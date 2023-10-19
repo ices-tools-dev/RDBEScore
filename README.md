@@ -13,7 +13,7 @@
 `RDBEScore`
 =========
 
-`RDBEScore` provides functions to work with the [**Regional DataBase and Estimation System (RDBES)**](https://sboxrdbes.ices.dk/#/).
+`RDBEScore` provides functions to work with the [**Regional DataBase and Estimation System (RDBES)**](https://rdbes.ices.dk/#/).
 
 It is implemented as an [**R**](https://www.r-project.org) package and
 available on <!-- [CRAN](https://cran.r-project.org/package=RDBEScore) --> 
