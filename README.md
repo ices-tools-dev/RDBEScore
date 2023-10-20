@@ -80,6 +80,12 @@ The current development version can be installed using:
 library(remotes)
 install_github("ices-tools-dev/RDBEScore@dev")
 ```
+If the installation fails due to R CMD, this alternative option can be used
+
+```R
+library(remotes)
+install_github("ices-tools-dev/RDBEScore@dev", build = FALSE)
+```
 ## On `data.table` usage
 
 Objects of type `data.table` passed as parameters should be copied before modification. As an example:
