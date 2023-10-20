@@ -13,16 +13,24 @@ applyGenerateProbs(
 )
 }
 \arguments{
-\item{x}{- RDBES raw object}
+\item{x}{\itemize{
+\item RDBES raw object
+}}
 
-\item{probType}{- string. Can be set to "selection" (only selection
+\item{probType}{\itemize{
+\item string. Can be set to "selection" (only selection
 probabilities are calculated), "inclusion" (only inclusion probabilities are
-calculated) or "both" (both types of probabilities are calculated)}
+calculated) or "both" (both types of probabilities are calculated)
+}}
 
-\item{overwrite}{- if TRUE will overwrite probabilities already existing for
-SRSWR and SRSWOR}
+\item{overwrite}{\itemize{
+\item if TRUE will overwrite probabilities already existing for
+SRSWR and SRSWOR
+}}
 
-\item{runInitialProbChecks}{- if TRUE runs runChecksOnSelectionAndProbs}
+\item{runInitialProbChecks}{\itemize{
+\item if TRUE runs runChecksOnSelectionAndProbs
+}}
 
 \item{strict}{(Optional) This function validates its input data - should
 the validation be strict? The default is TRUE.}

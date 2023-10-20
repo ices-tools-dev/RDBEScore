@@ -1,21 +1,42 @@
 Package: RDBEScore
 Type: Package
 Title: Functions for the ICES Regional Database and Estimation System (RDBES)
-Version: 0.2.1
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Version: 0.3.0
+Author: c(
+    person(given = "Nicholas", 
+           family = "Carey", 
+           role = c("ctb"),
+           email = "nicholas.carey@gov.scot"),
+    person(given = "David", 
+           family = "Currie", 
+           role = c("ctb"), 
+           email = "david.currie@marine.ie"),
+    person(given = "Ana Cláudia", 
+           family = "Fernandes", 
+           role = c("ctb"), 
+           email = "acfernandes@ipma.pt"),
+    person(given = "Nuno", 
+           family = "Prista", 
+           role = c("ctb"), 
+           email = "nuno.prista@slu.se")
+           )
+Maintainer: Colin Millar <colin.millar@ices.dk>
+Description: The RDBEScore package provides functions to import and work with  
+    fisheries data downloaded from the ICES RDBES database. It also contains 
+    functions to perform estimation analysis using the resulting objects. 
+URL: https://github.com/ices-tools-dev/RDBEScore,
+     https://rdbes.ices.dk
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.3
+Roxygen: list(markdown = TRUE)
 Suggests: 
     knitr,
     rmarkdown,
     testthat
 Depends: 
-    R (>= 3.5.0)
+    R (>= 4.1)
 Imports: 
     dplyr, 
     data.table

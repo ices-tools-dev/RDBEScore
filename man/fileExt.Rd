@@ -14,6 +14,6 @@ the second element of the character vector.
 }
 \description{
 This function splits a character vector and returns the second element if the
-separator is a dot `.`.
+separator is a dot \code{.}.
 }
 \keyword{internal}

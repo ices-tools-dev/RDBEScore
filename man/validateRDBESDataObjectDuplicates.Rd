@@ -3,7 +3,7 @@
 \name{validateRDBESDataObjectDuplicates}
 \alias{validateRDBESDataObjectDuplicates}
 \title{check RDBES Raw Object Content
- Private function to do some basic checks on
+Private function to do some basic checks on
 the content of the RDBESDataObject (e.g. all required field names are
 present).  Function is only used by checkRDBESDataObject and should only
 be passed a list of non-null objects}
@@ -15,7 +15,9 @@ validateRDBESDataObjectDuplicates(
 )
 }
 \arguments{
-\item{objectToCheck}{- RDBESDataObject i.e. a list of data.tables}
+\item{objectToCheck}{\itemize{
+\item RDBESDataObject i.e. a list of data.tables
+}}
 
 \item{verbose}{(Optional) Set to TRUE if you want informative text printed
 out, or FALSE if you don't.  The default is FALSE.}
@@ -29,7 +31,7 @@ list with  first element as the object and the second the warnings
 }
 \description{
 check RDBES Raw Object Content
- Private function to do some basic checks on
+Private function to do some basic checks on
 the content of the RDBESDataObject (e.g. all required field names are
 present).  Function is only used by checkRDBESDataObject and should only
 be passed a list of non-null objects

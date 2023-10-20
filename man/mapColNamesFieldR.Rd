@@ -9,13 +9,13 @@ to R field names}
 A data frame containing database field names and their equivalent
 R field name:
 \describe{
-  \item{Table.Prefix}{The two letter prefix of the relevent RDBES table}
-  \item{Field.Name}{The database field names}
-  \item{R.Name}{The equivalent R field name}
-  \item{RDataType}{The equivalent R data type (e.g. "integer", "character" etc)}
-  \item{Type}{The Data type in the RDBES documentation (e.g. "Decimal", etc)}
-  \item{EssentialForEst}{Is this column considered essential?}
-  ...
+\item{Table.Prefix}{The two letter prefix of the relevent RDBES table}
+\item{Field.Name}{The database field names}
+\item{R.Name}{The equivalent R field name}
+\item{RDataType}{The equivalent R data type (e.g. "integer", "character" etc)}
+\item{Type}{The Data type in the RDBES documentation (e.g. "Decimal", etc)}
+\item{EssentialForEst}{Is this column considered essential?}
+...
 }
 }
 \source{
