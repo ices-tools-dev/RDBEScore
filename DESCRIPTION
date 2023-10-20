@@ -5,7 +5,7 @@ Version: 0.3.0
 Author: c(
     person(given = "Nicholas", 
            family = "Carey", 
-           role = c("ctb"),
+           role = c("aut"),
            email = "nicholas.carey@gov.scot"),
     person(given = "David", 
            family = "Currie", 
@@ -13,11 +13,11 @@ Author: c(
            comment = c(ORCID = "0000-0002-3523-6895")),
     person(given = "Ana Cláudia", 
            family = "Fernandes", 
-           role = c("ctb"), 
+           role = c("aut"), 
            email = "acfernandes@ipma.pt"),
     person(given = "Nuno", 
            family = "Prista", 
-           role = c("ctb"), 
+           role = c("aut"), 
            email = "nuno.prista@slu.se")
            )
 Maintainer: Colin Millar <colin.millar@ices.dk>
