@@ -7,8 +7,8 @@ test_that("generateZerosUsingSL creates rows for SLcou*SLinst*SLspeclistName*SLy
 # tests should be partioned into several test_that sections
 
 
-		myH1DataObject1[c("SL","SS", "SA")]
-		generateZerosUsingSL(myH1DataObject1)[c("SL","SS", "SA")]
+		#myH1DataObject1[c("SL","SS", "SA")]
+		#generateZerosUsingSL(myH1DataObject1)[c("SL","SS", "SA")]
 
 
 # create test data from download [to be used in different tests]
@@ -33,7 +33,7 @@ test_that("generateZerosUsingSL creates rows for SLcou*SLinst*SLspeclistName*SLy
 	myH1DataObject0[["SL"]]$SLsppCode <- as.integer(myH1DataObject0[["SL"]]$SLsppCode)
 	# add an additional species list - could be many in the SL download
 	myH1DataObject0[["SL"]]<-rbind(myH1DataObject0[["SL"]], myH1DataObject[["SL"]][1,])
-	
+
 	# ensure key is set on SL
 	setkey(myH1DataObject0[["SL"]], SLid)
 
@@ -58,7 +58,7 @@ test_that("generateZerosUsingSL creates rows for SLcou*SLinst*SLspeclistName*SLy
 
 	  # create aux id_table [Nuno's function] and tmpKey to use in test
 		aux<-createTableOfRDBESIds(x = myTest3, addSAseqNums=FALSE)
-	
+
 	# will be unequal is species lists not applicable to samples not correctly handled
 	expect_equal(nrow(myTest3$SA),length(myTest3$SS$SLid[match(aux$SSid[match(myTest3$SS$SSid,aux$SSid)], myTest3$SS$SSid)]))
 
@@ -80,13 +80,13 @@ test_that("generateZerosUsingSL creates rows for SLcou*SLinst*SLspeclistName*SLy
 		myH1DataObject2$SL$SLsppCode[1:2]<-126437 # dummy
 		setkey(myH1DataObject2[["SL"]], SLid)
 		expect_equal(nrow(generateZerosUsingSL(myH1DataObject2)$SA),4)
-	
+
 	# no change if SSuseCalcZero<-'N'
 		myH1DataObject2<-myH1DataObject1
 		myH1DataObject2[["SS"]]$SSuseCalcZero<-'N'
 		expect_equal(generateZerosUsingSL(myH1DataObject2),myH1DataObject2)
-	# 	
-	
+	#
+
 # species*catchFrac in SL and in SA: expected behavior -> do not generate a 0 row in SA
 
 	myH1DataObject2<-myH1DataObject1
