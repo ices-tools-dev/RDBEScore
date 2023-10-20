@@ -5,19 +5,19 @@ Version: 0.3.0
 Author: c(
     person(given = "Nicholas", 
            family = "Carey", 
-           role = c("ctb"),
+           role = c("aut"),
            email = "nicholas.carey@gov.scot"),
     person(given = "David", 
            family = "Currie", 
-           role = c("ctb"), 
+           role = c("aut"), 
            email = "david.currie@marine.ie"),
     person(given = "Ana Cláudia", 
            family = "Fernandes", 
-           role = c("ctb"), 
+           role = c("aut"), 
            email = "acfernandes@ipma.pt"),
     person(given = "Nuno", 
            family = "Prista", 
-           role = c("ctb"), 
+           role = c("aut"), 
            email = "nuno.prista@slu.se")
            )
 Maintainer: Colin Millar <colin.millar@ices.dk>
