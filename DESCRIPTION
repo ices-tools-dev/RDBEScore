@@ -18,7 +18,12 @@ Author: c(
     person(given = "Nuno", 
            family = "Prista", 
            role = c("aut"), 
-           email = "nuno.prista@slu.se")
+           email = "nuno.prista@slu.se"),
+    person(given="Richard",
+           family="Meitern",
+           role =  c("aut"),
+           email="richard.meitern@ut.ee",
+           comment = c(ORCID = "0000-0002-2600-3002")
            )
 Maintainer: Colin Millar <colin.millar@ices.dk>
 Description: The RDBEScore package provides functions to import and work with  
