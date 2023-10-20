@@ -1,10 +1,7 @@
 #' Generates the DBE estimation object for the upper hierarchy tables
 #'
 #' @param inputList All the data tables in a named list. Name should be equal
-#' to the short table names e.g. DE, SD, TE, FO. An example can be found at
-#' the share point:
-#' https://community.ices.dk/ExpertGroups/WKRDB/2019\%20Meetings/
-#' WKRDB-EST\%202019/06.\%20Data/Kirsten/H1/H1_upper.RData
+#' to the short table names e.g. DE, SD, TE, FO.
 #'
 #' @export
 #' @return The upper hierarchy tables in the DBE estimation object
@@ -205,7 +202,7 @@ doDBEestimantionObjUpp <-
 
       # select relevant columns
       j <- which(names(su) %in% varNames)
-      
+
       eval(parse(
         text = paste0(
           expectedTablesHere$su_level[[i]],
