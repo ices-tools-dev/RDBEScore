@@ -7,9 +7,13 @@
 runChecksOnSelectionAndProbs(x, verbose = FALSE, strict = TRUE)
 }
 \arguments{
-\item{x}{- RDBES raw object}
+\item{x}{\itemize{
+\item RDBES raw object
+}}
 
-\item{verbose}{- If TRUE prints the issue behind the stop}
+\item{verbose}{\itemize{
+\item If TRUE prints the issue behind the stop
+}}
 
 \item{strict}{(Optional) This function validates its input data - should
 the validation be strict? The default is TRUE.}

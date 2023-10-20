@@ -35,7 +35,7 @@ Cerianthidae Milne Edwards & Haime, 1851. Accessed through: "... }
 \item{match_type}{E.g. "exact" }
 \item{modified}{E.g. "2018-01-22T17:48:34.063Z" }
 \item{DateDownloaded}{E.g. "2023-10-18" }
-  ...
+...
 }
 }
 \source{

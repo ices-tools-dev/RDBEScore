@@ -4,9 +4,11 @@
 \alias{validateRDBESDataObjectFieldNames}
 \title{check RDBES Data Object field names
 Private function to do some checks on the columns of an RDBESDataObject -
-1) are all required fields present? 2) are there any extra fields present?
+\enumerate{
+\item are all required fields present? 2) are there any extra fields present?
 It is used by validateRDBESDataObject() and should only be passed a list
-of non-null objects}
+of non-null objects
+}}
 \usage{
 validateRDBESDataObjectFieldNames(
   objectToCheck,
@@ -15,7 +17,9 @@ validateRDBESDataObjectFieldNames(
 )
 }
 \arguments{
-\item{objectToCheck}{- RDBESDataObject i.e. a list of data.tables}
+\item{objectToCheck}{\itemize{
+\item RDBESDataObject i.e. a list of data.tables
+}}
 
 \item{verbose}{(Optional) Set to TRUE if you want informative text printed
 out, or FALSE if you don't.  The default is FALSE.}
@@ -31,7 +35,9 @@ and the second element contains any warnings
 \description{
 check RDBES Data Object field names
 Private function to do some checks on the columns of an RDBESDataObject -
-1) are all required fields present? 2) are there any extra fields present?
+\enumerate{
+\item are all required fields present? 2) are there any extra fields present?
 It is used by validateRDBESDataObject() and should only be passed a list
 of non-null objects
+}
 }

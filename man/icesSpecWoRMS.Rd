@@ -8,15 +8,15 @@ code list data can be downloaded from https://vocab.ices.dk/}
 \format{
 A data frame
 \describe{
-  \item{GUID}{Globally unique identifier assigned by ICES}
-  \item{Key}{AphiaID}
-  \item{Description}{Scientific name}
-  \item{LongDescription}{Ignore}
-  \item{Modified}{Date when the code was last updated}
-  \item{Deprecated}{IS this still a valid code.  If FALSE the code is
-  no longer valid within ICES.}
-  \item{DateDownloaded}{E.g. "2023-10-18" }
-  ...
+\item{GUID}{Globally unique identifier assigned by ICES}
+\item{Key}{AphiaID}
+\item{Description}{Scientific name}
+\item{LongDescription}{Ignore}
+\item{Modified}{Date when the code was last updated}
+\item{Deprecated}{IS this still a valid code.  If FALSE the code is
+no longer valid within ICES.}
+\item{DateDownloaded}{E.g. "2023-10-18" }
+...
 }
 }
 \source{

@@ -1,3 +1,5 @@
+#'Function which rename SAspeciesCode -> SAnewSpeciesCode
+
 #packages
 library(data.table)
 library(RDBEScore)
@@ -6,9 +8,9 @@ library(dplyr)
 # data
 # myObject <- createRDBESDataObject(input = "./tests/testthat/h1_v_1_19_18")
 # myObject[["SA"]]
-H1_SA <- read.csv("data-raw/exampleData/H1_SA.csv")
-H1_SL <- read.csv("data-raw/exampleData/H1_SL.csv")
-H1_SS <- read.csv("data-raw/exampleData/H1_SS.csv")
+H1_SA <- read.csv("WGRDBES-EST/personal/Kasia/H1_SA.csv")
+H1_SL <- read.csv("WGRDBES-EST/personal/Kasia/H1_SL.csv")
+H1_SS <- read.csv("WGRDBES-EST/personal/Kasia/H1_SS.csv")
 
 aphiaRecords <- RDBEScore::wormsAphiaRecord
 
@@ -38,13 +40,11 @@ H1_SL_new$SLkey<-paste(H1_SL_new$SLspeciesCode,H1_SL_new$SLspeciesListName,sep='
 
 newest_SA<-data.frame(NULL)
 
-#unique(H1_SA_new$SSid)->sequence_SSid
-#for test only 61-68
-for (k in c(61,62,63,64,65,66,67)){
-  for (l in c('Lan')){
-    print(paste(k,'SSid'))
-    print(paste(l,'CatchCategory'))
+unique(H1_SA_new$SSid)->sequence_SSid
+unique(H1_SA_new$SAcatchCategory)->sequence_catchCategory
 
+for (k in sequence_SSid){ #c(61,62,63,64,65,66,67)
+  for (l in sequence_catchCategory){
     # subset of all SA by SSid for all catch category!!! (remember not only of Landing)
     ex1<-H1_SA_new[H1_SA_new$SSid==k & H1_SA_new$SAcatchCategory==l,]
     ex1$SAnewSpeciesCode <- NA
@@ -83,3 +83,5 @@ for (k in c(61,62,63,64,65,66,67)){
     }
   }#l
 }#k
+SA<-newest_SA
+SA<-SA[,c(names(H1_SA),'SAnewSpeciesCode')]

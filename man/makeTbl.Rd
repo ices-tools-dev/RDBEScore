@@ -33,7 +33,7 @@ Defaults to c("U"), meaning not stratified.}
 
 \item{mean}{numeric the expected mean of the target variable.
 The variable is created using \code{\link[stats]{rnorm}} and saved under
- column ending with "y". Defaults to 5.}
+column ending with "y". Defaults to 5.}
 }
 \value{
 a data.table
