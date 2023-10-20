@@ -691,9 +691,9 @@
 		dir_outputs<-paste0(base_dir_outputs,
 		                    project_name_outputs,"/")
 		dir.create(dir_outputs, recursive=T, showWarnings=FALSE)
-		filename_output_CS <- paste0(project_name_outputs,"_H1.csv")
-		filename_output_SL <- paste0(project_name_outputs,"_HSL.csv")
-		filename_output_VD <- paste0(project_name_outputs,"_HVD.csv")
+		filename_output_CS <- paste0("H1.csv")
+		filename_output_SL <- paste0("HSL.csv")
+		filename_output_VD <- paste0("HVD.csv")
 
 
 
