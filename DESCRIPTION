@@ -10,7 +10,7 @@ Author: c(
     person(given = "David", 
            family = "Currie", 
            role = c("aut"), 
-           email = "david.currie@marine.ie"),
+           comment = c(ORCID = "0000-0002-3523-6895")),
     person(given = "Ana Cláudia", 
            family = "Fernandes", 
            role = c("aut"), 

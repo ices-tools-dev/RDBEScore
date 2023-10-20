@@ -708,9 +708,9 @@ RDBESlist[[i]][which(grepl(colnames(RDBESlist[[i]]),pat="[A-Z]id"))]<-NULL
 	dir_outputs<-paste0(base_dir_outputs,"/",
 	                    project_name_outputs,"/")
   dir.create(dir_outputs, recursive=T, showWarnings=FALSE)
-	filename_output_CS <- paste0("H1.csv")
-	filename_output_SL <- paste0("HSL.csv")
-	filename_output_VD <- paste0("HVD.csv")
+	filename_output_CS <- paste0(project_name_outputs,"_H1.csv")
+	filename_output_SL <- paste0(project_name_outputs,"_HSL.csv")
+	filename_output_VD <- paste0(project_name_outputs,"_HVD.csv")
 
 
 lapply(RDBESlist, function(x, filename1 = paste0(dir_outputs,filename_output_CS)){

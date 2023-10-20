@@ -29,8 +29,8 @@ library(RDBEScore)
 First we'll load some example data from the RDBES and check it's valid.  It's a good idea to check your RDBESDataObjects are valid after any manipulations you perform.
 
 ```{r load}
-# h1d <- importRDBESDataCSV(rdbesExtractPath = "../tests/testthat/h1_v_1_19_13")
-# validateRDBESDataObject(h1d, verbose = FALSE)
+h1d <- importRDBESDataCSV(rdbesExtractPath = "../tests/testthat/h1_v_1_19_13")
+validateRDBESDataObject(h1d, verbose = FALSE)
 
 ```
 
@@ -39,13 +39,13 @@ First we'll load some example data from the RDBES and check it's valid.  It's a 
 
 Let's first estimate the last level values for a single VSid so that estimation is done for each top level record (i.e. as the data is)
 ```{r}
-# FMidSel <- "1445683"
-# BV <- h1d$BV[h1d$BV$FMid == FMidSel,]
-# 
-# estimMC(as.numeric(BV$BVvalueMeas),
-#         BV$BVnumSamp,
-#         BV$BVnumTotal, 
-#         method=unique(BV$BVselectMeth))
+FMidSel <- "1445683"
+BV <- h1d$BV[h1d$BV$FMid == FMidSel,]
+
+estimMC(as.numeric(BV$BVvalueMeas),
+        BV$BVnumSamp,
+        BV$BVnumTotal, 
+        method=unique(BV$BVselectMeth))
 ```
 
 
