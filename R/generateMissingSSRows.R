@@ -286,45 +286,39 @@ generateSSRows <- function(FOids, speciesListName, catchFra) {
     catchFractions <- character()
   }
 
-  data.frame(
-    SSid = myNAs,
-    LEid = myNAs,
-    FOid = FOids, # FOids
-    TEid = myNAs,
-    FTid = myNAs,
-    SLid = myNAs,
-    OSid = myNAs,
-    SSrecType = myNAs,
-    SSseqNum = myNAs,
-    SSstratification = myNAs,
-    SSstratumName = myNAs,
-    SSclustering = myNAs,
-    SSclusterName = myNAs,
-    SSobsActTyp = myNAs,
-    SScatchFra = catchFractions, # Catch Fraction
-    SSobsTyp = myNAs,
-    SSsampler = myNAs,
-    SSspecListName = specListNames, # Species list name
-    SSuseCalcZero = myNAs,
-    SStimeTotal = myNAs,
-    SStimeSamp = myNAs,
-    SSnumTotal = myNAs,
-    SSnumSamp = myNAs,
-    SSselProb = myNAs,
-    SSincProb = myNAs,
-    SSselectMeth = myNAs,
-    SSunitName = myNAs,
-    SSselectMethCluster = myNAs,
-    SSnumTotalClusters = myNAs,
-    SSnumSampClusters = myNAs,
-    SSselProbCluster = myNAs,
-    SSincProbCluster = myNAs,
-    SSsamp = myNAs,
-    SSnoSampReason = myNAs,
-    SSnonRespCol = myNAs,
-    SSauxVarTot = myNAs,
-    SSauxVarValue = myNAs,
-    SSauxVarName = myNAs,
-    SSauxVarUnit = myNAs
-  )
+
+
+  # Create an SS data frame using the column definitions
+  SSfields <- RDBEScore::mapColNamesFieldR[
+    RDBEScore::mapColNamesFieldR$Table.Prefix == "SS",]
+
+    # Always start with SSid
+  SSDF <- data.frame(SSid = as.integer(myNAs))
+
+   # Add the fields as the correct data type
+  for (i in seq(2,nrow(SSfields))){
+    #print(i)
+    myField <- SSfields[i,]
+    myFieldName <- myField[,"R.Name"]
+    #print(myFieldName)
+    if (myFieldName == "FOid"){
+      SSDF[,myFieldName] <- FOids
+    } else if (myFieldName == "SScatchFra") {
+      SSDF[,myFieldName] <- catchFractions
+    } else if (myFieldName == "SSspecListName"){
+      SSDF[,myFieldName] <- specListNames
+    } else {
+      if (myField$RDataType == "integer"){
+        SSDF[,myFieldName] <- as.integer(myNAs)
+      } else if (myField$RDataType == "character"){
+        SSDF[,myFieldName] <- as.character(myNAs)
+      } else if (myField$RDataType == "numeric"){
+        SSDF[,myFieldName] <- as.numeric(myNAs)
+      } else {
+        SSDF[,myFieldName] <- as.logical(myNAs)
+      }
+    }
+  }
+
+  SSDF
 }
