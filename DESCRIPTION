@@ -18,7 +18,7 @@ Author: c(
     person(given = "Nuno", 
            family = "Prista", 
            role = c("aut"), 
-           email = "nuno.prista@slu.se"),
+           email = c(ORCID = "0000-0002-5145-7241")),
     person(given="Richard",
            family="Meitern",
            role =  c("aut"),
