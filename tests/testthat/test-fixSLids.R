@@ -9,7 +9,7 @@ capture.output({ ## suppresses printing of console output when running test()
 
 	expectedCols<-c("SLid", "SLtaxaId", "SLrecType", "SLcou", "SLinst", "SLspeclistName","SLyear","SLcatchFrac", "SLcommTaxon","SLsppCode")
 	expect_equal(colnames(fixSLids(myH1RawObject)$SL), expectedCols)
-})		
+})
 
   test_that("SLid returned by fixesSLids exists in SS", {
 
@@ -25,15 +25,14 @@ capture.output({ ## suppresses printing of console output when running test()
 
 })
 
-	
+
   test_that("fixesSLids issues message if SLtaxaId already there", {
-  
+
     myH1RawObject <- RDBEScore:::importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_18")
 	myH1RawObject$SL$SLtaxaId<-NA
 	expect_error(fixSLids(myH1RawObject, strict=F))
-   
-  })
-	
 
-}
- 
+  })
+
+})
+
