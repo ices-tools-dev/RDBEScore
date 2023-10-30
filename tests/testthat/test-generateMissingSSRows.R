@@ -136,7 +136,7 @@ capture.output({ ## suppresses printing of console output when running test()
 
     # Take our new SS rows and add them back into our original object
     myH1RawObject[["SS"]] <- mySSAfter
-    expect_no_error(validateRDBESDataObject(myH1RawObject))
+    expect_silent(validateRDBESDataObject(myH1RawObject))
   })
 
   test_that("generateMissingSSRows runs correctly for FO Dis, generates missing SS Dis rows (H1)", {
@@ -169,7 +169,7 @@ capture.output({ ## suppresses printing of console output when running test()
 
     # Take our new SS rows and add them back into our original object
     myH1RawObject[["SS"]] <- mySSAfter
-    expect_no_error(validateRDBESDataObject(myH1RawObject))
+    expect_silent(validateRDBESDataObject(myH1RawObject))
   })
 
   test_that("generateMissingSSRows runs correctly for FO Lan, when there are no missing SS Lan rows (H1)", {
@@ -198,7 +198,7 @@ capture.output({ ## suppresses printing of console output when running test()
 
     # Take our new SS rows and add them back into our original object
     myH1RawObject[["SS"]] <- mySSAfter
-    expect_no_error(validateRDBESDataObject(myH1RawObject))
+    expect_silent(validateRDBESDataObject(myH1RawObject))
   })
 
   test_that("generateMissingSSRows runs correctly for FO Lan, generates missing SS Lan rows (H1)", {
@@ -229,7 +229,7 @@ capture.output({ ## suppresses printing of console output when running test()
 
     # Take our new SS rows and add them back into our original object
     myH1RawObject[["SS"]] <- mySSAfter
-    expect_no_error(validateRDBESDataObject(myH1RawObject))
+    expect_silent(validateRDBESDataObject(myH1RawObject))
   })
 
   test_that("generateMissingSSRows runs correctly for FO All, generates missing SS Lan rows (H1)", {
@@ -260,7 +260,7 @@ capture.output({ ## suppresses printing of console output when running test()
 
     # Take our new SS rows and add them back into our original object
     myH1RawObject[["SS"]] <- mySSAfter
-    expect_no_error(validateRDBESDataObject(myH1RawObject))
+    expect_silent(validateRDBESDataObject(myH1RawObject))
   })
 
   test_that("generateMissingSSRows runs correctly for FO All, generates missing SS Dis rows (H1)", {
@@ -291,7 +291,7 @@ capture.output({ ## suppresses printing of console output when running test()
 
     # Take our new SS rows and add them back into our original object
     myH1RawObject[["SS"]] <- mySSAfter
-    expect_no_error(validateRDBESDataObject(myH1RawObject))
+    expect_silent(validateRDBESDataObject(myH1RawObject))
   })
 
   test_that("generateMissingSSRows runs correctly for FO All, when there are no missing SS Catch rows (H1)", {
@@ -320,7 +320,7 @@ capture.output({ ## suppresses printing of console output when running test()
 
     # Take our new SS rows and add them back into our original object
     myH1RawObject[["SS"]] <- mySSAfter
-    expect_no_error(validateRDBESDataObject(myH1RawObject))
+    expect_silent(validateRDBESDataObject(myH1RawObject))
   })
 
 
@@ -352,7 +352,7 @@ capture.output({ ## suppresses printing of console output when running test()
 
     # Take our new SS rows and add them back into our original object
     myH1RawObject[["SS"]] <- mySSAfter
-    expect_no_error(validateRDBESDataObject(myH1RawObject))
+    expect_silent(validateRDBESDataObject(myH1RawObject))
   })
 
 
