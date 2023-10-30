@@ -3,7 +3,6 @@
 #' @param inputList All the data tables in a named list. Name should be equal
 #' to the short table names e.g. DE, SD, TE, FO.
 #'
-#' @export
 #' @return The upper hierarchy tables in the DBE estimation object
 #' (DBEestimantionObjUpp)
 #'

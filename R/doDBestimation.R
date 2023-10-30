@@ -18,7 +18,6 @@
 #' estimation options
 #'
 #' @import data.table
-#' @export
 #'
 #' @examples
 #' data(shrimps)

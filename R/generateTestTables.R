@@ -71,7 +71,6 @@ makeTbl <- function(tblName,
 #' @inheritDotParams makeTbl
 #'
 #' @return a list of named data.table's
-#' @export
 #'
 #' @examples
 #' generateTestTbls(c("A", "B", "C"), selMeth = "SRSWOR")
