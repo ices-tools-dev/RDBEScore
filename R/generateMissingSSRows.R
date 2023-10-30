@@ -48,7 +48,7 @@ generateMissingSSRows <- function(RDBESDataObject,
     }
   }
 
-  # TODO Check if speciesListName exists for this year and country
+  # Check if speciesListName exists for this year and country
   #print("TODO: Need to use year, country when we check the species list name")
   # For the time being just check if it exists at all
 
@@ -76,15 +76,13 @@ generateMissingSSRows <- function(RDBESDataObject,
   # Get the unique combinations of SL country, year, and list names
   mySLUnique <- unique(mySL[,c("SLcou","SLyear","SLspeclistName")])
 
-  mySSSLUnique <- dplyr::left_join(mySSUnique,
-                             mySLUnique,
-                             keep = TRUE,
-                             dplyr::join_by(
-                               "SSyear" == "SLyear",
-                               "SSctry" == "SLcou",
-                               "SSspecListName" == "SLspeclistName"
-                             ))
-  if (nrow(mySSSLUnique[is.na(mySSSLUnique$SLspeclistName),])){
+  mySSSLUnique <- dplyr::inner_join(mySSUnique,
+                                   mySLUnique,
+                                   by = c("SSyear" = "SLyear",
+                                          "SSctry" = "SLcou",
+                                          "SSspecListName" = "SLspeclistName"))
+
+  if (nrow(mySSSLUnique) < 1){
     stop(paste0("The requested species list is not compatible with the ",
     "combination of SS country and year"))
   }
@@ -257,9 +255,9 @@ getMissingSSCatchFraction <- function(FOdata, SSdata, catchFra, verbose) {
   myFOSS <- dplyr::left_join(
     myFOFraction,
     SSdata,
-    dplyr::join_by(
-      "FOid" == "FOid",
-      "FOcatReg" == "SScatchFra"
+    by = c(
+      "FOid" = "FOid",
+      "FOcatReg" = "SScatchFra"
     )
   )
   mySSFractionMissing <- myFOSS[is.na(myFOSS$SSid), ]
