@@ -6,7 +6,7 @@ globalVariables(c("mapColNamesFieldR", "mapColNamesFieldR", "SAid",
                   "..targetProbColumns2", "finalInclusionProb_to_su1",
                   "targetValue", "su1unitName", "su1inclusionProb",
                   "..target_prob_columns2", "su1selectionProb",
-                  "..varsNeeded", "%>%", "parentTableID", "est.total",
+                  "..varsNeeded", "|>", "parentTableID", "est.total",
                   "recType", "parentTableStratum", "stratumName",
                   "parentIDandStratum", "studyVariable", "..myColNames",
                   "..methColNames", "tblName", "all_of"))
@@ -128,10 +128,10 @@ extractHigherFields <- function(object, table, field){
   h <- paste0("H", unique(object$DE$DEhierarchy))
 
   # get path from DE to input table
-  h.all <- tablesInRDBESHierarchies %>%
-    dplyr::filter(h == hierarchy) %>%
-    dplyr::arrange(sortOrder) %>%
-    dplyr::filter(FALSE == optional) %>%
+  h.all <- tablesInRDBESHierarchies |>
+    dplyr::filter(h == hierarchy) |>
+    dplyr::arrange(sortOrder) |>
+    dplyr::filter(FALSE == optional) |>
     dplyr::filter(FALSE == lowerHierarchy)
   path.to.table <- h.all$table
   path.to.table <- path.to.table[match("DE", path.to.table):match(table, path.to.table)] # path to SS
