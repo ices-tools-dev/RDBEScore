@@ -14,7 +14,8 @@ capture.output({ ## suppresses printing of console output when running test()
   test_that("SLid returned by fixesSLids exists in SS", {
 
     myH1RawObject <- RDBEScore:::importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_18")
-	expect_contains(unique(fixSLids(myH1RawObject)$SL$SLid), unique(myH1RawObject$SS$SLid))
+    #see https://github.com/r-lib/testthat/issues/1346
+	expect_true(all(unique(myH1RawObject$SS$SLid) %in% unique(fixSLids(myH1RawObject)$SL$SLid)))
 
 })
 
