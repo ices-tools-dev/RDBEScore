@@ -1,4 +1,5 @@
 #' Fixes SLid in SL facilitating joins with SS table.
+#'
 #' RDBES SL can be seen as a join of two tables - one that identifies the species list in 
 #' terms of SLcou*SLinst*SLspeclistName*SLyear*SLcatchFrac and one that specifies
 #' the taxa (SLcommTaxon SLsppCode) in the list. In SS, SLid remits to the 1st taxa in a species list and 
