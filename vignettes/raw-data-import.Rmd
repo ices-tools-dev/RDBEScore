@@ -103,6 +103,13 @@ importedTables <- createRDBESDataObject("./vignetteData/H1_2023_10_16.zip")
 validateRDBESDataObject(importedTables, verbose = TRUE)
 ```
 
-```{r}
+To see what you can do with the imported **RDBESDataObject** see vignettes [Manipulating RDBESDataObjects](manipulating-rdbesdataobjects.html) and others:
+
+```{r echo=FALSE, results='asis'}
+vignettes <- as.data.frame(browseVignettes(package = "RDBEScore")$RDBEScore)
+for (i in seq_along(vignettes$PDF)) {
+  cat(sprintf("- [%s](%s)\n", vignettes$Title[i], vignettes$PDF[i]))
+}
+
 #END
 ```

@@ -18,20 +18,37 @@
 #'
 #' @format A list containing entries required for H1 RDBES data:
 #' \describe{
-#'   \item{DE}{the Design data frame}
-#'   \item{SD}{the Sampling Details data frame}
-#'   \item{VS}{the Vessel Selection data frame}
-#'   \item{FT}{the Fishing Trip data frame}
-#'   \item{FO}{the Fishing Operation data frame}
-#'   \item{SS}{the Species Selection data frame}
-#'   \item{SA}{the Sample data frame}
-#'   \item{FM}{the Frequency Measure data frame}
-#'   \item{BV}{the Biological Variable data frame}
-#'   \item{VD}{the Vessel Details data frame}
-#'   \item{SL}{the Species List data frame}
-#'   ...
+#'   \item{DE}{the Design data table}
+#'   \item{SD}{the Sampling Details data table}
+#'   \item{VS}{the Vessel Selection data table}
+#'   \item{FT}{the Fishing Trip data table}
+#'   \item{FO}{the Fishing Operation data table}
+#'   \item{SS}{the Species Selection data table}
+#'   \item{SA}{the Sample data table}
+#'   \item{FM}{the Frequency Measure data table}
+#'   \item{BV}{the Biological Variable data table}
+#'   \item{VD}{the Vessel Details data table}
+#'   \item{SL}{the Species List data table}
 #' }
 "H1Example"
+
+#' A dataset containing test RDBES data for H5 in the RDBESDataObject structure
+#'
+#' @format A list containing entries required for H5 RDBES data:
+#' \describe{
+#'   \item{DE}{the Design data table}
+#'   \item{SD}{the Sampling Details data table}
+#'   \item{FT}{the Fishing Trip data table}
+#'   \item{OS}{the Onshore Event data table}
+#'   \item{LE}{the Landing Event data table}
+#'   \item{SS}{the Species Selection data table}
+#'   \item{SA}{the Sample data table}
+#'   \item{FM}{the Frequency Measure data table}
+#'   \item{BV}{the Biological Variable data table}
+#'   \item{VD}{the Vessel Details data table}
+#'   \item{SL}{the Species List data table}
+#' }
+"H5Example"
 
 
 #' A dataset containing the mapping from database column names
