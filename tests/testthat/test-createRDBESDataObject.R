@@ -12,7 +12,7 @@ capture.output({  ## suppresses printing of console output when running test()
   dirH7 <- "./h7_v_1_19_18/"
 
   # H1 object for comparison
-  expObjH1 <- readRDS(paste0(dirH1, "H1_2023_10_16.rds"))
+  expObjH1 <- H1Example
 
 
   # Test general behavior  --------------------------------------------------

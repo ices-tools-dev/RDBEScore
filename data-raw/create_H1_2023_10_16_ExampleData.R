@@ -8,4 +8,6 @@ validateRDBESDataObject(H1_2023_10_16)
 
 saveRDS(H1_2023_10_16, file=paste0(outputDir,"H1_2023_10_16.rds"))
 
-
+H1Example <- H1_2023_10_16
+# Save the data
+usethis::use_data(H1Example, overwrite = TRUE)
