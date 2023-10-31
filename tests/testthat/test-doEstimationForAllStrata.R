@@ -6,11 +6,6 @@ capture.output({  ## suppresses printing of console output when running test()
 
     myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_18")
 
-    # Only use a subset of the test data
-    myH1RawObject <- filterRDBESDataObject(myH1RawObject,c("DEstratumName"),c("DE_stratum1_H1","DE_stratum2_H1","DE_stratum3_H1"))
-    myH1RawObject <- findAndKillOrphans(myH1RawObject, verbose = FALSE)
-
-
     #Filter our data for WGRDBES-EST TEST 1, 1965, H1
     myValues <- c(1965,1,"National Routine","DE_stratum1_H1",1019159)
     myFields <- c("DEyear","DEhierarchy","DEsampScheme","DEstratumName","SAspeCode")
