@@ -36,8 +36,12 @@ test_that("createRDBESEstObject can create an object from an H5 data extract
   expect_equal(length(grep("^su1.*",names(myEstObject))),24)
   expect_equal(length(grep("^su2.*",names(myEstObject))),24)
   expect_equal(length(grep("^su3.*",names(myEstObject))),24)
-  expect_equal(length(grep("^su4.*",names(myEstObject))),24)
-  expect_equal(length(grep("^su5.*",names(myEstObject))),17)
+  expect_equal(length(grep("^su4.*",names(myEstObject))),17)
+  expect_equal(length(grep("^su5.*",names(myEstObject))),0)
+  #optional tables should be excluded from hierarchy when making estObjects
+  #they have 1:1 relationship with the parent table and are not in hierarchy
+  #expect_equal(length(grep("^su4.*",names(myEstObject))),24)
+  #expect_equal(length(grep("^su5.*",names(myEstObject))),17)
   expect_equal(length(grep("^su6.*",names(myEstObject))),0)
   expect_equal(length(grep("^su7.*",names(myEstObject))),0)
   expect_equal(length(grep("^su8.*",names(myEstObject))),0)

@@ -40,8 +40,9 @@ createRDBESEstObject <- function(rdbesPrepObject,
 
 
   # See if the user has specified a table to stop at
+  #take out the optional as this messes up est object creation
   targetTables <-
-    RDBEScore::getTablesInRDBESHierarchy(hierarchyToUse)
+    RDBEScore::getTablesInRDBESHierarchy(hierarchyToUse, includeOptTables = F)
   if (length(is.null(stopTable)) == 1 &&
     !is.null(stopTable)) {
     stopTableLoc <- which(targetTables == stopTable)
