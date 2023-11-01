@@ -26,7 +26,7 @@
 #'   documentation.
 #'
 #'   The function then sets a key on each table using the 'XXid' column as the
-#'   key, where 'XX' is the name of that table. It alos replaces all empty
+#'   key, where 'XX' is the name of that table. It also replaces all empty
 #'   strings with `NA`.
 #'
 #'   It then uses the `newRDBESDataObject` function to create a new
@@ -39,7 +39,6 @@ importRDBESDataDFS <- function(myList,
                                castToCorrectDataTypes = TRUE,
                                strict = TRUE,
                                ...){
-
   # Checks for different names than the ones expected and duplicate table names in the list
   if(length(setdiff(names(myList), unique(mapColNamesFieldR$Table.Prefix))) > 0 || any(duplicated(names(myList)))) stop("You have given list names that are not valid or you have duplicate table names.")
 
@@ -65,6 +64,11 @@ importRDBESDataDFS <- function(myList,
   # Ensure all the columns are the correct data type
   if(castToCorrectDataTypes) dt <- RDBEScore:::setRDBESDataObjectDataTypes(dt)
 
+  #the correct Name mapping has all Correct names both ways
+  nameMap <- c(setNames(mapColNamesFieldR$R.Name, mapColNamesFieldR$Field.Name),
+               setNames(mapColNamesFieldR$R.Name, mapColNamesFieldR$R.Name))
+  nameMap <- nameMap[!duplicated(names(nameMap))]
+
   # Set a key on any data tables in myList - use the XXid column as the key
   for(aTable in names(dt)){
     #skip redundant tables
@@ -74,11 +78,10 @@ importRDBESDataDFS <- function(myList,
     } else {
       # SET KEY
       data.table::setkeyv(dt[[aTable]], paste0(aTable,"id")) # essentially orders rows by id column?
-      # SET NAMES
-      # oldNames <- colnames(dt[[aTable]])
-      # rNames <- mapColNamesFieldR$R.Name[mapColNamesFieldR$Table.Prefix == aTable]
-      # data.table::setnames(dt[[aTable]], old = oldNames, new = rNames, skip_absent = TRUE)
-      # # SET all empty strings to NA
+      # SET NAMES if/where needed
+      oldNames <- data.table::copy(colnames(dt[[aTable]]))
+      data.table::setnames(dt[[aTable]], old = oldNames, new = nameMap[oldNames], skip_absent = TRUE)
+      # SET all empty strings to NA
       # dt[[aTable]][dt[[aTable]]==""] <- NA
     }
   }

@@ -35,7 +35,7 @@ Column names are replaced with the RDBES 'R names' from the model
 documentation.
 
 The function then sets a key on each table using the 'XXid' column as the
-key, where 'XX' is the name of that table. It alos replaces all empty
+key, where 'XX' is the name of that table. It also replaces all empty
 strings with \code{NA}.
 
 It then uses the \code{newRDBESDataObject} function to create a new
