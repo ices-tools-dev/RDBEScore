@@ -180,8 +180,11 @@ validateRDBESDataObject <- function(objectToCheck,
               )
           }
         }
-        if(!validRDBESDataObject) {
+        if(!validRDBESDataObject & strict) {
           stop(warningText)
+        }
+        if(!validRDBESDataObject) {
+          warning(warningText)
         }
   }
 

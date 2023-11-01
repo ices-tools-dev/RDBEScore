@@ -40,7 +40,16 @@ importRDBESDataDFS <- function(myList,
                                strict = TRUE,
                                ...){
   # Checks for different names than the ones expected and duplicate table names in the list
-  if(length(setdiff(names(myList), unique(mapColNamesFieldR$Table.Prefix))) > 0 || any(duplicated(names(myList)))) stop("You have given list names that are not valid or you have duplicate table names.")
+  wrongNames <- setdiff(names(myList), unique(mapColNamesFieldR$Table.Prefix))
+  dupNamesBool <- duplicated(names(myList))
+  if(length(wrongNames) > 0) {
+    stop("You have given list names that are not valid:\n",
+         paste(wrongNames, collapse = ", "))
+  }
+  if(any(dupNamesBool)) {
+    stop("You have given list names that have duplicate table names:\n",
+         paste0(names(myList)[dupNamesBool], collapse = ", "))
+  }
 
 
   dt <- RDBEScore::newRDBESDataObject(DE = makeDT(myList[["DE"]]),
@@ -80,7 +89,12 @@ importRDBESDataDFS <- function(myList,
       data.table::setkeyv(dt[[aTable]], paste0(aTable,"id")) # essentially orders rows by id column?
       # SET NAMES if/where needed
       oldNames <- data.table::copy(colnames(dt[[aTable]]))
-      data.table::setnames(dt[[aTable]], old = oldNames, new = nameMap[oldNames], skip_absent = TRUE)
+      #essure that any strange/wrong names are retained in the result
+      extraCols <- setdiff(oldNames, names(nameMap))
+      names(extraCols) <- extraCols
+      newNames <- c(nameMap, extraCols)
+      data.table::setnames(dt[[aTable]], old = oldNames,
+                           new = newNames[oldNames], skip_absent = TRUE)
       # SET all empty strings to NA
       # dt[[aTable]][dt[[aTable]]==""] <- NA
     }
