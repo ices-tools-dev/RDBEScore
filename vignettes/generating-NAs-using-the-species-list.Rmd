@@ -1,0 +1,107 @@
+---
+title: "Generating NAs using the Species List"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{manipulating-the-species-list}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+## Introduction
+
+The aim of this document is demonstrate how the species list table of the RDBES can be used to complement the sample table with NAs in cases where, e.g., a species was not meant to be looked for. This task is made easy using function `generateNAsUsingSL` available in the `RDBEScore` package.
+
+## Load the package
+
+```{r setup}
+library(RDBEScore)
+```
+
+## Load and validate example data
+
+```{r}
+# read an example dataset
+myH1DataObject1 <- readRDS("./vignetteData/myH1DataObject1.rds")
+# check it is a valid RDBESobject
+validateRDBESDataObject(myH1DataObject1, checkDataTypes = TRUE)
+```
+
+## A closer look the example data and its characteristics
+
+The example is from data in hierarchy 1. It contains a single trip with a single haul. For simplicity, we restrict our analysis to the tables SL, SS and SA which are the ones handled by the functions we which behaviour we want to demonstrate. 
+
+Examining a print of the Species List (SL) one can conclude that the sampling targeted the landings of only 1 species. In this case the species was *Nephrops norvegicus* (aphiaId 107254).
+
+```{r}
+myH1DataObject1[c("SL")]
+```
+
+Examining a print of the Species Selection table (SS), one can confirm that only one fishing operation is present in the data (FOid 70849) and that landings were indeed sampled from it (for simplicity only a subset of columns is printed).
+
+```{r}
+myH1DataObject1[[c("SS")]][,1:15]
+```
+Given the previous, it is  expected that if *Nephrops norvegicus* was sampled it will appear in the RDBES Sample table (SA). One can confirm that happened by printing that table (for simplicity only a subset of columns is printed).
+```{r}
+myH1DataObject1[[c("SA")]][,c(1:9,48:49)]
+```
+
+## Generating NAs for species not looked for
+
+Suppose we want to consult the data to produce an estimate of, e.g., cod (aphiaId 126436). That species was not targeted by the sampling programme and it is impossible to infer from the data if it was or not present alongside *Nephrops norvegicus* during the sampling. The total weight measured (SAtotalWtMes) of cod should therefore be considered missing (NA). 
+
+The function \code{generateNAsUsingSL} does that (again for convenience, only a few columns of the SA table are printed).
+
+```{r}
+myH1DataObject1updte<-generateNAsUsingSL(myH1DataObject1, targetAphiaId = c("126436"))
+myH1DataObject1updte$SA[,c(1:9,48:49)]
+```
+
+Note that argument `targetAphiaId` in the function `generateNAsUsingSL` can also accept a vector thus allowing generation of NAs for multiple species in one go. In the example below *Pandalus borealis* is added to the call.
+
+```{r}
+myH1DataObject1updte<-generateNAsUsingSL(myH1DataObject1, targetAphiaId = c("126436","107649"))
+myH1DataObject1updte$SA[,c(1:9,48:49)]
+```
+
+## Dealing with diligent observers
+
+In many practical situations, diligent observers sometimes record more species than those expected. Such "excess" data is frequently useless from an estimation point-of-view (because the sampling is observer-dependent and therefore likely non-representative), but in analyses (e.g., distribution of rare species) or summaries (e.g., totals of biomass sampled) it may be useful to preserve them in the data.
+
+The difference between these two cases can be specified via the argument `overwriteSampled` in the function `generateNAsUsingSL`. By default (estimation case) the argument is set to TRUE which makes `generateNAsUsingSL` set the weights of these extra species to NA. But, by explicitly setting that argument as `overwriteSampled=FALSE` the information collected can also kept.
+
+To demonstrate this we carry out a small alteration of the example data, removing the *Nephrops norvegicus* from the Species List. This is a very atypical situation, used here just for illustrative purposes as it configures a case where of a haul where nothing was supposed to be looked for but still an observer registered *Nephrops norvegicus*.
+
+```{r}
+# we remove *Nephrops norvegicus*
+myH1DataObject1$SL<-myH1DataObject1$SL[-1,]
+validateRDBESDataObject(myH1DataObject1, checkDataTypes = TRUE)
+
+```
+
+Now we call `generateNAsUsingSL` for *Nephrops norvegicus* with its implicit default `overwriteSampled=TRUE` (regular estimation case). It is noticeable that the function sets weights of that species to NA
+
+```{r}
+myH1DataObject1updte<-generateNAsUsingSL(myH1DataObject1, 
+                                         targetAphiaId = c("107254"))
+myH1DataObject1updte$SA[,c(1:9,48:49)]
+```
+
+If, on the other hand, we are interested in keeping all available data, we set `overwriteSampled=FALSE`
+
+```{r}
+myH1DataObject1updte<-generateNAsUsingSL(myH1DataObject1, 
+                                         targetAphiaId = c("107254"),
+                                         overwriteSampled=FALSE)
+myH1DataObject1updte$SA[,c(1:9,48:49)]
+```
+
+
