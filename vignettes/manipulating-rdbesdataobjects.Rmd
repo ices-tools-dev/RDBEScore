@@ -70,8 +70,28 @@ validateRDBESDataObject(myH5RawObject, verbose = FALSE)
 
 ```
 
+## Sorting RDBESDataObject
 
-## Combining RBDESRawObjects
+If the data has a single hierarchy in the DE table a correct sort order is defined for it. You can use the **sort()** method for it. Printing the object sorts it automatically if possible.
+
+```{r}
+#before sorting
+names(H8Example)
+```
+
+```{r}
+#after sorting
+names(sort(H8Example))
+```
+
+```{r}
+#printing the summary
+H8Example
+```
+
+
+
+## Combining RDBESDataObjects
 
 RDBESDataObjects can be combined using the **combineRDBESDataObjects()** function. This might be required when different sampling schemes are used to collect on-shore and at-sea samples - it will often be required to combine all the data together before further analysis.
 

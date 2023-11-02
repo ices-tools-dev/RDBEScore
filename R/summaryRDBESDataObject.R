@@ -19,6 +19,10 @@
 #' @method summary RDBESDataObject
 #' @export
 summary.RDBESDataObject <- function(object) {
+  h <- unique(object$DE$DEhierarchy)
+  #order items by Hierarchy
+  if(!is.null(h)){object <- sort(object)}
+
   items <- sapply(object, function(x) {
     if (!is.null(x) && "data.table" %in% class(x)) {
       nrow(x)
@@ -29,7 +33,7 @@ summary.RDBESDataObject <- function(object) {
   # Remove NULL values from items
   items <- Filter(Negate(is.null), items)
 
-  h <- unique(object$DE$DEhierarchy)
-  #TODO order items by Hierarchy
   return(list(hierarchy=h, rows=items, CS=!is.null(h)))
 }
+
+
