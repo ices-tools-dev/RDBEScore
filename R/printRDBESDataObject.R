@@ -16,7 +16,7 @@
 #' @method print RDBESDataObject
 #' @export
 print.RDBESDataObject <- function(x, ...) {
-  summary_values <- summary(object)
+  summary_values <- summary(x)
   #years <- sapply(summary_values$data, function(x){getInfo(x$design, "year")})
   #years <- unique(years[!is.na(years)])
   if(!is.null(summary_values$hierarchy)){

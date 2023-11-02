@@ -13,26 +13,26 @@
 #' @method sort RDBESDataObject
 #' @export
 sort.RDBESDataObject <- function(x, decreasing = TRUE, ...) {
-  h <- unique(object$DE$DEhierarchy)
+  h <- unique(x$DE$DEhierarchy)
 
   # Order items by Hierarchy
   if(!is.null(h)){
     if(length(h)==1){
-      if(is.na(h)){return(object)}
+      if(is.na(h)){return(x)}
       # See if the user has specified a table to stop at
       targetTables <- RDBEScore::getTablesInRDBESHierarchy(h)
-      restOfTables <- setdiff(names(object), targetTables)
+      restOfTables <- setdiff(names(x), targetTables)
       #put rest of tables to the end
-      if(decreasing){ object <- object[c(targetTables,restOfTables)]}
-      if(!decreasing){ object <- object[c(restOfTables, targetTables)]}
+      if(decreasing){ x <- x[c(targetTables,restOfTables)]}
+      if(!decreasing){ x <- x[c(restOfTables, targetTables)]}
 
       # Reassign class
-      class(object) <- c("RDBESDataObject", "list")
+      class(x) <- c("RDBESDataObject", "list")
     } else{
       warning("No sort order for multiple hierarchies can be defined!", call.=F)
     }
 
   }
 
-  return(object)
+  return(x)
 }
