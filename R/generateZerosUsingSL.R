@@ -46,7 +46,7 @@ generateZerosUsingSL <- function(x,
 	tmpSA$SLspeclistName<-x$SL$SLspeclistName[match(tmpSA$SLid, x$SL$SLid)]
 	tmpSA[ ,tmpKey0 := paste(DEyear, SDctry, SDinst, SSspecListName, SScatchFra)]
 	tmpSA[ ,tmpKey1 := paste(DEyear, SDctry, SDinst, SSspecListName, SScatchFra, SAspeCode)]
-	
+
 	# restricts to SSuseCalcZero=='Y'
 	tmpSA<-tmpSA[SSuseCalcZero=='Y',]
 
@@ -63,7 +63,7 @@ if(nrow(tmpSA)>0)
 			,.N, .(SSid,SAstratumName)]$N>1)) stop("cannot generateZerosUsingSL because >1 SAcatchCat
 								OR SAsex OR SAlandCat in same SSid*SAstratumName: situation
 										still to be analyzed - likely you should have them ")
-    
+
 tmpSS <- data.table::copy(x[["SS"]])
 tmpSS$tmpKey0<-tmpSL$tmpKey0[match(tmpSS$SLid, tmpSL$SLid)]
 # case where SS exists and was sampled but there is no child record (all SL is added)
@@ -71,7 +71,7 @@ tmpSS$tmpKey0<-tmpSL$tmpKey0[match(tmpSS$SLid, tmpSL$SLid)]
  if(any(check))
 	for (targetSLid in tmpSS$SLid[check])
 	{
-	# in the following, the max SAid is determined. That SAid + a decimal will constitute the SAid of the new 0 rows  
+	# in the following, the max SAid is determined. That SAid + a decimal will constitute the SAid of the new 0 rows
 	# determine upper table (parentIdVar) and its value (parentIdValue)
 		# note, the use of which is an attempt to make this hierarchy independent - there may be better forms to achieve this.
 		parentIdVar<-c("FOid","TEid","LEid","FTid")[which(!is.na(tmpSS[tmpSS$SLid == targetSLid,c("FOid","TEid","LEid","FTid")]))]
@@ -84,10 +84,10 @@ tmpSS$tmpKey0<-tmpSL$tmpKey0[match(tmpSS$SLid, tmpSL$SLid)]
 		# vector of species to add
 		sppToAdd<-tmpSL$SLcommTaxon[tmpSL$SLid %in% tmpSS$SLid[!check]]
 		# picks up a row to be used as dummy
-		dummyRows<-do.call("rbind", replicate(n=length(sppToAdd), tmpSA[SAid == maxSAid,][1,], simplify = FALSE)) 
+		dummyRows<-do.call("rbind", replicate(n=length(sppToAdd), tmpSA[SAid == maxSAid,][1,], simplify = FALSE))
 		# fills in with NA (some vars will be specified below
 		dummyRows[,10:31]<-NA # an alternative here could be "NotAvailable" or "NotApplicable" or source from other tables with assumptions
-		# handling of a few specific variables (probably will need some tunning later on) 
+		# handling of a few specific variables (probably will need some tunning later on)
 		dummyRows$SAid <- maxSAid+0.001*c(1:length(sppToAdd))
 		dummyRows$SSid <- tmpSS$SSid[tmpSS$SLid == targetSLid]
 		dummyRows$SAseqNum <- 1:length(sppToAdd)
@@ -116,9 +116,9 @@ tmpSS$tmpKey0<-tmpSL$tmpKey0[match(tmpSS$SLid, tmpSL$SLid)]
 
 # handles remaining (more usual) cases
   ls1 <- split(tmpSA, paste(tmpSA$SSid, tmpSA$SAstratumName))
-  ls2 <- lapply(ls1, function(x, z=tmpSS) { 
+  ls2 <- lapply(ls1, function(x, z=tmpSS) {
     for (w in tmpSL$tmpKey1[tmpSL$tmpKey0==z$tmpKey0[z$SSid==x$SSid]]) {
-		
+
 		if (!w %in% tmpSA$tmpKey1) {
 		   # duplicates SA row
           y <- x[1, ]
@@ -138,7 +138,7 @@ tmpSS$tmpKey0<-tmpSL$tmpKey0[match(tmpSS$SLid, tmpSL$SLid)]
           y$SAnumSamp <- ifelse(y$SAunitType=="Individuals", 0, y$SAnumSamp)
           y$SAselProb <- 1
           y$SAincProb <- 1
-		  y$SAid <- min(x$SAid) - 0.1 # maintain a count
+		  y$SAid <- min(x$SAid) - 0.001 # maintain a count
           y$SAseqNum <- min(x$SAseqNum) - 0.001 # maintain a count
           y$SAunitName <- min(x$SAid) - 0.001 # maintain a count
           y$SAsex <- 'U'
@@ -167,7 +167,7 @@ colsToDelete<-c("SDctry", "SDinst","SSspecListName","DEyear","SScatchFra","SSuse
   setkey(x[["SA"]],SAid)
   # orders
   x[["SA"]] <-  x[["SA"]][order(x[["SA"]]$SSid, x[["SA"]]$SAid, decreasing = F), ]
-  
+
 }
   x
 }
