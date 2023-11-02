@@ -1,20 +1,17 @@
-#' Filter and an RDBESDataObject and remove any orphan records in an
-#' RDBESDataObject
+#' Filter and remove orphan records in an RDBESDataObject
 #'
-#' The returned object will include all rows which either: a) do not included
-#' any of the field names in `fieldsToFilter`, or b) do include the field names
-#' and have one of the allowed values in `valuesToFilter`.
+#' This function filters an RDBESDataObject based on specified fields and values, and can optionally remove any orphan records.
+#' The returned object will include all rows which either: a) do not include any of the field names in `fieldsToFilter`, or b) do include the field names and have one of the allowed values in `valuesToFilter`.
+#' If `killOrphans` is set to `TRUE`, the function will remove orphaned rows. The default is `FALSE`.
 #'
-#' `killOrphans` allows you to remove orphaned rows if set to `TRUE`. The
-#' default is `FALSE`.
-#'
-#' @param RDBESDataObjectToFilterAndTidy The `RDBESDataObjectToFilterAndTidy` to filter
-#' @param fieldsToFilter A vector of the field names you wish to check
-#' @param valuesToFilter A vector of the field values you wish to filter for
+#' @param RDBESDataObjectToFilterAndTidy The RDBESDataObject to filter.
+#' @param fieldsToFilter A vector of the field names you wish to check.
+#' @param valuesToFilter A vector of the field values you wish to filter for.
 #' @param killOrphans Controls if orphan rows are removed. Default is `FALSE`.
+#' @param verboseOrphans Controls if verbose output for orphan rows is printed. Default is `FALSE`.
+#' @param verboseBrokenVesselLinks Controls if verbose output for broken vessel links is printed. Default is `FALSE`.
 #'
-#' @return the filtered input object of the same class as
-#'   `RDBESDataObjectToFilterAndTidy`
+#' @return The filtered input object of the same class as `RDBESDataObjectToFilterAndTidy`.
 #'
 #' @export
 #' @md
@@ -22,11 +19,10 @@
 #' @examples
 #' \dontrun{
 #'
-#' myH1RawObject <-
-#'   createRDBESDataObject(rdbesExtractPath = "tests\\testthat\\h1_v_1_19_13")
+#' myH1RawObject <- createRDBESDataObject(rdbesExtractPath = "tests\\testthat\\h1_v_1_19_13")
 #'
-#'   # to check how removeBrokenVesselLinks() works
-#'   myH1RawObject$VD$VDlenCat[which(myH1RawObject$VD$VDencrVessCode=="VDcode_10")] <- "VL40XX"
+#' # To check how removeBrokenVesselLinks() works
+#' myH1RawObject$VD$VDlenCat[which(myH1RawObject$VD$VDencrVessCode=="VDcode_10")] <- "VL40XX"
 #'
 #' myFields <- c("VSencrVessCode", "VDlenCat")
 #' myValues <- c("VDcode_1","VDcode_2", "VDcode_10","VL1518","VL2440")
@@ -34,11 +30,9 @@
 #' myFilteredObject <- filterAndTidyRDBESDataObject(myH1RawObject,
 #'   fieldsToFilter = myFields,
 #'   valuesToFilter = myValues,
-#'    killOrphans = TRUE, verboseBrokenVesselLinks = TRUE
+#'   killOrphans = TRUE, verboseBrokenVesselLinks = TRUE
 #' )
 #' }
-#'
-#'
 filterAndTidyRDBESDataObject <- function(RDBESDataObjectToFilterAndTidy,
                                  fieldsToFilter,
                                  valuesToFilter,

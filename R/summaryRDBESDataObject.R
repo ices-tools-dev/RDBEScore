@@ -47,7 +47,7 @@ getDesignSummary <- function(dt){
   presentCols <- intersect(colnames(dt), cols)
   missingCols <- setdiff(cols, colnames(dt))
   # Create a new data frame with the same structure as dt
-  res <- unique(dt[, ..presentCols])
+  res <- unique(dt[, presentCols, with=FALSE])
 
   # Add the missing columns and set them to NA
   #for (col in missingCols) {

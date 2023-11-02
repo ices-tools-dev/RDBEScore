@@ -2,8 +2,7 @@
 % Please edit documentation in R/filterAndTidyRDBESDataObject.R
 \name{filterAndTidyRDBESDataObject}
 \alias{filterAndTidyRDBESDataObject}
-\title{Filter and an RDBESDataObject and remove any orphan records in an
-RDBESDataObject}
+\title{Filter and remove orphan records in an RDBESDataObject}
 \usage{
 filterAndTidyRDBESDataObject(
   RDBESDataObjectToFilterAndTidy,
@@ -15,35 +14,33 @@ filterAndTidyRDBESDataObject(
 )
 }
 \arguments{
-\item{RDBESDataObjectToFilterAndTidy}{The \code{RDBESDataObjectToFilterAndTidy} to filter}
+\item{RDBESDataObjectToFilterAndTidy}{The RDBESDataObject to filter.}
 
-\item{fieldsToFilter}{A vector of the field names you wish to check}
+\item{fieldsToFilter}{A vector of the field names you wish to check.}
 
-\item{valuesToFilter}{A vector of the field values you wish to filter for}
+\item{valuesToFilter}{A vector of the field values you wish to filter for.}
 
 \item{killOrphans}{Controls if orphan rows are removed. Default is \code{FALSE}.}
+
+\item{verboseOrphans}{Controls if verbose output for orphan rows is printed. Default is \code{FALSE}.}
+
+\item{verboseBrokenVesselLinks}{Controls if verbose output for broken vessel links is printed. Default is \code{FALSE}.}
 }
 \value{
-the filtered input object of the same class as
-\code{RDBESDataObjectToFilterAndTidy}
+The filtered input object of the same class as \code{RDBESDataObjectToFilterAndTidy}.
 }
 \description{
-The returned object will include all rows which either: a) do not included
-any of the field names in \code{fieldsToFilter}, or b) do include the field names
-and have one of the allowed values in \code{valuesToFilter}.
-}
-\details{
-\code{killOrphans} allows you to remove orphaned rows if set to \code{TRUE}. The
-default is \code{FALSE}.
+This function filters an RDBESDataObject based on specified fields and values, and can optionally remove any orphan records.
+The returned object will include all rows which either: a) do not include any of the field names in \code{fieldsToFilter}, or b) do include the field names and have one of the allowed values in \code{valuesToFilter}.
+If \code{killOrphans} is set to \code{TRUE}, the function will remove orphaned rows. The default is \code{FALSE}.
 }
 \examples{
 \dontrun{
 
-myH1RawObject <-
-  createRDBESDataObject(rdbesExtractPath = "tests\\\\testthat\\\\h1_v_1_19_13")
+myH1RawObject <- createRDBESDataObject(rdbesExtractPath = "tests\\\\testthat\\\\h1_v_1_19_13")
 
-  # to check how removeBrokenVesselLinks() works
-  myH1RawObject$VD$VDlenCat[which(myH1RawObject$VD$VDencrVessCode=="VDcode_10")] <- "VL40XX"
+# To check how removeBrokenVesselLinks() works
+myH1RawObject$VD$VDlenCat[which(myH1RawObject$VD$VDencrVessCode=="VDcode_10")] <- "VL40XX"
 
 myFields <- c("VSencrVessCode", "VDlenCat")
 myValues <- c("VDcode_1","VDcode_2", "VDcode_10","VL1518","VL2440")
@@ -51,9 +48,7 @@ myValues <- c("VDcode_1","VDcode_2", "VDcode_10","VL1518","VL2440")
 myFilteredObject <- filterAndTidyRDBESDataObject(myH1RawObject,
   fieldsToFilter = myFields,
   valuesToFilter = myValues,
-   killOrphans = TRUE, verboseBrokenVesselLinks = TRUE
+  killOrphans = TRUE, verboseBrokenVesselLinks = TRUE
 )
 }
-
-
 }

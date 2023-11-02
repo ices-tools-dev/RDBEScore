@@ -28,7 +28,9 @@ to zip files, unzips and import tables as an object of class
 \code{RDBESDataObject}.
 }
 \examples{
-rdbesExtractPath <- "./tests/testthat/h7_v_1_19_18/2022_FPN_FPE_H7.zip"
+\dontrun{
+rdbesExtractPath <- "./2022_FPN_FPE_H7.zip"
 obj <- importRDBESDataZIP(rdbesExtractPath)
+}
 }
 \keyword{internal}

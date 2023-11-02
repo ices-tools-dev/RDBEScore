@@ -36,8 +36,10 @@ Create an R object from a folder containing .csv data files downloaded from
 the RDBES upload/download page.
 }
 \examples{
+\dontrun{
 myEmptyRDBESObject <- importRDBESDataCSV()
 rdbesExtractPath <- "./tests/testthat/h7_v_1_19_18/"
 obj <- importRDBESDataCSV(rdbesExtractPath)
+}
 }
 \keyword{internal}

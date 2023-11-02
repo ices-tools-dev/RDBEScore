@@ -1,7 +1,8 @@
 # This is a file to store general internal utility functions
 
+
 # Deal with "no visible binding for global variable.." warnings in R CMD CHECK
-globalVariables(c("mapColNamesFieldR", "mapColNamesFieldR", "SAid",
+globalVariables(c("mapColNamesFieldR",
                   "rdbesEstimObj", "..targetProbColumns",
                   "..targetProbColumns2", "finalInclusionProb_to_su1",
                   "targetValue", "su1unitName", "su1inclusionProb",
@@ -9,7 +10,8 @@ globalVariables(c("mapColNamesFieldR", "mapColNamesFieldR", "SAid",
                   "..varsNeeded", "|>", "parentTableID", "est.total",
                   "recType", "parentTableStratum", "stratumName",
                   "parentIDandStratum", "studyVariable", "..myColNames",
-                  "..methColNames", "tblName", "all_of"))
+                  "..methColNames", "tblName", "all_of", "SLid","SAid",
+                  "..myLevel","parentTable",".", "id", "i.id" ))
 
 
 #' as.integer.or.dbl
