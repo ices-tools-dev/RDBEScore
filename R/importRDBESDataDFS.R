@@ -9,6 +9,7 @@
 #'   to the correct data types. Default is `TRUE`.
 #' @param strict logical. Indicates level of validation of the `RDBESDataObject`
 #'   it creates - should the validation be strict? Default is `TRUE`.
+#' @importFrom stats setNames
 #'
 #' @return An `RDBESDataObject` with each element being a data table.
 #'

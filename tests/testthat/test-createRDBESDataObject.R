@@ -315,7 +315,7 @@ capture.output({  ## suppresses printing of console output when running test()
   list_with_nulls  <-  createRDBESDataObject(paste0(dirH1, "H1_2023_10_16.zip"))
   list_of_dfs <- list_with_nulls[!(sapply(list_with_nulls, is.null))]
   list_of_dfs <- lapply(list_of_dfs, as.data.frame)
-  colMapping <-   setNames(mapColNamesFieldR$Field.Name, mapColNamesFieldR$R.Name)
+  colMapping <-   stats::setNames(mapColNamesFieldR$Field.Name, mapColNamesFieldR$R.Name)
   list_of_dfs_long_names <- lapply(list_of_dfs, function(df, colMapping){
     colnames(df) <- colMapping[colnames(df)]
     df

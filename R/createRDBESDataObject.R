@@ -53,6 +53,7 @@
 #'   attempt to cast the required columns to the correct data type.  If `FALSE`
 #'   then the column data types will be determined by how the csv files are read
 #'   in. Default is `TRUE`.
+#' @importFrom utils file_test
 #'
 #' @return A RDBESDataObject
 #' @export
