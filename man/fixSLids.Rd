@@ -2,12 +2,7 @@
 % Please edit documentation in R/fixSLids.R
 \name{fixSLids}
 \alias{fixSLids}
-\title{Fixes SLid in SL facilitating joins with SS table.
-RDBES SL can be seen as a join of two tables - one that identifies the species list in
-terms of SLcou\emph{SLinst}SLspeclistName\emph{SLyear}SLcatchFrac and one that specifies
-the taxa (SLcommTaxon SLsppCode) in the list. In SS, SLid remits to the 1st taxa in a species list and
-not - as it would be expected - to the species list itself. This function fixes this by creating
-a new SLtaxaId variable in SL and assigning all taxa in a species to a single SSid.}
+\title{Fixes SLid in SL table (facilitating SS-SL joins).}
 \usage{
 fixSLids(RDBESDataObject, verbose = FALSE, strict = TRUE)
 }
@@ -24,12 +19,16 @@ the validation be strict? The default is TRUE.}
 an RDBESDataObject with SL ids reworked
 }
 \description{
-Fixes SLid in SL facilitating joins with SS table.
-RDBES SL can be seen as a join of two tables - one that identifies the species list in
-terms of SLcou\emph{SLinst}SLspeclistName\emph{SLyear}SLcatchFrac and one that specifies
-the taxa (SLcommTaxon SLsppCode) in the list. In SS, SLid remits to the 1st taxa in a species list and
-not - as it would be expected - to the species list itself. This function fixes this by creating
-a new SLtaxaId variable in SL and assigning all taxa in a species to a single SSid.
+Fixes SLid in SL table (facilitating SS-SL joins).
+}
+\details{
+RDBES SL can be seen as a join of two tables - one that identifies the
+species list in terms of \emph{SLcou} * \emph{SLinst} * \emph{SLspeclistName} *
+\emph{SLyear} * \emph{SLcatchFrac} and one that specifies the
+taxa (\emph{SLcommTaxon} * \emph{SLsppCode}) in the list. In SS, SLid
+remits to the 1st taxa in a species list and not - as it would be expected -
+to the species list itself. This function fixes this by creating a new
+SLtaxaId variable in SL and assigning all taxa in a species to a single SSid.
 }
 \examples{
 # To add

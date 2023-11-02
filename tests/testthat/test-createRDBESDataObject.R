@@ -144,7 +144,7 @@ capture.output({  ## suppresses printing of console output when running test()
     genObj <- suppressWarnings(createRDBESDataObject(input =  paste0(dirH1, zipFiles),
                                                      castToCorrectDataTypes = TRUE))
 
-    myDiffs <- RDBEScore:::validateRDBESDataObjectDataTypes(genObj)
+    myDiffs <- validateRDBESDataObjectDataTypes(genObj)
 
     numberOfDifferences <- nrow(myDiffs)
     expect_equal(numberOfDifferences,0)
@@ -230,7 +230,7 @@ capture.output({  ## suppresses printing of console output when running test()
     myRDBESDataObject <- createRDBESDataObject(input = csvFilesH1,
                                                castToCorrectDataTypes = TRUE)
 
-    myDiffs <- RDBEScore:::validateRDBESDataObjectDataTypes(myRDBESDataObject)
+    myDiffs <- validateRDBESDataObjectDataTypes(myRDBESDataObject)
 
     numberOfDifferences <- nrow(myDiffs)
     expect_equal(numberOfDifferences,0)
@@ -315,7 +315,7 @@ capture.output({  ## suppresses printing of console output when running test()
   list_with_nulls  <-  createRDBESDataObject(paste0(dirH1, "H1_2023_10_16.zip"))
   list_of_dfs <- list_with_nulls[!(sapply(list_with_nulls, is.null))]
   list_of_dfs <- lapply(list_of_dfs, as.data.frame)
-  colMapping <-   setNames(mapColNamesFieldR$Field.Name, mapColNamesFieldR$R.Name)
+  colMapping <-   stats::setNames(mapColNamesFieldR$Field.Name, mapColNamesFieldR$R.Name)
   list_of_dfs_long_names <- lapply(list_of_dfs, function(df, colMapping){
     colnames(df) <- colMapping[colnames(df)]
     df
@@ -346,7 +346,7 @@ capture.output({  ## suppresses printing of console output when running test()
   test_that("Importing list of dfs with castToCorrectDataTypes = TRUE works",{
     genObj <- suppressWarnings(createRDBESDataObject(list_of_dfs, castToCorrectDataTypes = TRUE))
 
-    myDiffs <- RDBEScore:::validateRDBESDataObjectDataTypes(genObj)
+    myDiffs <- validateRDBESDataObjectDataTypes(genObj)
 
     numberOfDifferences <- nrow(myDiffs)
     expect_equal(numberOfDifferences,0)

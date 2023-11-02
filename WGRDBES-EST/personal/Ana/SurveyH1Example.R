@@ -5,7 +5,7 @@ library(icesRDBES)
 
 getwd()
 
-mySurveyH1 <- RDBEScore:::importRDBESDataZIP('data-raw/WGRDBES-EST_TEST_Pckg_Survey_data_apistrat_H1.zip')
+mySurveyH1 <- RDBEScore::createRDBESDataObject('data-raw/WGRDBES-EST_TEST_Pckg_Survey_data_apistrat_H1.zip')
 validateRDBESDataObject(mySurveyH1, checkDataTypes = TRUE)
 runChecksOnSelectionAndProbs(mySurveyH1)
 

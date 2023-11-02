@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 
 ## Introduction 
 
-The aim of this document is to illustrate how population parameters like total and mean can be estimated using the **estimMC(...)** function.
+The aim of this document is to illustrate how population parameters like total and mean can be estimated using the **estimMC(...)** function. And how a multi level or multi stratum estimation can be run to estimate the population total and mean using  **doEstimationForAllStrata(...)**.
 
 ```{r}
 library(RDBEScore)
@@ -29,17 +29,17 @@ library(RDBEScore)
 First we'll load some example data from the RDBES and check it's valid.  It's a good idea to check your RDBESDataObjects are valid after any manipulations you perform.
 
 ```{r load}
-h1d <- importRDBESDataCSV(rdbesExtractPath = "../tests/testthat/h1_v_1_19_13")
+h1d <- H1Example
 validateRDBESDataObject(h1d, verbose = FALSE)
-
+h1d
 ```
 
 
 ## Single level Multiple Count Estimator
 
-Let's first estimate the last level values for a single VSid so that estimation is done for each top level record (i.e. as the data is)
+Let's first estimate the last level values for a single FMid so that estimation is done for one top level record 
 ```{r}
-FMidSel <- "1445683"
+FMidSel <- "4033243"
 BV <- h1d$BV[h1d$BV$FMid == FMidSel,]
 
 estimMC(as.numeric(BV$BVvalueMeas),
@@ -48,10 +48,142 @@ estimMC(as.numeric(BV$BVvalueMeas),
         method=unique(BV$BVselectMeth))
 ```
 
+This **estimMC(...)** function is actually the core of the estimation functions running on multiple levels as well. For implementation details see: [Variance calculation functions using "Multiple count" estimator](https://github.com/ices-tools-dev/RDBEScore/issues/13) 
 
+## Estimation workflow
 
+Estimation actually  is done on a *RDBESEstObject* that is generate from *RDBESDataObject* using **createRDBESEstObject(...)**. The following example uses a dataset that  resembles in many ways real data at ICES area 27.3.d.28.1 from the Estonian Baltic Trawling fleet for 2022 sprat (*Sprattus sprattus*).The dataset has both total landings and commercial sampling data.
 
 ```{r}
+H8Example
+```
+The data has not gone through RDBES upload and download procedure and  contains invalid data types but also may have some other validity problems. However the fields for estimation should be present and valid.
+```{r eval=FALSE, echo=TRUE}
+#to check data types
+validateRDBESDataObject(H8Example, checkDataTypes = TRUE, strict = FALSE)
+```
+
+
+```{r, results='asis'}
+#create the estimation object to estimate values on the SA table
+estData <- createRDBESEstObject(H8Example, 8, "SA" )
+
+#the SAsampWtMes is in grammes let's estimate in tonnes
+estData$SAsampWtMes <- estData$SAsampWtMes / (1000 * 1000)
+
+results <- doEstimationForAllStrata(estData, "SAsampWtMes")
+
+#let's compare the results from 1st quarter with actual catches from Q1
+CL <- H8Example$CL
+Q1months <- c("January", "February", "March")
+Q1results <- results[results$recType== "TE" &
+                     results$stratumName %in% Q1months,]
+cat("Total estimated SPR catch in Q1: ",
+    round(sum(Q1results$est.total), 3),  "tonnes\n")
+
+#CLoffWeight is in Kg, converting to tonnes
+cat("Total reported  SPR catch in Q1: ", 
+    sum(CL[CL$CLquar ==1, "CLoffWeight"])/1000, "tonnes")
+
+```
+
+```{r}
+#let's add the actual totals
+Q1results$actualTotals <- c(February=124.829,January=119.108, March=152.273)
+```
+
+
+So the total estimated catch (*est.total*) for the first quarter is near the total of the actual catch. The table below gives the estimates by month with standard errors (*se.total*). The (*est.mean*) and its standard error (SE, *se.mean*) are the estimated mean catch of sprat per vessel per landing for the given month. As you can see from the table for the first 2 months the estimates with *se.total* are in line with the estimate as for March somehow there is a big discrepancy.
+```{r}
+columns <- c("recType","stratumName","actualTotals",
+             "est.total", "se.total", "est.mean", "se.mean")
+captionText <- paste("Estmation results for 1st quarter by months (stratums).",
+                     "Total estimated catch (est.total) and standard error (se.total)",
+                     " as well as estimated mean with se for vessels are given.",
+                     "In addition actual total reported weights are given.")
+knitr::kable(Q1results[columns], digits=3, caption=captionText)
+```
+
+
+
+
+In the next sections we will use data from R packages [survey](https://CRAN.R-project.org/package=survey) and [SDAResources](https://CRAN.R-project.org/package=SDAResources) that are converted into the *RDBESDataObject* to demonstrate the estimation procedure.
+
+
+
+### Estimation on Multiple Strata
+
+From [SDAResources](https://CRAN.R-project.org/package=SDAResources) we use *agstrat* which is  data from a stratified random sample of size 300 from the 1992 U.S. Census of Agriculture agpop data. The datset is converted into *RDBESDataObject* **Pckg_SDAResources_agstrat_H1_WGRDBES_EST_TEST_1** so that  Table VS and SA contain the core information of \code{data(agstrat)} used in Lohr examples 3.2 and 3.6. Table VS is stratified with VSstratumName set to *region*, and VSnumberSampled and VSnumberTotal set according to *agstrat* VSunitName is set to a combination of original *county*, *state*, *region* and *agstrat* row numbers.
+Table SA contains the variable measured *acres92* in \code{SAtotalWeightMeasured}, \code{SAsampleWeightMeasured} and \code{SAconversionFactorMeasLive} set to 1.
+Table DE, SD, FT and FO are for the most dummy tables inserted to meet RDBES model requirements to be aggregated during estimation tests. Values of mandatory fields have dummy values taken from an onboard programme, with exception of  *\code{selectionMethod} - that is set to CENSUS - they should be ignored during estimation. BV, FM, CL, and CE are not provided. SL and VD are subset to the essential rows.
+
+```{r}
+agstrat_H1 <- Pckg_SDAResources_agstrat_H1_WGRDBES_EST_TEST_1 #valid
+agstrat_H1
+```
+
+```{r}
+
+#create the estimation object to estimate values on the SA table
+estObj <- createRDBESEstObject(agstrat_H1, 1, "SA")
+
+
+res <- doEstimationForAllStrata(estObj, "SAsampWtMes")
+
+# Get the estimated total and mean  for "SAsampWtMes" for the VS stratum "NC"
+columns2Get <- c("est.total","est.mean", "se.total","se.mean")
+round(unlist(res[res$recType == "VS" & res$stratumName == "NC" ,columns2Get]),1)
+ 
+```
+
+How to interpret these results in the above example?
+
+ - *est.total* - total SAsampWtMes sampled weight per vessel per year in the stratum
+ - *est.mean* - mean SAsampWtMes per vessel per year in the stratum (i.e  how much in total one ship on average contributed to the sampled total in this stratum)
+
+You can explore the result to see the estimated total, mean etc. for other stratums. 
+
+
+### Two Level Estimation on Single Stratum
+
+From [survey](https://CRAN.R-project.org/package=survey) we use apiclus2 which is the Academic Performance Index  computed for all California schools based on standardised testing of students. The data sets contain information for all schools with at least 100 students and for various
+ probability samples of the data. The design is 2-stage cluster sampling with clusters of unequal sizes  An SRS of 40 districts is selected (psus) from the 757 districts in the population and then  up to 5 schools (min 1) were selected from each district (ssus)
+The datset is converted into *RDBESDataObject* **Pckg_survey_apiclus2_H1_WGRDBES_EST_TEST_1** so that  1 DE row with DEstratumName == "Pckg_SDAResources_apiclus2_H1", 1 child SD row, 40 child rows in VS (the 40 districts),  VSnumberTotal is 757,  VSnumberSampled is 40, 126 child rows in FT (the 126 schools finally observed), each associated to its cluster (dname), FTnumberTotal is the number of schools in district, FTnumberSAmpled is 1...5 schools sampled, tables FO, SS are just 1:1 links to the final data (in SA), in SA SAsampleWeightMeasured is enroll (NB! there are  4 NAs)
+
+```{r}
+apiclus2_H1 <- Pckg_survey_apiclus2_H1_WGRDBES_EST_TEST_1 # valid H1
+apiclus2_H1
+```
+
+```{r}
+
+#create the estimation object to estimate values on the SA table
+estObj <- createRDBESEstObject(apiclus2_H1, 1, "SA")
+    
+# Run estimation on total measured weight: SAtotalWtMes
+res <- doEstimationForAllStrata(estObj, "SAtotalWtMes")
+
+# Get the estimated total and mean  for "SAtotalWtMes" for the VS
+columns2Get <- c("est.total","est.mean", "se.total","se.mean")
+round(unlist(res[res$recType == "VS" ,columns2Get]),1)
+```
+
+How to interpret these results in the above example?
+
+ - *est.total* - total caught weight per vessel per year 
+ - *est.mean* - mean caught weight per vessel per year (i.e  how much in total one ship on average contributed to the total catch per year)
+ 
+ The **SE** values are just the standard errors for the total and mean respectively.
+
+
+See also other package vignettes:
+
+```{r echo=FALSE, results='asis'}
+vignettes <- as.data.frame(browseVignettes(package = "RDBEScore")$RDBEScore)
+for (i in seq_along(vignettes$PDF)) {
+  cat(sprintf("- [%s](%s)\n", vignettes$Title[i], vignettes$PDF[i]))
+}
+
 #END
 ```
 

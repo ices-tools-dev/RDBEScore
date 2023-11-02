@@ -135,6 +135,10 @@ myHierarchyTablesDF[myHierarchyTablesDF$table %in% c("FM","BV"),"lowerHierarchy"
 myHierarchyTablesDF[myHierarchyTablesDF$hierarchy == "H5" & myHierarchyTablesDF$table == "FT","optional"] <- TRUE
 myHierarchyTablesDF[myHierarchyTablesDF$hierarchy == "H5" & myHierarchyTablesDF$table == "FT","samplingUnit"] <- FALSE
 
+# Set FT in H8 to be optional and not a sampling unit
+myHierarchyTablesDF[myHierarchyTablesDF$hierarchy == "H8" & myHierarchyTablesDF$table == "FT","optional"] <- TRUE
+myHierarchyTablesDF[myHierarchyTablesDF$hierarchy == "H8" & myHierarchyTablesDF$table == "FT","samplingUnit"] <- FALSE
+
 # Set LE in H7 to not be a sampling unit
 myHierarchyTablesDF[myHierarchyTablesDF$hierarchy == "H7" & myHierarchyTablesDF$table == "LE","samplingUnit"] <- FALSE
 

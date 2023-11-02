@@ -14,11 +14,7 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' myH1RawObject <-
-#'   importRDBESDataCSV(rdbesExtractPath = "tests/testthat/h1_v_1_19")
-#' myH1EstObj <- createRDBESEstObject(myH1RawObject, 1)
-#' }
+#' myH1EstObj <- createRDBESEstObject(H1Example, 1, "SA")
 createRDBESEstObject <- function(rdbesPrepObject,
                                  hierarchyToUse,
                                  stopTable = NULL,
@@ -40,8 +36,9 @@ createRDBESEstObject <- function(rdbesPrepObject,
 
 
   # See if the user has specified a table to stop at
+  #take out the optional as this messes up est object creation
   targetTables <-
-    RDBEScore::getTablesInRDBESHierarchy(hierarchyToUse)
+    RDBEScore::getTablesInRDBESHierarchy(hierarchyToUse, includeOptTables = F)
   if (length(is.null(stopTable)) == 1 &&
     !is.null(stopTable)) {
     stopTableLoc <- which(targetTables == stopTable)

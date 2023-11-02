@@ -42,8 +42,10 @@ Create design-based point and variance estimates from
 RDBES estimation object (rdbesEstimObj)
 }
 \examples{
+\dontrun{
 data(shrimps)
 doDBestimation (x = shrimps, estimateType = "total",
 pointEstimator = "Unbiased", varEstimator = "WRonPSUviaPsi",stage = 0,
 domainOfinterest = NULL )
+ }
 }

@@ -32,6 +32,30 @@
 #' }
 "H1Example"
 
+#' A dataset containing test RDBES data for H8 in the RDBESDataObject structure
+#'
+#' This dataset does not have passed the RDBES upload checks,
+#'  hence the object might be somewhat invalid, however it resembles real data
+#'  from the Estonian Baltic Trawling fleet for 2022 sprat total landings and
+#'  commercial sampling
+#'
+#' @format A list containing entries required for H8 RDBES data:
+#' \describe{
+#'   \item{DE}{the Design data table}
+#'   \item{SD}{the Sampling Details data table}
+#'   \item{TE}{the Temporal Event data table}
+#'   \item{VS}{the Vessel Selection data table}
+#'   \item{LE}{the Landing Event data table}
+#'   \item{SS}{the Species Selection data table}
+#'   \item{SA}{the Sample data table}
+#'   \item{BV}{the Biological Variable data table}
+#'   \item{VD}{the Vessel Details data table}
+#'   \item{SL}{the Species List data table}
+#'   \item{CL}{the Commertial Landing data table}
+#'   \item{CL}{the Commertial Effort data table}
+#' }
+"H8Example"
+
 #' A dataset containing test RDBES data for H5 in the RDBESDataObject structure
 #'
 #' @format A list containing entries required for H5 RDBES data:

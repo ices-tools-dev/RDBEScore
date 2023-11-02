@@ -109,9 +109,52 @@ test_that("doEstimationForAllStrata creates correct est.total for SAsampWtMes us
 
 })
 
+test_that("doEstimationForAllStrata gets some results for H8Example",  {
+
+  myTestData <- H8Example
+  # Only use a subset of the test data
+
+  # create an est object
+  myEstData <- createRDBESEstObject(myTestData, 8, "SA" )
+
+  #convvert to Kgs from grammes
+  myEstData$SAsampWtMes <- myEstData$SAsampWtMes /1000
+  # Run estimation
+  myResults <- doEstimationForAllStrata(myEstData, "SAsampWtMes")
+
+  # Get the results for the TE strata
+  January_actual <-  myResults[myResults$recType == "TE" & myResults$stratumName == "January" ,c("stratumName","est.total","est.mean", "se.total","se.mean")]
+  February_actual <-  myResults[myResults$recType == "TE" & myResults$stratumName == "February" ,c("stratumName","est.total","est.mean", "se.total","se.mean")]
+  March_actual <-  myResults[myResults$recType == "TE" & myResults$stratumName == "March" ,c("stratumName","est.total","est.mean", "se.total","se.mean")]
+
+
+  # Check if the results are correct
+
+  # January stratum
+  expect_equal(round(January_actual$est.total,0), 138995)
+  expect_equal(round(January_actual$se.total,0), 41709)
+  expect_equal(round(January_actual$est.mean,3), 34748.659)
+  expect_equal(round(January_actual$se.mean,3), 10427.312)
+
+  # February stratum
+  expect_equal(round(February_actual$est.total,0), 209271)
+  expect_equal(round(February_actual$se.total,0), 97071)
+  expect_equal(round(February_actual$est.mean,3), 52317.864)
+  expect_equal(round(February_actual$se.mean,3), 24267.667)
+
+  # March stratum
+  expect_equal(round(March_actual$est.total,0), 32996)
+  expect_equal(round(March_actual$se.total,0), 7213)
+  expect_equal(round(March_actual$est.mean,3), 8248.884)
+  expect_equal(round(March_actual$se.mean,3), 1803.148)
+
+
+
+})
+
 test_that("doEstimationForAllStrata creates get correct results for Lohr worked examples",  {
 
-  myTestData <- RDBEScore:::importRDBESDataZIP("./h1_v_1_19_18/ZW_1965_WGRDBES-EST_TEST_1.zip")
+  myTestData <- RDBEScore::createRDBESDataObject("./h1_v_1_19_18/ZW_1965_WGRDBES-EST_TEST_1.zip")
 
   # Only use a subset of the test data
   myTestData <- filterRDBESDataObject(myTestData,c("DEstratumName"),c("Pckg_SDAResources_agstrat_H1"))

@@ -9,6 +9,7 @@
 #'   to the correct data types. Default is `TRUE`.
 #' @param strict logical. Indicates level of validation of the `RDBESDataObject`
 #'   it creates - should the validation be strict? Default is `TRUE`.
+#' @importFrom stats setNames
 #'
 #' @return An `RDBESDataObject` with each element being a data table.
 #'
@@ -71,7 +72,7 @@ importRDBESDataDFS <- function(myList,
                                       CE = makeDT(myList[["CE"]]))
 
   # Ensure all the columns are the correct data type
-  if(castToCorrectDataTypes) dt <- RDBEScore:::setRDBESDataObjectDataTypes(dt)
+  if(castToCorrectDataTypes) dt <- setRDBESDataObjectDataTypes(dt)
 
   #the correct Name mapping has all Correct names both ways
   nameMap <- c(setNames(mapColNamesFieldR$R.Name, mapColNamesFieldR$Field.Name),
