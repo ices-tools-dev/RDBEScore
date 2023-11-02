@@ -2,7 +2,7 @@ capture.output({  ## suppresses printing of console output when running test()
 
 # download and subset original data
 
-	myH1DataObject <- RDBEScore:::importRDBESDataZIP("./h1_v_1_19_18/ZW_1965_WGRDBES-EST_TEST_1.zip")
+	myH1DataObject <- RDBEScore::createRDBESDataObject("./h1_v_1_19_18/ZW_1965_WGRDBES-EST_TEST_1.zip")
 
 	# Subset data
 		myH1DataObject <- filterRDBESDataObject(myH1DataObject,c("DEstratumName","SLspeclistName"),

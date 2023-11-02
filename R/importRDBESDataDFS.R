@@ -71,7 +71,7 @@ importRDBESDataDFS <- function(myList,
                                       CE = makeDT(myList[["CE"]]))
 
   # Ensure all the columns are the correct data type
-  if(castToCorrectDataTypes) dt <- RDBEScore:::setRDBESDataObjectDataTypes(dt)
+  if(castToCorrectDataTypes) dt <- setRDBESDataObjectDataTypes(dt)
 
   #the correct Name mapping has all Correct names both ways
   nameMap <- c(setNames(mapColNamesFieldR$R.Name, mapColNamesFieldR$Field.Name),

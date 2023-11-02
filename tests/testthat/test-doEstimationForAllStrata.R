@@ -154,7 +154,7 @@ test_that("doEstimationForAllStrata gets some results for H8Example",  {
 
 test_that("doEstimationForAllStrata creates get correct results for Lohr worked examples",  {
 
-  myTestData <- RDBEScore:::importRDBESDataZIP("./h1_v_1_19_18/ZW_1965_WGRDBES-EST_TEST_1.zip")
+  myTestData <- RDBEScore::createRDBESDataObject("./h1_v_1_19_18/ZW_1965_WGRDBES-EST_TEST_1.zip")
 
   # Only use a subset of the test data
   myTestData <- filterRDBESDataObject(myTestData,c("DEstratumName"),c("Pckg_SDAResources_agstrat_H1"))

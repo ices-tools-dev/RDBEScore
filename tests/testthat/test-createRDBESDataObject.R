@@ -144,7 +144,7 @@ capture.output({  ## suppresses printing of console output when running test()
     genObj <- suppressWarnings(createRDBESDataObject(input =  paste0(dirH1, zipFiles),
                                                      castToCorrectDataTypes = TRUE))
 
-    myDiffs <- RDBEScore:::validateRDBESDataObjectDataTypes(genObj)
+    myDiffs <- validateRDBESDataObjectDataTypes(genObj)
 
     numberOfDifferences <- nrow(myDiffs)
     expect_equal(numberOfDifferences,0)
@@ -230,7 +230,7 @@ capture.output({  ## suppresses printing of console output when running test()
     myRDBESDataObject <- createRDBESDataObject(input = csvFilesH1,
                                                castToCorrectDataTypes = TRUE)
 
-    myDiffs <- RDBEScore:::validateRDBESDataObjectDataTypes(myRDBESDataObject)
+    myDiffs <- validateRDBESDataObjectDataTypes(myRDBESDataObject)
 
     numberOfDifferences <- nrow(myDiffs)
     expect_equal(numberOfDifferences,0)
@@ -346,7 +346,7 @@ capture.output({  ## suppresses printing of console output when running test()
   test_that("Importing list of dfs with castToCorrectDataTypes = TRUE works",{
     genObj <- suppressWarnings(createRDBESDataObject(list_of_dfs, castToCorrectDataTypes = TRUE))
 
-    myDiffs <- RDBEScore:::validateRDBESDataObjectDataTypes(genObj)
+    myDiffs <- validateRDBESDataObjectDataTypes(genObj)
 
     numberOfDifferences <- nrow(myDiffs)
     expect_equal(numberOfDifferences,0)

@@ -3,7 +3,7 @@
 # the files in the directory exampleData/TextBookExamples and uploaded to RDBES
 
 zipFname <- "./data-raw/exampleData/madeUpExamples/downloadsFromRDBES/ZW_1965_WGRDBES-EST_TEST_3.zip"
-data <- RDBEScore:::importRDBESDataZIP(zipFname)
+data <- RDBEScore::createRDBESDataObject(zipFname)
 
 #keep only the selected sampling scheme
 samp_scheme <-"WGRDBES-EST TEST 3"
