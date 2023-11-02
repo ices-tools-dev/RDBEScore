@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 
 ## Introduction
 
-The aim of this document is demonstrate how the species list table of the RDBES can be used to complement the sample table with NAs in cases where, e.g., a species was not meant to be looked for. This task is made easy using function `generateNAsUsingSL` available in the `RDBEScore` package.
+The aim of this document is demonstrate how the Species List table (SL) of the RDBES can be used to complement the sample table with NAs in cases where, e.g., a species was not meant to be looked for. This task is made easy using function `generateNAsUsingSL` available in the `RDBEScore` package.
 
 ## Load the package
 
@@ -28,8 +28,12 @@ library(RDBEScore)
 ## Load and validate example data
 
 ```{r}
-# read an example dataset
-myH1DataObject1 <- readRDS("./vignetteData/myH1DataObject1.rds")
+# read an example dataset and simplify it to 1 trip and 1 haul [dev bote: this section needs to be reworked when data and filterRDBESDataObject are  updated]
+data(Pckg_survey_apistrat_H1_WGRDBES_EST_TEST_1)
+myH1DataObject1 <- Pckg_survey_apistrat_H1_WGRDBES_EST_TEST_1
+myH1DataObject1$SL<-myH1DataObject1$SL[grepl(myH1DataObject1$SL$SLspeclistName, pat="Pckg_survey_apistrat_H1"),]
+#myH1DataObject1<-filterAndTidyRDBESDataObject(myH1DataObject1, fieldsToFilter="FOid",valuesToFilter=70849, killOrphans = TRUE)
+myH1DataObject1<-filterRDBESDataObject(myH1DataObject1, fieldsToFilter="SSid",valuesToFilter=227694, killOrphans = TRUE)
 # check it is a valid RDBESobject
 validateRDBESDataObject(myH1DataObject1, checkDataTypes = TRUE)
 ```
@@ -38,7 +42,7 @@ validateRDBESDataObject(myH1DataObject1, checkDataTypes = TRUE)
 
 The example is from data in hierarchy 1. It contains a single trip with a single haul. For simplicity, we restrict our analysis to the tables SL, SS and SA which are the ones handled by the functions we which behaviour we want to demonstrate. 
 
-Examining a print of the Species List (SL) one can conclude that the sampling targeted the landings of only 1 species. In this case the species was *Nephrops norvegicus* (aphiaId 107254).
+Examining a print of the Species List table (SL) one can conclude that the sampling targeted the landings of only 1 species. In this case the species was *Nephrops norvegicus* (aphiaId 107254).
 
 ```{r}
 myH1DataObject1[c("SL")]
@@ -65,6 +69,13 @@ myH1DataObject1updte<-generateNAsUsingSL(myH1DataObject1, targetAphiaId = c("126
 myH1DataObject1updte$SA[,c(1:9,48:49)]
 ```
 
+Note that the new rows have floating points values for SAid, and SAseqNum (we use sprintf to ensure the decimal places are displayed). This facilitates the ordering of the samples and prevenes overlaps when different datasets are joined. Also a SAunitName was created for the new row that builds on the SAid and helps to make the row more readily identifiable.
+```{r}
+sprintf(myH1DataObject1updte[['SA']]$SAid, fmt = '%.3f')
+sprintf(myH1DataObject1updte[['SA']]$SAseqNum, fmt = '%.3f')
+print(myH1DataObject1updte[['SA']]$SAunitName)
+```
+
 Note that argument `targetAphiaId` in the function `generateNAsUsingSL` can also accept a vector thus allowing generation of NAs for multiple species in one go. In the example below *Pandalus borealis* is added to the call.
 
 ```{r}
@@ -78,7 +89,7 @@ In many practical situations, diligent observers sometimes record more species t
 
 The difference between these two cases can be specified via the argument `overwriteSampled` in the function `generateNAsUsingSL`. By default (estimation case) the argument is set to TRUE which makes `generateNAsUsingSL` set the weights of these extra species to NA. But, by explicitly setting that argument as `overwriteSampled=FALSE` the information collected can also kept.
 
-To demonstrate this we carry out a small alteration of the example data, removing the *Nephrops norvegicus* from the Species List. This is a very atypical situation, used here just for illustrative purposes as it configures a case where of a haul where nothing was supposed to be looked for but still an observer registered *Nephrops norvegicus*.
+To demonstrate this we carry out a small alteration of the example data, removing the *Nephrops norvegicus* from the Species List. This creates a somewhat  atypical situation (it configures a case where of a haul where nothing was supposed to be looked for but still *Nephrops norvegicus* was registered) that is used here for sake of simplifying the example.
 
 ```{r}
 # we remove *Nephrops norvegicus*
