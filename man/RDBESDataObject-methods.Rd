@@ -32,6 +32,8 @@ the values are the number of rows in each data.table. NULL values are excluded.}
 \description{
 This method prints the hierarchy of the DE data.table (if it exists),
 and the number of rows for each data.table in the RDBESDataObject that is not NULL.
+It also provides the sampling method and number sampled and number total for tables
+where it is applicable.
 If the RDBESDataObject has a mixed hierarchy, a warning message is printed.
 
 This method sorts the RDBESDataObject based on the hierarchy.
