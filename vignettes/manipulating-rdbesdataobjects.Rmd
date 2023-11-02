@@ -25,34 +25,43 @@ library(RDBEScore)
 
 ## Prerequisites
 
-First we'll load some example data from the RDBES and check it's valid.  It's a good idea to check your RDBESDataObjects are valid after any manipulations you perform. See how to import your own data in the vignette [Import RDBES data](raw-data-import.html)
+First we'll load some example data from the RDBES and check it's valid.  It's a good idea to check your RDBESDataObjects are valid after any manipulations you perform. See how to import your own data in the vignette [Import RDBES data](raw-data-import.html) In this vignette package example data is used.
 
-To get an example Hierarchy 1 data:
-
-```{r load}
-
-
-# Hierarchy 1 demo data
+```{r load H1}
+# load Hierarchy 1 demo data
 myH1RawObject <- H1Example
 
-# Number of rows in each non-null table
-print(myH1RawObject)
-
-
 validateRDBESDataObject(myH1RawObject, verbose = FALSE)
-
-
-
 ```
 
 
-To get the **number of rows** in each non-null table you can do:
+### Print, sort and summary of RDBESDataObject
+
+The print method gives list of non-null tables in the RDBESDataObject. The structure of the output for each table is:
+
+ - Table name (DE, TE, LE, etc.)
+ - Number of rows 
+ - Sampling method (if applicable, SWRWR, NPJS, CENSUS, etc.)
+ - Range of number sampled (if applicable)
+ - Range of number total (if applicable)
+ 
+If there is a single hierarchy present the output is ordered by RDBES hierarchy structure.
+
 ```{r}
-unlist(summary(myH1RawObject)$rows)
+print(myH1RawObject)
 ```
 
-or simply call the object:
+Underling the print function there is a summary function that retains only unique rows for some columns used in print.
+```{r}
+h1summary <- summary(myH1RawObject)
+#get the hierarchy
+h1summary$hierarchy
+#extract the number of rows in tables from the summary
+sapply(h1summary$data, function(x){x$rows})
+```
 
+
+To get the **number of rows** in each non-null table you can simply call the object:
 ```{r}
 myH1RawObject #equivalent to print(summary(myH1RawObject))
 ```
@@ -63,14 +72,15 @@ To get an example Hierarchy 5 data:
 # Hierarchy 5 demo data
 myH5RawObject <- H5Example
 
+validateRDBESDataObject(myH5RawObject, verbose = FALSE)
+
 # Number of rows in each non-null table and hierarchy
 print(myH5RawObject)
 
-validateRDBESDataObject(myH5RawObject, verbose = FALSE)
 
 ```
 
-## Sorting RDBESDataObject
+### Sorting RDBESDataObject
 
 If the data has a single hierarchy in the DE table a correct sort order is defined for it. You can use the **sort()** method for it. Printing the object sorts it automatically if possible.
 

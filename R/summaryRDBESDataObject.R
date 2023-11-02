@@ -25,7 +25,8 @@ summary.RDBESDataObject <- function(object) {
 
   items <- sapply(object, function(x) {
     if (!is.null(x) && "data.table" %in% class(x)) {
-      nrow(x)
+      list(design = getDesignSummary(x),
+           rows = nrow(x))
     } else {
       NULL
     }
@@ -33,7 +34,27 @@ summary.RDBESDataObject <- function(object) {
   # Remove NULL values from items
   items <- Filter(Negate(is.null), items)
 
-  return(list(hierarchy=h, rows=items, CS=!is.null(h)))
+  return(list(hierarchy=h, data=items))
+}
+
+getDesignSummary <- function(dt){
+  #remove the table prefix
+  colnames(dt) <- substr(colnames(dt), 3, nchar(colnames(dt)))
+
+  # List of column names to add in the summary data if present
+  cols <- c("selectMeth", "numSamp", "numTotal", "year")
+  presentCols <- intersect(colnames(dt), cols)
+  missingCols <- setdiff(cols, colnames(dt))
+  # Create a new data frame with the same structure as dt
+  res <- unique(dt[, ..presentCols])
+
+  # Add the missing columns and set them to NA
+  #for (col in missingCols) {
+  #  res[, (col) := NA]
+  #}
+
+  return(as.data.frame(res))
+
 }
 
 
