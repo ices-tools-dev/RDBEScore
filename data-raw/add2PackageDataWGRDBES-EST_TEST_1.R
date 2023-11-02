@@ -1,5 +1,5 @@
 #read the downloaded zip file
-#this file is downlaoded from the RDEBS the contents of this file is prepared in
+#this file is downloaded from the RDBES the contents of this file is prepared in
 # the files in the directory exampleData/TextBookExamples and uploaded to RDBES
 
 zipFname <- "./data-raw/exampleData/TextBookExamples/DownloadsFromRDBES/ZW_1965_WGRDBES-EST_TEST_1.zip"
@@ -22,6 +22,9 @@ for(dname in datasetNames){
                                               fieldsToFilter = "DEstratumName",
                                               valuesToFilter = dname,
                                               killOrphans = T)
+  # restricts species list
+  deData$SL<-deData$SL[grepl(deData$SL$SLspeclistName, pat=dname)]
+
   assign(datasetName, deData)
   do.call(eval(parse(text="usethis::use_data")),
           list(as.name(datasetName), overwrite = TRUE))
