@@ -28,6 +28,9 @@ names used by the RDBES data download ("Design.csv" etc).}
 attempt to cast the required columns to the correct data type.  If \code{FALSE}
 then the column data types will be determined by how the csv files are read
 in. Default is \code{TRUE}.}
+
+\item{...}{parameters passed to validateRDBESDataObject
+if input is list of data frames e.g.\code{strict=FALSE}}
 }
 \value{
 A RDBESDataObject

@@ -53,6 +53,8 @@
 #'   attempt to cast the required columns to the correct data type.  If `FALSE`
 #'   then the column data types will be determined by how the csv files are read
 #'   in. Default is `TRUE`.
+#' @param ... parameters passed to validateRDBESDataObject
+#' if input is list of data frames e.g.`strict=FALSE`
 #' @importFrom utils file_test
 #'
 #' @return A RDBESDataObject

@@ -6,7 +6,8 @@
 #' where it is applicable.
 #' If the RDBESDataObject has a mixed hierarchy, a warning message is printed.
 #'
-#' @param object An object of class RDBESDataObject.
+#' @param x An object of class RDBESDataObject.
+#' @param ... parameters to underling functions (not used currently)
 #' @return None.
 #' @examples
 #' # Print the package data object
@@ -14,7 +15,7 @@
 #' @rdname RDBESDataObject-methods
 #' @method print RDBESDataObject
 #' @export
-print.RDBESDataObject <- function(object) {
+print.RDBESDataObject <- function(x, ...) {
   summary_values <- summary(object)
   #years <- sapply(summary_values$data, function(x){getInfo(x$design, "year")})
   #years <- unique(years[!is.na(years)])

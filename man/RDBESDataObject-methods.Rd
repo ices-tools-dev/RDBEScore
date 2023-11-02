@@ -7,19 +7,25 @@
 \alias{summary.RDBESDataObject}
 \title{Print method for RDBESDataObject}
 \usage{
-\method{print}{RDBESDataObject}(object)
+\method{print}{RDBESDataObject}(x, ...)
 
-\method{sort}{RDBESDataObject}(object)
+\method{sort}{RDBESDataObject}(x, decreasing = TRUE, ...)
 
-\method{summary}{RDBESDataObject}(object)
+\method{summary}{RDBESDataObject}(object, ...)
 }
 \arguments{
+\item{x}{An object of class RDBESDataObject.}
+
+\item{...}{parameters to underling functions (not used currently)}
+
+\item{decreasing}{should hierarchy tables be the first ones}
+
 \item{object}{An object of class RDBESDataObject.}
 }
 \value{
 None.
 
-The sorted RDBESDataObject.
+The sorted RDBESDataObject by hierarchy.
 
 A list with three elements:
 \itemize{

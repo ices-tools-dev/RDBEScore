@@ -5,6 +5,7 @@
 #' and a logical value indicating if the hierarchy is not NULL.
 #'
 #' @param object An object of class RDBESDataObject.
+#' @param ... parameters to underling functions (not used currently)
 #' @return A list with three elements:
 #' \itemize{
 #'   \item{hierarchy: The hierarchy of the DE data.table in the RDBESDataObject.}
@@ -18,7 +19,7 @@
 #' @rdname RDBESDataObject-methods
 #' @method summary RDBESDataObject
 #' @export
-summary.RDBESDataObject <- function(object) {
+summary.RDBESDataObject <- function(object, ...) {
   h <- unique(object$DE$DEhierarchy)
   #order items by Hierarchy
   if(!is.null(h)){object <- sort(object)}
