@@ -73,11 +73,11 @@ applyGenerateProbs <- function(x, probType, overwrite,
       ls1 <- split(x[[i]], x[[i]][[eval(noquote(parentId[targetTables == i]))]])
       ls2 <- lapply(ls1, function(x, ...) {
         # aspects needing development
-        if (length(unique(x[[grep("^..stratumName$", names(x), value = TRUE)]]))
-            > 1 | any(x[[grep("^..stratification$", names(x), value = TRUE)]]==
-                      "Y"))  {
-          stop("stratification present: not yet developed")
-        }
+        #if (length(unique(x[[grep("^..stratumName$", names(x), value = TRUE)]]))
+        #  > 1 | any(x[[grep("^..stratification$", names(x), value = TRUE)]]==
+        #             "Y"))  {
+        #stop("stratification present: not yet developed")
+        #}
         if (length(unique(x[[grep("^..clusterName$", names(x), value = TRUE)]]))
             > 1 | any(x[[grep("^..clustering$", names(x), value = TRUE)]]==
                       "Y")) {
