@@ -13,11 +13,18 @@ data <- RDBEScore::filterRDBESDataObject(data,
                                          killOrphans = T)
 datasetNames <- unique(data$DE$DEstratumName)
 
+#fix wrong named data these are from survey actually
+wrongDataSets <- c('Pckg_SDAResources_apiclus1_v2_H1',
+                    'Pckg_SDAResources_apiclus2_v2_H1')
 #add all stratums to package data
 for(dname in datasetNames){
   #fix the naming removing strange characters
   datasetName <- gsub("[[:punct:]]|[[:space:]]", "_",
                       paste0(dname,"_",samp_scheme))
+  #replace the name
+  if(dname %in% wrongDataSets){
+    datasetName <- sub("SDAResources", "survey", datasetName)
+    }
   deData <-  RDBEScore::filterRDBESDataObject(data,
                                               fieldsToFilter = "DEstratumName",
                                               valuesToFilter = dname,
