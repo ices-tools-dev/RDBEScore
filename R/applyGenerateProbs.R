@@ -78,15 +78,17 @@ applyGenerateProbs <- function(x, probType, overwrite,
         #             "Y"))  {
         #stop("stratification present: not yet developed")
         #}
-        if (length(unique(x[[grep("^..clusterName$", names(x), value = TRUE)]]))
+        if(!i %in% c("SA","FM","BV")){
+                if (length(unique(x[[grep("^..clusterName$", names(x), value = TRUE)]]))
             > 1 | any(x[[grep("^..clustering$", names(x), value = TRUE)]]==
                       "Y")) {
           stop("clustering present: not yet developed")
-        }
+        }}
         print(paste0(
           parentId[targetTables == i], ": ",
           x[[parentId[targetTables == i]]][1]
         ))
+
         x <- generateProbs(x, probType)
         x
         })
