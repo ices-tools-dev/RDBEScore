@@ -20,6 +20,7 @@ A list containing entries required for H8 RDBES data:
 \item{CL}{the Commertial Landing data table}
 \item{CL}{the Commertial Effort data table}
 }
+#' @source Richard Meitern @ Estonian Marine Institute, 2023
 }
 \usage{
 H8Example

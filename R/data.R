@@ -146,6 +146,7 @@
 #'   \item{CL}{the Commertial Landing data table}
 #'   \item{CL}{the Commertial Effort data table}
 #' }
+#' #' @source Richard Meitern @ Estonian Marine Institute, 2023
 "H8Example"
 
 #' A dataset containing test RDBES data for H5 in the RDBESDataObject structure
@@ -168,7 +169,7 @@
 
 ##-------H1 Data from survey package-------------
 
-#' A RDBESDataObject converted from package survey dataset apiclus2
+#' A Multi-Stage RDBESDataObject converted from package survey dataset apiclus2
 #'
 #' This data set is derived from the Academic Performance Index computed for all
 #' California schools based on standardized testing of students. The original
@@ -195,7 +196,7 @@
 #' @source \url{https://CRAN.R-project.org/package=survey}
 "Pckg_survey_apiclus2_H1_WGRDBES_EST_TEST_1"
 
-#' A RDBESDataObject converted from package SDAResources dataset apiclus2_v2
+#' A RDBESDataObject converted from package survey dataset apiclus1
 #'
 #' This data set is derived from the Academic Performance Index computed for all
 #' California schools based on standardized testing of students. The original
@@ -208,7 +209,7 @@
 #'
 #' @format A list containing entries required for H1 RDBES data:
 #' \describe{
-#'   \item{DE}{the Design data table. Contains 1 DE row with DEstratumName == "Pckg_SDAResources_apiclus2_v2_H1"}
+#'   \item{DE}{the Design data table. Contains 1 DE row with DEstratumName == "Pckg_SDAResources_apiclus1_v2_H1"}
 #'   \item{SD}{the Sampling Details data table. Contains 1 child SD row}
 #'   \item{VS}{the Vessel Selection data table. Contains 183 child rows (the 186 schools finally observed), each associated to its cluster (dname), VSnumberTotalClusters is 757, VSnumberTotal is the number of schools in the cluster (census), calibrated weights are provided as 1/pw in VSinclusionProbCluster}
 #'   \item{FT}{the Fishing Trip data table. Just 1:1 links to the final data (in SA)}
@@ -220,12 +221,64 @@
 #'   \item{VD}{the Vessel Details data table}
 #'   \item{SL}{the Species List data table}
 #' }
-#' @source \url{https://CRAN.R-project.org/package=SDAResources}
-"Pckg_SDAResources_apiclus2_v2_H1_WGRDBES_EST_TEST_1"
+#' @source \url{https://CRAN.R-project.org/package=survey}
+"Pckg_survey_apiclus1_v2_H1_WGRDBES_EST_TEST_1"
+
+#' A Clustered RDBESDataObject converted from package survey dataset apiclus2
+#'
+#' This data set is derived from the Academic Performance Index computed for all
+#' California schools based on standardized testing of students. The original
+#' data sets contain information for all schools with at least 100 students and
+#' for various probability samples of the data. The design is 2-stage cluster
+#' sampling with clusters of unequal sizes. An SRS of 40 districts is selected
+#' (psus) from the 757 districts in the population and then up to 5 schools (min
+#' 1) were selected from each district (ssus). The target variable is enroll - note that it contains 4 NA values.
+#'
+#' @format A list containing entries required for H1 RDBES data:
+#' \describe{
+#'   \item{DE}{the Design data table. Contains 1 DE row with DEstratumName == "Pckg_SDAResources_apiclus2_v2_H1"}
+#'   \item{SD}{the Sampling Details data table. Contains 1 child SD row}
+#'   \item{VS}{the Vessel Selection data table. Contains 126 child rows (the 126 schools finally observed), each associated to its cluster (dname), VSnumberTotalClusters is 757, VSnumberTotal is 1...5 schools sampled}
+#'   \item{FT}{the Fishing Trip data table. Just 1:1 links to the final data (in SA)}
+#'   \item{FO}{the Fishing Operation data table. Just 1:1 links to the final data (in SA)}
+#'   \item{SS}{the Species Selection data table. Just 1:1 links to the final data (in SA)}
+#'   \item{SA}{the Sample data table. SAsampleWeightMeasured is enroll (note the 4 NAs)}
+#'   \item{FM}{the Frequency Measure data table}
+#'   \item{BV}{the Biological Variable data table}
+#'   \item{VD}{the Vessel Details data table}
+#'   \item{SL}{the Species List data table}
+#' }
+#' @source \url{https://CRAN.R-project.org/package=survey}
+"Pckg_survey_apiclus2_v2_H1_WGRDBES_EST_TEST_1"
+
+#' A RDBESDataObject converted from package survey dataset apistrat
+#'
+#' This data set is a stratified version of the previous "apiclus2" data. It is derived from the Academic Performance Index computed for all California schools based on standardized testing of students. The original data sets contain information for all schools with at least 100 students and for various probability samples of the data. The design is 1-stage cluster sampling with clusters of unequal sizes. An SRS of 200 districts is selected (psus) from the 755 districts in the population. All schools within district are selected (ssus).
+#'
+#' @format A list containing entries required for H1 RDBES data:
+#' \describe{
+#'   \item{DE}{the Design data table. Contains 1 DE row}
+#'   \item{SD}{the Sampling Details data table. Contains 1 child SD row}
+#'   \item{VS}{the Vessel Selection data table. Contains 200 child rows (the 200 schools finally observed), each associated to its cluster (dname), VSnumberTotalClusters is 755, VSnumberTotal is 50-100 schools sampled}
+#'   \item{FT}{the Fishing Trip data table. Contains 200 child rows (the 200 schools finally observed), each associated to its cluster (dname), FTnumberTotal is the number of schools in the cluster (census)}
+#'   \item{FO}{the Fishing Operation data table. Just 1:1 links to the final data (in SA)}
+#'   \item{SS}{the Species Selection data table. Just 1:1 links to the final data (in SA)}
+#'   \item{SA}{the Sample data table. SAsampleWeightMeasured is enroll}
+#'   \item{FM}{the Frequency Measure data table}
+#'   \item{BV}{the Biological Variable data table}
+#'   \item{VD}{the Vessel Details data table. Contains 311 child rows}
+#'   \item{SL}{the Species List data table. Contains 1 child row}
+#' }
+#' @source \url{https://CRAN.R-project.org/package=survey}
+"Pckg_survey_apistrat_H1_WGRDBES_EST_TEST_1"
 
 
 
-##------H1 Data from survey package-------------------
+
+##------H1 Data from SDAResources package-------------------
+
+
+
 
 #-------Other example data----------
 
