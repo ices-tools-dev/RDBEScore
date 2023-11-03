@@ -1,5 +1,4 @@
 #' Generate vector of selection or inclusion probabilities
-#' (version of fuction by John Ball)
 #'
 #' @param x RDBES data frame
 #' @param probType  Value == "selection" | "inclusion" ,
