@@ -20,4 +20,25 @@ test_that("printing produces expected upper tables", {
   expect_output(print(H1Example),"SA:")
 })
 
+test_that("printing removes NA rows on character", {
+  a <- H8ExampleEE1
+  a$TE$TEsampMeth[1] <- NA
+  expect_output(print(a),'TE: 11 \\(SRSWOR: 2-3/4\\)')
+})
+
+test_that("printing removes NA rows on numeric", {
+  a <- H8ExampleEE1
+  a$TE$TEnumTotal[1] <- NA
+  expect_output(print(a),'TE: 11 (SRSWOR: 2-3/4)', fixed=T)
+})
+
+test_that("printing gives right nr of rows", {
+
+  expect_output(print(H8ExampleEE1),'TE: 11')
+
+  a <- H8ExampleEE1
+  a$TE <- data.table()
+  expect_output(print(a),'TE: 0\\n')
+})
+
 }) #end capture.output

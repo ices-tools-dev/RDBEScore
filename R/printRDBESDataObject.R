@@ -34,11 +34,14 @@ print.RDBESDataObject <- function(x, ...) {
 }
 
 getInfo <- function(df, colName){
-  if(is.numeric(df[[colName]]) && length(unique(df[[colName]])) > 1){
-    paste0(min(df[[colName]]), "-", max(df[[colName]]))
+  #remove NAs
+  colData <- na.omit(df[[colName]])
+
+  if(is.numeric(colData) && length(unique(colData)) > 1){
+    paste0(min(colData), "-", max(colData))
   } else {
-    ifelse(!is.null(df[[colName]]),
-           paste0(unique(df[[colName]]), collapse = ","),
+    ifelse(!is.null(colData),
+           paste0(unique(colData), collapse = ","),
            NA)
   }
 }
