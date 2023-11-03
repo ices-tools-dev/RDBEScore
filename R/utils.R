@@ -2,16 +2,29 @@
 
 
 # Deal with "no visible binding for global variable.." warnings in R CMD CHECK
-globalVariables(c("mapColNamesFieldR",
-                  "rdbesEstimObj", "..targetProbColumns",
-                  "..targetProbColumns2", "finalInclusionProb_to_su1",
-                  "targetValue", "su1unitName", "su1inclusionProb",
-                  "..target_prob_columns2", "su1selectionProb",
-                  "..varsNeeded", "|>", "parentTableID", "est.total",
-                  "recType", "parentTableStratum", "stratumName",
-                  "parentIDandStratum", "studyVariable", "..myColNames",
-                  "..methColNames", "tblName", "all_of", "SLid","SAid",
-                  "..myLevel","parentTable",".", "id", "i.id" ))
+usedVars <- c("mapColNamesFieldR",
+              "rdbesEstimObj", "..targetProbColumns",
+              "..targetProbColumns2", "finalInclusionProb_to_su1",
+              "targetValue", "su1unitName", "su1inclusionProb",
+              "..target_prob_columns2", "su1selectionProb",
+              "..varsNeeded", "|>", "parentTableID", "est.total",
+              "recType", "parentTableStratum", "stratumName",
+              "parentIDandStratum", "studyVariable", "..myColNames",
+              "..methColNames", "tblName", "all_of", "SLid","SAid",
+              "..myLevel","parentTable",".", "id", "i.id" )
+
+moreUsedVars  <- c("..clustFields", "DEyear", "SAcatchCat",
+               "SAlandCat", "SAsex", "SAspeCode",
+               "SAstratumName", "SDctry", "SDinst",
+               "SLcatchFrac", "SLcommTaxon", "SLcou",
+               "SLinst", "SLrecType", "SLspeclistName",
+               "SLyear", "SScatchFra", "SSctry",
+               "SSid", "SSspecListName", "SSuseCalcZero",
+               "SSyear", "i.parentIDandStratum", "lowerHierarchy",
+               "optional", "sortOrder", "tablesInRDBESHierarchies",
+               "tmpKey0", "tmpKey1")
+
+globalVariables(unique(c(usedVars, moreUsedVars)))
 
 
 #' as.integer.or.dbl
