@@ -14,7 +14,7 @@ applyGenerateProbs(
 }
 \arguments{
 \item{x}{\itemize{
-\item RDBES raw object
+\item RDBES data object
 }}
 
 \item{probType}{\itemize{
