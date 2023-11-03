@@ -9,10 +9,17 @@ A list containing entries required for H1 RDBES data:
 \describe{
 \item{DE}{the Design data table. Contains 1 DE row}
 \item{SD}{the Sampling Details data table. Contains 1 child SD row}
-\item{VS}{the Vessel Selection data table. Contains 200 child rows (the 200 schools finally observed), each associated to its cluster (dname), VSnumberTotalClusters is 755, VSnumberTotal is 50-100 schools sampled}
-\item{FT}{the Fishing Trip data table. Contains 200 child rows (the 200 schools finally observed), each associated to its cluster (dname), FTnumberTotal is the number of schools in the cluster (census)}
-\item{FO}{the Fishing Operation data table. Just 1:1 links to the final data (in SA)}
-\item{SS}{the Species Selection data table. Just 1:1 links to the final data (in SA)}
+\item{VS}{the Vessel Selection data table. Contains 200 child rows
+(the 200 schools finally observed), each associated to its cluster
+(dname), VSnumberTotalClusters is 755, VSnumberTotal is 50-100 schools
+sampled}
+\item{FT}{the Fishing Trip data table. Contains 200 child rows
+(the 200 schools finally observed), each associated to its cluster
+(dname), FTnumberTotal is the number of schools in the cluster (census)}
+\item{FO}{the Fishing Operation data table. Just 1:1 links to the
+final data (in SA)}
+\item{SS}{the Species Selection data table. Just 1:1 links to the
+final data (in SA)}
 \item{SA}{the Sample data table. SAsampleWeightMeasured is enroll}
 \item{FM}{the Frequency Measure data table}
 \item{BV}{the Biological Variable data table}

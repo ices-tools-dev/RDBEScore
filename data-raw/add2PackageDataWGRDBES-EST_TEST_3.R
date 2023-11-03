@@ -12,7 +12,8 @@ data <- RDBEScore::filterRDBESDataObject(data,
                                          valuesToFilter = samp_scheme,
                                          killOrphans = T)
 datasetNames <- unique(data$DE$DEstratumName)
-
+#seems that only the v1 is currently used
+datasetNames <- datasetNames[grepl("_v1_", datasetNames)]
 #add all stratums to package data
 for(dname in datasetNames){
   #fix the naming removing strange characters
