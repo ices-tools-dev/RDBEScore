@@ -17,8 +17,6 @@
 #' @export
 print.RDBESDataObject <- function(x, ...) {
   summary_values <- summary(x)
-  #years <- sapply(summary_values$data, function(x){getInfo(x$design, "year")})
-  #years <- unique(years[!is.na(years)])
   if(!is.null(summary_values$hierarchy)){
     if(length(summary_values$hierarchy)>1){
       warning("Mixed hierarchy RDBESDataObject!", call.=FALSE)
@@ -28,32 +26,19 @@ print.RDBESDataObject <- function(x, ...) {
   } else {
     cat(paste0("No hierarchy, RDBESdataObject:\n "))
   }
-  tblInfo <- sapply(summary_values$data, getPrintInfoForTable)
+  tblInfo <- mapply(getPrintInfoForTable, summary_values$data,
+                    names(summary_values$data), SIMPLIFY = FALSE)
   names(tblInfo) <- names(summary_values$data)
   cat(paste0(names(tblInfo), ": ", paste(tblInfo), "\n"))
 }
 
-getInfo <- function(df, colName){
-  #remove NAs
-  colData <- na.omit(df[[colName]])
-
-  if(is.numeric(colData) && length(unique(colData)) > 1){
-    paste0(min(colData), "-", max(colData))
-  } else {
-    ifelse(!is.null(colData),
-           paste0(unique(colData), collapse = ","),
-           NA)
-  }
-}
-
-getPrintInfoForTable <- function(items){
-  #if the table is empty just return the row count
+getPrintInfoForTable <- function(items, dfName){
   if(items$rows == 0){return(items$rows)}
   df <- items$design
 
-  selMeth <- getInfo(df, "selectMeth")
-  samp <- getInfo(df, "numSamp")
-  tot <- getInfo(df, "numTotal")
+  selMeth <- getInfo(df, "selectMeth", dfName)
+  samp <- getInfo(df, "numSamp", dfName)
+  tot <- getInfo(df, "numTotal", dfName)
 
   res <- paste0(items$rows,
                 ifelse(is.na(selMeth), "", paste0(" (",selMeth,": ")),
@@ -61,6 +46,20 @@ getPrintInfoForTable <- function(items){
                 ifelse(is.na(samp) & is.na(tot), "","/"),
                 ifelse(is.na(tot), "", tot),
                 ifelse(is.na(selMeth), "", ")")
-                )
+  )
   return(res)
+}
+
+getInfo <- function(df, colName, dfName){
+  colData <- na.omit(df[[colName]])
+  if(length(colData) != length(df[[colName]])){
+    warning(dfName,": ",colName, " has NA values!", call.=FALSE)
+  }
+  if(is.numeric(colData) && length(unique(colData)) > 1){
+    paste0(min(colData), "-", max(colData))
+  } else {
+    ifelse(!is.null(colData),
+           paste0(unique(colData), collapse = ","),
+           NA)
+  }
 }

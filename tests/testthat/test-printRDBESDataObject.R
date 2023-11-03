@@ -23,13 +23,25 @@ test_that("printing produces expected upper tables", {
 test_that("printing removes NA rows on character", {
   a <- H8ExampleEE1
   a$TE$TEsampMeth[1] <- NA
-  expect_output(print(a),'TE: 11 \\(SRSWOR: 2-3/4\\)')
+  expect_output(suppressWarnings(print(a)),'TE: 11 \\(SRSWOR: 2-3/4\\)')
 })
 
 test_that("printing removes NA rows on numeric", {
   a <- H8ExampleEE1
   a$TE$TEnumTotal[1] <- NA
-  expect_output(print(a),'TE: 11 (SRSWOR: 2-3/4)', fixed=T)
+  expect_output(suppressWarnings(print(a)),'TE: 11 (SRSWOR: 2-3/4)', fixed=T)
+})
+
+test_that("having NA on num total creates a warning", {
+  a <- H8ExampleEE1
+  a$TE$TEnumTotal[1] <- NA
+  expect_warning(print(a),"TE: numTotal has NA values!")
+})
+
+test_that("having NA on sel Meth creates a warning", {
+  a <- H8ExampleEE1
+  a$TE$TEselectMeth[1] <- NA
+  expect_warning(print(a),"TE: selectMeth has NA values!")
 })
 
 test_that("printing gives right nr of rows", {
