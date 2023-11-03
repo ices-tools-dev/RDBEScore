@@ -2,13 +2,13 @@
 
 # Info:
 # ?api
-	# from help: 
-		# The Academic Performance Index is computed for all California schools based on standardised testing of 
-		# students. The data sets contain information for all schools with at least 100 students and for various 
-		# probability samples of the data. 
-	# interpretation 
+	# from help:
+		# The Academic Performance Index is computed for all California schools based on standardised testing of
+		# students. The data sets contain information for all schools with at least 100 students and for various
+		# probability samples of the data.
+	# interpretation
 		# design is 2-stage cluster sampling with clusters of unequal sizes
-		# An SRS of 40 districts is selected (psus) from the 757 districts in the population and then 
+		# An SRS of 40 districts is selected (psus) from the 757 districts in the population and then
 		# up to 5 schools (min 1) were selected from each district (ssus)
 	# target variable is enroll - note that it contains 4 NA values
 
@@ -39,7 +39,7 @@
 		DEyear<-1965
 		SDinstitution <- 4484
 		DEsamplingScheme<-"WGRDBES-EST TEST 1"
-		DEstratumName <- "Pckg_SDAResources_apiclus2_v2_H1"
+		DEstratumName <- "Pckg_survey_apiclus2_v2_H1"
 		project_name_outputs <- gsub(" ","_", paste0(DEsamplingScheme,"_", DEstratumName))
 		baseDir <- "./data-raw/exampleData/TextBookExamples/"
 		baseDir <- ""
@@ -102,7 +102,7 @@ DE_df<-data.frame(
 		  DEauxiliaryVariableTotal = "",
 		  DEauxiliaryVariableValue = "",
 		  DEauxiliaryVariableName = "",
-		  DEauxiliaryVariableUnit = "", 
+		  DEauxiliaryVariableUnit = "",
 		  stringsAsFactors=FALSE
 			)
 
@@ -161,7 +161,7 @@ SD_df<-data.frame(
 
 #check_All_fields("VS")
 	dataset$VSid <- 1:nrow(dataset)
-	
+
 	aux_sampleSizes<-as.data.table(dataset)[,list(Npsu=757,npsu=40, Nssu="",nssu=.N),list(dnum, dname)]
 	aux<-data.table(apipop)[,list(.N, x=length(unique(snum))), dnum] # gets Nssu from population data
 	aux_sampleSizes$Nssu<-aux$N[match(aux_sampleSizes$dnum,aux$dnum)]
@@ -218,7 +218,7 @@ VS_df$VSnumberTotalClusters<-757
 VS_df$VSnumberSampledClusters<-40
 VS_df$VSselectionMethodCluster<-"SRSWOR"
 VS_df$VSselectionProbCluster<-""
-VS_df$VSinclusionProbCluster<-"" 
+VS_df$VSinclusionProbCluster<-""
 
 #===FT============
 
@@ -306,10 +306,10 @@ FT_df <- data.frame(
   FTauxiliaryVariableTotal = "",
   FTauxiliaryVariableValue = "",
   FTauxiliaryVariableName = "",
-  FTauxiliaryVariableUnit = "", 
+  FTauxiliaryVariableUnit = "",
   stringsAsFactors=FALSE
 )
- 
+
 #====FO===========
 
 
@@ -404,7 +404,7 @@ FO_df <- data.frame(
 	FOstartLon="", # ATT!
 	FOstopLat="",
 	FOstopLon="",
-	FOexclusiveEconomicZoneIndicator = "", # 
+	FOexclusiveEconomicZoneIndicator = "", #
 	FOarea = "27.3.a.21", #M
 	FOrectangle = "",
 	FOfisheriesManagementUnit = "",
@@ -530,7 +530,7 @@ SS_df<-data.frame(
 	SSauxiliaryVariableValue = "",
 	SSauxiliaryVariableName = "",
 	SSauxiliaryVariableUnit = "",
-	stringsAsFactors=FALSE	
+	stringsAsFactors=FALSE
 )
 
 #====SA===========
@@ -638,7 +638,7 @@ SA_df<-data.frame(
 		SAnonResponseCollected = "Y",
 		SAreasonNotSampledFM = "",
 		SAreasonNotSampledBV = "",
-		SAtotalWeightMeasured = ifelse(!is.na(dataset[[target_var]]),dataset[[target_var]],""), # 
+		SAtotalWeightMeasured = ifelse(!is.na(dataset[[target_var]]),dataset[[target_var]],""), #
 		SAsampleWeightMeasured = ifelse(!is.na(dataset[[target_var]]),dataset[[target_var]],""), #
 		SAconversionFactorMeasLive = 1,
 		SAauxiliaryVariableTotal = "",

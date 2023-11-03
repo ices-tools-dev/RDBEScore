@@ -1,3 +1,5 @@
+#-----------Package utility data ---------
+
 #' The tables required for each RDBES hierarchy.
 #'
 #' A data frame containing the tables required for each RDBES hierachy
@@ -13,6 +15,96 @@
 #' }
 #' @source \url{https://github.com/davidcurrie2001/MI_RDBES_ExchangeFiles}
 "tablesInRDBESHierarchies"
+
+
+
+
+#' A dataset containing the mapping from database column names
+#' to R field names
+#'
+#' @format A data frame containing database field names and their equivalent
+#' R field name:
+#' \describe{
+#'   \item{Table.Prefix}{The two letter prefix of the relevent RDBES table}
+#'   \item{Field.Name}{The database field names}
+#'   \item{R.Name}{The equivalent R field name}
+#'   \item{RDataType}{The equivalent R data type (e.g. "integer", "character" etc)}
+#'   \item{Type}{The Data type in the RDBES documentation (e.g. "Decimal", etc)}
+#'   \item{EssentialForEst}{Is this column considered essential?}
+#'   ...
+#' }
+#' @source \url{https://sboxrdbes.ices.dk}
+"mapColNamesFieldR"
+
+
+#' A dataset containing the RDBES "design variable" names
+#'
+#' @format A vector containing the short R names of the RDBES design variables
+#' (without any 2 letter table prefixes)
+#' R field name:
+#' \describe{
+#'   \item{designVariables}{The design variable names}
+#' }
+#' @source \url{https://sboxrdbes.ices.dk}
+"designVariables"
+
+#' A dataset containing a copy of the icesSpecWoRMS code list. The latest
+#' code list data can be downloaded from https://vocab.ices.dk/
+#'
+#' @format A data frame
+#' \describe{
+#'   \item{GUID}{Globally unique identifier assigned by ICES}
+#'   \item{Key}{AphiaID}
+#'   \item{Description}{Scientific name}
+#'   \item{LongDescription}{Ignore}
+#'   \item{Modified}{Date when the code was last updated}
+#'   \item{Deprecated}{IS this still a valid code.  If FALSE the code is
+#'   no longer valid within ICES.}
+#'   \item{DateDownloaded}{E.g. "2023-10-18" }
+#'   ...
+#' }
+#' @source \url{https://vocab.ices.dk/}
+"icesSpecWoRMS"
+
+#' A dataset containing aphia records for species found in icesSpecWoRMS
+#'
+#' @format A data frame
+#' \describe{
+#'   \item{AphiaID}{E.g. 100684 }
+#'   \item{url}{E.g. "https://www.marinespecies.org/aphia.php?p=taxdetails&id=100684"}
+#'   \item{scientificname}{E.g. "Cerianthidae"  }
+#'   \item{authority}{E.g. "Milne Edwards & Haime, 1851" }
+#'   \item{status}{E.g. "accepted"  }
+#'   \item{unacceptreason}{E.g. NA }
+#'   \item{taxonRankID}{E.g. 140  }
+#'   \item{rank}{E.g. "Family" "Genus" "Species" "Species" }
+#'   \item{valid_AphiaID}{E.g. 100684 }
+#'   \item{valid_name}{E.g. "Cerianthidae"  }
+#'   \item{valid_authority}{E.g. "Milne Edwards & Haime, 1851" }
+#'   \item{parentNameUsageID}{E.g. 151646 }
+#'   \item{kingdom}{E.g. "Animalia"  }
+#'   \item{phylum}{E.g. "Cnidaria"  }
+#'   \item{class}{E.g. "Anthozoa"  }
+#'   \item{order}{E.g. "Spirularia" }
+#'   \item{family}{E.g. "Cerianthidae"  }
+#'   \item{genus}{E.g. NA "Cerianthus"}
+#'   \item{citation }{E.g. "Molodtsova, T. (2023). World List of Ceriantharia.
+#' Cerianthidae Milne Edwards & Haime, 1851. Accessed through: "... }
+#'   \item{lsid}{internal database identifier}
+#'   \item{isMarine}{E.g. 1 }
+#'   \item{isBrackish}{E.g. 1 }
+#'   \item{isFreshwater}{E.g. 0  }
+#'   \item{isTerrestrial}{E.g. 0  }
+#'   \item{isExtinct}{E.g. NA  }
+#'   \item{match_type}{E.g. "exact" }
+#'   \item{modified}{E.g. "2018-01-22T17:48:34.063Z" }
+#'   \item{DateDownloaded}{E.g. "2023-10-18" }
+#'   ...
+#' }
+#' @source \url{https://www.marinespecies.org/}
+"wormsAphiaRecord"
+
+#-------Example Hierarchy datasets---------
 
 #' A dataset containing test RDBES data for H1 in the RDBESDataObject structure
 #'
@@ -74,23 +166,68 @@
 #' }
 "H5Example"
 
+##-------H1 Data from survey package-------------
 
-#' A dataset containing the mapping from database column names
-#' to R field names
+#' A RDBESDataObject converted from package survey dataset apiclus2
 #'
-#' @format A data frame containing database field names and their equivalent
-#' R field name:
+#' This data set is derived from the Academic Performance Index computed for all
+#' California schools based on standardized testing of students. The original
+#' data sets contain information for all schools with at least 100 students and
+#' for various probability samples of the data. The design is 2-stage cluster
+#' sampling with clusters of unequal sizes. An SRS of 40 districts is selected
+#' (psus) from the 757 districts in the population and then up to 5 schools (min
+#' 1) were selected from each district (ssus).
+#'
+#' @format A list containing entries required for H1 RDBES data:
 #' \describe{
-#'   \item{Table.Prefix}{The two letter prefix of the relevent RDBES table}
-#'   \item{Field.Name}{The database field names}
-#'   \item{R.Name}{The equivalent R field name}
-#'   \item{RDataType}{The equivalent R data type (e.g. "integer", "character" etc)}
-#'   \item{Type}{The Data type in the RDBES documentation (e.g. "Decimal", etc)}
-#'   \item{EssentialForEst}{Is this column considered essential?}
-#'   ...
+#'   \item{DE}{the Design data table. Contains 1 DE row with DEstratumName == "Pckg_SDAResources_apiclus2_H1"}
+#'   \item{SD}{the Sampling Details data table. Contains 1 child SD row}
+#'   \item{VS}{the Vessel Selection data table. Contains 40 child rows (the 40 districts), VSnumberTotal is 757, VSnumberSampled is 40}
+#'   \item{FT}{the Fishing Trip data table. Contains 126 child rows (the 126 schools finally observed), each associated to its cluster (dname), FTnumberTotal is the number of schools in district, FTnumberSAmpled is 1...5 schools sampled}
+#'   \item{FO}{the Fishing Operation data table. Just 1:1 links to the final data (in SA)}
+#'   \item{SS}{the Species Selection data table. Just 1:1 links to the final data (in SA)}
+#'   \item{SA}{the Sample data table. SAsampleWeightMeasured is enroll (NB! there are 4 NAs)}
+#'   \item{FM}{the Frequency Measure data table}
+#'   \item{BV}{the Biological Variable data table}
+#'   \item{VD}{the Vessel Details data table}
+#'   \item{SL}{the Species List data table}
 #' }
-#' @source \url{https://sboxrdbes.ices.dk}
-"mapColNamesFieldR"
+#' @source \url{https://CRAN.R-project.org/package=survey}
+"Pckg_survey_apiclus2_H1_WGRDBES_EST_TEST_1"
+
+#' A RDBESDataObject converted from package SDAResources dataset apiclus2_v2
+#'
+#' This data set is derived from the Academic Performance Index computed for all
+#' California schools based on standardized testing of students. The original
+#' data sets contain information for all schools with at least 100 students and
+#' for various probability samples of the data. The design is 1-stage cluster
+#' sampling with clusters of unequal sizes. An SRS of 15 districts is selected
+#' (psus) from the 757 districts in the population. All schools within district
+#' are selected (ssus). The weights (pw) do not match 757/15 probably because
+#' they have been calibrated. The target variable is enroll.
+#'
+#' @format A list containing entries required for H1 RDBES data:
+#' \describe{
+#'   \item{DE}{the Design data table. Contains 1 DE row with DEstratumName == "Pckg_SDAResources_apiclus2_v2_H1"}
+#'   \item{SD}{the Sampling Details data table. Contains 1 child SD row}
+#'   \item{VS}{the Vessel Selection data table. Contains 183 child rows (the 186 schools finally observed), each associated to its cluster (dname), VSnumberTotalClusters is 757, VSnumberTotal is the number of schools in the cluster (census), calibrated weights are provided as 1/pw in VSinclusionProbCluster}
+#'   \item{FT}{the Fishing Trip data table. Just 1:1 links to the final data (in SA)}
+#'   \item{FO}{the Fishing Operation data table. Just 1:1 links to the final data (in SA)}
+#'   \item{SS}{the Species Selection data table. Just 1:1 links to the final data (in SA)}
+#'   \item{SA}{the Sample data table. SAsampleWeightMeasured is enroll}
+#'   \item{FM}{the Frequency Measure data table}
+#'   \item{BV}{the Biological Variable data table}
+#'   \item{VD}{the Vessel Details data table}
+#'   \item{SL}{the Species List data table}
+#' }
+#' @source \url{https://CRAN.R-project.org/package=SDAResources}
+"Pckg_SDAResources_apiclus2_v2_H1_WGRDBES_EST_TEST_1"
+
+
+
+##------H1 Data from survey package-------------------
+
+#-------Other example data----------
 
 #' One quarter of sample data from swedish shrimp landings of the
 #' SWE_OTB_CRU_32-69_0_0 fishery
@@ -148,68 +285,3 @@
 #' @source Nuno Prista @ SLU Aqua, 2022
 "shrimpsStrat"
 
-#' A dataset containing the RDBES "design variable" names
-#'
-#' @format A vector containing the short R names of the RDBES design variables
-#' (without any 2 letter table prefixes)
-#' R field name:
-#' \describe{
-#'   \item{designVariables}{The design variable names}
-#' }
-#' @source \url{https://sboxrdbes.ices.dk}
-"designVariables"
-
-#' A dataset containing a copy of the icesSpecWoRMS code list. The latest
-#' code list data can be downloaded from https://vocab.ices.dk/
-#'
-#' @format A data frame
-#' \describe{
-#'   \item{GUID}{Globally unique identifier assigned by ICES}
-#'   \item{Key}{AphiaID}
-#'   \item{Description}{Scientific name}
-#'   \item{LongDescription}{Ignore}
-#'   \item{Modified}{Date when the code was last updated}
-#'   \item{Deprecated}{IS this still a valid code.  If FALSE the code is
-#'   no longer valid within ICES.}
-#'   \item{DateDownloaded}{E.g. "2023-10-18" }
-#'   ...
-#' }
-#' @source \url{https://vocab.ices.dk/}
-"icesSpecWoRMS"
-
-#' A dataset containing aphia records for species found in icesSpecWoRMS
-#'
-#' @format A data frame
-#' \describe{
-#' \item{AphiaID}{E.g. 100684 }
-#' \item{url}{E.g. "https://www.marinespecies.org/aphia.php?p=taxdetails&id=100684"}
-#' \item{scientificname}{E.g. "Cerianthidae"  }
-#' \item{authority}{E.g. "Milne Edwards & Haime, 1851" }
-#' \item{status}{E.g. "accepted"  }
-#' \item{unacceptreason}{E.g. NA }
-#' \item{taxonRankID}{E.g. 140  }
-#' \item{rank}{E.g. "Family" "Genus" "Species" "Species" }
-#' \item{valid_AphiaID}{E.g. 100684 }
-#' \item{valid_name}{E.g. "Cerianthidae"  }
-#' \item{valid_authority}{E.g. "Milne Edwards & Haime, 1851" }
-#' \item{parentNameUsageID}{E.g. 151646 }
-#' \item{kingdom}{E.g. "Animalia"  }
-#' \item{phylum}{E.g. "Cnidaria"  }
-#' \item{class}{E.g. "Anthozoa"  }
-#' \item{order}{E.g. "Spirularia" }
-#' \item{family}{E.g. "Cerianthidae"  }
-#' \item{genus}{E.g. NA "Cerianthus"}
-#' \item{citation }{E.g. "Molodtsova, T. (2023). World List of Ceriantharia.
-#' Cerianthidae Milne Edwards & Haime, 1851. Accessed through: "... }
-#' \item{isMarine}{E.g. 1 }
-#' \item{isBrackish}{E.g. 1 }
-#' \item{isFreshwater}{E.g. 0  }
-#' \item{isTerrestrial}{E.g. 0  }
-#' \item{isExtinct}{E.g. NA  }
-#' \item{match_type}{E.g. "exact" }
-#' \item{modified}{E.g. "2018-01-22T17:48:34.063Z" }
-#' \item{DateDownloaded}{E.g. "2023-10-18" }
-#'   ...
-#' }
-#' @source \url{https://www.marinespecies.org/}
-"wormsAphiaRecord"
