@@ -147,10 +147,10 @@
 #'   \item{VD}{the Vessel Details data table}
 #'   \item{SL}{the Species List data table}
 #'   \item{CL}{the Commertial Landing data table}
-#'   \item{CL}{the Commertial Effort data table}
+#'   \item{CE}{the Commertial Effort data table}
 #' }
 #' #' @source Richard Meitern @ Estonian Marine Institute, 2023
-"H8Example"
+"H8ExampleEE1"
 
 #' A dataset containing test RDBES data for H5 in the RDBESDataObject structure
 #'

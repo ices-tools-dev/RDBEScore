@@ -109,9 +109,9 @@ test_that("doEstimationForAllStrata creates correct est.total for SAsampWtMes us
 
 })
 
-test_that("doEstimationForAllStrata gets some results for H8Example",  {
+test_that("doEstimationForAllStrata gets some results for H8ExampleEE1",  {
 
-  myTestData <- H8Example
+  myTestData <- H8ExampleEE1
   # Only use a subset of the test data
 
   # create an est object

@@ -52,7 +52,7 @@ and a logical value indicating if the hierarchy is not NULL.
 # Print the package data object
 print(H1Example)
 # Sort the package data
-sort(H8Example)
+sort(H8ExampleEE1)
 # Get summary of the package data
 summary(H1Example)
 }

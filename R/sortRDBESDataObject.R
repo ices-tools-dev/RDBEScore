@@ -8,7 +8,7 @@
 #' @return The sorted RDBESDataObject by hierarchy.
 #' @examples
 #' # Sort the package data
-#' sort(H8Example)
+#' sort(H8ExampleEE1)
 #' @rdname RDBESDataObject-methods
 #' @method sort RDBESDataObject
 #' @export
