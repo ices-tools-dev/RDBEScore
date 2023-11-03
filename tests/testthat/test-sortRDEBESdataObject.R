@@ -2,7 +2,7 @@ capture.output({  ## suppresses printing of console output when running test()
 test_that("sorting a raw object works for H8", {
   correctOrder <- c('DE', 'SD', 'TE', 'VS', 'FT', 'LE', 'SS', 'SA', 'FM', 'BV',
                     'FO', 'LO', 'OS', 'VD', 'SL', 'CL', 'CE')
-  expect_equal(names(sort(H8Example)),correctOrder)
+  expect_equal(names(sort(H8ExampleEE1)),correctOrder)
 })
 
 test_that("sorting a raw object works for H5", {

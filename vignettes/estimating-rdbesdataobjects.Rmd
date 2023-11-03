@@ -55,18 +55,18 @@ This **estimMC(...)** function is actually the core of the estimation functions 
 Estimation actually  is done on a *RDBESEstObject* that is generate from *RDBESDataObject* using **createRDBESEstObject(...)**. The following example uses a dataset that  resembles in many ways real data at ICES area 27.3.d.28.1 from the Estonian Baltic Trawling fleet for 2022 sprat (*Sprattus sprattus*).The dataset has both total landings and commercial sampling data.
 
 ```{r}
-H8Example
+H8ExampleEE1
 ```
 The data has not gone through RDBES upload and download procedure and  contains invalid data types but also may have some other validity problems. However the fields for estimation should be present and valid.
 ```{r eval=FALSE, echo=TRUE}
 #to check data types
-validateRDBESDataObject(H8Example, checkDataTypes = TRUE, strict = FALSE)
+validateRDBESDataObject(H8ExampleEE1, checkDataTypes = TRUE, strict = FALSE)
 ```
 
 
 ```{r, results='asis'}
 #create the estimation object to estimate values on the SA table
-estData <- createRDBESEstObject(H8Example, 8, "SA" )
+estData <- createRDBESEstObject(H8ExampleEE1, 8, "SA" )
 
 #the SAsampWtMes is in grammes let's estimate in tonnes
 estData$SAsampWtMes <- estData$SAsampWtMes / (1000 * 1000)
@@ -74,7 +74,7 @@ estData$SAsampWtMes <- estData$SAsampWtMes / (1000 * 1000)
 results <- doEstimationForAllStrata(estData, "SAsampWtMes")
 
 #let's compare the results from 1st quarter with actual catches from Q1
-CL <- H8Example$CL
+CL <- H8ExampleEE1$CL
 Q1months <- c("January", "February", "March")
 Q1results <- results[results$recType== "TE" &
                      results$stratumName %in% Q1months,]
@@ -176,9 +176,18 @@ How to interpret these results in the above example?
  The **SE** values are just the standard errors for the total and mean respectively.
 
 
+
+
 See also other package vignettes:
 
-```{r echo=FALSE, results='asis'}
+- [Raw Data Import](raw-data-import.html)
+- [Manipulating RDBESDataObjects](manipulating-rdbesdataobjects.html)
+- [Generating NAs using the Species List](generating-NAs-using-the-species-list.html)
+- [Generating Zeros using the Species List](generating-zeros-using-the-species-list.html)
+
+
+
+```{r eval=FALSE, include=FALSE, results='asis'}
 vignettes <- as.data.frame(browseVignettes(package = "RDBEScore")$RDBEScore)
 for (i in seq_along(vignettes$PDF)) {
   cat(sprintf("- [%s](%s)\n", vignettes$Title[i], vignettes$PDF[i]))

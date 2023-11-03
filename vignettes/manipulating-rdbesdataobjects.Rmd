@@ -86,17 +86,17 @@ If the data has a single hierarchy in the DE table a correct sort order is defin
 
 ```{r}
 #before sorting
-names(H8Example)
+names(H8ExampleEE1)
 ```
 
 ```{r}
 #after sorting
-names(sort(H8Example))
+names(sort(H8ExampleEE1))
 ```
 
 ```{r}
 #printing the summary
-H8Example
+H8ExampleEE1
 ```
 
 
