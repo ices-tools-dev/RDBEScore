@@ -3,8 +3,7 @@ capture.output({  ## suppresses printing of console output when running test()
 test_that("createRDBESEstObject can create an object from an H1 data extract
           with no warnings or errors",  {
 
-  myPath <- "./h1_v_1_19_18"
-  myRawObject <- importRDBESDataCSV(rdbesExtractPath = myPath)
+   myRawObject <- H1Example
 
   # Only use a subset of the test data
   myRawObject <- filterRDBESDataObject(myRawObject,c("DEstratumName"),c("DE_stratum1_H1","DE_stratum2_H1","DE_stratum3_H1"))
@@ -27,8 +26,7 @@ test_that("createRDBESEstObject can create an object from an H1 data extract
 test_that("createRDBESEstObject can create an object from an H5 data extract
           with no warnings or errors",  {
 
-  myPath <- "./h5_v_1_19_18"
-  myRawObject <- importRDBESDataCSV(rdbesExtractPath = myPath)
+  myRawObject <- H5Example
 
   myEstObject <- expect_warning(createRDBESEstObject(myRawObject,5),NA)
   myEstObject <- expect_error(createRDBESEstObject(myRawObject,5),NA)
@@ -70,8 +68,7 @@ test_that("createRDBESEstObject can create an object from an empty H1 data extra
 test_that("createRDBESEstObject can create an object from an H1 data extract with sub-sampling
           with no warnings or errors",  {
 
-  myPath <- "./h1_v_1_19_18"
-  myRawObject <- importRDBESDataCSV(rdbesExtractPath = myPath)
+  myRawObject <- H1Example
 
   # Only use a subset of the test data
   myRawObject <- filterRDBESDataObject(myRawObject,c("DEstratumName"),c("DE_stratum1_H1","DE_stratum2_H1","DE_stratum3_H1"))
@@ -104,8 +101,7 @@ test_that("createRDBESEstObject can create an object from an H1 data extract wit
 })
 test_that("createRDBESEstObject fails when an invalid hierarchy is requested",  {
 
-  myPath <- "./h1_v_1_19_18"
-  myRawObject <- importRDBESDataCSV(rdbesExtractPath = myPath)
+  myRawObject <- H1Example
 
   myEstObject <- expect_error(createRDBESEstObject(myRawObject,99),"An invalid value was used for the 'hierarchyToUse' parameter - createRDBESEstObject will not proceed")
 
@@ -113,8 +109,7 @@ test_that("createRDBESEstObject fails when an invalid hierarchy is requested",  
 test_that("createRDBESEstObject can create an object from an H1 data extract
           with no warnings or errors, stopping at VS",  {
 
-    myPath <- "./h1_v_1_19_18"
-    myRawObject <- importRDBESDataCSV(rdbesExtractPath = myPath)
+    myRawObject <- H1Example
 
     # Only use a subset of the test data
     myRawObject <- filterRDBESDataObject(myRawObject,c("DEstratumName"),c("DE_stratum1_H1","DE_stratum2_H1","DE_stratum3_H1"))
@@ -135,8 +130,7 @@ test_that("createRDBESEstObject can create an object from an H1 data extract
 })
 test_that("createRDBESEstObject can correctly create an object when there is no BV data",  {
 
-    myPath <- "./h1_v_1_19_18"
-    myRawObject <- importRDBESDataCSV(rdbesExtractPath = myPath)
+    myRawObject <- H1Example
 
     # Only use a subset of the test data
     myRawObject <- filterRDBESDataObject(myRawObject,c("DEstratumName"),c("DE_stratum1_H1","DE_stratum2_H1","DE_stratum3_H1"))
@@ -160,8 +154,7 @@ test_that("createRDBESEstObject can correctly create an object when there is no 
 })
 test_that("createRDBESEstObject can correctly create an object when there is no FM data",  {
 
-  myPath <- "./h1_v_1_19_18"
-  myRawObject <- importRDBESDataCSV(rdbesExtractPath = myPath)
+  myRawObject <- H1Example
 
   # Only use a subset of the test data
   myRawObject <- filterRDBESDataObject(myRawObject,c("DEstratumName"),c("DE_stratum1_H1","DE_stratum2_H1","DE_stratum3_H1"))
@@ -188,8 +181,7 @@ test_that("createRDBESEstObject can correctly create an object when there is no 
 })
 test_that("createRDBESEstObject can correctly create an object when there is no FM or BV data",  {
 
-  myPath <- "./h1_v_1_19_18"
-  myRawObject <- importRDBESDataCSV(rdbesExtractPath = myPath)
+  myRawObject <- H1Example
 
   # Only use a subset of the test data
   myRawObject <- filterRDBESDataObject(myRawObject,c("DEstratumName"),c("DE_stratum1_H1","DE_stratum2_H1","DE_stratum3_H1"))
@@ -214,8 +206,7 @@ test_that("createRDBESEstObject can correctly create an object when there is no 
 })
 test_that("createRDBESEstObject creates the correct number of rows when there is sub-sampling present (1)",  {
 
-  myPath <- "./h1_v_1_19_18"
-  myRawObject <- importRDBESDataCSV(rdbesExtractPath = myPath)
+  myRawObject <- H1Example
 
   # Only use a subset of the test data
   myRawObject <- filterRDBESDataObject(myRawObject,c("DEstratumName"),c("DE_stratum1_H1","DE_stratum2_H1","DE_stratum3_H1"))
@@ -258,8 +249,7 @@ test_that("createRDBESEstObject creates the correct number of rows when there is
 })
 test_that("createRDBESEstObject creates the correct number of rows when there is sub-sampling present (2)",  {
 
-  myPath <- "./h1_v_1_19_18"
-  myRawObject <- importRDBESDataCSV(rdbesExtractPath = myPath)
+  myRawObject <- H1Example
 
   # Only use a subset of the test data
   myRawObject <- filterRDBESDataObject(myRawObject,c("DEstratumName"),c("DE_stratum1_H1","DE_stratum2_H1","DE_stratum3_H1"))
@@ -313,8 +303,7 @@ test_that("createRDBESEstObject creates the correct number of rows when there is
 
 test_that("createRDBESEstObject does not create parentID columns",  {
 
-            myPath <- "./h1_v_1_19_18"
-            myRawObject <- importRDBESDataCSV(rdbesExtractPath = myPath)
+            myRawObject <- H1Example
             myEstObject <- createRDBESEstObject(myRawObject,1)
 
             if (sum(grepl(".*parentID", names(myEstObject)), na.rm = TRUE) >0){
@@ -323,6 +312,13 @@ test_that("createRDBESEstObject does not create parentID columns",  {
               SAParentIDExists <- FALSE
             }
             expect_false(SAParentIDExists)
+})
+
+test_that("createRDBESEstObject does not need explicit hierarcy",  {
+
+  myRawObject <- H1Example
+  myEstObject <- createRDBESEstObject(myRawObject)
+  expect_s3_class(myEstObject,"RDBESEstObject")
 })
 
 }) ## end capture.output
