@@ -409,7 +409,9 @@ capture.output({  ## suppresses printing of console output when running test()
     list_with_nulls <- lapply(list_with_nulls, as.data.frame)
 
 
-    expect_error(expect_warning(createRDBESDataObject(input = list_with_nulls, castToCorrectDataTypes = FALSE),  "NOTE: Creating RDBES data objects from a list of local data frames bypasses the RDBES upload data integrity checks."), "some columns are not in the data.table")
+    expect_error(expect_warning(createRDBESDataObject(input = list_with_nulls, castToCorrectDataTypes = FALSE),
+                                "NOTE: Creating RDBES data objects from a list of local data frames bypasses the RDBES upload data integrity checks."),
+                 "id does not exist in the input tables.")
 
   })
 
