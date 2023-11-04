@@ -197,7 +197,7 @@
 #'   \item{SL}{the Species List data table}
 #' }
 #' @source \url{https://CRAN.R-project.org/package=survey}
-"Pckg_survey_apiclus2_H1_WGRDBES_EST_TEST_1"
+"Pckg_survey_apiclus2_H1"
 
 #' A RDBESDataObject converted from package survey dataset apiclus1
 #'
@@ -225,7 +225,7 @@
 #'   \item{SL}{the Species List data table}
 #' }
 #' @source \url{https://CRAN.R-project.org/package=survey}
-"Pckg_survey_apiclus1_v2_H1_WGRDBES_EST_TEST_1"
+"Pckg_survey_apiclus1_v2_H1"
 
 #' A Clustered RDBESDataObject converted from package survey dataset apiclus2
 #'
@@ -252,7 +252,7 @@
 #'   \item{SL}{the Species List data table}
 #' }
 #' @source \url{https://CRAN.R-project.org/package=survey}
-"Pckg_survey_apiclus2_v2_H1_WGRDBES_EST_TEST_1"
+"Pckg_survey_apiclus2_v2_H1"
 
 #' A RDBESDataObject converted from package survey dataset apistrat
 #'
@@ -280,7 +280,7 @@
 #'   \item{SL}{the Species List data table. Contains 1 child row}
 #' }
 #' @source \url{https://CRAN.R-project.org/package=survey}
-"Pckg_survey_apistrat_H1_WGRDBES_EST_TEST_1"
+"Pckg_survey_apistrat_H1"
 
 
 
@@ -325,7 +325,7 @@
 #'   \item{SL}{the Species List data table. Subset to the essential rows}
 #' }
 #' @source \url{https://CRAN.R-project.org/package=SDAResources}
-"Pckg_SDAResources_agsrs_H1_WGRDBES_EST_TEST_1"
+"Pckg_SDAResources_agsrs_H1"
 
 #' A RDBESDataObject converted from package SDAResources dataset agstrat
 #'
@@ -364,7 +364,7 @@
 #'   \item{SL}{the Species List data table. Subset to the essential rows}
 #' }
 #' @source \url{https://CRAN.R-project.org/package=SDAResources}
-"Pckg_SDAResources_agstrat_H1_WGRDBES_EST_TEST_1"
+"Pckg_SDAResources_agstrat_H1"
 
 #' A RDBESDataObject converted from package SDAResources dataset algebra
 #'
@@ -397,7 +397,7 @@
 #'   \item{SL}{the Species List data table}
 #' }
 #' @source \url{https://CRAN.R-project.org/package=SDAResources}
-"Pckg_SDAResources_algebra_H1_WGRDBES_EST_TEST_1"
+"Pckg_SDAResources_algebra_H1"
 
 #' A RDBESDataObject converted from package SDAResources dataset coots
 #'
@@ -431,7 +431,7 @@
 #'   \item{SL}{the Species List data table}
 #' }
 #' @source \url{https://CRAN.R-project.org/package=SDAResources}
-"Pckg_SDAResources_coots_H1_WGRDBES_EST_TEST_1"
+"Pckg_SDAResources_coots_H1"
 
 #' A Multi-stage RDBESDataObject from package SDAResources dataset coots
 #'
@@ -466,7 +466,7 @@
 #'   \item{SL}{the Species List data table}
 #' }
 #' @source \url{https://CRAN.R-project.org/package=SDAResources}
-"Pckg_SDAResources_coots_multistage_H1_WGRDBES_EST_TEST_1"
+"Pckg_SDAResources_coots_multistage_H1"
 
 #' A RDBESDataObject converted from package SDAResources dataset gpa
 #'
@@ -498,7 +498,7 @@
 #'   \item{SL}{the Species List data table}
 #' }
 #' @source \url{https://CRAN.R-project.org/package=SDAResources}
-"Pckg_SDAResources_gpa_H1_WGRDBES_EST_TEST_1"
+"Pckg_SDAResources_gpa_H1"
 
 #' A RDBESDataObject converted from package SDAResources dataset schools
 #'
@@ -529,7 +529,7 @@
 #'   \item{SL}{the Species List data table}
 #' }
 #' @source \url{https://CRAN.R-project.org/package=SDAResources}
-"Pckg_SDAResources_schools_H1_WGRDBES_EST_TEST_1"
+"Pckg_SDAResources_schools_H1"
 
 ##---------------Made Up data---------------
 
@@ -560,7 +560,7 @@
 #'   SLspeciesListName, SLyear, SLcatchFraction, SLcommercialTaxon,
 #'   SLspeciesCode & SLcommercialTaxon == SLspeciesCode}
 #' }
-"MadeUpData_for_SL_SA_tests_v1_WGRDBES_EST_TEST_3"
+"MadeUpData_for_SL_SA_tests_v1"
 
 
 #-------Other example data----------

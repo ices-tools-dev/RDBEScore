@@ -14,7 +14,7 @@ library(RDBEScore)
 
 ```{r get_data}
 
-dat <- MadeUpData_for_SL_SA_tests_v1_WGRDBES_EST_TEST_3
+dat <- MadeUpData_for_SL_SA_tests_v1
 
 ss <- dat[["SS"]]
 ss

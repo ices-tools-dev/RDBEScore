@@ -19,8 +19,9 @@
 #' @export
 #'
 #' @examples
+#' #Creates an rdbesEStObject from prepared RDBES data
 #' myH1EstObj <- createRDBESEstObject(H1Example, 1, "SA")
-#' Creates an rdbesEStObject from prepared RDBES data
+#' 
 #'
 #' @param rdbesPrepObject The prepared RDBES object that should be used to
 #' create an estimation object

@@ -2,7 +2,7 @@ capture.output({  ## suppresses printing of console output when running test()
 
 test_that("doEstimationForAllStrata creates correct results for Survey apiclust2 multistage",  {
 
-  myTestData <- RDBEScore::Pckg_survey_apiclus2_H1_WGRDBES_EST_TEST_1 #this is valid H1 RDBESDataObj
+  myTestData <- RDBEScore::Pckg_survey_apiclus2_H1 #this is valid H1 RDBESDataObj
 
     # create an est object
   myEstData <- createRDBESEstObject(myTestData, 1, "SA" )
@@ -35,7 +35,7 @@ test_that("doEstimationForAllStrata creates correct results for Survey apiclust2
 
 test_that("doEstimationForAllStrata creates correct results for Survey apiclust2 multistage when reordered",  {
 
-    myTestData <- RDBEScore::Pckg_survey_apiclus2_H1_WGRDBES_EST_TEST_1 #this is valid H1 RDBESDataObj
+    myTestData <- RDBEScore::Pckg_survey_apiclus2_H1 #this is valid H1 RDBESDataObj
 
     # create an est object
     myEstData <- createRDBESEstObject(myTestData, 1, "SA" )

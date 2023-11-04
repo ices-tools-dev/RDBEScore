@@ -58,7 +58,9 @@ as.integer.or.dbl <- function(x){
 #' @param col A character string specifying the name of the column to check
 #' @return  nothing if the column exists and has unique values, otherwise an error is thrown
 #' @examples
-#' check_key_column(H1Example$DE, "DEid")
+#' \dontrun{
+#'   RDBEScore:::check_key_column(H1Example$DE, "DEid")
+#' }
 check_key_column <- function(dt, col) {
   # Check if column exists in data table
   if (!col %in% colnames(dt)) {

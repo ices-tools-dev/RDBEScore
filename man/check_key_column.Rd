@@ -19,5 +19,7 @@ This function checks if a specified column exists in a given data table and has 
 If the column does not exist or has non-unique values, an error is thrown.
 }
 \examples{
-check_key_column(H1Example$DE, "DEid")
+\dontrun{
+  RDBEScore:::check_key_column(H1Example$DE, "DEid")
+}
 }

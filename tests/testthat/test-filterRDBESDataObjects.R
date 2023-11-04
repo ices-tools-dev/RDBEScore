@@ -150,7 +150,7 @@ test_that("filterRDBESDataObject does not removes orphans when killOrphans = FAL
 
 test_that("filterRDBESDataObject retains FT if filtering by FO", {
   #issue #183  problem with filtering by FOid but not SSid?
-  myH1RawObject <- Pckg_survey_apistrat_H1_WGRDBES_EST_TEST_1
+  myH1RawObject <- Pckg_survey_apistrat_H1
 
   resFO <- filterRDBESDataObject(myH1RawObject, "FOid", 70849,
                                  killOrphans = F)
@@ -170,7 +170,7 @@ test_that("filterRDBESDataObject filter correctly for FT and FO", {
   #only if it is the id of that table. I think this makes things less confusing.
   #although it is not very flexible as you might want to filter on an id field
   # but this requires explicitly stating on the call the table where the id is expected.
-  myH1RawObject <- Pckg_survey_apistrat_H1_WGRDBES_EST_TEST_1
+  myH1RawObject <- Pckg_survey_apistrat_H1
 
   resFO <- filterRDBESDataObject(myH1RawObject, "FOid", 70849,
                                  killOrphans = TRUE)
@@ -184,7 +184,7 @@ test_that("filterRDBESDataObject filter correctly for FT and FO", {
 
 test_that("filterRDBESDataObject filter correctly for FO and SS", {
   #issue #183  problem with filtering by FOid but not SSid?
-  myH1RawObject <- Pckg_survey_apistrat_H1_WGRDBES_EST_TEST_1
+  myH1RawObject <- Pckg_survey_apistrat_H1
   values2filter <- c(227694)
   fields2filter <- c("SSid")
   resSS <- filterRDBESDataObject(myH1RawObject, fields2filter, values2filter,
@@ -198,7 +198,7 @@ test_that("filterRDBESDataObject filter correctly for FO and SS", {
 
 test_that("filterRDBESDataObject filter correctly for SS and SA", {
   #issue #183  problem with filtering by FOid but not SSid?
-  myH1RawObject <- Pckg_survey_apistrat_H1_WGRDBES_EST_TEST_1
+  myH1RawObject <- Pckg_survey_apistrat_H1
   values2filter <- c(227694)
   fields2filter <- c("SSid")
   resSS <- filterRDBESDataObject(myH1RawObject, fields2filter, values2filter,

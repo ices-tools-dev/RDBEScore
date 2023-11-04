@@ -36,6 +36,10 @@ the filtered input object of the same class as
 The returned object will include all rows which either: a) do not included
 any of the field names in \code{fieldsToFilter}, or b) do include the field names
 and have one of the allowed values in \code{valuesToFilter}.
+If you want to filter for a id field like \code{DEid}, \code{FTid} etc, the filtering
+works only on the table where the id field is its key. For example, if you
+try to filter on \code{FOid} it does not look  \code{FOid} in other tables like \code{FT},
+although the field \code{FOid} exists in \code{FT} table.
 }
 \details{
 \code{killOrphans} allows you to remove orphaned rows if set to \code{TRUE}. The

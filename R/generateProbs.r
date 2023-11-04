@@ -17,12 +17,12 @@
 #'
 #' @examples
 #' \dontrun{
-#' generateProbs(x = Pckg_SDAResources_agstrat_H1_WGRDBES_EST_TEST_1[["VS"]], probType = ("inclusion"))
+#' generateProbs(x = Pckg_SDAResources_agstrat_H1[["VS"]], probType = ("inclusion"))
 #' # population size
-#' a<-generateProbs(x = Pckg_SDAResources_agstrat_H1_WGRDBES_EST_TEST_1[["VS"]], probType = ("inclusion"))
+#' a<-generateProbs(x = Pckg_SDAResources_agstrat_H1[["VS"]], probType = ("inclusion"))
 #' sum(1/a$VSincProb)
 #' # returns error
-#' generateProbs(x = Pckg_SDAResources_agstrat_H1_WGRDBES_EST_TEST_1[["VS"]], probType = ("selection"))
+#' generateProbs(x = Pckg_SDAResources_agstrat_H1[["VS"]], probType = ("selection"))
 #'
 #' }
 generateProbs <- function(x, probType) {
