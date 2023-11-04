@@ -148,4 +148,68 @@ test_that("filterRDBESDataObject does not removes orphans when killOrphans = FAL
   )
 })
 
+test_that("filterRDBESDataObject retains FT if filtering by FO", {
+  #issue #183  problem with filtering by FOid but not SSid?
+  myH1RawObject <- Pckg_survey_apistrat_H1_WGRDBES_EST_TEST_1
+
+  resFO <- filterRDBESDataObject(myH1RawObject, "FOid", 70849,
+                                 killOrphans = F)
+  expect_equal(nrow(resFO$FO), 1)
+  expect_equal(nrow(resFO$FT), 200)
+
+})
+
+
+test_that("filterRDBESDataObject filter correctly for FT and FO", {
+  #issue #183  problem with filtering by FOid but not SSid?
+  #the issue was that the "**FOid** field exists in several tables so it is
+  #also on **FT** table (although NA) as not used.
+  #So filtering it also filtered the FT and hence the strange behaviour.
+  #the solution is to remove all the other id fields from the FT table except FTid
+  #when filtering. So the current implementation enables to filter on an id field
+  #only if it is the id of that table. I think this makes things less confusing.
+  #although it is not very flexible as you might want to filter on an id field
+  # but this requires explicitly stating on the call the table where the id is expected.
+  myH1RawObject <- Pckg_survey_apistrat_H1_WGRDBES_EST_TEST_1
+
+  resFO <- filterRDBESDataObject(myH1RawObject, "FOid", 70849,
+                                 killOrphans = TRUE)
+  expect_equal(nrow(resFO$FO), 1)
+  FTid <- resFO$FO$FTid
+  resFT <- filterRDBESDataObject(myH1RawObject, "FTid", FTid,
+                                 killOrphans = TRUE)
+  expect_equal(nrow(resFO$SS), 1)
+  expect_equal(resFO$SS, resFT$SS)
+})
+
+test_that("filterRDBESDataObject filter correctly for FO and SS", {
+  #issue #183  problem with filtering by FOid but not SSid?
+  myH1RawObject <- Pckg_survey_apistrat_H1_WGRDBES_EST_TEST_1
+  values2filter <- c(227694)
+  fields2filter <- c("SSid")
+  resSS <- filterRDBESDataObject(myH1RawObject, fields2filter, values2filter,
+                                 killOrphans = TRUE)
+  FOid <- resSS$SS$FOid
+  resFO <- filterRDBESDataObject(myH1RawObject, "FOid", FOid,
+                                 killOrphans = TRUE)
+  expect_equal(nrow(resFO$FO), 1)
+  expect_equal(resSS$SS, resFO$SS)
+})
+
+test_that("filterRDBESDataObject filter correctly for SS and SA", {
+  #issue #183  problem with filtering by FOid but not SSid?
+  myH1RawObject <- Pckg_survey_apistrat_H1_WGRDBES_EST_TEST_1
+  values2filter <- c(227694)
+  fields2filter <- c("SSid")
+  resSS <- filterRDBESDataObject(myH1RawObject, fields2filter, values2filter,
+                                 killOrphans = TRUE)
+  SAid <- resSS$SA$SAid
+  resSA <- filterRDBESDataObject(myH1RawObject, "SAid", SAid,
+                                 killOrphans = TRUE)
+
+  expect_equal(resSS$SA, resSA$SA)
+})
+
+
+
 }) ## end capture.output

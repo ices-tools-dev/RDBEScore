@@ -3,6 +3,10 @@
 #' The returned object will include all rows which either: a) do not included
 #' any of the field names in `fieldsToFilter`, or b) do include the field names
 #' and have one of the allowed values in `valuesToFilter`.
+#' If you want to filter for a id field like `DEid`, `FTid` etc, the filtering
+#' works only on the table where the id field is its key. For example, if you
+#' try to filter on `FOid` it does not look  `FOid` in other tables like `FT`,
+#' although the field `FOid` exists in `FT` table.
 #'
 #' `killOrphans` allows you to remove orphaned rows if set to `TRUE`. The
 #' default is `FALSE`.
@@ -59,14 +63,21 @@ filterRDBESDataObject <- function(RDBESDataObjectToFilter,
     ))
   }
 
-  alteredObject <- lapply(RDBESDataObjectToFilter, function(x) {
-    foundNames <- names(x)[which(names(x) %in% fieldsToFilter)]
+  tblNames <- names(RDBESDataObjectToFilter)
+  alteredObject <- mapply(function(x, name) {
+    #do not search id columns that are not ids of this table
+    #see issue #183
+    idCols <- names(x)[grepl("id$", names(x))]
+    searchNames <- c(setdiff(names(x), idCols), paste0(name,"id"))
+    foundNames <- searchNames[which(searchNames %in% fieldsToFilter)]
     if (length(foundNames) > 0) {
       x <-
         dplyr::filter(x, dplyr::if_all(all_of(foundNames), ~ .x %in% valuesToFilter))
     }
     x
-  })
+  }, RDBESDataObjectToFilter, tblNames, SIMPLIFY = FALSE)
+  names(alteredObject) <- tblNames
+
 
   # Update the original object so we don't lose its class type
   for (myTable in names(RDBESDataObjectToFilter)) {
