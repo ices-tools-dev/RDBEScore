@@ -1,4 +1,4 @@
-
+capture.output({
 #Create list of dfs for comparison
 list_with_nulls  <-  H1Example
 list_of_dfs <- list_with_nulls[!(sapply(list_with_nulls, is.null))]
@@ -71,6 +71,6 @@ test_that("column order corrected if changed with adding missing columns", {
   expect_equal(colnames(dt$DE), colnames(H1Example$DE))
 })
 
-
+})
 
 
