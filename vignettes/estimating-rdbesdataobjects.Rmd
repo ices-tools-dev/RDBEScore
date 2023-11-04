@@ -93,7 +93,15 @@ Q1results$actualTotals <- c(February=124.829,January=119.108, March=152.273)
 ```
 
 
-So the total estimated catch (*est.total*) for the first quarter is near the total of the actual catch. The table below gives the estimates by month with standard errors (*se.total*). The (*est.mean*) and its standard error (SE, *se.mean*) are the estimated mean catch of sprat per vessel per landing for the given month. As you can see from the table for the first 2 months the estimates with *se.total* are in line with the estimate as for March somehow there is a big discrepancy.
+So the total estimated catch (*est.total*) for the first quarter is near the total of the actual catch. The table below gives the estimates by month with standard errors (*se.total*). The (*est.mean*) and its standard error (SE, *se.mean*) are the estimated mean catch of sprat per week in the given month.
+
+```{r}
+#there are 4 weeks and 2 are sampled in TE so in this case the total is: 
+#mean * 4 
+Q1results$est.mean * 4
+```
+
+As you can see from the table for the first 2 months the estimates with *se.total* are in line with the estimate as for March somehow there is a big discrepancy.
 ```{r}
 columns <- c("recType","stratumName","actualTotals",
              "est.total", "se.total", "est.mean", "se.mean")
@@ -182,6 +190,7 @@ See also other package vignettes:
 
 - [Raw Data Import](raw-data-import.html)
 - [Manipulating RDBESDataObjects](manipulating-rdbesdataobjects.html)
+- [Generating probabilities](generating-probabilities.html)
 - [Generating NAs using the Species List](generating-NAs-using-the-species-list.html)
 - [Generating Zeros using the Species List](generating-zeros-using-the-species-list.html)
 
