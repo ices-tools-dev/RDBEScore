@@ -24,6 +24,10 @@ The aim of this document is to illustrate how to automatically generate some typ
 library(RDBEScore)
 ```
 
+## main data requirements to generate probabilities
+
+`RDBEScore` currently only provides probability generation for selection method "SRSWR","SRSWOR" and "CENSUS". Also, to automatically generate probabilities, it is necessary that `numTotal` and `numSamp` are declared in every sampling table. Functions are also only configured to handle for cases where "clustering=="N". If that is not the case, changes need to be made to the data before running the functions. Such changes configure significant assumptions that should be left well visible in the data preparation section of any estimation script.
+
 ## Load and validate some example data
 
 First we'll load some example data from the RDBES and check it's valid.  It's a good tip to check your RDBESDataObjects are valid after any manipulations you perform. See how to import your own data in the vignette [Import RDBES data](raw-data-import.html) In this vignette package example data pre-loaded with `RDBEScore` is used.
@@ -112,6 +116,8 @@ unique(myH1DataObject[["FO"]][,c("FOid","FOstratification","FOstratumName","FOse
 
 ```
 
+
+
 ## generating probabilities for only one table: `generateProbs`
 
 To generate probabilities for one of the tables choose what type of probabilities you want to generate ("selection" or "inclusion") and run `generateProbs`.
@@ -162,5 +168,6 @@ We could use `probType = "selection"` to further complete the data with selectio
                                       , runInitialProbChecks = FALSE)
 ```
 
-## ...
+## The `overwrite` argument
 
+To be completed
