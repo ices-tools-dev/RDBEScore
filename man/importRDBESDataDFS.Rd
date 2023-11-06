@@ -8,7 +8,7 @@ importRDBESDataDFS(
   myList,
   castToCorrectDataTypes = TRUE,
   strict = TRUE,
-  addmissingColumns = FALSE,
+  addMissingColumns = FALSE,
   ...
 )
 }
@@ -22,7 +22,7 @@ to the correct data types. Default is \code{TRUE}.}
 \item{strict}{logical. Indicates level of validation of the \code{RDBESDataObject}
 it creates - should the validation be strict? Default is \code{TRUE}.}
 
-\item{addmissingColumns}{logical. Indicates whether to add missing columns}
+\item{addMissingColumns}{logical. Indicates whether to add missing columns}
 }
 \value{
 An \code{RDBESDataObject} with each element being a data table.

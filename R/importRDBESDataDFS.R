@@ -9,7 +9,7 @@
 #'   to the correct data types. Default is `TRUE`.
 #' @param strict logical. Indicates level of validation of the `RDBESDataObject`
 #'   it creates - should the validation be strict? Default is `TRUE`.
-#' @param addmissingColumns logical. Indicates whether to add missing columns
+#' @param addMissingColumns logical. Indicates whether to add missing columns
 #' @importFrom stats setNames
 #'
 #' @return An `RDBESDataObject` with each element being a data table.
@@ -39,7 +39,7 @@
 importRDBESDataDFS <- function(myList,
                                castToCorrectDataTypes = TRUE,
                                strict = TRUE,
-                               addmissingColumns = FALSE,
+                               addMissingColumns = FALSE,
                                ...){
   # Checks for different names than the ones expected and duplicate table names in the list
   wrongNames <- setdiff(names(myList), unique(RDBEScore::mapColNamesFieldR$Table.Prefix))
@@ -103,7 +103,7 @@ importRDBESDataDFS <- function(myList,
       # SET all empty strings to NA
       # dt[[aTable]][dt[[aTable]]==""] <- NA
 
-      if(addmissingColumns){
+      if(addMissingColumns){
          expectedCols <- RDBEScore::mapColNamesFieldR$R.Name[
           RDBEScore::mapColNamesFieldR$Table.Prefix == aTable]
          missingCols <- setdiff(expectedCols, colnames(dt[[aTable]]))
