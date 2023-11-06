@@ -97,7 +97,7 @@ createRDBESDataObject <- function(input = NULL,
 
 
   if(import.type == "list.of.dfs") {
-    warning("NOTE: Creating RDBES data objects from a list of local data frames bypasses the RDBES upload data integrity checks.")
+    warning("NOTE: Creating RDBES data objects from a list of local data frames bypasses the RDBES upload data integrity checks.\n")
     output <- importRDBESDataDFS(myList = input, castToCorrectDataTypes = castToCorrectDataTypes, ...)
   }
 

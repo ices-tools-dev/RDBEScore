@@ -357,7 +357,7 @@ capture.output({  ## suppresses printing of console output when running test()
 
     names(list_of_dfs)[1] <- "Design"
     expect_error(expect_warning(createRDBESDataObject(list_of_dfs, castToCorrectDataTypes = FALSE),
-                                "NOTE: Creating RDBES data objects from a list of local data frames bypasses the RDBES upload data integrity checks."),
+                                "NOTE: Creating RDBES data objects from a list of local data frames bypasses the RDBES upload data integrity checks.\n"),
                  "You have given list names that are not valid:\nDesign")
 
   })
@@ -366,7 +366,7 @@ capture.output({  ## suppresses printing of console output when running test()
 
     names(list_of_dfs)[1] <- "DE"
     names(list_of_dfs)[2] <- "DE"
-    expect_error(expect_warning(createRDBESDataObject(list_of_dfs, castToCorrectDataTypes = FALSE), "NOTE: Creating RDBES data objects from a list of local data frames bypasses the RDBES upload data integrity checks."),
+    expect_error(expect_warning(createRDBESDataObject(list_of_dfs, castToCorrectDataTypes = FALSE), "NOTE: Creating RDBES data objects from a list of local data frames bypasses the RDBES upload data integrity checks.\n"),
                  "You have given list names that have duplicate table names:\nDE")
 
   })
@@ -389,7 +389,7 @@ capture.output({  ## suppresses printing of console output when running test()
    list2 <- list_of_dfs
     expect_error(expect_warning(createRDBESDataObject(input = c(list1, list2),
                                                       castToCorrectDataTypes = FALSE),
-                                "NOTE: Creating RDBES data objects from a list of local data frames bypasses the RDBES upload data integrity checks."),
+                                "NOTE: Creating RDBES data objects from a list of local data frames bypasses the RDBES upload data integrity checks.\n"),
                  "You have given list names that have duplicate table names:\nDE, SD, VS, FT, FO, SS, SA, FM, BV, VD, SL")
 
   })
@@ -410,7 +410,7 @@ capture.output({  ## suppresses printing of console output when running test()
 
 
     expect_error(expect_warning(createRDBESDataObject(input = list_with_nulls, castToCorrectDataTypes = FALSE),
-                                "NOTE: Creating RDBES data objects from a list of local data frames bypasses the RDBES upload data integrity checks."),
+                                "NOTE: Creating RDBES data objects from a list of local data frames bypasses the RDBES upload data integrity checks.\n"),
                  "id does not exist in the input tables.")
 
   })
