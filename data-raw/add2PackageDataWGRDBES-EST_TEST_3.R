@@ -18,7 +18,7 @@ datasetNames <- datasetNames[grepl("_v1_", datasetNames)]
 for(dname in datasetNames){
   #fix the naming removing strange characters
   datasetName <- gsub("[[:punct:]]|[[:space:]]", "_",
-                      paste0(dname,"_",samp_scheme))
+                      paste0(dname))
   deData <-  RDBEScore::filterRDBESDataObject(data,
                                               fieldsToFilter = "DEstratumName",
                                               valuesToFilter = dname,

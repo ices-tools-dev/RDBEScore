@@ -30,8 +30,8 @@ library(data.table)
 
 ```{r}
 # read an example dataset and simplify it to 1 trip and 1 haul [dev bote: this section needs to be reworked when data and filterRDBESDataObject are  updated]
-data(Pckg_survey_apistrat_H1_WGRDBES_EST_TEST_1)
-myH1DataObject1 <- Pckg_survey_apistrat_H1_WGRDBES_EST_TEST_1
+data(Pckg_survey_apistrat_H1)
+myH1DataObject1 <- Pckg_survey_apistrat_H1
 myH1DataObject1$SL<-myH1DataObject1$SL[grepl(myH1DataObject1$SL$SLspeclistName, pat="Pckg_survey_apistrat_H1"),]
 #myH1DataObject1<-filterAndTidyRDBESDataObject(myH1DataObject1, fieldsToFilter="FOid",valuesToFilter=70849, killOrphans = TRUE)
 myH1DataObject1<-filterRDBESDataObject(myH1DataObject1, fieldsToFilter="SSid",valuesToFilter=227694, killOrphans = TRUE)

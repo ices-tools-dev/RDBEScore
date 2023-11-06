@@ -49,6 +49,29 @@ as.integer.or.dbl <- function(x){
 }
 
 
+#' Check if a column exists in a data table and has unique values
+#'
+#' This function checks if a specified column exists in a given data table and has unique values.
+#' If the column does not exist or has non-unique values, an error is thrown.
+#'
+#' @param dt A data table to check
+#' @param col A character string specifying the name of the column to check
+#' @return  nothing if the column exists and has unique values, otherwise an error is thrown
+#' @examples
+#' \dontrun{
+#'   RDBEScore:::check_key_column(H1Example$DE, "DEid")
+#' }
+check_key_column <- function(dt, col) {
+  # Check if column exists in data table
+  if (!col %in% colnames(dt)) {
+    stop(paste0(col, " does not exist in the input tables."))
+  }
+  # Check if column has unique values
+  if (length(unique(dt[[col]])) != nrow(dt)) {
+    stop(paste0(col, " does not have unique values."))
+  }
+}
+
 #' fileExt
 #'
 #' This function splits a character vector and returns the second element if the

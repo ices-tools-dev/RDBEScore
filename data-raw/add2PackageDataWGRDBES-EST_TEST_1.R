@@ -20,7 +20,7 @@ wrongDataSets <- c('Pckg_SDAResources_apiclus1_v2_H1',
 for(dname in datasetNames){
   #fix the naming removing strange characters
   datasetName <- gsub("[[:punct:]]|[[:space:]]", "_",
-                      paste0(dname,"_",samp_scheme))
+                      paste0(dname))
   #replace the name
   if(dname %in% wrongDataSets){
     datasetName <- sub("SDAResources", "survey", datasetName)

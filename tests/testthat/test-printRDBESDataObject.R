@@ -35,13 +35,20 @@ test_that("printing removes NA rows on numeric", {
 test_that("having NA on num total creates a warning", {
   a <- H8ExampleEE1
   a$TE$TEnumTotal[1] <- NA
-  expect_warning(print(a),"TE: numTotal has NA values!")
+  expect_warning(print(a),"TE: numTotal has NAs!")
 })
 
 test_that("having NA on sel Meth creates a warning", {
   a <- H8ExampleEE1
   a$TE$TEselectMeth[1] <- NA
-  expect_warning(print(a),"TE: selectMeth has NA values!")
+  expect_warning(print(a),"TE: selectMeth has NAs!")
+})
+
+test_that("having NA on sel Meth and num total creates a warning", {
+  a <- H8ExampleEE1
+  a$TE$TEselectMeth[1] <- NA
+  a$TE$TEnumTotal[1] <- NA
+  expect_warning(print(a),"TE: selectMeth, numTotal have NAs!")
 })
 
 test_that("printing gives right nr of rows", {

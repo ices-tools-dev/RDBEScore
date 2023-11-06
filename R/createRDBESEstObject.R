@@ -2,8 +2,35 @@
 #'
 #' @param rdbesPrepObject The prepared RDBES object that should be used to
 #' create an estimation object
+#' @param hierarchyToUse (Optional) The upper RDBES hierarchy to use. An integer value
+#' between 1 and 13. If NULL, the hierarchy will be determined from the DE table
+#' 
+#' @param stopTable (Optional) The table to stop at in the RDBES hierarchy. 
+#' If specified, only tables up to and including this table will be included in the 
+#' resulting RDBESEstObject. The default is NULL, which means all tables in the hierarchy 
+#' will be included.
+#' @param verbose (Optional) Set to TRUE if you want informative text printed
+#' out, or FALSE if you don't.  The default is FALSE.
+#' @param strict (Optional) This function validates its input data - should
+#' the validation be strict? The default is TRUE.
+#'
+#' @return An object of class RDBESEstObject ready for use in design based
+#' estimation
+#' @export
+#'
+#' @examples
+#' #Creates an rdbesEStObject from prepared RDBES data
+#' myH1EstObj <- createRDBESEstObject(H1Example, 1, "SA")
+#' 
+#'
+#' @param rdbesPrepObject The prepared RDBES object that should be used to
+#' create an estimation object
 #' @param hierarchyToUse The upper RDBES hiearchy to use
-#' @param stopTable PLEASE DOCUMENT THIS
+#' 
+#' @param stopTable (Optional) The table to stop at in the RDBES hierarchy. 
+#' If specified, only tables up to and including this table will be included in the 
+#' resulting RDBESEstObject. The default is NULL, which means all tables in the hierarchy 
+#' will be included.
 #' @param verbose (Optional) Set to TRUE if you want informative text printed
 #' out, or FALSE if you don't.  The default is FALSE.
 #' @param strict (Optional) This function validates its input data - should
@@ -16,16 +43,33 @@
 #' @examples
 #' myH1EstObj <- createRDBESEstObject(H1Example, 1, "SA")
 createRDBESEstObject <- function(rdbesPrepObject,
-                                 hierarchyToUse,
+                                 hierarchyToUse =NULL,
                                  stopTable = NULL,
                                  verbose = FALSE,
                                  strict = TRUE) {
+
+   DEhierarchy <- summary(rdbesPrepObject)$hierarchy
+  if(is.null(hierarchyToUse)){
+    hierarchyToUse <- DEhierarchy
+    if(length(hierarchyToUse) > 1){
+      stop("Mixed hierarchy RDBESDataObject!", call.=FALSE)
+    }
+  }
 
   if (!hierarchyToUse %in% 1:13) {
     stop(paste0(
       "An invalid value was used for the 'hierarchyToUse' parameter",
       " - createRDBESEstObject will not proceed"
     ))
+  }
+  if(!(hierarchyToUse %in% DEhierarchy) & !is.null(DEhierarchy)){
+    stop(paste0(
+      "The hierarchyToUse parameter is not the hierarchy stated on the DE table",
+      " - createRDBESEstObject will not proceed"
+    ))
+  }
+  if(length(DEhierarchy) > 1){
+    stop("Mixed hierarchy RDBESDataObject! not supported", call.=FALSE)
   }
 
   validateRDBESDataObject(rdbesPrepObject, verbose = verbose, strict = strict)

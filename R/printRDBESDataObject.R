@@ -36,9 +36,19 @@ getPrintInfoForTable <- function(items, dfName){
   if(items$rows == 0){return(items$rows)}
   df <- items$design
 
-  selMeth <- getInfo(df, "selectMeth", dfName)
-  samp <- getInfo(df, "numSamp", dfName)
-  tot <- getInfo(df, "numTotal", dfName)
+  cols2get <- c("selectMeth", "numSamp", "numTotal")
+  results <- lapply(cols2get, function(x) {getInfo(df, x)})
+  names(results) <- cols2get
+  selMeth <- results[["selectMeth"]][["text"]]
+  samp <- results[["numSamp"]][["text"]]
+  tot <- results[["numTotal"]][["text"]]
+
+  warnings <- na.omit(sapply(results, function(x) x[["warningCol"]]))
+  if(length(warnings) > 0){
+    warning(paste0(dfName, ": ", paste0(warnings, collapse = ", "),
+                   ifelse(length(warnings) > 1, " have", " has"),
+                   " NAs!"), call.=FALSE)
+  }
 
   res <- paste0(items$rows,
                 ifelse(is.na(selMeth), "", paste0(" (",selMeth,": ")),
@@ -49,17 +59,20 @@ getPrintInfoForTable <- function(items, dfName){
   )
   return(res)
 }
-
-getInfo <- function(df, colName, dfName){
+#function returns a list of strings
+getInfo <- function(df, colName){
   colData <- na.omit(df[[colName]])
   if(length(colData) != length(df[[colName]])){
-    warning(dfName,": ",colName, " has NA values!", call.=FALSE)
+    warningCol <- colName
+  } else {
+    warningCol <- NA
   }
   if(is.numeric(colData) && length(unique(colData)) > 1){
-    paste0(min(colData), "-", max(colData))
+    text <- paste0(min(colData), "-", max(colData))
   } else {
-    ifelse(!is.null(colData),
+    text <- ifelse(!is.null(colData),
            paste0(unique(colData), collapse = ","),
            NA)
   }
+  return(list(text = text, warningCol = warningCol))
 }
