@@ -42,7 +42,7 @@ importRDBESDataDFS <- function(myList,
                                addmissingColumns = FALSE,
                                ...){
   # Checks for different names than the ones expected and duplicate table names in the list
-  wrongNames <- setdiff(names(myList), unique(mapColNamesFieldR$Table.Prefix))
+  wrongNames <- setdiff(names(myList), unique(RDBEScore::mapColNamesFieldR$Table.Prefix))
   dupNamesBool <- duplicated(names(myList))
   if(length(wrongNames) > 0) {
     stop("You have given list names that are not valid:\n",
@@ -72,11 +72,13 @@ importRDBESDataDFS <- function(myList,
                                       CL = makeDT(myList[["CL"]]),
                                       CE = makeDT(myList[["CE"]]))
 
-  
+
 
   #the correct Name mapping has all Correct names both ways
-  nameMap <- c(setNames(mapColNamesFieldR$R.Name, mapColNamesFieldR$Field.Name),
-               setNames(mapColNamesFieldR$R.Name, mapColNamesFieldR$R.Name))
+  nameMap <- c(setNames(RDBEScore::mapColNamesFieldR$R.Name,
+                        RDBEScore::mapColNamesFieldR$Field.Name),
+               setNames(RDBEScore::mapColNamesFieldR$R.Name,
+                        RDBEScore::mapColNamesFieldR$R.Name))
   nameMap <- nameMap[!duplicated(names(nameMap))]
 
   # Set a key on any data tables in myList - use the XXid column as the key
@@ -89,7 +91,7 @@ importRDBESDataDFS <- function(myList,
       # SET KEY
       # essentially orders rows by id column?
       check_key_column(dt[[aTable]], paste0(aTable,"id"))
-      data.table::setkeyv(dt[[aTable]], paste0(aTable,"id")) 
+      data.table::setkeyv(dt[[aTable]], paste0(aTable,"id"))
       # SET NAMES if/where needed
       oldNames <- data.table::copy(colnames(dt[[aTable]]))
       #essure that any strange/wrong names are retained in the result
@@ -100,20 +102,21 @@ importRDBESDataDFS <- function(myList,
                            new = newNames[oldNames], skip_absent = TRUE)
       # SET all empty strings to NA
       # dt[[aTable]][dt[[aTable]]==""] <- NA
-     
+
       if(addmissingColumns){
-         expectedCols <- mapColNamesFieldR$R.Name[mapColNamesFieldR$Table.Prefix == aTable]
+         expectedCols <- RDBEScore::mapColNamesFieldR$R.Name[
+          RDBEScore::mapColNamesFieldR$Table.Prefix == aTable]
          missingCols <- setdiff(expectedCols, colnames(dt[[aTable]]))
-         
+
         for(aCol in missingCols){
            dt[[aTable]]<- dt[[aTable]][,(aCol) := NA]
-        } 
+        }
         # Order the columns of the data table
         data.table::setcolorder(dt[[aTable]], c(expectedCols,extraCols))
-      }       
+      }
     }
   }
-
+  return(dt)
   # Ensure all the columns are the correct data type
   if(castToCorrectDataTypes) dt <- setRDBESDataObjectDataTypes(dt)
 

@@ -124,7 +124,7 @@ is.zip <- function(x) {
 
 convert.col.names <- function(table, new.names = "R.name"){
   # subset mapColNamesFieldR to appropriate table
-  mapColNamesFieldR.sub <- mapColNamesFieldR[mapColNamesFieldR$Table.Prefix == table,]
+  mapColNamesFieldR.sub <- RDBEScore::mapColNamesFieldR[RDBEScore::mapColNamesFieldR$Table.Prefix == table,]
 
   if(new.names == "R.name") nms.new <- mapColNamesFieldR.sub$R.Name
   if(new.names == "field.name") nms.new <- mapColNamesFieldR.sub$Field.Name
