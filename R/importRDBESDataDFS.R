@@ -116,7 +116,6 @@ importRDBESDataDFS <- function(myList,
       }
     }
   }
-  return(dt)
   # Ensure all the columns are the correct data type
   if(castToCorrectDataTypes) dt <- setRDBESDataObjectDataTypes(dt)
 
