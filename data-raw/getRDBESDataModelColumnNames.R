@@ -176,7 +176,7 @@ row.names(mapColNamesFieldR) <- NULL # reset row numbers
 
 mapColNamesFieldR$EssentialForEst <- FALSE
 
-# All DE, SD and SS fields are essential
+# All DE, SD, SS and SL fields are essential
 mapColNamesFieldR[
   mapColNamesFieldR$Table.Prefix %in% c("DE","SD","SS","SL"),
                                         "EssentialForEst"] <- TRUE
@@ -201,7 +201,11 @@ for (aTable in unique(mapColNamesFieldR$Table.Prefix)){
 # FOcatReg is requied by generateMissingSSRows()
 mapColNamesFieldR[mapColNamesFieldR$R.Name == "FOcatReg",
                                           "EssentialForEst"] <- TRUE
-
+# Mandatory fields from VD
+mapColNamesFieldR[
+  mapColNamesFieldR$R.Name %in%
+    c("VDencrVessCode","VDyear","VDctry","VDflgCtry","VDlenCat"),
+                                          "EssentialForEst"] <- TRUE
 
 # TODO - what else is essential?
 
