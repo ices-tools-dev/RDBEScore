@@ -294,6 +294,151 @@ capture.output({ ## suppresses printing of console output when running test()
     expect_silent(validateRDBESDataObject(myH1RawObject))
   })
 
+  test_that("generateMissingSSRows runs correctly for FO All, generates missing SS Dis rows (H1).  Add extra SS col (strict validation = FALSE)", {
+
+    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_18")
+    # Only use a subset of the test data
+    myH1RawObject <- filterRDBESDataObject(myH1RawObject, c("DEstratumName"), c("DE_stratum1_H1", "DE_stratum2_H1", "DE_stratum3_H1"))
+    myH1RawObject <- findAndKillOrphans(myH1RawObject, verbose = FALSE)
+
+    # Set FO to Lan
+    myH1RawObject[["FO"]]$FOcatReg <- "All"
+    # Ensure only SS Dis rows exists
+    myH1RawObject[["SS"]]$SScatchFra <- "Lan"
+
+    # Add a col to SS
+    myH1RawObject[["SS"]]$SSextracCol <- "Test"
+
+    # Try to generate any missing SS rows (strict = FALSE)
+    mySSAfter <- generateMissingSSRows(myH1RawObject,
+                                       "ZW_1965_SpeciesList",
+                                       verbose = FALSE,
+                                       strict = FALSE)
+    SSbefore <- nrow(myH1RawObject[["SS"]])
+    catchFracBefore <- sort(unique(myH1RawObject[["SS"]]$SScatchFra))
+    SSafter <- nrow(mySSAfter)
+    catchFracAfter <- sort(unique(mySSAfter$SScatchFra))
+
+    # We expect the number of SS rows to double
+    expect_equal(SSafter,2*SSbefore)
+    # We expect to have Lan rows added to SS
+    expect_equal(catchFracAfter,c("Dis",catchFracBefore))
+
+    # Take our new SS rows and add them back into our original object
+    myH1RawObject[["SS"]] <- mySSAfter
+    # strict = FALSE validation
+    expect_silent(validateRDBESDataObject(myH1RawObject, strict = FALSE))
+  })
+
+  test_that("generateMissingSSRows runs correctly for FO All, generates missing SS Dis rows (H1).  Add extra FO col (strict validation = FALSE)", {
+
+    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_18")
+    # Only use a subset of the test data
+    myH1RawObject <- filterRDBESDataObject(myH1RawObject, c("DEstratumName"), c("DE_stratum1_H1", "DE_stratum2_H1", "DE_stratum3_H1"))
+    myH1RawObject <- findAndKillOrphans(myH1RawObject, verbose = FALSE)
+
+    # Set FO to Lan
+    myH1RawObject[["FO"]]$FOcatReg <- "All"
+    # Ensure only SS Dis rows exists
+    myH1RawObject[["SS"]]$SScatchFra <- "Lan"
+
+    # Add a col to FO
+    myH1RawObject[["FO"]]$FOextracCol <- "Test"
+
+    # Try to generate any missing SS rows (strict = FALSE)
+    mySSAfter <- generateMissingSSRows(myH1RawObject,
+                                       "ZW_1965_SpeciesList",
+                                       verbose = FALSE,
+                                       strict = FALSE)
+    SSbefore <- nrow(myH1RawObject[["SS"]])
+    catchFracBefore <- sort(unique(myH1RawObject[["SS"]]$SScatchFra))
+    SSafter <- nrow(mySSAfter)
+    catchFracAfter <- sort(unique(mySSAfter$SScatchFra))
+
+    # We expect the number of SS rows to double
+    expect_equal(SSafter,2*SSbefore)
+    # We expect to have Lan rows added to SS
+    expect_equal(catchFracAfter,c("Dis",catchFracBefore))
+
+    # Take our new SS rows and add them back into our original object
+    myH1RawObject[["SS"]] <- mySSAfter
+    # strict = FALSE validation
+    expect_silent(validateRDBESDataObject(myH1RawObject, strict = FALSE))
+  })
+
+  test_that("generateMissingSSRows runs correctly for FO All, generates missing SS Dis rows (H1).  Remove non-essential FO col (strict validation = FALSE)", {
+
+    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_18")
+    # Only use a subset of the test data
+    myH1RawObject <- filterRDBESDataObject(myH1RawObject, c("DEstratumName"), c("DE_stratum1_H1", "DE_stratum2_H1", "DE_stratum3_H1"))
+    myH1RawObject <- findAndKillOrphans(myH1RawObject, verbose = FALSE)
+
+    # Set FO to Lan
+    myH1RawObject[["FO"]]$FOcatReg <- "All"
+    # Ensure only SS Dis rows exists
+    myH1RawObject[["SS"]]$SScatchFra <- "Lan"
+
+    # Remove FOval col
+    myH1RawObject[["FO"]]$FOval <- NULL
+
+    # Try to generate any missing SS rows (strict = FALSE)
+    mySSAfter <- generateMissingSSRows(myH1RawObject,
+                                       "ZW_1965_SpeciesList",
+                                       verbose = FALSE,
+                                       strict = FALSE)
+    SSbefore <- nrow(myH1RawObject[["SS"]])
+    catchFracBefore <- sort(unique(myH1RawObject[["SS"]]$SScatchFra))
+    SSafter <- nrow(mySSAfter)
+    catchFracAfter <- sort(unique(mySSAfter$SScatchFra))
+
+    # We expect the number of SS rows to double
+    expect_equal(SSafter,2*SSbefore)
+    # We expect to have Lan rows added to SS
+    expect_equal(catchFracAfter,c("Dis",catchFracBefore))
+
+    # Take our new SS rows and add them back into our original object
+    myH1RawObject[["SS"]] <- mySSAfter
+    # strict = FALSE validation
+    expect_silent(validateRDBESDataObject(myH1RawObject, strict = FALSE))
+  })
+
+
+  test_that("generateMissingSSRows runs correctly for FO All, generates missing SS Dis rows (H1).  Add extra SL col (strict validation = FALSE)", {
+
+    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_18")
+    # Only use a subset of the test data
+    myH1RawObject <- filterRDBESDataObject(myH1RawObject, c("DEstratumName"), c("DE_stratum1_H1", "DE_stratum2_H1", "DE_stratum3_H1"))
+    myH1RawObject <- findAndKillOrphans(myH1RawObject, verbose = FALSE)
+
+    # Set FO to Lan
+    myH1RawObject[["FO"]]$FOcatReg <- "All"
+    # Ensure only SS Dis rows exists
+    myH1RawObject[["SS"]]$SScatchFra <- "Lan"
+
+    # Add a col to SL
+    myH1RawObject[["SL"]]$SLextracCol <- "Test"
+
+    # Try to generate any missing SS rows (strict = FALSE)
+    mySSAfter <- generateMissingSSRows(myH1RawObject,
+                                       "ZW_1965_SpeciesList",
+                                       verbose = FALSE,
+                                       strict = FALSE)
+    SSbefore <- nrow(myH1RawObject[["SS"]])
+    catchFracBefore <- sort(unique(myH1RawObject[["SS"]]$SScatchFra))
+    SSafter <- nrow(mySSAfter)
+    catchFracAfter <- sort(unique(mySSAfter$SScatchFra))
+
+    # We expect the number of SS rows to double
+    expect_equal(SSafter,2*SSbefore)
+    # We expect to have Lan rows added to SS
+    expect_equal(catchFracAfter,c("Dis",catchFracBefore))
+
+    # Take our new SS rows and add them back into our original object
+    myH1RawObject[["SS"]] <- mySSAfter
+    # strict = FALSE validation
+    expect_silent(validateRDBESDataObject(myH1RawObject, strict = FALSE))
+  })
+
   test_that("generateMissingSSRows runs correctly for FO All, when there are no missing SS Catch rows (H1)", {
 
     myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_18")

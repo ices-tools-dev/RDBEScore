@@ -209,7 +209,7 @@ generateMissingSSRows <- function(RDBESDataObject,
   if (verbose) {
     print(paste0(nrow(SStoAdd), " rows of SS data have been added"))
   }
-  SStoReturn <- rbind(mySS, SStoAdd)
+  SStoReturn <- rbind(mySS, SStoAdd, fill = TRUE)
   if (verbose) {
     print(paste0(nrow(SStoReturn), " rows of SS data will be returned"))
   }
