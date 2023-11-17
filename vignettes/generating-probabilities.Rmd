@@ -38,7 +38,8 @@ First we'll load some example data from the RDBES and check it's valid.  It's a 
 myH1DataObject <- H1Example
      
 # filter data for DEstratumName==DE_stratum1_H1 to make object smaller and easier to handle
-myH1DataObject <- filterAndTidyRDBESDataObject(myH1DataObject,c("DEstratumName"), c("DE_stratum1_H1"), killOrphans=TRUE)
+myH1DataObject <- filterAndTidyRDBESDataObject(myH1DataObject,c("DEstratumName"), c("DE_stratum1_H1"),
+                                               killOrphans=TRUE)
 ```
 
 The functions that generate probabilities do not yet deal with lower hierarchies A and B so we rework a bit the data so it looks like lower hierarchy C. 
@@ -56,9 +57,11 @@ myH1DataObject[["BV"]]$BVnumTotal <- 10
 myH1DataObject[["BV"]]$BVnumSamp <- 10
 
 # reworking stratification of VS table
-myH1DataObject[["VS"]][VSencrVessCode %in% c("VDcode_5","VDcode_8","VDcode_9")]$VSstratumName <- "VS_stratum1"
+myH1DataObject[["VS"]][VSencrVessCode %in% c("VDcode_5","VDcode_8","VDcode_9")]$VSstratumName <- 
+  "VS_stratum1"
 myH1DataObject[["VS"]][VSencrVessCode %in% c("VDcode_5","VDcode_8","VDcode_9")]$VSnumTotal <- 30
-myH1DataObject[["VS"]][VSencrVessCode %in% c("VDcode_6","VDcode_7","VDcode_10")]$VSstratumName <- "VS_stratum2"
+myH1DataObject[["VS"]][VSencrVessCode %in% c("VDcode_6","VDcode_7","VDcode_10")]$VSstratumName <- 
+  "VS_stratum2"
 myH1DataObject[["VS"]][VSstratumName %in% "VS_stratum1",]$VSnumSamp <- 5
 myH1DataObject[["VS"]][VSstratumName %in% "VS_stratum2",]$VSnumSamp <- 4
 
@@ -66,9 +69,11 @@ myH1DataObject[["VS"]][VSstratumName %in% "VS_stratum2",]$VSnumSamp <- 4
 myH1DataObject[["FT"]]$FTselectMeth <- "SRSWOR"
 
 tmp<-myH1DataObject[["FT"]]
-tmp$VSencrVessCode<-myH1DataObject[["VS"]]$VSencrVessCode[match(myH1DataObject[["FT"]]$VSid,myH1DataObject[["VS"]]$VSid)]
+tmp$VSencrVessCode<-myH1DataObject[["VS"]]$VSencrVessCode[match(myH1DataObject[["FT"]]$VSid,
+                                                                myH1DataObject[["VS"]]$VSid)]
 
-tmp$FTnumSamp<-as.integer(table(tmp$VSencrVessCode))[match(tmp$VSencrVessCode, names(table(tmp$VSencrVessCode)))]
+tmp$FTnumSamp<-as.integer(table(tmp$VSencrVessCode))[match(tmp$VSencrVessCode, 
+                                                           names(table(tmp$VSencrVessCode)))]
 
 tmp[tmp$VSencrVessCode %in% c("VDcode_5"),]$FTnumTotal<-100
 tmp[tmp$VSencrVessCode %in% c("VDcode_6"),]$FTnumTotal<-50
@@ -99,20 +104,23 @@ The final data contains 10 ages in each of 243 hauls sampled from 81 trips done 
 Examining the selection methods used in the VS table it is visible that the 9 vessels were selected with replacement (SRSWR) out of two strata, one strata with a total of 30 vessels (VS_stratum1) and one with a total of 60 vessels (VS_stratum2). It is also noticeable that selection and inclusion probabilities were not declared during upload.
 
 ```{r}
-unique(myH1DataObject[["VS"]][,c("VSstratification","VSstratumName","VSselectMeth","VSnumTotal","VSnumSamp","VSselProb","VSincProb")])
+unique(myH1DataObject[["VS"]][,c("VSstratification","VSstratumName","VSselectMeth",
+                                 "VSnumTotal","VSnumSamp","VSselProb","VSincProb")])
 ```
 
 With regards to trips these were selected without replacement (SRSWOR). either 9 or 18 trips were selected from each vessel. Individual vessels registered total number of trips between 25 and 100 trips. We also see that selection and inclusion probabilities were not declared.
 
 ```{r}
-unique(myH1DataObject[["FT"]][,c("VSid","FTstratification","FTstratumName","FTselectMeth","FTnumTotal","FTnumSamp","FTselProb","FTincProb")])
+unique(myH1DataObject[["FT"]][,c("VSid","FTstratification","FTstratumName","FTselectMeth",
+                                 "FTnumTotal","FTnumSamp","FTselProb","FTincProb")])
 ```
 
 With regards to hauls the example data indicates that 20 were done in every trip(!) from which 3 were sampled. Not very likely data, but good enough for demonstration purposes. Also here we see that selection and inclusion probabilities were not declared.
 
 ```{r}
 table(myH1DataObject[["FO"]]$FTid)
-unique(myH1DataObject[["FO"]][,c("FOid","FOstratification","FOstratumName","FOselectMeth","FOnumTotal","FOnumSamp","FOselProb","FOincProb")])
+unique(myH1DataObject[["FO"]][,c("FOid","FOstratification","FOstratumName","FOselectMeth",
+                                 "FOnumTotal","FOnumSamp","FOselProb","FOincProb")])
 
 ```
 
@@ -126,13 +134,17 @@ note: To check the data for some issues related to selection methods and probabi
 
 ```{r generateProbs}
 myH1DataObject_uptde<-myH1DataObject
-myH1DataObject_uptde[["VS"]] <- generateProbs(myH1DataObject[["VS"]], probType="inclusion")
+myH1DataObject_uptde[["VS"]] <- generateProbs(myH1DataObject[["VS"]], 
+                                              probType="inclusion")
 # display changes
-myH1DataObject_uptde[["VS"]][,c("VSstratification","VSstratumName","VSselectMeth","VSnumTotal","VSnumSamp","VSselProb","VSincProb")]
+myH1DataObject_uptde[["VS"]][,c("VSstratification","VSstratumName","VSselectMeth",
+                                "VSnumTotal","VSnumSamp","VSselProb","VSincProb")]
 
-myH1DataObject_uptde[["VS"]] <- generateProbs(myH1DataObject_uptde[["VS"]], probType="selection")
+myH1DataObject_uptde[["VS"]] <- generateProbs(myH1DataObject_uptde[["VS"]], 
+                                              probType="selection")
 # display changes
-myH1DataObject_uptde[["VS"]][,c("VSstratification","VSstratumName","VSselectMeth","VSnumTotal","VSnumSamp","VSselProb","VSincProb")]
+myH1DataObject_uptde[["VS"]][,c("VSstratification","VSstratumName","VSselectMeth",
+                                "VSnumTotal","VSnumSamp","VSselProb","VSincProb")]
 ```
 
 ## generating probabilities for an entire RDBES data object: `applyGenerateProbs`
@@ -148,13 +160,17 @@ The function `applyGenerateProbs` generates selection or inclusion probabilities
 validateRDBESDataObject(myH1DataObject_uptde)
 
 # display changes
-myH1DataObject_uptde[["VS"]][,c("VSstratification","VSstratumName","VSselectMeth","VSnumTotal","VSnumSamp","VSselProb","VSincProb")]
+myH1DataObject_uptde[["VS"]][,c("VSstratification","VSstratumName","VSselectMeth",
+                                "VSnumTotal","VSnumSamp","VSselProb","VSincProb")]
 
-unique(myH1DataObject_uptde[["FT"]][,c("VSid","FTstratification","FTstratumName","FTselectMeth","FTnumTotal","FTnumSamp","FTselProb","FTincProb")])
+unique(myH1DataObject_uptde[["FT"]][,c("VSid","FTstratification","FTstratumName",
+                                       "FTselectMeth","FTnumTotal","FTnumSamp","FTselProb","FTincProb")])
 
-unique(myH1DataObject_uptde[["FO"]][,c("FOid","FOstratification","FOstratumName","FOselectMeth","FOnumTotal","FOnumSamp","FOselProb","FOincProb")])
+unique(myH1DataObject_uptde[["FO"]][,c("FOid","FOstratification","FOstratumName",
+                                       "FOselectMeth","FOnumTotal","FOnumSamp","FOselProb","FOincProb")])
 
-unique(myH1DataObject_uptde[["BV"]][,c("BVid","BVfishId","BVselectMeth","BVnumTotal","BVnumSamp","BVselProb","BVincProb")])
+unique(myH1DataObject_uptde[["BV"]][,c("BVid","BVfishId","BVselectMeth","BVnumTotal",
+                                       "BVnumSamp","BVselProb","BVincProb")])
 
 
 ```
