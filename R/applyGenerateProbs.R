@@ -22,9 +22,8 @@
 #' @seealso \code{\link{runChecksOnSelectionAndProbs}}
 #' \code{\link{generateProbs}}
 #'
-#' examples for now see
-#' https://github.com/ices-eg/WK_RDBES/tree/master/WKRDB-EST2/chairs/Nuno
-#'
+#' @examples
+#' # To be added
 
 applyGenerateProbs <- function(x, probType, overwrite,
                                runInitialProbChecks = TRUE,
@@ -80,8 +79,8 @@ applyGenerateProbs <- function(x, probType, overwrite,
         #}
         if(!i %in% c("SA","FM","BV")){
                 if (length(unique(x[[grep("^..clusterName$", names(x), value = TRUE)]]))
-            > 1 | any(x[[grep("^..clustering$", names(x), value = TRUE)]]==
-                      "Y")) {
+            > 1 | any(x[[grep("^..clustering$", names(x), value = TRUE)]]!=
+                      "N")) {
           stop("clustering present: not yet developed")
         }}
         print(paste0(
