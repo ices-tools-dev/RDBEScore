@@ -44,10 +44,10 @@ runChecksOnSelectionAndProbs which main tests need to be passed before
 probabilities can be calculated. The it calls generateProbs for
 each sample in each sampling level of the hierarchy.
 }
+\examples{
+# To be added
+}
 \seealso{
 \code{\link{runChecksOnSelectionAndProbs}}
 \code{\link{generateProbs}}
-
-examples for now see
-https://github.com/ices-eg/WK_RDBES/tree/master/WKRDB-EST2/chairs/Nuno
 }

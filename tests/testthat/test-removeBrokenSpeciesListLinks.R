@@ -7,6 +7,8 @@ test_that("removeBrokenSpeciesListLinks runs without errors
     myH1RawObject <-
     importRDBESDataCSV(rdbesExtractPath = myPath)
 
+})
+
 test_that("removeBrokenSpeciesListLinks prduces an error
           if the SL table is NULL",  {
 
@@ -36,7 +38,6 @@ test_that("removeBrokenSpeciesListLinks runs without errors
         removeBrokenSpeciesListLinks(objectToCheck = myFilteredObject
                                      ,verbose = FALSE)
                                     ,NA)
-
 })
 
 }) ## end capture.output
