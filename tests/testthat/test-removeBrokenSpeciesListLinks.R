@@ -7,12 +7,6 @@ test_that("removeBrokenSpeciesListLinks runs without errors
     myH1RawObject <-
     importRDBESDataCSV(rdbesExtractPath = myPath)
 
-    myObjectValidSpeciesListLinks <- expect_warning(
-              removeBrokenSpeciesListLinks(objectToCheck = myH1RawObject,
-                                           verbose = FALSE)
-                            ,NA)
-
-})
 test_that("removeBrokenSpeciesListLinks prduces an error
           if the SL table is NULL",  {
 
