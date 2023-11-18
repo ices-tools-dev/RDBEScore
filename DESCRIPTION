@@ -55,7 +55,7 @@ Author: c(
            email = "nicolas.goni@luke.fi"),	
 	person(given = "Annica", 
            family = "de Groote", 
-           role = c("aut"), 
+           role = c("ctb"), 
            email = "annica.isaksson.de.groote@slu.se"),		   
 	person(given = "Jonathan", 
            family = "Rault", 
