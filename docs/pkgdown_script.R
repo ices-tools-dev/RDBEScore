@@ -1,3 +1,6 @@
+# Preview site
+pkgdown::preview_site()
+
 ## Build site
 
 pkgdown::build_site()
