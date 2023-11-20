@@ -1,9 +1,9 @@
  
-[![codecov](https://codecov.io/gh/ices-tools-prod/RDBEScore/branch/master/graph/badge.svg)](https://codecov.io/gh/ices-tools-prod/RDBEScore)
-[![CRAN Status](http://www.r-pkg.org/badges/version/RDBEScore)](https://cran.r-project.org/package=RDBEScore)
 [![License](https://img.shields.io/badge/license-GPL%20(%3E%3D%202)-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 <!--
+[![codecov](https://codecov.io/gh/ices-tools-prod/RDBEScore/branch/master/graph/badge.svg)](https://codecov.io/gh/ices-tools-prod/RDBEScore)
 [![GitHub release](https://img.shields.io/github/release/ices-tools-prod/RDBEScore.svg?maxAge=2592001)]()
+[![CRAN Status](http://www.r-pkg.org/badges/version/RDBEScore)](https://cran.r-project.org/package=RDBEScore)
 [![CRAN Monthly](http://cranlogs.r-pkg.org/badges/RDBEScore)](https://cran.r-project.org/package=RDBEScore)
 [![CRAN Total](http://cranlogs.r-pkg.org/badges/grand-total/RDBEScore)](https://cran.r-project.org/package=RDBEScore)
 -->
