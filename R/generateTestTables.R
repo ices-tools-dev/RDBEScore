@@ -71,11 +71,12 @@ makeTbl <- function(tblName,
 #' @inheritDotParams makeTbl
 #'
 #' @return a list of named data.table's
-#' @export
 #'
 #' @examples
+#' \dontrun{
 #' generateTestTbls(c("A", "B", "C"), selMeth = "SRSWOR")
 #' generateTestTbls(LETTERS[1:5]) # makes 5 tables with method CENSUS
+#' }
 generateTestTbls <- function(tblNames, prevTbls = list(), ...) {
   tbl <- makeTbl(tblNames[1], prevTbls, ...)
   prevTbls[[tblNames[1]]] <- tbl

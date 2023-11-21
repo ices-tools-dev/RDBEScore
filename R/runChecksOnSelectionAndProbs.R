@@ -7,6 +7,8 @@
 #'
 #' @param x - RDBES raw object
 #' @param verbose - If TRUE prints the issue behind the stop
+#' @param strict (Optional) This function validates its input data - should
+#' the validation be strict? The default is TRUE.
 #'
 #' @return nothing
 #'
@@ -20,11 +22,13 @@
 #'
 
 
-runChecksOnSelectionAndProbs <- function(x, verbose = TRUE) {
+runChecksOnSelectionAndProbs <- function(x,
+                                         verbose = FALSE,
+                                         strict = TRUE) {
 
 
   # Check we have a valid RDBESDataObject before doing anything else
-  validateRDBESDataObject(x, verbose = FALSE)
+  validateRDBESDataObject(x, verbose = verbose, strict = strict)
 
   if (length(unique(x[["DE"]]$DEhierarchy)) > 1) stop(">1 hierarchy in data not
                                                     yet specified")

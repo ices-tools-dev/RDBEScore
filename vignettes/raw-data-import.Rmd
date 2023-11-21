@@ -14,10 +14,11 @@ knitr::opts_chunk$set(
 )
 ```
 
-## Introduction 
+## Introduction
 
-The aim of this document is to outline the basic workflow of importing data downloaded from the [ICES Regional Database & Estimation System (RDBES)](https://sboxrdbes.ices.dk/#/) into `R` using the `RDBEScore` package.
+The aim of this document is to outline the basic workflow of importing data downloaded from the [ICES Regional Database & Estimation System (RDBES)](https://rdbes.ices.dk/#/) or a `list` object containing data frames (or data.tables) into `R` using the `RDBEScore` package.
 
+The function **createRDBESDataObject** is intended to directly import Commercial Landing (CL), Commercial Effort (CE) and Commercial Sampling (CS) tables downloaded from [RDBES](https://rdbes.ices.dk/#/).
 
 ## Load the package
 
@@ -25,86 +26,95 @@ The aim of this document is to outline the basic workflow of importing data down
 library(RDBEScore)
 ```
 
+
 ## Importing zipped files
 
-```{r}
-#directory holding the files
-ddir <- "../tests/testthat/h1_v_1_19_13/"
-
-#the files to import
-zipFiles <- c("H1_2022_10_05.zip",
-              "HSL_2022_10_05.zip",
-              "HVD_2022_10_05.zip",
-              "VesselSelection.csv")
-
-#adding full path
-zipFiles <- paste0(ddir, zipFiles)
-```
-
-
-It can directly import the `.zip` archive from the RDBES download containing all mandatory Hierarchy tables plus VD and SL:
+It can directly import the `.zip` archive from the RDBES download containing all mandatory hierarchy tables plus VD and SL:
 
 ```{r}
-importedH1 <- importRDBESDownloadData("../tests/testthat/h1_v_1_19_13/H1_2022_10_05.zip")
+importedH1 <- createRDBESDataObject(input = "./vignetteData/H1_2023_10_16.zip")
 #print the not NULL table names
 names(importedH1[!unlist(lapply(importedH1, is.null))])
 ```
-
-It can import the VD or SL tables `.zip` archives, but will include all other tables as `NULL`:
-
+The easiest way to get a glimpse of the imported data hierarchy and single table row counts is just to print it. The information also includes the range of number sampled and number total for each table together with the selection method and number of rows.
 ```{r}
-importedSL <- importRDBESDownloadData("../tests/testthat/h1_v_1_19_13/HSL_2022_10_05.zip")
-#print the not NULL table names
-str(importedSL)
+#calls the print function 
+importedH1
 ```
 
-or a combination of both
+
+It can import the CL, CE, VD or SL tables `.zip` archives, but will include all other tables as `NULL`:
 
 ```{r}
-importedTables <- importRDBESDownloadData(zipFiles[1:3])
+importedSL <- createRDBESDataObject(input = "./vignetteData/HSL_2023_10_16.zip")
+#print the not NULL table names
+importedSL
+```
+
+It can also handle overwriting `zip` file original files with files appearing later in the list. However each overwrite results in a warning!
+
+```{r}
+importFiles <- c("./vignetteData/HSL_2023_10_16.zip",
+                 "./vignetteData/H1_2023_10_16.zip")
+importedTables <- createRDBESDataObject(input = importFiles)
 #print the not NULL table names
 names(importedTables[!unlist(lapply(importedTables, is.null))])
 ```
 
-It can also handle overwriting zip file original files with files apearing later in the list. However each overwrite results in a warning!
-
-
-```{r}
-importedTables <- importRDBESDownloadData(zipFiles)
-#print the not NULL table names
-names(importedTables[!unlist(lapply(importedTables, is.null))])
-```
-
+## Importing csv files
 
 It can also import the unzipped `.csv` files with the default RDBES names:
 
 ```{r}
-importedH5 <- createRDBESDataObject("../tests/testthat/h5_v_1_19_13")
+importedVS <- createRDBESDataObject(input = "./vignetteData/",
+                                    listOfFileNames = list("VS" = "VesselSelection.csv"))
 #print the not NULL table names
 names(importedTables[!unlist(lapply(importedTables, is.null))])
 ```
 
+## Importing list of data frames
 
-## Object class
-
-It should be noted that the objects created are of the S3 class "RDBESDataObject"
+It can also import a `list` object containing data frames (or data.tables). However, it should be noted that this type of import bypasses the RDBES upload data integrity checks.
 
 ```{r}
-importedTables <- importRDBESDownloadData(zipFiles)
+#list of data frames 
+listOfDfsH1 <- readRDS("./vignetteData/H1_2023_10_19.rds")
+#print the class of the list elements 
+sapply(listOfDfsH1, class)
+```
+
+```{r}
+importedList <- createRDBESDataObject(listOfDfsH1)
+```
+
+## Object class RDBESDataObject
+
+It should be noted that the objects created are of the S3 class "**RDBESDataObject**". The class has defined **print()**, **summary()** and **sort()** methods. For more info on theese see vignette [Manipulating RDBESDataObjects](manipulating-rdbesdataobjects.html). 
+
+```{r}
+importedTables <- createRDBESDataObject("./vignetteData/H1_2023_10_16.zip")
 class(importedTables)
 ```
 
 
-RDBESDataObject structure can be validated using the validateRDBESDataObject() function.
+### validate RDBESDataObject
+
+RDBESDataObject structure can be validated using the **validateRDBESDataObject()** function.
 
 ```{r}
-importedTables <- importRDBESDownloadData(zipFiles)
-validateRDBESDataObject(importedTables, verbose = FALSE)
+validateRDBESDataObject(importedTables, verbose = TRUE)
 ```
 
 
-```{r}
+To see what you can do with the imported **RDBESDataObject** see other vignettes like [Manipulating RDBESDataObjects](manipulating-rdbesdataobjects.html).
+
+Other vignettes:
+
+```{r echo=FALSE, results='asis'}
+vignettes <- as.data.frame(browseVignettes(package = "RDBEScore")$RDBEScore)
+for (i in seq_along(vignettes$PDF)) {
+  cat(sprintf("- [%s](%s)\n", vignettes$Title[i], vignettes$PDF[i]))
+}
+
 #END
 ```
-
-

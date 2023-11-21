@@ -19,6 +19,9 @@
 #' care. Default value is FALSE.
 #' @param verbose (Optional) Set to TRUE if you want informative text printed
 #' out, or FALSE if you don't.  The default is FALSE.
+#' @param strict (Optional) Set to TRUE if you want to be sure all columns
+#' are present in the data, set to FALSE if you only want to check that
+#' essential columns are present.  The default is TRUE.
 #'
 #' @return Returns objectToCheck
 #' @md
@@ -27,44 +30,63 @@
 #' @examples
 #' \dontrun{
 #' myH1RawObject <-
-#' createRDBESDataObject(rdbesExtractPath = "tests/testthat/h1_v_1_19")
+#' importRDBESDataCSV(rdbesExtractPath = "tests/testthat/h1_v_1_19")
 #' validateRDBESDataObject(myH1RawObject)}
 #'
 validateRDBESDataObject <- function(objectToCheck,
                                 checkDataTypes = FALSE,
-                                verbose = FALSE) {
-  #allowedNamesInList <- unique(RDBEScore::mapColNamesFieldR$Table.Prefix)
-  allowedNamesInList <- unique(mapColNamesFieldR$Table.Prefix)
+                                verbose = FALSE,
+                                strict = TRUE) {
 
-  # CHECK 1 Have we just been passed NA?
+  allowedNamesInList <- unique(RDBEScore::mapColNamesFieldR$Table.Prefix)
+
+  # STEP 1 OF CHECKS
+
+  # CHECK 1 Have we just been passed NA or NULL?
   if (length(is.na(objectToCheck)) == 1) {
-    if (is.na(objectToCheck)) {
+    if (is.na(objectToCheck)){
       stop("objectToCheck is NA")
     }
-  # CHECK 2 Is this an object of class RDBESDataObject?  It should be!
-  } else if (! 'RDBESDataObject' %in% class(objectToCheck)) {
-    stop("objectToCheck is not of the class RDBESDataObject")
-  # CHECK 3 Is this a list?  It should be!
-  } else if (!(is.list(objectToCheck) & inherits(objectToCheck, "list"))) {
-    stop("objectToCheck does not inherit from list")
-    # CHECK 4 Does this list have any names that aren't allowed?
-  } else if (!all(names(objectToCheck) %in% allowedNamesInList)) {
-    stop(paste("objectToCheck is a list but has extra names ",
-      paste(names(objectToCheck), collapse = ","),
-      sep = ""
-    ))
-    # CHECK 5 Does the list have an entry for all the required names?
-  } else if (!all(allowedNamesInList %in% names(objectToCheck))) {
-    print(paste(names(objectToCheck), collapse = ","))
-    stop(paste("objectToCheck is a list but does not contain ",
-      "all the required names ",
-      paste(names(objectToCheck), collapse = ","),
-      sep = ""
-    ))
-  } else { #1
+    if (is.null(objectToCheck)){
+      stop("objectToCheck is NULL")
+    }
+  }
 
-    # Get any objectToCheck entries which aren't null or data tables
-    badEntries <- objectToCheck[!
+  # CHECK 2 Is this an object of class RDBESDataObject?  It should be!
+  if (! 'RDBESDataObject' %in% class(objectToCheck)) {
+    stop("objectToCheck is not of the class RDBESDataObject")
+  }
+
+  # CHECK 3 Is this a list?  It should be!
+  if (!(is.list(objectToCheck) & inherits(objectToCheck, "list"))) {
+    stop("objectToCheck does not inherit from list")
+  }
+
+  # CHECK 4 Does this list have any names that aren't required?
+  # (this is now only an error if we being strict)
+  if (!all(names(objectToCheck) %in% allowedNamesInList)) {
+    if (strict){
+      stop(paste("objectToCheck is a list but has extra names ",
+                 paste(names(objectToCheck), collapse = ","),
+                 sep = ""
+      ))
+    }
+  }
+
+  # CHECK 5 Does the list have an entry for all the required names?
+  if (!all(allowedNamesInList %in% names(objectToCheck))) {
+      print(paste(names(objectToCheck), collapse = ","))
+      stop(paste("objectToCheck is a list but does not contain ",
+                 "all the required names ",
+                 paste(names(objectToCheck), collapse = ","),
+                 sep = ""
+      ))
+  }
+
+  # STEP 2 OF CHECKS
+
+  # Get any objectToCheck entries which aren't null or data tables
+  badEntries <- objectToCheck[!
     sapply(
       objectToCheck,
       function(x) {
@@ -76,61 +98,80 @@ validateRDBESDataObject <- function(objectToCheck,
         }
         returnValue
       }
-      )]
-    # CHECK 6 Are there any entries which aren't NULL or data tables?
-    if (length(badEntries) > 0) {
-      stop(paste("objectToCheck is a list but contains some entries which are ",
-        "not NULL or data tables",
+    )]
+
+  if (length(badEntries) > 0) {
+    stop(paste("objectToCheck is a list but contains some entries which are ",
+        "not NULL or data tables ",
         paste(names(badEntries), collapse = ","),
         sep = ""
-      ))
-    } else { #2
+    ))
+  }
 
-      # Print out null entries for information
-      nullEntries <- objectToCheck[sapply(objectToCheck, is.null)]
-      emptyTables <- unlist(sapply(objectToCheck,
-                                          function(x){nrow(x) == 0}))
-      if (length(nullEntries)>0){
-        if (verbose){
-          print(paste("Note that ",names(nullEntries)
-                     ," is NULL but this is allowed in an RDBESDataObject"
+
+  # Print out null and empty entries for information
+  if (verbose){
+    nullEntries <- objectToCheck[sapply(objectToCheck, is.null)]
+    if (length(nullEntries)>0){
+      print(paste("Note that ",names(nullEntries)
+                  ," is NULL but this is allowed in an RDBESDataObject"
                   , sep = ""))
+    }
+
+    emptyTables <- unlist(sapply(objectToCheck, function(x){nrow(x) == 0}))
+    if (any(emptyTables)){
+      print(paste("Note that ",names(emptyTables)
+                  ," has 0 rows but this is allowed in an RDBESDataObject"
+                  , sep = ""))
+    }
+  }
+
+
+  # From now on we will just check the non-NULL entries
+  nonNullEntries <- objectToCheck[sapply(objectToCheck, Negate(is.null))]
+
+  # The next checks are only relevant if we don't have an empty object
+  if (length(nonNullEntries) > 0) {
+
+        warningText <- ""
+        validRDBESDataObject <- TRUE
+
+        # CHECK 6 Check that keys are set on the data tables
+        for(aTable in names(nonNullEntries)){
+            if (is.null(key(nonNullEntries[[aTable]]))){
+              validRDBESDataObject <- FALSE
+              warningText <- paste0(warningText, aTable, " does not have a key set. ")
+            }
         }
-      }
 
-      if (any(emptyTables)){
-        if (verbose){
-          print(paste("Note that ",names(emptyTables[emptyTables])
-                      ," has 0 rows but this is allowed in an RDBESDataObject"
-                      , sep = ""))
+        # CHECK 7 Check the field names
+        myReturnValue <- validateRDBESDataObjectFieldNames(nonNullEntries,
+                                          verbose = verbose,
+                                          strict = strict)
+        if (!is.na(myReturnValue[["warningText"]])){
+          warningText <- paste0(warningText,myReturnValue[["warningText"]],". ")
         }
-      }
+        if (!myReturnValue[["validRDBESDataObject"]]) {
+          validRDBESDataObject <- FALSE
+        }
 
-      # Just check non-NULL entries
-      nonNullEntries <- objectToCheck[sapply(objectToCheck, Negate(is.null))]
+        # CHECK 8 check whether there are any duplicates
+        myReturnValue <- validateRDBESDataObjectDuplicates(nonNullEntries,
+                                                        verbose = verbose,
+                                                        strict = strict)
+        if (!is.na(myReturnValue[["warningText"]])){
+          warningText <- paste0(warningText,myReturnValue[["warningText"]],". ")
+        }
+        if (!myReturnValue[["validRDBESDataObject"]]) {
+          validRDBESDataObject <- FALSE
+        }
 
-      # The next checks are only relevent if we don't have an empty object
-      if (length(nonNullEntries) > 0) { #3
-        #TODO: implement content, type checks using stop and fix this mess
-
-        # Call a function to check whether the required field names
-        # are present and that there aren't duplicates
-        myReturnValue <- validateRDBESDataObjectContent(nonNullEntries)
-        warningText <- myReturnValue[["warningText"]]
-        validRDBESDataObject <- myReturnValue[["validRDBESDataObject"]]
-
-        # If we also want to check the data types of the columns
-        # then go ahead and call the function to do that
+        # CHECK 9 (Optional)  check the data types of the columns
         if (checkDataTypes){
           myDiffs <- validateRDBESDataObjectDataTypes(nonNullEntries)
           numberOfDifferences <- nrow(myDiffs)
           if (numberOfDifferences >0 ){
             validRDBESDataObject <- FALSE
-            if(is.na(warningText)){
-              warningText <- ""
-            } else {
-              warningText <- paste0(warningText,". ")
-            }
             warningText <- paste0(warningText,
               "objectToCheck has the following fields ",
               "with incorrect data types: ",
@@ -139,14 +180,14 @@ validateRDBESDataObject <- function(objectToCheck,
               )
           }
         }
-        if(!validRDBESDataObject) {
+        if(!validRDBESDataObject & strict) {
           stop(warningText)
         }
-      } #3
-    } #2
-  } #1
+        if(!validRDBESDataObject) {
+          warning(warningText)
+        }
+  }
 
-  # Return the validation result
   return(invisible(objectToCheck));
 }
 

@@ -6,10 +6,13 @@ designVariables <- c(
   "selProb", "incProb", "selectMeth", "unitName",
   "selectMethCluster", "numTotalClusters",
   "numSampClusters", "selProbCluster",
-  "incProbCluster", "samp", "noSampReason"
+  "incProbCluster", "samp", "noSampReason",
+  "nonRespCol", "auxVarTot", "auxVarValue",
+  "auxVarName", "auxVarUnit"
 )
+
 
 #outFile <- "data\\designVariables.RData"
 
 # Save the data
-usethis::use_data(designVariables)
+usethis::use_data(designVariables, overwrite = TRUE)

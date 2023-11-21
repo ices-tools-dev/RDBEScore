@@ -5,9 +5,19 @@
 \alias{checkRDBESDataObject}
 \title{Check Whether an \code{RDBESDataObject} is in a Valid Format}
 \usage{
-validateRDBESDataObject(objectToCheck, checkDataTypes = FALSE, verbose = FALSE)
+validateRDBESDataObject(
+  objectToCheck,
+  checkDataTypes = FALSE,
+  verbose = FALSE,
+  strict = TRUE
+)
 
-checkRDBESDataObject(objectToCheck, checkDataTypes = FALSE, verbose = FALSE)
+checkRDBESDataObject(
+  objectToCheck,
+  checkDataTypes = FALSE,
+  verbose = FALSE,
+  strict = TRUE
+)
 }
 \arguments{
 \item{objectToCheck}{RDBESDataObject i.e. a list of data.tables}
@@ -18,6 +28,10 @@ care. Default value is FALSE.}
 
 \item{verbose}{(Optional) Set to TRUE if you want informative text printed
 out, or FALSE if you don't.  The default is FALSE.}
+
+\item{strict}{(Optional) Set to TRUE if you want to be sure all columns
+are present in the data, set to FALSE if you only want to check that
+essential columns are present.  The default is TRUE.}
 }
 \value{
 Returns objectToCheck
@@ -42,7 +56,7 @@ uploaded data.
 \examples{
 \dontrun{
 myH1RawObject <-
-createRDBESDataObject(rdbesExtractPath = "tests/testthat/h1_v_1_19")
+importRDBESDataCSV(rdbesExtractPath = "tests/testthat/h1_v_1_19")
 validateRDBESDataObject(myH1RawObject)}
 
 }

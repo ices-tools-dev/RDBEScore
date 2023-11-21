@@ -1,0 +1,158 @@
+# =============
+Type: stratified sampling
+Script: BuildTextBookDataUpload_Pckg_survey_apistrat_H1.R
+Package: survey
+Dataset: apistrat
+As RDBES hierarchy: H1
+Reference:
+Where
+DEyear = 1965
+DEsamplingScheme = "WGRDBES-EST TEST 1"
+DEstratumName = "WGRDBES-EST_TEST_1_Pckg_survey_data_apistrat_H1"
+SDcountry = "ZW"
+# =============
+
+# =============
+Type: 1-stage cluster sampling with equal probabilities. Unequal cluster sizes
+Script: BuildTextBookDataUpload_Pckg_survey_apiclus1_H1.R
+Package: survey
+Dataset: apiclus1
+As RDBES hierarchy: H1
+Reference: 
+  # [1] T. Lumley (2023) "survey: analysis of complex survey samples". R package version 4.2
+Where:
+  # [1] see example in ?survey::api; also in https://cran.r-project.org/web/packages/survey/vignettes/precalibrated.pdf
+DEyear = 1965
+DEsamplingScheme = "WGRDBES-EST TEST 1"
+DEstratumName = "WGRDBES-EST_TEST_1_Pckg_survey_data_apiclus1_H1"
+SDcountry = "ZW"
+Notes: 
+	# 1-stage clustering (1C) in table VS; 
+	# original pw provided as VSinclusionProbCluster [from vignette: The sampling weights pw are already calibrated to sum to the known number of schools in the population]
+# =============
+
+# =============
+Type: 2-stage cluster sampling with equal probabilities. Unequal cluster sizes
+Script: BuildTextBookDataUpload_Pckg_SDAResources_apiclus2_v2_H1.R
+Package: SDAResources
+Dataset: apiclus2 (enroll)
+As RDBES hierarchy: H1
+Reference: 
+  # [1] T. Lumley (2023) "survey: analysis of complex survey samples". R package version 4.2
+Where:
+  # [1] see example in ?survey::api
+DEyear = 1965
+DEsamplingScheme = "WGRDBES-EST TEST 1"
+DEstratumName = "WGRDBES-EST_TEST1_Pckg_SDAResources_schools_H1"
+SDcountry = "ZW"
+Notes: 2-stage clustering (2C) in table VS; 4 non-responses in table SA
+# =============
+
+# =============
+Type: simple random sampling
+Script: BuildTextBookDataUpload_Pckg_SDAResources_agsrs_H1.R
+Package: SDAResources
+Dataset: agsrs
+As RDBES hierarchy: H1
+Reference: 
+	[1] Lu, Y., & Lohr, S.L. (2021). R Companion for Sampling: Design and Analysis, Third Edition (1st ed.). Chapman and Hall/CRC. https://doi.org/10.1201/9781003228196
+	[2] Lohr (2021), Sampling: Design and Analysis, 2nd Edition. Boca Raton, FL: CRC Press. 	
+Where: 
+	[1] Page 18 Section 2.2 
+	[2] examples 2.6, 2.7, 2.11 and 4.8
+DEyear = 1965
+DEsamplingScheme = "WGRDBES-EST TEST 1"
+DEstratumName = "WGRDBES-EST_TEST1_Pckg_SDAResources_agsrs_H1"
+SDcountry = "ZW"
+# =============
+
+# =============
+Type: 1-stage stratified random sampling
+Script: BuildTextBookDataUpload_Pckg_SDAResources_agstrat_H1.R
+Package: SDAResources
+Dataset: agstrat
+As RDBES hierarchy: H1
+Reference: Lu, Y., & Lohr, S.L. (2021). R Companion for Sampling: Design and Analysis, Third Edition (1st ed.). Chapman and Hall/CRC. https://doi.org/10.1201/9781003228196
+Where: Page 32 Section 3.3
+DEyear = 1965
+DEsamplingScheme = "WGRDBES-EST TEST 1"
+DEstratumName = "WGRDBES-EST_TEST1_Pckg_SDAResources_agstrat_H1"
+SDcountry = "ZW"
+# =============
+
+# =============
+Type: 1-stage cluster sampling with equal probabilities and cluster sizes
+Script: BuildTextBookDataUpload_Pckg_SDAResources_gpa_H1.R
+Package: SDAResources
+Dataset: gpa
+As RDBES hierarchy: H1
+Reference: Lu, Y., & Lohr, S.L. (2021). R Companion for Sampling: Design and Analysis, Third Edition (1st ed.). Chapman and Hall/CRC. https://doi.org/10.1201/9781003228196
+Where: Page 57 Section 5.1
+DEyear = 1965
+DEsamplingScheme = "WGRDBES-EST TEST 1"
+DEstratumName = "WGRDBES-EST_TEST1_Pckg_SDAResources_gpa_H1"
+SDcountry = "ZW"
+Notes: # gpa scores are *100 to meet type integer requirement of SAsampleWeightMeasured
+# =============
+
+
+# =============
+Type: 1-stage cluster sampling with equal probabilities and unequal cluster sizes
+Script: BuildTextBookDataUpload_Pckg_SDAResources_algebra_H1.R
+Package: SDAResources
+Dataset: algebra
+As RDBES hierarchy: H1
+Reference: 
+  # [1] Lu, Y., & Lohr, S.L. (2021). R Companion for Sampling: Design and Analysis, Third Edition (1st ed.). Chapman and Hall/CRC. https://doi.org/10.1201/9781003228196
+  # [2] Lohr (2021), Sampling: Design and Analysis, 2nd Edition. Boca Raton, FL: CRC Press. 	
+Where:
+  # [1] Page 58 Example 5.6
+  # [2] Page 181 Example 5.6
+DEyear = 1965
+DEsamplingScheme = "WGRDBES-EST TEST 1"
+DEstratumName = "WGRDBES-EST_TEST1_Pckg_SDAResources_algebra_H1"
+SDcountry = "ZW"
+Notes:
+# =============
+
+
+# =============
+Type: 2-stage cluster sampling with unequal probabilities and cluster sizes
+Script: BuildTextBookDataUpload_Pckg_SDAResources_coots_H1.R
+Package: SDAResources
+Dataset: coots
+As RDBES hierarchy: H1
+Reference: 
+  # [1] Lu, Y., & Lohr, S.L. (2021). R Companion for Sampling: Design and Analysis, Third Edition (1st ed.). Chapman and Hall/CRC. https://doi.org/10.1201/9781003228196
+  # [2] Lohr (2021), Sampling: Design and Analysis, 2nd Edition. Boca Raton, FL: CRC Press. 	
+Where:
+  # [1] Page 59 Section 5.2
+  # [2] Page 186 Example 5.7
+DEyear = 1965
+DEsamplingScheme = "WGRDBES-EST TEST 1"
+DEstratumName = "WGRDBES-EST_TEST1_Pckg_SDAResources_coots_H1"
+SDcountry = "ZW"
+Notes: 
+  # gpa scores are *100000000 to meet type integer requirement of SAsampleWeightMeasured
+  # total number of psus unkwnon - example assumes very large so that fpc=1
+# =============
+
+# =============
+Type: 2-stage cluster sampling with unequal probabilities and cluster sizes
+Script: BuildTextBookDataUpload_Pckg_SDAResources_schools_H1.R
+Package: SDAResources
+Dataset: schools
+As RDBES hierarchy: H1
+Reference: 
+  # [1] Lu, Y., & Lohr, S.L. (2021). R Companion for Sampling: Design and Analysis, Third Edition (1st ed.). Chapman and Hall/CRC. https://doi.org/10.1201/9781003228196
+Where:
+  # [1] Page 61-67 Section 5.2-3
+DEyear = 1965
+DEsamplingScheme = "WGRDBES-EST TEST 1"
+DEstratumName = "WGRDBES-EST_TEST1_Pckg_SDAResources_schools_H1"
+SDcountry = "ZW"
+Notes: 
+# =============
+
+
+

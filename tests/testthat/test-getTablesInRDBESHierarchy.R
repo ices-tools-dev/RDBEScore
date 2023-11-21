@@ -15,13 +15,13 @@ test_that("getTablesInRDBESHierarchy fails for hierarchy parameter ouisde allowe
 })
 test_that("getTablesInRDBESHierarchy works for hierachy 5 with default parameters",  {
 
-  expectedResult <- c("DE","SD","OS","FT","LE","SS","SA","FM","BV")
+  expectedResult <- c("DE","SD","OS","LE","FT","SS","SA","FM","BV")
   expect_equal(getTablesInRDBESHierarchy(5),expectedResult)
 
 })
 test_that("getTablesInRDBESHierarchy works for hierachy 5 excluding lower tables",  {
 
-  expectedResult <- c("DE","SD","OS","FT","LE","SS","SA")
+  expectedResult <- c("DE","SD","OS","LE","FT","SS","SA")
   actualResult <- getTablesInRDBESHierarchy(5,includeOptTables = TRUE,
                                             includeLowHierTables = FALSE,
                                             includeTablesNotInSampHier = TRUE)

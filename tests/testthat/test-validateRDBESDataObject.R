@@ -22,7 +22,7 @@ test_that(
   "validateRDBESDataObject returns input object for valid object from H1 data",
   {
 
-  myObject <- createRDBESDataObject(rdbesExtractPath = "./h1_v_1_19_13")
+  myObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_18")
   myReturn <- validateRDBESDataObject(objectToCheck = myObject,
                                      verbose = FALSE)
   expect_equal(myObject, myReturn)
@@ -31,7 +31,7 @@ test_that(
 test_that("validateRDBESDataObject returns same object for valid object from H1
           data (also checking data types)",  {
 
-  myObject <- createRDBESDataObject(rdbesExtractPath = "./h1_v_1_19_13")
+  myObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_18")
   myReturn <- validateRDBESDataObject(objectToCheck = myObject,
                                      checkDataTypes = TRUE,
                                      verbose = FALSE)
@@ -41,7 +41,7 @@ test_that("validateRDBESDataObject returns same object for valid object from H1
 test_that("validateRDBESDataObject returns same object for valid object from H5
           data",  {
 
-  myObject <- createRDBESDataObject(rdbesExtractPath = "./h5_v_1_19_13")
+  myObject <- importRDBESDataCSV(rdbesExtractPath = "./h5_v_1_19_18")
   myReturn <- validateRDBESDataObject(objectToCheck = myObject,
                                      verbose = FALSE)
   expect_equal(myObject, myReturn)
@@ -50,7 +50,7 @@ test_that("validateRDBESDataObject returns same object for valid object from H5
 test_that("validateRDBESDataObject returns same object for valid object from H5
           data (also checking data types)",  {
 
-  myObject <- createRDBESDataObject(rdbesExtractPath = "./h5_v_1_19_13")
+  myObject <- importRDBESDataCSV(rdbesExtractPath = "./h5_v_1_19_18")
   myReturn <- validateRDBESDataObject(objectToCheck = myObject,
                                      checkDataTypes = TRUE,
                                      verbose = FALSE)
@@ -63,6 +63,12 @@ test_that("validateRDBESDataObject produces error for NA",  {
                                      verbose = FALSE))
 
 })
+test_that("validateRDBESDataObject produces error for NULL",  {
+
+  expect_error(validateRDBESDataObject(objectToCheck = NULL,
+                                       verbose = FALSE))
+
+})
 test_that("validateRDBESDataObject produces error for object that is not a
           list",  {
 
@@ -73,42 +79,59 @@ test_that("validateRDBESDataObject produces error for object that is not a
 
 test_that("validateRDBESDataObject produces error for object with extra name",
           {
-  myObject <- createRDBESDataObject(rdbesExtractPath = "./h1_v_1_19_13")
+  myObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_18")
   myObject[['XX']] <- F
   expect_error(validateRDBESDataObject(objectToCheck = myObject,
                                      verbose = FALSE))
 })
 test_that("validateRDBESDataObject produces error for object without all names",
           {
-  myObject <- createRDBESDataObject(rdbesExtractPath = "./h1_v_1_19_13")
+  myObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_18")
   myObject[['DE']] <- NULL
   expect_error(validateRDBESDataObject(objectToCheck = myObject,
                                      verbose = FALSE))
 })
 test_that("validateRDBESDataObject produces error for object with a required
           field removed",  {
-  myObject <- createRDBESDataObject(rdbesExtractPath = "./h1_v_1_19_13")
+  myObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_18")
   myObject[['DE']]$DEsampScheme <- NULL
   expect_error(validateRDBESDataObject(objectToCheck = myObject,
                                      verbose = FALSE))
 })
+test_that("validateRDBESDataObject produces error for object with a
+           'non-essential' field removed (when strict)",  {
+            myObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_18")
+            myObject[['FT']]$FTdepLoc <- NULL
+            expect_error(validateRDBESDataObject(objectToCheck = myObject,
+                                                 verbose = FALSE,
+                                                 strict = TRUE))
+})
+test_that("validateRDBESDataObject does not produce an error for object with a
+           'non-essential' field removed (when not strict)",  {
+             myObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_18")
+             myObject[['FT']]$FTdepLoc <- NULL
+             expect_error(validateRDBESDataObject(objectToCheck = myObject,
+                                                  verbose = FALSE,
+                                                  strict = FALSE),
+                                                  NA)
+           })
 test_that("validateRDBESDataObject produces error for object with duplicate
           rows",  {
-  myObject <- createRDBESDataObject(rdbesExtractPath = "./h1_v_1_19_13")
+  myObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_18")
   myObject[['DE']] <- data.table::rbindlist(list(myObject[['DE']],myObject[['DE']]))
   expect_error(validateRDBESDataObject(objectToCheck = myObject,
                                      verbose = FALSE))
 })
 test_that("validateRDBESDataObject produces error for object with duplicate
           DEid values",  {
-  myObject <- createRDBESDataObject(rdbesExtractPath = "./h1_v_1_19_13")
+  myObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_18")
   myObject[['DE']][,"DEid"]  <- replicate(nrow(myObject[['DE']]),1)
   expect_error(validateRDBESDataObject(objectToCheck = myObject,
                                      verbose = FALSE))
 })
 test_that("validateRDBESDataObject produces error for object with invalid data
           types (when checking data types)",  {
-  myObject <- createRDBESDataObject(rdbesExtractPath = "./h1_v_1_19_13")
+  myObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_18")
   myObject[["DE"]]$DEid <- as.character(myObject[["DE"]]$DEid)
   myObject[["SD"]]$SDid <- as.character(myObject[["SD"]]$SDid)
   expect_error(validateRDBESDataObject(objectToCheck = myObject,
@@ -118,7 +141,7 @@ test_that("validateRDBESDataObject produces error for object with invalid data
 test_that("validateRDBESDataObject produces error for object with with
           duplicate DEid values and invalid data types (when checking data
           types)",  {
-  myObject <- createRDBESDataObject(rdbesExtractPath = "./h1_v_1_19_13")
+  myObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_18")
   myObject[['DE']][,"DEid"]  <- replicate(nrow(myObject[['DE']]),1)
   myObject[["DE"]]$DEid <- as.character(myObject[["DE"]]$DEid)
   myObject[["SD"]]$SDid <- as.character(myObject[["SD"]]$SDid)
@@ -129,11 +152,41 @@ test_that("validateRDBESDataObject produces error for object with with
 
 test_that("validateRDBESDataObject prints empty table note",  {
 
-  myObject <- createRDBESDataObject(rdbesExtractPath = "./h1_v_1_19_13")
+  myObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_18")
   myObject[['FT']] <-   myObject[['FT']][FALSE,]
   expect_output(validateRDBESDataObject(objectToCheck = myObject,
                                       verbose = TRUE), regexp = "Note that FT has 0 rows")
 
 })
+
+test_that("validateRDBESDataObject produces error if keys aren't set on a data table",  {
+
+  myObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_18")
+  # Remove the key from DE
+  data.table::setkey(myObject[['DE']],NULL)
+  expect_error(validateRDBESDataObject(objectToCheck = myObject,
+                                        verbose = TRUE), regexp = "DE does not have a key set")
+})
+
+test_that("validateRDBESDataObject prints unnecessary column note",  {
+
+  myObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_18")
+  myObject[['FT']]$myExtraColumn <- 'Test'
+  expect_output(validateRDBESDataObject(objectToCheck = myObject,
+                                       verbose = TRUE, strict = FALSE),
+                regexp = ".*The following unnecessary columns were found in table FT : myExtraColumn.*")
+
+})
+
+test_that("validateRDBESDataObject produces error for unnecessary column when strict = TRUE",  {
+
+  myObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_18")
+  myObject[['FT']]$myExtraColumn <- 'Test'
+  expect_error(validateRDBESDataObject(objectToCheck = myObject,
+                                        verbose = TRUE, strict = TRUE),
+                regexp = ".*objectToCheck contains the following tables which either don't contain all required fields or they include unnecessary columns FT*")
+
+})
+
 
 }) ## end capture.output

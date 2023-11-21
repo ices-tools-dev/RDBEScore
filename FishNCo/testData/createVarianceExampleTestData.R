@@ -3,13 +3,13 @@ library(dplyr)
 
 
 # Load the test data
-testData <- RDBEScore::createRDBESDataObject("./FishNCo/testData/RegionalTestData")
+testData <- createRDBESDataObject("./FishNCo/testData/RegionalTestData")
 
 
 # show the non-null table names
 names(testData[!unlist(lapply(testData, is.null))])
 # validate the data
-RDBEScore::validateRDBESDataObject(testData, verbose = FALSE)
+RDBEScore::validateRDBESDataObject(testData, verbose = TRUE)
 
 # make some changs to our test data so that we can estimate
 testData[['SA']]$SAselectMeth = 'SRSWOR'
@@ -17,6 +17,13 @@ testData[['SS']]$SSselectMeth = 'SRSWOR'
 testData[['FO']]$FOselectMeth = 'SRSWOR'
 testData[['FT']]$FTselectMeth = 'SRSWOR'
 testData[['VS']]$VSselectMeth = 'SRSWOR'
+
+# Get rid of rows with NA numTotal
+testData[['SA']] <- testData[['SA']][!is.na(testData[['SA']]$SAnumTotal),]
+testData[['FT']] <- testData[['FT']][!is.na(testData[['FT']]$FTnumTotal),]
+testData[['VS']][is.na(testData[['VS']]$VSnumTotal),"VSnumTotal"] <-
+  testData[['VS']][is.na(testData[['VS']]$VSnumTotal),"VSnumSamp"] + 5
+
 
 # Get rid of SS rows without linked SA rows
 temp <-
@@ -77,9 +84,14 @@ myFilteredTestData <- RDBEScore::filterRDBESDataObject(testData,
 myFilteredTestData <-
   RDBEScore::findAndKillOrphans(myFilteredTestData, verbose = FALSE)
 
+
+myEstObject <- createRDBESEstObject(myFilteredTestData,1,"SA")
+# Get rid of rows that don't have an SA row
+myEstObject <- myEstObject[!is.na(myEstObject$SAid),]
+
+
 # Generate estimates for all strata
 StrataEst <-
-  doEstimationForAllStrata(RDBESDataObjectForEstim = myFilteredTestData ,
-                           hierarchyToUse = 1)
+  doEstimationForAllStrata(myEstObject, "SAsampWtLive", verbose = TRUE)
 
 saveRDS(StrataEst, file = "./FishNCo/testData/StrataEst.rds")

@@ -1,0 +1,9 @@
+SSid,LEid,FOid,TEid,FTid,SLid,OSid,SSrecordType,SSsequenceNumber,SSstratification,SSstratumName,SSclustering,SSclusterName,SSobservationActivityType,SScatchFraction,SSobservationType,SSsampler,SSspeciesListName,SSuseForCalculateZero,SStimeTotal,SStimeSampled,SSnumberTotal,SSnumberSampled,SSselectionProb,SSinclusionProb,SSselectionMethod,SSunitName,SSselectionMethodCluster,SSnumberTotalClusters,SSnumberSampledClusters,SSselectionProbCluster,SSinclusionProbCluster,SSsampled,SSreasonNotSampled,SSnonResponseCollected,SSauxiliaryVariableTotal,SSauxiliaryVariableValue,SSauxiliaryVariableName,SSauxiliaryVariableUnit
+216648,,64870,,,47865,,SS,1,N,U,N,U,Sort,Lan,Volume,Observer,WGRDBES-EST_TEST_6_H1,N,,,1,1,1.0000000000000000,1.0000000000000000,CENSUS,1,,,,,,Y,,N,,,,
+216649,,64871,,,47867,,SS,1,N,U,N,U,Sort,Lan,Volume,Observer,WGRDBES-EST_TEST_1_H1,N,,,1,1,1.0000000000000000,1.0000000000000000,CENSUS,1,,,,,,Y,,N,,,,
+216650,,64872,,,47868,,SS,1,N,U,N,U,Sort,Lan,Volume,Observer,WGRDBES-EST_TEST_2_H1,N,,,1,1,1.0000000000000000,1.0000000000000000,CENSUS,1,,,,,,Y,,N,,,,
+216651,,64873,,,47870,,SS,1,N,U,N,U,Sort,Lan,Volume,Observer,WGRDBES-EST_TEST_3_H1,N,,,1,1,1.0000000000000000,1.0000000000000000,CENSUS,1,,,,,,Y,,N,,,,
+216652,,64874,,,47871,,SS,1,N,U,N,U,Sort,Dis,Volume,Observer,WGRDBES-EST_TEST_4_H1,N,,,1,1,1.0000000000000000,1.0000000000000000,CENSUS,1,,,,,,Y,,N,,,,
+216653,,64875,,,47872,,SS,1,N,U,N,U,Sort,Lan,Volume,Observer,WGRDBES-EST_TEST_5_H1,N,,,1,1,1.0000000000000000,1.0000000000000000,CENSUS,1,,,,,,Y,,N,,,,
+216654,,64876,,,47875,,SS,1,N,U,N,U,Sort,Lan,Volume,Observer,WGRDBES-EST_TEST_7_H1,N,,,1,1,1.0000000000000000,1.0000000000000000,CENSUS,1,,,,,,Y,,N,,,,
+216655,,64877,,,47877,,SS,1,N,U,N,U,Sort,Lan,Volume,Observer,WGRDBES-EST_TEST_8_H1,N,,,1,1,1.0000000000000000,1.0000000000000000,CENSUS,1,,,,,,Y,,N,,,,

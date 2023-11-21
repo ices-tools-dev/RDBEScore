@@ -5,6 +5,8 @@
 #' @param objectToCheck an RDBESDataObject.
 #' @param verbose (Optional) If set to TRUE more detailed text will be printed
 #' out by the function.  Default is TRUE.
+#' @param strict (Optional) This function validates its input data - should
+#' the validation be strict? The default is TRUE.
 #'
 #' @return an RDBESDataObject with any records with an invalid SpeciesListName
 #' rows removed
@@ -14,7 +16,7 @@
 #' \dontrun{
 #'
 #' myH1RawObject <-
-#'   createRDBESDataObject(rdbesExtractPath = "tests\\testthat\\h1_v_1_19")
+#'   importRDBESDataCSV(rdbesExtractPath = "tests\\testthat\\h1_v_1_19")
 #' myFields <- c("SLspeclistName")
 #' myValues <- c("WGRDBES-EST TEST 5 - sprat data")
 #' myFilteredObject <- filterRDBESDataObject(myH1RawObject,
@@ -26,11 +28,13 @@
 #'   verbose = FALSE
 #' )
 #' }
-removeBrokenSpeciesListLinks <- function(objectToCheck, verbose = FALSE) {
+removeBrokenSpeciesListLinks <- function(objectToCheck,
+                                         verbose = FALSE,
+                                         strict = TRUE) {
 
 
   # Check we have a valid RDBESDataObject before doing anything else
-  validateRDBESDataObject(objectToCheck, verbose = FALSE)
+  validateRDBESDataObject(objectToCheck, verbose = verbose, strict = strict)
 
   # Just check the non-null entries
   nonNullEntries <- names(objectToCheck[sapply(objectToCheck, Negate(is.null))])
@@ -72,11 +76,37 @@ removeBrokenSpeciesListLinks <- function(objectToCheck, verbose = FALSE) {
       # Default to link not existing
       myOrphanResults[, "slExists"] <- FALSE
 
+
+# Add year and country to SS ----------------------------------------------------
+
+myTable$SSyear <- extractHigherFields(objectToCheck, "SS", "DEyear")
+myTable$SSctry <- extractHigherFields(objectToCheck, "SS", "SDctry")
+
+# -------------------------------------------------------------------------
+
+
       # Inner join to the SL table
       joinedTables <- dplyr::inner_join(myTable,
                                     objectToCheck[["SL"]],
-                                    by = c("SSspecListName" = "SLspeclistName")
+                                    by = c("SSspecListName" = "SLspeclistName",
+                                           "SScatchFra" = "SLcatchFrac",
+                                           "SSyear" = "SLyear",
+                                           "SSctry" = "SLcou"),
+                                    multiple = "all",
+                                    relationship="many-to-many"
       )
+
+
+# Remove year and ctry columns from SS ------------------------------------
+
+myTable <- myTable[, SSyear := NULL]
+myTable <- myTable[, SSctry := NULL]
+
+# -------------------------------------------------------------------------
+
+
+      # Remove year and ctry columns from SL
+
 
       # Update the results for any matches we found
       if (nrow(joinedTables) > 0) {
@@ -120,5 +150,6 @@ removeBrokenSpeciesListLinks <- function(objectToCheck, verbose = FALSE) {
     print(unlist(lapply(objectToCheck[tableToCheck], nrow)))
   }
 
-  objectToCheck
+  return(objectToCheck)
 }
+

@@ -2,39 +2,79 @@
 % Please edit documentation in R/createRDBESDataObject.R
 \name{createRDBESDataObject}
 \alias{createRDBESDataObject}
-\title{Create an RDBES Raw Object}
+\title{Create an RDBES Data Object}
 \usage{
 createRDBESDataObject(
-  rdbesExtractPath = NA,
-  listOfFileNames = NA,
-  castToCorrectDataTypes = TRUE
+  input = NULL,
+  listOfFileNames = NULL,
+  castToCorrectDataTypes = TRUE,
+  ...
 )
 }
 \arguments{
-\item{rdbesExtractPath}{(Optional) The path to the csv files produced as an
-extract by the ICES RDBES.  If no path is suppled then an empty
-RDBESDataObject will be returned.}
+\item{input}{Strings or \code{list} object. The path to the zip file downloaded
+from RDBES (or multiple zip files - see details), or path to a folder of
+\code{csv} files, or a \code{list} object in the current environment containing data
+frames of each table. If \code{NULL} an empty \code{RDBESDataObject} is created.}
 
-\item{listOfFileNames}{(Optional) A names list of file names - the list names
-shoudl be the two-letter code for the relevent table e.g.
-list("DE" = "DE.csv",... ).  If the parameter is not supplied then the
-default file names used by the RDBES data download will be used e.g.
-"Design.csv" etc.}
+\item{listOfFileNames}{\code{list} of Strings, Optional. For use with \code{csv} inputs
+only, and only required if the csv file names are \emph{not} the default file
+names used by RDBES when downloading data (for instance if you created the
+files yourself). The actual file names should be a \code{list} of the two-letter
+code for the relevant table e.g. \code{list("DE" = "DE.csv", "SD" = "SD.csv", etc.)}.  If not used then it is assumed the files have the default file
+names used by the RDBES data download ("Design.csv" etc).}
 
-\item{castToCorrectDataTypes}{(Optional) If TRUE then the function
-will attempt to cast the required columns to the correct data type.  If
-FALSE then the column data types will be determined by how the csv files
-are read in.  The default is TRUE}
+\item{castToCorrectDataTypes}{Logical. If \code{TRUE} then the function will
+attempt to cast the required columns to the correct data type.  If \code{FALSE}
+then the column data types will be determined by how the csv files are read
+in. Default is \code{TRUE}.}
+
+\item{...}{parameters passed to validateRDBESDataObject
+if input is list of data frames e.g.\code{strict=FALSE}}
 }
 \value{
-A RDBESDataObject.  If a path to RDBES extract files is provided then
-it will contain the data from those files.  If no path is supplied then
-an empty RDBESDataObject will be returned.
+A RDBESDataObject
 }
 \description{
-Create an R object from a folder containing .csv data files downloaded from
-the RDBES upload/download page.
+This function lets you create an RDBES Data object in your current R
+environment.
+}
+\details{
+The \code{input} should be either:
+\itemize{
+\item A \code{zip} file downloaded from RDBES (or multiple zip files if you want to include or overwrite tables, for example CL and CE data)
+\item A folder containing \code{csv} files downloaded from RDBES (e.g. the unzipped file), or any set of csv files of the RDBES tables.
+\item A \code{list} of data frames in the current environment representing different tables in the hierarchy.
+\item A \code{NULL} input will return and empty RDBES data object
+}
+
+\emph{\strong{ZIP file inputs}}
+This \code{input} should be a path to a zip file downloaded from RDBES. Multiple
+zip files can be entered if you want to include additional tables, for
+example CL and CE. E.g. `input = c("path/to/H1.zip", "path/to/CL.zip"). If
+any tables in the first input are overwritten by other inputs a warning is
+given. You should not input different hierarchy files; this function will not
+combine them.
+
+\emph{\strong{CSV file inputs}}
+This \code{input} should be a path to a folder of \code{csv} files. These can be the
+\code{csv} files downloaded from RDBES (e.g. an unzipped hierarchy), or \emph{any} set
+of csv files containing RDBES tables. If the files do not have the default
+RDBES name (e.g. 'Design.csv') the \code{listOfFileNames} input can by used to
+specify the file names e.g. \code{list("DE" = "DE.csv", "SD" = "SD.csv", etc.)}.
+
+\emph{\strong{List of data frames inputs}}
+This \code{input} should be a \code{list} object containing data frames (or
+data.tables) for each table in your hierarchy. They should be named with the
+appropriate 2-letter code (\code{DE}, \code{SD}, etc.). Columns within these tables
+will be renamed to the RDBES model documentation 'R name'. Note if you choose
+to create an \code{RDBESDAtaObject} from local data frames these may have not
+passed the data integrity checks performed when you upload to RDBES!
+
+\emph{\strong{NULL inputs}}
+This \code{input} produces an empty \code{RDBESDataObject}, i.e. all tables with
+correct data classes but the tables will be empty.
 }
 \examples{
-myEmptyRDBESObject <- createRDBESDataObject()
+myEmptyRDBESObject <- createRDBESDataObject(input = NULL)
 }

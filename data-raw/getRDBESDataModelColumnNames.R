@@ -52,12 +52,65 @@ for (i in 1:2) {
 # Get rid of NA field names
 mapColNamesFieldR <- mapColNames[!is.na(mapColNames$Field.Name),]
 
+# Create a field to hold the R data type of the field
+mapColNamesFieldR$RDataType <- NA
+
 # Fix for two issues
 mapColNamesFieldR[mapColNamesFieldR$R.Name == "Clid","Field.Name"] <- "CLid"
 mapColNamesFieldR[mapColNamesFieldR$R.Name == "Clid","R.Name"] <- "CLid"
 
-# Determine which R data type each field should be
-mapColNamesFieldR$RDataType <- NA
+# Fix for missing LEid column in FT table (remove when Excel model doc is updated from v 1.19.18)
+# If no match on this then this column is still missing, so needs added
+# So at least if model doc is updated and this is not removed then it shouldn't break anything
+if(nrow(mapColNamesFieldR[mapColNamesFieldR$Table.Prefix == "FT" & mapColNamesFieldR$Field.Name == "LEid",]) == 0) {
+  # this is the row after which the new row needs to be added
+  ind <- intersect(which(mapColNamesFieldR$Table.Prefix == "FT"),
+                   which(mapColNamesFieldR$Field.Name == "TEid"))
+
+  mapColNamesFieldR <- rbind(mapColNamesFieldR[1:ind,],
+                             c("FT", "LEid", "LEid", "Integer", "integer"),
+                             mapColNamesFieldR[(ind+1):nrow(mapColNamesFieldR),])
+
+}
+
+# Similar fix to above for LEid in the SA table
+if(nrow(mapColNamesFieldR[mapColNamesFieldR$Table.Prefix == "SA" & mapColNamesFieldR$Field.Name == "LEid",]) == 0) {
+  # this is the row after which the new row needs to be added
+  ind <- intersect(which(mapColNamesFieldR$Table.Prefix == "SA"),
+                   which(mapColNamesFieldR$Field.Name == "SSid"))
+
+  mapColNamesFieldR <- rbind(mapColNamesFieldR[1:ind,],
+                             c("SA", "LEid", "LEid", "Integer", "integer"),
+                             mapColNamesFieldR[(ind+1):nrow(mapColNamesFieldR),])
+
+}
+
+# Another similar fix to above for FOid in the LE table
+if(nrow(mapColNamesFieldR[mapColNamesFieldR$Table.Prefix == "LE" & mapColNamesFieldR$Field.Name == "FOid",]) == 0) {
+  # this is the row after which the new row needs to be added
+  ind <- intersect(which(mapColNamesFieldR$Table.Prefix == "LE"),
+                   which(mapColNamesFieldR$Field.Name == "VDid"))
+
+  mapColNamesFieldR <- rbind(mapColNamesFieldR[1:ind,],
+                             c("LE", "FOid", "FOid", "Integer", "integer"),
+                             mapColNamesFieldR[(ind+1):nrow(mapColNamesFieldR),])
+
+  # Need to also change the order to match order in download SA table (which is different than in the Excel doc)
+  # DOWNLOAD:                  LEid > OSid > FTid > VSid > TEid > SAid > VDid > FOid > SSid
+  # EXCEL (also missing LEid): LEid > OSid > FTid > VSid > VDid > TEid > SAid > SSid
+  rownames(mapColNamesFieldR) <- NULL
+  mapColNamesFieldR <- rbind(mapColNamesFieldR[1:254,],
+                             mapColNamesFieldR[257,], # TEid
+                             mapColNamesFieldR[258,], # SAid
+                             mapColNamesFieldR[255,], # VDid
+                             mapColNamesFieldR[256,], # FOid
+                             mapColNamesFieldR[259,], # SSid
+                             mapColNamesFieldR[260:nrow(mapColNamesFieldR),])
+
+}
+
+
+
 
 # Set xxID fields to integer data type
 mapColNamesFieldR[
@@ -104,8 +157,8 @@ mapColNamesFieldR[
 # Change SAid and SAseqNum to be numeric rather than integer -
 # this is required when we generate true zeros
 mapColNamesFieldR[
-mapColNamesFieldR$Table.Prefix == "SA" &
-  mapColNamesFieldR$Field.Name == "SAid","RDataType"] <- "numeric"
+  mapColNamesFieldR$Table.Prefix == "SA" &
+    mapColNamesFieldR$Field.Name == "SAid","RDataType"] <- "numeric"
 mapColNamesFieldR[
   mapColNamesFieldR$Table.Prefix == "SA" &
     mapColNamesFieldR$Field.Name == "SAsequenceNumber","RDataType"] <- "numeric"
@@ -113,5 +166,49 @@ mapColNamesFieldR[
   mapColNamesFieldR$Table.Prefix == "SA" &
     mapColNamesFieldR$Field.Name == "SAparentSequenceNumber","RDataType"] <- "numeric"
 
+# Remove any spaces from the R names
+mapColNamesFieldR$R.Name <- gsub(" ", "", mapColNamesFieldR$R.Name)
+
+row.names(mapColNamesFieldR) <- NULL # reset row numbers
+
+# Indicate which are the "essential" fields for estimation - these must always
+# be present even if we're not being strict when we validate
+
+mapColNamesFieldR$EssentialForEst <- FALSE
+
+# All DE, SD, SS and SL fields are essential
+mapColNamesFieldR[
+  mapColNamesFieldR$Table.Prefix %in% c("DE","SD","SS","SL"),
+                                        "EssentialForEst"] <- TRUE
+
+# xxID fields are essential
+mapColNamesFieldR[
+  grepl("^..ID$",mapColNamesFieldR$R.Name, ignore.case = TRUE) &
+    !is.na(mapColNamesFieldR$Field.Name),"EssentialForEst"] <- TRUE
+
+# recType fields are essential
+mapColNamesFieldR[
+  grepl("^..recType$",mapColNamesFieldR$R.Name, ignore.case = TRUE) &
+    !is.na(mapColNamesFieldR$Field.Name),"EssentialForEst"] <- TRUE
+
+# design variables are essential
+for (aTable in unique(mapColNamesFieldR$Table.Prefix)){
+  designVars <- paste0(aTable, RDBEScore::designVariables)
+  mapColNamesFieldR[
+    mapColNamesFieldR$R.Name %in% designVars,"EssentialForEst"] <- TRUE
+}
+
+# FOcatReg is requied by generateMissingSSRows()
+mapColNamesFieldR[mapColNamesFieldR$R.Name == "FOcatReg",
+                                          "EssentialForEst"] <- TRUE
+# Mandatory fields from VD
+mapColNamesFieldR[
+  mapColNamesFieldR$R.Name %in%
+    c("VDencrVessCode","VDyear","VDctry","VDflgCtry","VDlenCat"),
+                                          "EssentialForEst"] <- TRUE
+
+# TODO - what else is essential?
+
+
 # Save the data
-usethis::use_data(mapColNamesFieldR)
+usethis::use_data(mapColNamesFieldR, overwrite = TRUE)

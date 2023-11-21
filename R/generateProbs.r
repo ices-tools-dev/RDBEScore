@@ -1,16 +1,29 @@
 #' Generate vector of selection or inclusion probabilities
-#' (version of fuction by John Ball)
 #'
-#' @param x RDBES data frame
-#' @param probType  Value == "selection" | "inclusion" ,
-# for selection or inclusion probabilities respectively
+#' @param x RDBES data object
+#' @param probType  "selection" or "inclusion" for selection and inclusion
+#' probabilities respectively
 #'
+#' @details When the selection method is SRSWR selection probabilities are
+#' calculated as \eqn{1 / N} and inclusion probabilities as
+#' \eqn{1 - (1 - 1 / N)^n}. When the selection method is SRSWOR selection
+#' probabilities are not currently implemented. Inclusion probabilities are
+#' calculated as \eqn{n/N}. When the selection method is CENSUS both types of
+#' probabilities are set to 1. Probabilities for selection methods UPSWR and
+#' UPSWOR are not calculated (they need to be supplied by the user). The same
+#' happens with regards to non-probabilistic methods
 #' @return A vector or probabilities
 #' @export
 #'
 #' @examples
 #' \dontrun{
-#' generateProbs(x = y, probType = "inclusion")
+#' generateProbs(x = Pckg_SDAResources_agstrat_H1[["VS"]], probType = ("inclusion"))
+#' # population size
+#' a<-generateProbs(x = Pckg_SDAResources_agstrat_H1[["VS"]], probType = ("inclusion"))
+#' sum(1/a$VSincProb)
+#' # returns error
+#' generateProbs(x = Pckg_SDAResources_agstrat_H1[["VS"]], probType = ("selection"))
+#'
 #' }
 generateProbs <- function(x, probType) {
 

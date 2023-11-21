@@ -11,7 +11,7 @@ test_that("findAndKillOrphans runs without errors on an empty RDBESDataObject", 
 })
 test_that("findAndKillOrphans runs without errors on an RDBESDataObject with no orphans",  {
 
-  myH1RawObject <- createRDBESDataObject(rdbesExtractPath = "./h1_v_1_19_13")
+  myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_18")
 
   expect_error(findAndKillOrphans(objectToCheck = myH1RawObject,
                                   verbose = FALSE),NA)
@@ -19,7 +19,11 @@ test_that("findAndKillOrphans runs without errors on an RDBESDataObject with no 
 })
 test_that("findAndKillOrphans removes orphans on an filtered RDBESDataObject",  {
 
-  myH1RawObject <- createRDBESDataObject(rdbesExtractPath = "./h1_v_1_19_13")
+  myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_18")
+
+  # Only use a subset of the test data
+  myH1RawObject <- filterRDBESDataObject(myH1RawObject,c("DEstratumName"),c("DE_stratum1_H1","DE_stratum2_H1","DE_stratum3_H1"))
+  myH1RawObject <- findAndKillOrphans(myH1RawObject, verbose = FALSE)
 
   # remove all the VS rows (but not any other rows)
   myFields <- c("VSunitName")

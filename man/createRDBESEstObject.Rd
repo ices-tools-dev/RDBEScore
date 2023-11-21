@@ -6,9 +6,10 @@
 \usage{
 createRDBESEstObject(
   rdbesPrepObject,
-  hierarchyToUse,
+  hierarchyToUse = NULL,
   stopTable = NULL,
-  verbose = FALSE
+  verbose = FALSE,
+  strict = TRUE
 )
 }
 \arguments{
@@ -17,21 +18,31 @@ create an estimation object}
 
 \item{hierarchyToUse}{The upper RDBES hiearchy to use}
 
-\item{stopTable}{PLEASE DOCUMENT THIS}
+\item{stopTable}{(Optional) The table to stop at in the RDBES hierarchy.
+If specified, only tables up to and including this table will be included in the
+resulting RDBESEstObject. The default is NULL, which means all tables in the hierarchy
+will be included.}
 
-\item{verbose}{PLEASE DOCUMENT THIS}
+\item{verbose}{(Optional) Set to TRUE if you want informative text printed
+out, or FALSE if you don't.  The default is FALSE.}
+
+\item{strict}{(Optional) This function validates its input data - should
+the validation be strict? The default is TRUE.}
 }
 \value{
-An object of class RDBESEstObject ready for us in design based
+An object of class RDBESEstObject ready for use in design based
+estimation
+
+An object of class RDBESEstObject ready for use in design based
 estimation
 }
 \description{
 Creates an rdbesEStObject from prepared RDBES data
 }
 \examples{
-\dontrun{
-myH1RawObject <-
-  createRDBESDataObject(rdbesExtractPath = "tests/testthat/h1_v_1_19")
-myH1EstObj <- createRDBESEstObject(myH1RawObject, 1)
-}
+#Creates an rdbesEStObject from prepared RDBES data
+myH1EstObj <- createRDBESEstObject(H1Example, 1, "SA")
+
+
+myH1EstObj <- createRDBESEstObject(H1Example, 1, "SA")
 }

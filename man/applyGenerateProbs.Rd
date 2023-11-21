@@ -4,19 +4,36 @@
 \alias{applyGenerateProbs}
 \title{Generate probabilities missing from RDBES Data}
 \usage{
-applyGenerateProbs(x, probType, overwrite, runInitialProbChecks = TRUE)
+applyGenerateProbs(
+  x,
+  probType,
+  overwrite,
+  runInitialProbChecks = TRUE,
+  strict = TRUE
+)
 }
 \arguments{
-\item{x}{- RDBES raw object}
+\item{x}{\itemize{
+\item RDBES data object
+}}
 
-\item{probType}{- string. Can be set to "selection" (only selection
+\item{probType}{\itemize{
+\item string. Can be set to "selection" (only selection
 probabilities are calculated), "inclusion" (only inclusion probabilities are
-calculated) or "both" (both types of probabilities are calculated)}
+calculated) or "both" (both types of probabilities are calculated)
+}}
 
-\item{overwrite}{- if TRUE will overwrite probabilties already existing for
-SRSWR and SRSWOR}
+\item{overwrite}{\itemize{
+\item if TRUE will overwrite probabilities already existing for
+SRSWR and SRSWOR
+}}
 
-\item{runInitialProbChecks}{- if TRUE runs runChecksOnSelectionAndProbs}
+\item{runInitialProbChecks}{\itemize{
+\item if TRUE runs runChecksOnSelectionAndProbs
+}}
+
+\item{strict}{(Optional) This function validates its input data - should
+the validation be strict? The default is TRUE.}
 }
 \value{
 a list of all the RDBES data tables with probabilites calculated
@@ -27,10 +44,10 @@ runChecksOnSelectionAndProbs which main tests need to be passed before
 probabilities can be calculated. The it calls generateProbs for
 each sample in each sampling level of the hierarchy.
 }
+\examples{
+# To be added
+}
 \seealso{
 \code{\link{runChecksOnSelectionAndProbs}}
 \code{\link{generateProbs}}
-
-examples for now see
-https://github.com/ices-eg/WK_RDBES/tree/master/WKRDB-EST2/chairs/Nuno
 }

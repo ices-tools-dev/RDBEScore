@@ -6,7 +6,6 @@
 #' @param output a string pointing towards the output folder
 #'
 #' @return .Rdata files
-#' @export
 #'
 #' @examples
 #' \dontrun{

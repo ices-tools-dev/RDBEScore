@@ -7,13 +7,16 @@ RDBESDataObject.  Normally data that has been downloaded from the RDBES
 will not contain orphan records - however if the data is subsequently
 filtered it is possible to introduce orphan records.}
 \usage{
-findAndKillOrphans(objectToCheck, verbose = FALSE)
+findAndKillOrphans(objectToCheck, verbose = FALSE, strict = TRUE)
 }
 \arguments{
 \item{objectToCheck}{an RDBESDataObject.}
 
 \item{verbose}{(Optional) If set to TRUE more detailed text will be printed
 out by the function.  Default is TRUE.}
+
+\item{strict}{(Optional) This function validates its input data - should
+the validation be strict? The default is TRUE.}
 }
 \value{
 an RDBESDataObject with any orphan records removed
@@ -28,7 +31,7 @@ filtered it is possible to introduce orphan records.
 \dontrun{
 
 myH1RawObject <-
-createRDBESDataObject(rdbesExtractPath = "tests\\\\testthat\\\\h1_v_1_19")
+importRDBESDataCSV(rdbesExtractPath = "tests\\\\testthat\\\\h1_v_1_19")
 myFields <- c("SDctry","VDctry","VDflgCtry","FTarvLoc")
 myValues <- c("ZW","ZWBZH","ZWVFA" )
 myFilteredObject <- filterRDBESDataObject(myH1RawObject,

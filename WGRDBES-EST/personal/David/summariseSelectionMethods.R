@@ -14,6 +14,7 @@
 #' using strata names as the link
 #' iii) selectionMethodSummary: A list of data frames with summary information
 #' about the selection methods used in each level of the sampling.
+#' @importFrom stats setNames
 #' @export
 #'
 #' @examples

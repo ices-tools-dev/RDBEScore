@@ -1,0 +1,43 @@
+---
+title: "Testing generateZerosUsingSL"
+author: "Kirsten Birch Haakansson"
+date: "2023-10-19"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(RDBEScore)
+```
+
+
+```{r get_data}
+
+dat <- MadeUpData_for_SL_SA_tests_v1
+
+ss <- dat[["SS"]]
+ss
+sl <- dat[["SL"]]
+sl <- subset(sl, SLspeclistName %in% ss$SSspecListName)
+sl
+sa <- dat["SA"]
+sa
+
+```
+
+```{r}
+
+dat_after <- generateZerosUsingSL(dat)
+
+ss_after <- dat_after[["SS"]]
+ss_after
+sl_after <- dat_after[["SL"]]
+sl_after <- subset(sl_after, SLspeclistName %in% ss_after$SSspecListName)
+sl_after
+sa_after <- dat_after["SA"]
+sa_after
+
+```
+
+

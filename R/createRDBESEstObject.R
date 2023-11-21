@@ -2,32 +2,77 @@
 #'
 #' @param rdbesPrepObject The prepared RDBES object that should be used to
 #' create an estimation object
-#' @param hierarchyToUse The upper RDBES hiearchy to use
-#' @param stopTable PLEASE DOCUMENT THIS
-#' @param verbose PLEASE DOCUMENT THIS
+#' @param hierarchyToUse (Optional) The upper RDBES hierarchy to use. An integer value
+#' between 1 and 13. If NULL, the hierarchy will be determined from the DE table
+#' 
+#' @param stopTable (Optional) The table to stop at in the RDBES hierarchy. 
+#' If specified, only tables up to and including this table will be included in the 
+#' resulting RDBESEstObject. The default is NULL, which means all tables in the hierarchy 
+#' will be included.
+#' @param verbose (Optional) Set to TRUE if you want informative text printed
+#' out, or FALSE if you don't.  The default is FALSE.
+#' @param strict (Optional) This function validates its input data - should
+#' the validation be strict? The default is TRUE.
 #'
-#' @return An object of class RDBESEstObject ready for us in design based
+#' @return An object of class RDBESEstObject ready for use in design based
 #' estimation
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' myH1RawObject <-
-#'   createRDBESDataObject(rdbesExtractPath = "tests/testthat/h1_v_1_19")
-#' myH1EstObj <- createRDBESEstObject(myH1RawObject, 1)
-#' }
+#' #Creates an rdbesEStObject from prepared RDBES data
+#' myH1EstObj <- createRDBESEstObject(H1Example, 1, "SA")
+#' 
+#'
+#' @param rdbesPrepObject The prepared RDBES object that should be used to
+#' create an estimation object
+#' @param hierarchyToUse The upper RDBES hiearchy to use
+#' 
+#' @param stopTable (Optional) The table to stop at in the RDBES hierarchy. 
+#' If specified, only tables up to and including this table will be included in the 
+#' resulting RDBESEstObject. The default is NULL, which means all tables in the hierarchy 
+#' will be included.
+#' @param verbose (Optional) Set to TRUE if you want informative text printed
+#' out, or FALSE if you don't.  The default is FALSE.
+#' @param strict (Optional) This function validates its input data - should
+#' the validation be strict? The default is TRUE.
+#'
+#' @return An object of class RDBESEstObject ready for use in design based
+#' estimation
+#' @export
+#'
+#' @examples
+#' myH1EstObj <- createRDBESEstObject(H1Example, 1, "SA")
 createRDBESEstObject <- function(rdbesPrepObject,
-                                 hierarchyToUse,
+                                 hierarchyToUse =NULL,
                                  stopTable = NULL,
-                                 verbose = FALSE) {
+                                 verbose = FALSE,
+                                 strict = TRUE) {
 
-  validateRDBESDataObject(rdbesPrepObject, verbose = FALSE)
+   DEhierarchy <- summary(rdbesPrepObject)$hierarchy
+  if(is.null(hierarchyToUse)){
+    hierarchyToUse <- DEhierarchy
+    if(length(hierarchyToUse) > 1){
+      stop("Mixed hierarchy RDBESDataObject!", call.=FALSE)
+    }
+  }
+
   if (!hierarchyToUse %in% 1:13) {
     stop(paste0(
       "An invalid value was used for the 'hierarchyToUse' parameter",
       " - createRDBESEstObject will not proceed"
     ))
   }
+  if(!(hierarchyToUse %in% DEhierarchy) & !is.null(DEhierarchy)){
+    stop(paste0(
+      "The hierarchyToUse parameter is not the hierarchy stated on the DE table",
+      " - createRDBESEstObject will not proceed"
+    ))
+  }
+  if(length(DEhierarchy) > 1){
+    stop("Mixed hierarchy RDBESDataObject! not supported", call.=FALSE)
+  }
+
+  validateRDBESDataObject(rdbesPrepObject, verbose = verbose, strict = strict)
 
   # Copy the input data table so we don't change the original data
   rdbesPrepObjectCopy <- data.table::copy(rdbesPrepObject)
@@ -35,8 +80,9 @@ createRDBESEstObject <- function(rdbesPrepObject,
 
 
   # See if the user has specified a table to stop at
+  #take out the optional as this messes up est object creation
   targetTables <-
-    RDBEScore::getTablesInRDBESHierarchy(hierarchyToUse)
+    RDBEScore::getTablesInRDBESHierarchy(hierarchyToUse, includeOptTables = F)
   if (length(is.null(stopTable)) == 1 &&
     !is.null(stopTable)) {
     stopTableLoc <- which(targetTables == stopTable)
@@ -225,7 +271,9 @@ createRDBESEstObject <- function(rdbesPrepObject,
       if (j == numberOfSampleLevels) {
         tempRDBESEstObj <- dplyr::left_join(tempUpper,
           tempLower,
-          by = saJoinField
+          by = saJoinField,
+          multiple = "all"
+
         )
       } else {
 
@@ -259,7 +307,8 @@ createRDBESEstObject <- function(rdbesPrepObject,
         # currnt SA level so that we just get the matching rows
         tempRDBESEstObj <- dplyr::inner_join(tempUpper,
           tempLower,
-          by = saJoinField
+          by = saJoinField,
+          multiple = "all"
         )
       }
       if (verbose) {
@@ -292,6 +341,11 @@ createRDBESEstObject <- function(rdbesPrepObject,
     myRDBESEstObj[, (vdIDFieldsToRemove) := NULL]
   }
 
+  # If SAparentID exists - remove it to avoid confusion
+  # (the RDBES now uses parentSequenceNumber to link samples and sub-samples)
+  if ("SAparentID" %in% names(myRDBESEstObj)){
+    myRDBESEstObj$SAparentID <- NULL
+  }
 
   # If myRDBESEstObj is null let's create an empty data table to return
   if (length(is.null(myRDBESEstObj)) == 1 &&
@@ -368,7 +422,8 @@ procRDBESEstObjLowHier <- function(rdbesPrepObject,
     fMBV <-
       dplyr::left_join(rdbesPrepObject[["FM"]],
         rdbesPrepObject[["BV"]],
-        by = "FMid"
+        by = "FMid",
+        multiple = "all"
       )
     # sort out the wrong SAid column name after the join
     names(fMBV)[names(fMBV) == "SAid.x"] <- "SAid"
@@ -406,7 +461,8 @@ procRDBESEstObjLowHier <- function(rdbesPrepObject,
     # if we have both FM and BV data - join them together
     bVFM <- dplyr::right_join(rdbesPrepObject[["FM"]],
       rdbesPrepObject[["BV"]],
-      by = "FMid"
+      by = "FMid",
+      multiple = "all"
     )
     # sort out the wrong SAid column name after the join
     names(bVFM)[names(bVFM) == "SAid.y"] <- "SAid"
@@ -428,8 +484,8 @@ procRDBESEstObjLowHier <- function(rdbesPrepObject,
 
   # If we have data join our lowerX with the fmBV or BVFm data
   if (!is.null(nrow(fMBV))){
-    lowerA <- dplyr::left_join(lowerA, fMBV, by = "SAid")
-    lowerB <- dplyr::left_join(lowerB, fMBV, by = "SAid")
+    lowerA <- dplyr::left_join(lowerA, fMBV, by = "SAid", multiple = "all")
+    lowerB <- dplyr::left_join(lowerB, fMBV, by = "SAid", multiple = "all")
     #lowerD <- dplyr::left_join(lowerD, fMBV, by = "SAid")
     lowerD <- NULL
     allLower <- rbind(allLower,lowerA, lowerB, lowerD)
@@ -437,7 +493,7 @@ procRDBESEstObjLowHier <- function(rdbesPrepObject,
 
   if (!is.null(nrow(bVFM))){
     # Note the difference in lowerC
-    lowerC <- dplyr::left_join(lowerC, bVFM, by = "SAid")
+    lowerC <- dplyr::left_join(lowerC, bVFM, by = "SAid", multiple = "all")
     allLower <- rbind(allLower,lowerC)
   }
 
@@ -549,6 +605,7 @@ procRDBESEstObjUppHier <- function(myRDBESEstObj = NULL,
         dplyr::left_join(myRDBESEstObj,
           rdbesPrepObject[[thisTable]],
           by = joinField
+          , multiple = "all"
         )
     }
 

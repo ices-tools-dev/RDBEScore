@@ -1,9 +1,10 @@
 
-<!-- badges: start -->
 [![R-CMD-check](https://github.com/ices-tools-dev/RDBEScore/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ices-tools-dev/RDBEScore/actions/workflows/R-CMD-check.yaml)
 [![License](https://img.shields.io/badge/license-GPL%20(%3E%3D%202)-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 <!--
+[![codecov](https://codecov.io/gh/ices-tools-prod/RDBEScore/branch/master/graph/badge.svg)](https://codecov.io/gh/ices-tools-prod/RDBEScore)
 [![GitHub release](https://img.shields.io/github/release/ices-tools-prod/RDBEScore.svg?maxAge=2592001)]()
+[![CRAN Status](http://www.r-pkg.org/badges/version/RDBEScore)](https://cran.r-project.org/package=RDBEScore)
 [![CRAN Monthly](http://cranlogs.r-pkg.org/badges/RDBEScore)](https://cran.r-project.org/package=RDBEScore)
 [![CRAN Total](http://cranlogs.r-pkg.org/badges/grand-total/RDBEScore)](https://cran.r-project.org/package=RDBEScore)
 -->
@@ -80,6 +81,24 @@ The current development version can be installed using:
 library(remotes)
 install_github("ices-tools-dev/RDBEScore@dev")
 ```
+If the installation fails due to R CMD, this alternative option can be used
+
+```R
+library(remotes)
+install_github("ices-tools-dev/RDBEScore@dev", build = FALSE)
+```
+## On `data.table` usage
+
+Objects of type `data.table` passed as parameters should be copied before modification. As an example:
+```r
+function zeroIds(sl) {
+  sl <- data.table::copy(sl)
+  sl[,SLid:=0]
+  sl
+}
+```
+Now invocations of this function on SL tables will not alter the original copy.
+
 ## Precommit-hook framework
 
 For adhering to package styling guides it is advisable to use precommit checks while developing.
@@ -101,4 +120,13 @@ In order to run lintr and styler (etc) before committing code, follow the instru
    ```
 5. Running git commit should run the various checks automatically. See [the config file](.pre-commit-config.yaml) for all the checks.
 
+## Building binary packages
 
+Building binary packages can be achieved by running the following commands.
+```bash
+Rscript.exe -e "roxygen2::roxygenize('.', roclets = c('rd', 'collate', 'namespace'))"
+Rcmd.exe INSTALL --build --preclean .
+```
+Note to replace `.` with the relative path of the project if necessary. Also on some operating systems, `Rcmd.exe` is called `Rcmd` and `Rscript.exe` is `Rcmd` respectively.
+
+In R-studio there is also a button on the `build` - tab: `More -> Build Binary Package` that builds the binary package.

@@ -8,56 +8,55 @@ test_that("validateRDBESEstObject does not produce errors or warnings",  {
   expect_warning(validateRDBESEstObject(myEStObj),NA)
   expect_error(validateRDBESEstObject(myEStObj),NA)
 })
-test_that("validateRDBESEstObject returns T for valid empty object",  {
+test_that("validateRDBESEstObject does not error for valid empty object",  {
 
   myEmptyObject <- createRDBESDataObject()
   myEStObj <- createRDBESEstObject(myEmptyObject,1)
-  myReturn <- validateRDBESEstObject(myEStObj)
-  expect_true(myReturn)
+  expect_error(validateRDBESEstObject(myEStObj),NA)
 
 })
-test_that("validateRDBESEstObject returns T for valid object from H1 data",  {
+test_that("validateRDBESEstObject does not error for valid object from H1 data",  {
 
-  myObject <- createRDBESDataObject(rdbesExtractPath = "./h1_v_1_19_13")
+  myObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_18")
   myEStObj <- createRDBESEstObject(myObject,1)
-  myReturn <- validateRDBESEstObject(myEStObj)
-  expect_true(myReturn)
+  expect_error(validateRDBESEstObject(myEStObj),NA)
 
 })
-test_that("validateRDBESEstObject returns T for valid object from H5 data",  {
+test_that("validateRDBESEstObject does not error for valid object from H5 data",  {
 
-  myObject <- createRDBESDataObject(rdbesExtractPath = "./h5_v_1_19_13")
+  myObject <- importRDBESDataCSV(rdbesExtractPath = "./h5_v_1_19_18")
   myEStObj <- createRDBESEstObject(myObject,5)
-  myReturn <- validateRDBESEstObject(myEStObj)
-  expect_true(myReturn)
+  expect_error(validateRDBESEstObject(myEStObj),NA)
 
 })
-test_that("validateRDBESEstObject returns F for NA",  {
+test_that("validateRDBESEstObject errors for NA",  {
 
-  myReturn <- validateRDBESEstObject(NA)
-  expect_false(myReturn)
+  expect_error(validateRDBESEstObject(NA, verbose = TRUE),
+               regexp = "objectToCheck is NA")
+
 
 })
-test_that("validateRDBESEstObject returns F for a data frame",  {
+test_that("validateRDBESEstObject errors for a data frame",  {
 
   myTemp <- data.frame(a=c(0,1))
-  myReturn <- validateRDBESEstObject(myTemp)
-  expect_false(myReturn)
+  expect_error(validateRDBESEstObject(myTemp, verbose = TRUE),
+               regexp = "objectToCheck is not of the class RDBESEstObject")
+
 
 })
-test_that("validateRDBESEstObject returns F for an incorrectly defined class",  {
+test_that("validateRDBESEstObject errors for an incorrectly defined class",  {
 
   myTemp <- data.frame(a=c(0,1))
   class(myTemp) <- c("RDBESEstObject", class(myTemp))
-  myReturn <- validateRDBESEstObject(myTemp)
-  expect_false(myReturn)
+  expect_error(validateRDBESEstObject(myTemp, verbose = TRUE),
+               regexp = "objectToCheck does not inherit from data.table")
 
 })
-test_that("validateRDBESEstObject returns F for an RDBESDataObject",  {
+test_that("validateRDBESEstObject errors for an RDBESDataObject",  {
 
   myEmptyObject <- createRDBESDataObject()
-  myReturn <- validateRDBESEstObject(myEmptyObject)
-  expect_false(myReturn)
+  expect_error(validateRDBESEstObject(myEmptyObject, verbose = TRUE),
+               regexp = "objectToCheck is not of the class RDBESEstObject")
 
 })
 

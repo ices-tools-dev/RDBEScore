@@ -1,0 +1,14 @@
+DEsamplingScheme;DEstratumName;FOcatchReg;FOsampled;SScatchFraction;SSuseForCalculateZero;SSsampled;speciesListName;SLcatchFraction;SLcommercialTaxon;;SLspeciesCode;;SAspeciesCode;SAspeciesCodeFAO;SAcatchCategory;SAstratification;SAstratumName
+WGRDBES-EST TEST 3;MadeUpData_for_SL_SA_tests_v1;Lan;Y;Lan;Y;Y;MadeUpData_for_SL_SA_tests_v1;Lan;126436;COD;126436;COD;107254;NEP;Lan;N;U
+WGRDBES-EST TEST 3;MadeUpData_for_SL_SA_tests_v1;Lan;Y;Lan;Y;Y;MadeUpData_for_SL_SA_tests_v1;Lan;107254;NEP;107254;NEP;107254;NEP;Lan;N;U
+;;;;;;;;;;;;;;;;;
+WGRDBES-EST TEST 3;MadeUpData_for_SL_SA_tests_v2;Lan;Y;Lan;N;Y;MadeUpData_for_SL_SA_tests_v2;Lan;126436;COD;126436;COD;107254;NEP;Lan;N;U
+WGRDBES-EST TEST 3;MadeUpData_for_SL_SA_tests_v2;Lan;Y;Lan;N;Y;MadeUpData_for_SL_SA_tests_v2;Lan;107254;NEP;107254;NEP;107254;NEP;Lan;N;U
+;;;;;;;;;;;;;;;;;
+WGRDBES-EST TEST 3;MadeUpData_for_SL_SA_tests_v3;All;Y;Lan;Y;Y;MadeUpData_for_SL_SA_tests_v3;Lan;126436;COD;126436;COD;107254;NEP;Lan;N;U
+WGRDBES-EST TEST 3;MadeUpData_for_SL_SA_tests_v3;All;Y;Lan;Y;Y;MadeUpData_for_SL_SA_tests_v3;Lan;107254;NEP;107254;NEP;107254;NEP;Lan;N;U
+WGRDBES-EST TEST 3;MadeUpData_for_SL_SA_tests_v3;All;Y;Dis;Y;Y;MadeUpData_for_SL_SA_tests_v3;Dis;127143;PLE;127143;PLE;107254;NEP;Dis;N;U
+WGRDBES-EST TEST 3;MadeUpData_for_SL_SA_tests_v3;All;Y;Dis;Y;Y;MadeUpData_for_SL_SA_tests_v3;Dis;107254;NEP;107254;NEP;107254;NEP;Dis;N;U
+;;;;;;;;;;;;;;;;;
+WGRDBES-EST TEST 3;MadeUpData_for_SL_SA_tests_v4;All;Y;Catch;Y;Y;MadeUpData_for_SL_SA_tests_v4;Catch;126436;COD;126436;COD;107254;NEP;Lan;Y;X
+WGRDBES-EST TEST 3;MadeUpData_for_SL_SA_tests_v4;All;Y;Catch;Y;Y;MadeUpData_for_SL_SA_tests_v4;Catch;107254;NEP;107254;NEP;107254;NEP;Dis;Y;Y

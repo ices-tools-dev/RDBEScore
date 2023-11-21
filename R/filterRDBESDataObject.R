@@ -3,6 +3,10 @@
 #' The returned object will include all rows which either: a) do not included
 #' any of the field names in `fieldsToFilter`, or b) do include the field names
 #' and have one of the allowed values in `valuesToFilter`.
+#' If you want to filter for a id field like `DEid`, `FTid` etc, the filtering
+#' works only on the table where the id field is its key. For example, if you
+#' try to filter on `FOid` it does not look  `FOid` in other tables like `FT`,
+#' although the field `FOid` exists in `FT` table.
 #'
 #' `killOrphans` allows you to remove orphaned rows if set to `TRUE`. The
 #' default is `FALSE`.
@@ -11,6 +15,10 @@
 #' @param fieldsToFilter A vector of the field names you wish to check
 #' @param valuesToFilter A vector of the field values you wish to filter for
 #' @param killOrphans Controls if orphan rows are removed. Default is `FALSE`.
+#' @param verbose (Optional) Set to TRUE if you want informative text printed
+#' out, or FALSE if you don't.  The default is FALSE.
+#' @param strict (Optional) This function validates its input data - should
+#' the validation be strict? The default is TRUE.
 #'
 #' @return the filtered input object of the same class as
 #'   `RDBESDataObjectToFilter`
@@ -22,7 +30,7 @@
 #' \dontrun{
 #'
 #' myH1RawObject <-
-#'   createRDBESDataObject(rdbesExtractPath = "tests\\testthat\\h1_v_1_19")
+#'   importRDBESDataCSV(rdbesExtractPath = "tests\\testthat\\h1_v_1_19")
 #'
 #' myFields <- c("SDctry", "VDctry", "VDflgCtry", "FTarvLoc")
 #' myValues <- c("ZW", "ZWBZH", "ZWVFA")
@@ -35,10 +43,14 @@
 filterRDBESDataObject <- function(RDBESDataObjectToFilter,
                                  fieldsToFilter,
                                  valuesToFilter,
-                                 killOrphans = FALSE) {
+                                 killOrphans = FALSE,
+                                 verbose = FALSE,
+                                 strict = TRUE) {
 
   # Check we have a valid RDBESDataObject before doing anything else
-  validateRDBESDataObject(RDBESDataObjectToFilter, verbose = FALSE)
+  validateRDBESDataObject(RDBESDataObjectToFilter,
+                          verbose = verbose,
+                          strict = strict)
 
   # Check if the requested columns actually exist in the object
   allColNames <- unlist(lapply(RDBESDataObjectToFilter, names))
@@ -51,14 +63,21 @@ filterRDBESDataObject <- function(RDBESDataObjectToFilter,
     ))
   }
 
-  alteredObject <- lapply(RDBESDataObjectToFilter, function(x) {
-    foundNames <- names(x)[which(names(x) %in% fieldsToFilter)]
+  tblNames <- names(RDBESDataObjectToFilter)
+  alteredObject <- mapply(function(x, name) {
+    #do not search id columns that are not ids of this table
+    #see issue #183
+    idCols <- names(x)[grepl("id$", names(x))]
+    searchNames <- c(setdiff(names(x), idCols), paste0(name,"id"))
+    foundNames <- searchNames[which(searchNames %in% fieldsToFilter)]
     if (length(foundNames) > 0) {
       x <-
         dplyr::filter(x, dplyr::if_all(all_of(foundNames), ~ .x %in% valuesToFilter))
     }
     x
-  })
+  }, RDBESDataObjectToFilter, tblNames, SIMPLIFY = FALSE)
+  names(alteredObject) <- tblNames
+
 
   # Update the original object so we don't lose its class type
   for (myTable in names(RDBESDataObjectToFilter)) {
@@ -68,7 +87,7 @@ filterRDBESDataObject <- function(RDBESDataObjectToFilter,
   }
 
   # remove orphans
-  if (killOrphans == TRUE) RDBESDataObjectToFilter <- findAndKillOrphans(RDBESDataObjectToFilter, verbose = FALSE)
+  if (killOrphans == TRUE) RDBESDataObjectToFilter <- findAndKillOrphans(RDBESDataObjectToFilter, verbose = verbose, strict = strict)
 
   #
   return(RDBESDataObjectToFilter)

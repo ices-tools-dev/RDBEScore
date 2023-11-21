@@ -3,17 +3,20 @@ capture.output({  ## suppresses printing of console output when running test()
 test_that("createRDBESEstObject can create an object from an H1 data extract
           with no warnings or errors",  {
 
-  myPath <- "./h1_v_1_19_13"
-  myRawObject <- createRDBESDataObject(rdbesExtractPath = myPath)
+   myRawObject <- H1Example
+
+  # Only use a subset of the test data
+  myRawObject <- filterRDBESDataObject(myRawObject,c("DEstratumName"),c("DE_stratum1_H1","DE_stratum2_H1","DE_stratum3_H1"))
+  myRawObject <- findAndKillOrphans(myRawObject, verbose = FALSE)
 
   myEstObject <- expect_warning(createRDBESEstObject(myRawObject,1),NA)
   myEstObject <- expect_error(createRDBESEstObject(myRawObject,1),NA)
   # Check we have the right number of sampling unit fields
-  expect_equal(length(grep("^su1.*",names(myEstObject))),19)
-  expect_equal(length(grep("^su2.*",names(myEstObject))),19)
-  expect_equal(length(grep("^su3.*",names(myEstObject))),19)
-  expect_equal(length(grep("^su4.*",names(myEstObject))),19)
-  expect_equal(length(grep("^su5.*",names(myEstObject))),11)
+  expect_equal(length(grep("^su1.*",names(myEstObject))),24)
+  expect_equal(length(grep("^su2.*",names(myEstObject))),24)
+  expect_equal(length(grep("^su3.*",names(myEstObject))),24)
+  expect_equal(length(grep("^su4.*",names(myEstObject))),24)
+  expect_equal(length(grep("^su5.*",names(myEstObject))),17)
   expect_equal(length(grep("^su6.*",names(myEstObject))),0)
   expect_equal(length(grep("^su7.*",names(myEstObject))),0)
   expect_equal(length(grep("^su8.*",names(myEstObject))),0)
@@ -23,17 +26,20 @@ test_that("createRDBESEstObject can create an object from an H1 data extract
 test_that("createRDBESEstObject can create an object from an H5 data extract
           with no warnings or errors",  {
 
-  myPath <- "./h5_v_1_19_13"
-  myRawObject <- createRDBESDataObject(rdbesExtractPath = myPath)
+  myRawObject <- H5Example
 
   myEstObject <- expect_warning(createRDBESEstObject(myRawObject,5),NA)
   myEstObject <- expect_error(createRDBESEstObject(myRawObject,5),NA)
   # Check we have the right number of sampling unit fields
-  expect_equal(length(grep("^su1.*",names(myEstObject))),19)
-  expect_equal(length(grep("^su2.*",names(myEstObject))),19)
-  expect_equal(length(grep("^su3.*",names(myEstObject))),19)
-  expect_equal(length(grep("^su4.*",names(myEstObject))),19)
-  expect_equal(length(grep("^su5.*",names(myEstObject))),11)
+  expect_equal(length(grep("^su1.*",names(myEstObject))),24)
+  expect_equal(length(grep("^su2.*",names(myEstObject))),24)
+  expect_equal(length(grep("^su3.*",names(myEstObject))),24)
+  expect_equal(length(grep("^su4.*",names(myEstObject))),17)
+  expect_equal(length(grep("^su5.*",names(myEstObject))),0)
+  #optional tables should be excluded from hierarchy when making estObjects
+  #they have 1:1 relationship with the parent table and are not in hierarchy
+  #expect_equal(length(grep("^su4.*",names(myEstObject))),24)
+  #expect_equal(length(grep("^su5.*",names(myEstObject))),17)
   expect_equal(length(grep("^su6.*",names(myEstObject))),0)
   expect_equal(length(grep("^su7.*",names(myEstObject))),0)
   expect_equal(length(grep("^su8.*",names(myEstObject))),0)
@@ -62,8 +68,11 @@ test_that("createRDBESEstObject can create an object from an empty H1 data extra
 test_that("createRDBESEstObject can create an object from an H1 data extract with sub-sampling
           with no warnings or errors",  {
 
-  myPath <- "./h1_v_1_19_13"
-  myRawObject <- createRDBESDataObject(rdbesExtractPath = myPath)
+  myRawObject <- H1Example
+
+  # Only use a subset of the test data
+  myRawObject <- filterRDBESDataObject(myRawObject,c("DEstratumName"),c("DE_stratum1_H1","DE_stratum2_H1","DE_stratum3_H1"))
+  myRawObject <- findAndKillOrphans(myRawObject, verbose = FALSE)
 
   # Put some sub-sampling in the test data
   # Remove column because it seems to be logical data type
@@ -79,35 +88,38 @@ test_that("createRDBESEstObject can create an object from an H1 data extract wit
   myEstObject <- expect_warning(createRDBESEstObject(myRawObject,1),NA)
   myEstObject <- expect_error(createRDBESEstObject(myRawObject,1),NA)
   # Check we have the right number of sampling unit fields
-  expect_equal(length(grep("^su1.*",names(myEstObject))),19)
-  expect_equal(length(grep("^su2.*",names(myEstObject))),19)
-  expect_equal(length(grep("^su3.*",names(myEstObject))),19)
-  expect_equal(length(grep("^su4.*",names(myEstObject))),19)
-  expect_equal(length(grep("^su5.*",names(myEstObject))),11)
-  expect_equal(length(grep("^su6.*",names(myEstObject))),11)
-  expect_equal(length(grep("^su7.*",names(myEstObject))),11)
+  expect_equal(length(grep("^su1.*",names(myEstObject))),24)
+  expect_equal(length(grep("^su2.*",names(myEstObject))),24)
+  expect_equal(length(grep("^su3.*",names(myEstObject))),24)
+  expect_equal(length(grep("^su4.*",names(myEstObject))),24)
+  expect_equal(length(grep("^su5.*",names(myEstObject))),17)
+  expect_equal(length(grep("^su6.*",names(myEstObject))),17)
+  expect_equal(length(grep("^su7.*",names(myEstObject))),17)
   expect_equal(length(grep("^su8.*",names(myEstObject))),0)
 
 
 })
 test_that("createRDBESEstObject fails when an invalid hierarchy is requested",  {
 
-  myPath <- "./h1_v_1_19_13"
-  myRawObject <- createRDBESDataObject(rdbesExtractPath = myPath)
+  myRawObject <- H1Example
+
   myEstObject <- expect_error(createRDBESEstObject(myRawObject,99),"An invalid value was used for the 'hierarchyToUse' parameter - createRDBESEstObject will not proceed")
 
 })
 test_that("createRDBESEstObject can create an object from an H1 data extract
           with no warnings or errors, stopping at VS",  {
 
-    myPath <- "./h1_v_1_19_13"
-    myRawObject <- createRDBESDataObject(rdbesExtractPath = myPath)
+    myRawObject <- H1Example
+
+    # Only use a subset of the test data
+    myRawObject <- filterRDBESDataObject(myRawObject,c("DEstratumName"),c("DE_stratum1_H1","DE_stratum2_H1","DE_stratum3_H1"))
+    myRawObject <- findAndKillOrphans(myRawObject, verbose = FALSE)
 
     myEstObject <- expect_warning(createRDBESEstObject(myRawObject,1,stopTable = "VS"),NA)
     myEstObject <- expect_error(createRDBESEstObject(myRawObject,1,stopTable = "VS"),NA)
     expect_equal(unique(myEstObject$su1table),"VS")
     # Check we have the right number of sampling unit fields
-    expect_equal(length(grep("^su1.*",names(myEstObject))),19)
+    expect_equal(length(grep("^su1.*",names(myEstObject))),24)
     expect_equal(length(grep("^su2.*",names(myEstObject))),0)
     expect_equal(length(grep("^su3.*",names(myEstObject))),0)
     expect_equal(length(grep("^su4.*",names(myEstObject))),0)
@@ -118,15 +130,18 @@ test_that("createRDBESEstObject can create an object from an H1 data extract
 })
 test_that("createRDBESEstObject can correctly create an object when there is no BV data",  {
 
-    myPath <- "./h1_v_1_19_13"
-    myRawObject <- createRDBESDataObject(rdbesExtractPath = myPath)
+    myRawObject <- H1Example
+
+    # Only use a subset of the test data
+    myRawObject <- filterRDBESDataObject(myRawObject,c("DEstratumName"),c("DE_stratum1_H1","DE_stratum2_H1","DE_stratum3_H1"))
+    myRawObject <- findAndKillOrphans(myRawObject, verbose = FALSE)
 
     # Filter the object
-    myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "DEid", valuesToFilter = 4110)
-    myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "VSid", valuesToFilter = 63301)
+    myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "DEid", valuesToFilter = 5406)
+    myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "VSid", valuesToFilter = 78006)
     myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "FTunitName", valuesToFilter = "FT_unit_1")
     myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "FOunitName", valuesToFilter = "FO_unit_1")
-    myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "SSid", valuesToFilter = 110946)
+    myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "SSid", valuesToFilter = 225062)
     myRawObject <- findAndKillOrphans(myRawObject)
 
     # get rid of BV data
@@ -139,22 +154,25 @@ test_that("createRDBESEstObject can correctly create an object when there is no 
 })
 test_that("createRDBESEstObject can correctly create an object when there is no FM data",  {
 
-  myPath <- "./h1_v_1_19_13"
-  myRawObject <- createRDBESDataObject(rdbesExtractPath = myPath)
+  myRawObject <- H1Example
+
+  # Only use a subset of the test data
+  myRawObject <- filterRDBESDataObject(myRawObject,c("DEstratumName"),c("DE_stratum1_H1","DE_stratum2_H1","DE_stratum3_H1"))
+  myRawObject <- findAndKillOrphans(myRawObject, verbose = FALSE)
 
   # Filter the object
-  myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "DEid", valuesToFilter = 4110)
-  myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "VSid", valuesToFilter = 63301)
+  myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "DEid", valuesToFilter = 5406)
+  myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "VSid", valuesToFilter = 78006)
   myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "FTunitName", valuesToFilter = "FT_unit_1")
   myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "FOunitName", valuesToFilter = "FO_unit_1")
-  myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "SSid", valuesToFilter = 110946)
+  myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "SSid", valuesToFilter = 225062)
   myRawObject <- findAndKillOrphans(myRawObject)
 
   # get rid of FM data
   myRawObject[["SA"]]$SAlowHierarchy <- "C"
   myRawObject["FM"] <- list(NULL)
 
-  myRawObject[["BV"]][,"SAid"]<-644939
+  myRawObject[["BV"]][,"SAid"]<-548860
   myRawObject[["BV"]]$FMid <- NA
 
   myEstObject <- createRDBESEstObject(myRawObject, hierarchyToUse = 1)
@@ -163,15 +181,18 @@ test_that("createRDBESEstObject can correctly create an object when there is no 
 })
 test_that("createRDBESEstObject can correctly create an object when there is no FM or BV data",  {
 
-  myPath <- "./h1_v_1_19_13"
-  myRawObject <- createRDBESDataObject(rdbesExtractPath = myPath)
+  myRawObject <- H1Example
+
+  # Only use a subset of the test data
+  myRawObject <- filterRDBESDataObject(myRawObject,c("DEstratumName"),c("DE_stratum1_H1","DE_stratum2_H1","DE_stratum3_H1"))
+  myRawObject <- findAndKillOrphans(myRawObject, verbose = FALSE)
 
   # Filter the object
-  myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "DEid", valuesToFilter = 4110)
-  myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "VSid", valuesToFilter = 63301)
+  myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "DEid", valuesToFilter = 5406)
+  myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "VSid", valuesToFilter = 78006)
   myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "FTunitName", valuesToFilter = "FT_unit_1")
   myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "FOunitName", valuesToFilter = "FO_unit_1")
-  myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "SSid", valuesToFilter = 110946)
+  myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "SSid", valuesToFilter = 225062)
   myRawObject <- findAndKillOrphans(myRawObject)
 
   # get rid of FM and BV data
@@ -185,15 +206,18 @@ test_that("createRDBESEstObject can correctly create an object when there is no 
 })
 test_that("createRDBESEstObject creates the correct number of rows when there is sub-sampling present (1)",  {
 
-  myPath <- "./h1_v_1_19_13"
-  myRawObject <- createRDBESDataObject(rdbesExtractPath = myPath)
+  myRawObject <- H1Example
+
+  # Only use a subset of the test data
+  myRawObject <- filterRDBESDataObject(myRawObject,c("DEstratumName"),c("DE_stratum1_H1","DE_stratum2_H1","DE_stratum3_H1"))
+  myRawObject <- findAndKillOrphans(myRawObject, verbose = FALSE)
 
   # Filter the object
-  myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "DEid", valuesToFilter = 4110)
-  myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "VSid", valuesToFilter = 63301)
+  myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "DEid", valuesToFilter = 5406)
+  myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "VSid", valuesToFilter = 78006)
   myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "FTunitName", valuesToFilter = "FT_unit_1")
   myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "FOunitName", valuesToFilter = "FO_unit_1")
-  myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "SSid", valuesToFilter = 110946)
+  myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "SSid", valuesToFilter = 225062)
   myRawObject <- findAndKillOrphans(myRawObject)
 
   # Introduce sub-sampling - only the lowest level has data
@@ -214,9 +238,10 @@ test_that("createRDBESEstObject creates the correct number of rows when there is
 
   myRawObject["BV"] <- list(NULL)
   myRawObject[["SA"]]<-rbind(myRawObject[["SA"]],newSARows,newSARows2)
+  # Need to re-set the key afer the rbind
+  data.table::setkey(myRawObject[["SA"]],SAid)
 
-  myRawObject[["FM"]][myRawObject[["FM"]]$SAid == 644939,"SAid"] <- 644941
-
+  myRawObject[["FM"]][myRawObject[["FM"]]$SAid == 548860,"SAid"] <- 548862
 
   myEstObject <- createRDBESEstObject(myRawObject, hierarchyToUse = 1)
   expect_equal(nrow(myEstObject),10)
@@ -224,15 +249,18 @@ test_that("createRDBESEstObject creates the correct number of rows when there is
 })
 test_that("createRDBESEstObject creates the correct number of rows when there is sub-sampling present (2)",  {
 
-  myPath <- "./h1_v_1_19_13"
-  myRawObject <- createRDBESDataObject(rdbesExtractPath = myPath)
+  myRawObject <- H1Example
+
+  # Only use a subset of the test data
+  myRawObject <- filterRDBESDataObject(myRawObject,c("DEstratumName"),c("DE_stratum1_H1","DE_stratum2_H1","DE_stratum3_H1"))
+  myRawObject <- findAndKillOrphans(myRawObject, verbose = FALSE)
 
   # Filter the object
-  myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "DEid", valuesToFilter = 4110)
-  myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "VSid", valuesToFilter = 63301)
+  myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "DEid", valuesToFilter = 5406)
+  myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "VSid", valuesToFilter = 78006)
   myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "FTunitName", valuesToFilter = "FT_unit_1")
   myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "FOunitName", valuesToFilter = "FO_unit_1")
-  myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "SSid", valuesToFilter = 110946)
+  myRawObject <- filterRDBESDataObject(myRawObject, fieldsToFilter = "SSid", valuesToFilter = 225062)
   myRawObject <- findAndKillOrphans(myRawObject)
 
   # Introduce sub-sampling - the upper and lowest level of sampling have data
@@ -257,16 +285,40 @@ test_that("createRDBESEstObject creates the correct number of rows when there is
 
   myRawObject["BV"] <- list(NULL)
   myRawObject[["SA"]]<-rbind(myRawObject[["SA"]],newSARows,newSARows2)
+  # Need to re-set the key afer the rbind
+  data.table::setkey(myRawObject[["SA"]],SAid)
 
   newFM <- data.table::copy(myRawObject[["FM"]])
-  newFM[newFM$SAid == 644939,"SAid"] <- 644941
+  newFM[newFM$SAid == 548860,"SAid"] <- 548862
   newFM$FMid <- newFM$FMid + 50
 
   myRawObject[["FM"]]<- rbind(myRawObject[["FM"]],newFM)
+  # Need to re-set the key afer the rbind
+  data.table::setkey(myRawObject[["FM"]],FMid)
 
   myEstObject <- createRDBESEstObject(myRawObject, hierarchyToUse = 1)
   expect_equal(nrow(myEstObject),20)
 
+})
+
+test_that("createRDBESEstObject does not create parentID columns",  {
+
+            myRawObject <- H1Example
+            myEstObject <- createRDBESEstObject(myRawObject,1)
+
+            if (sum(grepl(".*parentID", names(myEstObject)), na.rm = TRUE) >0){
+              SAParentIDExists <- TRUE
+            } else {
+              SAParentIDExists <- FALSE
+            }
+            expect_false(SAParentIDExists)
+})
+
+test_that("createRDBESEstObject does not need explicit hierarcy",  {
+
+  myRawObject <- H1Example
+  myEstObject <- createRDBESEstObject(myRawObject)
+  expect_s3_class(myEstObject,"RDBESEstObject")
 })
 
 }) ## end capture.output

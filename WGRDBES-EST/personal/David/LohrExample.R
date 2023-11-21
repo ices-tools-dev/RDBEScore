@@ -3,7 +3,7 @@ library(RDBEScore)
 
 getwd()
 
-myLohr <- importRDBESDownloadData('data-raw/WGRDBES-EST_TEST_LOHR_eg_3_2_3_6.zip')
+myLohr <- RDBEScore::createRDBESDataObject('data-raw/WGRDBES-EST_TEST_LOHR_eg_3_2_3_6.zip')
 validateRDBESDataObject(myLohr, checkDataTypes = TRUE)
 runChecksOnSelectionAndProbs(myLohr)
 

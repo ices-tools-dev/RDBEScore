@@ -185,7 +185,7 @@ coverageEffort <- function(dataToPlot,
       CEstatRect,
       CEmetier6,
       CEvesLenCat,
-      CEnumFracTrips:CEsciFishDayRSE
+      CEnumFracTrips:CEnumUniqVes
     )
   EF$CEGear <- substr(EF$CEmetier6, 0, 3)
 

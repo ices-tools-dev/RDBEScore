@@ -1,0 +1,86 @@
+---
+title: "Rename SASpeciesCode in SA"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Rename SASpeciesCode in SA}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Introduction
+The aim of this document is to show how to rename the species code from the Sample (SA) table
+based on the Species list (SL) table  using the function `renameSA` in the `RDBEScore` package.
+
+## Load the package
+
+```{r setup}
+library(RDBEScore)
+```
+
+## Prerequisit
+In the first step you need to load some example data.
+Good practice is to check that the RDBESDataObjects are valid. 
+
+```{r}
+# load an example dataset
+myObject <- readRDS("D:/WK_RDBES/WGRDBES-EST/RDBEScore/WGRDBES-EST/personal/Kasia/vignettes/vignetteData/myObject.rds")
+# check it is a valid RDBESobject
+validateRDBESDataObject(myObject, checkDataTypes = TRUE)
+```
+
+## A closer look into the example data and its characteristics
+
+The example is from data in hierarchy 1. It contains a single trip with a single 
+haul. For simplicity, we restrict our analysis to the tables SL, SS and SA which 
+are the ones handled by the functions which behaviour we want to demonstrate. 
+
+Examining a print of the Species List table (SL) and part where SLspeclistName is 
+*WGRDBES-EST_TEST_1_H1* we can conclude that what was targeted for the sampling was only landings of *Clupeidae* (aphiaId 125464).
+
+```{r}
+myObject$SL[SLspeclistName=='WGRDBES-EST_TEST_1_H1'&SLcatchFrac=='Lan',]
+```
+The Species Selection Table where species list is *WGRDBES-EST_TEST_1_H1* and catch category *Lan*
+
+```{r}
+myObject$SS[SSspecListName=='WGRDBES-EST_TEST_1_H1' & SScatchFra=='Lan',c(1,3,6,8,15,18)]
+```
+
+The part of the SA table which corresponds to SS table is
+
+```{r}
+myObject$SA[SSid==216649,c(1,2,9,14,48,49)]
+```
+
+What was looked for is `Clupeidae`.
+
+In the sample we received the `Sprattus sprattus` and `Clupea harengus`. In both  species are from `Clupeidae` family. In this point it will be helpfull to use `renameSA` function.
+
+## Rename species code in SA table using SL table.
+We looked for the fish from `Clupeidae` family but we had a more precise reading 
+than we expected because we read fish in the species level which is more accurate 
+rank, than family.
+
+
+```{r}
+myObjectnew<-renameSpeciesSA(RDBESDataObject=myObject,
+                            validate=TRUE,
+                            verbose=FALSE,
+                            strict=TRUE)
+```
+
+Function is checking the rank of aphia id in both of tables SA and SL. If aphia 
+id in SA table is more accurate than in SL table and aphia ids are from the 
+same family then aphia id in SA table is renaming to aphia id from SL table. If aphia Ids are from diffrent families then the function is leaving the primary value. If we have the opposite situation, so when in the SL table there is more accurate rank than in the SA table, the function is leaving the primary value too.
+
+In the results we get
+```{r}
+myObjectnew$SA[SSid==216649,c(1,2,9,14,48,49)]
+```

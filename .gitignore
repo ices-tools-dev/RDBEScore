@@ -7,6 +7,7 @@
 
 # User-specific files
 .Ruserdata
+.DS_Store
 
 # Example code in package build process
 *-Ex.R
@@ -40,3 +41,7 @@ vignettes/*.pdf
 
 # FishNCo raw test data
 FishNCo/testData/RegionalTestData/*
+
+# MS Excel temp files
+~$*
+

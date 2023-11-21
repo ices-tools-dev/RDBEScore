@@ -9,7 +9,7 @@ A vector containing the short R names of the RDBES design variables
 (without any 2 letter table prefixes)
 R field name:
 \describe{
-  \item{designVariables}{The design variable names}
+\item{designVariables}{The design variable names}
 }
 }
 \source{

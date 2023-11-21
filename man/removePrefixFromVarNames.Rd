@@ -19,7 +19,7 @@ Remove table prefix from variable names
 \examples{
 \dontrun{
 myH1RawObject <-
-  createRDBESDataObject(rdbesExtractPath = "tests\\\\testthat\\\\h1_v_1_19")
+  importRDBESDataCSV(rdbesExtractPath = "tests\\\\testthat\\\\h1_v_1_19")
 cleanPrefixFromVarNames(x = myH1RawObject)
 }
 }

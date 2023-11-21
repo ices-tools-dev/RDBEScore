@@ -4,6 +4,8 @@
 #'
 #' @param RDBESDataObject1 The first object to combine
 #' @param RDBESDataObject2 The second object to combine
+#' @param strict (Optional) This function validates its input data - should
+#' the validation be strict? The default is TRUE.
 #'
 #' @return the combination of \code{RDBESDataObject1} and  \code{RDBESDataObject2}
 #' @seealso  \link[data.table]{rbindlist}
@@ -13,16 +15,18 @@
 #' \dontrun{
 #'
 #' myH1RawObject <-
-#'     createRDBESDataObject(rdbesExtractPath = "tests\\testthat\\h1_v_1_19")
+#'     importRDBESDataCSV(rdbesExtractPath = "tests\\testthat\\h1_v_1_19")
 #' myH5RawObject <-
-#'     createRDBESDataObject(rdbesExtractPath = "tests\\testthat\\h5_v_1_19")
+#'     importRDBESDataCSV(rdbesExtractPath = "tests\\testthat\\h5_v_1_19")
 #'
 #' myCombinedRawObject <- combineRDBESDataObjects(RDBESDataObject1=myH1RawObject,
 #'                                              RDBESDataObject2=myH5RawObject)
 #' }
-combineRDBESDataObjects <- function(RDBESDataObject1, RDBESDataObject2) {
-  validateRDBESDataObject(RDBESDataObject1, verbose = FALSE)
-  validateRDBESDataObject(RDBESDataObject2, verbose = FALSE)
+combineRDBESDataObjects <- function(RDBESDataObject1,
+                                    RDBESDataObject2,
+                                    strict = TRUE) {
+  validateRDBESDataObject(RDBESDataObject1, verbose = FALSE, strict = strict)
+  validateRDBESDataObject(RDBESDataObject2, verbose = FALSE, strict = strict)
   # Create an empty RDBESDataObject as the basis of what we will return
   myRDBESDataObject <- createRDBESDataObject()
 
@@ -39,11 +43,16 @@ combineRDBESDataObjects <- function(RDBESDataObject1, RDBESDataObject2) {
         ),
         use.names = T, fill = T
         )
+      # Need to re-set the key because rbindlist loses it...
+      data.table::setkeyv(myRDBESDataObject[[myTable]],paste0(myTable,"id"))
+
 
       # De-duplicate the resulting SL,VD, CL, and CE tables
       if (myTable %in% c('VD','SL','CL','CE')){
-        myRDBESDataObject[[myTable]] <-
-          dplyr::distinct(myRDBESDataObject[[myTable]], .keep_all = TRUE)
+        # Note - uniqueness will be based only on the data table key
+        myRDBESDataObject[[myTable]] <- unique(myRDBESDataObject[[myTable]])
+        #myRDBESDataObject[[myTable]] <-
+        #  dplyr::distinct(myRDBESDataObject[[myTable]], .keep_all = TRUE)
       }
 
     }

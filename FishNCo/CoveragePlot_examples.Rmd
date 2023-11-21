@@ -44,7 +44,7 @@ This example uses test data in the hierarchy 1 RDBES format.
 ```{r,warning=FALSE,message=FALSE,}
 
   # Load the test data
-  testData <- RDBEScore::createRDBESDataObject("testData/RegionalTestData")
+  testData <- createRDBESDataObject("testData/RegionalTestData")
   # validate the data
   RDBEScore::validateRDBESDataObject(testData)
 

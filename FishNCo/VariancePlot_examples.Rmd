@@ -56,8 +56,8 @@ df <- StrataEst
 df$Year = substr(df$stratumName, 0, 4)
 
 df <- df  %>%
-  filter_at(vars(est.total), any_vars((!is.na(.)))) %>%
-  mutate(var.sd = sqrt(var.total)) 
+  filter_at(vars(est.total), any_vars((!is.na(.))))
+  #%>% mutate(var.sd = sqrt(var.total)) 
 
 # Design
 DE <-df %>% filter(recType == 'DE') %>%
@@ -98,9 +98,9 @@ customRed0 = "#f9d1d1"
 
 
 
-## Tree Diagram for standard deviation of Vessel Selection Strata
+## Tree Diagram for standard error of Vessel Selection Strata
 
-Plot showing the standard deviation for the vessel selection strata. The tree displays the parent strata, Design and Sampling Details. Click on a node to expand its child strata. 
+Plot showing the standard error for the vessel selection strata. The tree displays the parent strata, Design and Sampling Details. Click on a node to expand its child strata. 
 
 ```{r, fig.width=10}
 
@@ -114,7 +114,8 @@ All_Data <- full_join(VS,
          DE.Total, 
          est.total,
          var.total,
-         var.sd, 
+         se.total,
+         #var.sd, 
          Year.y, 
          Country)  %>%
   mutate(stratumName.y = 
@@ -123,11 +124,11 @@ All_Data <- full_join(VS,
   mutate(stratumName.x = 
            paste0(stratumName.x,': SD Total - ',
                   format(round(as.numeric(SD.Total), 0), big.mark=","))) %>%
-  mutate(var.sd = 
-           paste0(stratumName,': VS stand. deviat. - ',
-                  format(round(as.numeric(var.sd), 0), big.mark=","))) %>%
+  mutate(se.total = 
+           paste0(stratumName,': VS stand. error - ',
+                  format(round(as.numeric(se.total), 0), big.mark=","))) %>%
   rename('SD_Stratum' = stratumName.x,
-         'Variance_VS' = var.sd,
+         'Variance_VS' = se.total,
          'DE_Stratum' = stratumName.y)%>%
   arrange(Year.y, Country) %>%
   distinct()
@@ -162,7 +163,7 @@ Graph showing the Estimated Total per Year, coloured by Design Stratum Name.
 
 
 DE <- DE %>%
-  select(recType, stratumName, DE.Total, var.sd, Year, stratumName)
+  select(recType, stratumName, DE.Total, se.total, Year, stratumName)
 # # plot
 DE_Plot <- ggplot(data = DE, aes(x = Year, y= DE.Total, fill = stratumName)) +
   geom_bar(stat='identity',  alpha= 0.7)+
@@ -194,7 +195,7 @@ Graph showing the Estimated Total by Stratum, coloured by Sampling Details Strat
 ```{r,warning=FALSE,message=FALSE, fig.width=10,fig.height=8}
 #Sampling Details Plot and Table
 SD <- SD %>%
-  select(recType, stratumName, SD.Total, var.sd, parentTableStratum) %>%
+  select(recType, stratumName, SD.Total, se.total, parentTableStratum) %>%
   mutate(parentTableStratum = sub('.', '', parentTableStratum)) 
 
 SD_Plot <- ggplot(data = SD,
@@ -226,9 +227,9 @@ formattable(SD,
 ### Vessel Selection
 Graph 1 shows the Vessel Selection estimated total per Vessel Selection stratum name. The error bars show the standard error of the values with smaller bars depicting higher confidence levels. <b>For the error bars with Standard Error value of NA, the confidence level is unknown.</b>
 
-Graph 2 displays the standard deviation by Vessel Selection stratum name coloured by Design stratum name.
+Graph 2 displays the standard error by Vessel Selection stratum name coloured by Design stratum name.
 
-Graph 3 displays the standard deviation by Vessel Selection stratum name coloured by the Sampling Details stratum name.
+Graph 3 displays the standard error by Vessel Selection stratum name coloured by the Sampling Details stratum name.
 
 ```{r, warning=FALSE,message=FALSE, fig.width=12,fig.height=8}
 #### Vessel Selection Plot and Table ####
@@ -259,27 +260,27 @@ ge$x$data[[1]]$hoverinfo <- "none"
 
 ge
 
-# Standard deviatione for VS by VS stratum name coloured by DE Stratum Name
+# Standard error for VS by VS stratum name coloured by DE Stratum Name
 VS_scatter1 <-ggplot(data=VS1,
-                      aes(x=stratumName, y=var.sd, fill = stratumName.y)) +
+                      aes(x=stratumName, y=se.total, fill = stratumName.y)) +
   geom_point(color="cadetblue", alpha= 0.7, size=4) +
-  labs(title="VS Stand. Deviat. by VS Stratum Name",
+  labs(title="VS Stand. Error by VS Stratum Name",
        x="VS Stratum Name",
-       y = "Standard deviation") +
+       y = "Standard error") +
   theme_tech(theme="airbnb") +
   theme(plot.title = element_text(color = "grey30")) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
   labs(fill = "DE Stratum Name")
 ggplotly(VS_scatter1)
 
-# Standard deviation for VS by VS stratum name coloured by SD Stratum Name
+# Standard error for VS by VS stratum name coloured by SD Stratum Name
 VS_scatter2 <-ggplot(data=VS1,
-                     aes(x=stratumName, y=var.sd, fill = stratumName.x)) +
+                     aes(x=stratumName, y=se.total, fill = stratumName.x)) +
   geom_point(color="skyblue4", alpha= 0.7, size=4) +
   scale_fill_tech(theme="airbnb") +
-  labs(title="VS Stand. Deviat. by SD Stratum Name",
+  labs(title="VS Stand. Error by SD Stratum Name",
        x="VS Stratum Name",
-       y = "Standard deviation") +
+       y = "Standard error") +
   theme_tech(theme="airbnb") +
   theme(plot.title = element_text(color = "grey30")) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
@@ -288,7 +289,7 @@ ggplotly(VS_scatter2)
 
 # tidy df for table
 VS2 <- VS %>%  
-  select(recType, stratumName, parentTableStratum, est.total, var.sd)
+  select(recType, stratumName, parentTableStratum, est.total, se.total)
   #select(recType, stratumName, parentTableStratum, est.total, var.total)%>%
   #filter(!is.na(var.total))
 
@@ -301,7 +302,7 @@ formattable(VS2, align = "c",
       formatter("span", style = ~ style(color = "grey",font.weight = "bold")), 
                  `est.total` = 
       color_tile(customGreen, customGreen0),
-                  `var.sd` = 
+                  `se.total` = 
         color_tile(customRed, customRed0)
 ))
 
@@ -334,7 +335,7 @@ ggplotly(FT_scatter)
 
 Graph 1 shows the Fishing Operation estimated total per Vessel Selection stratum name. The error bars show the standard error of the values with smaller bars depicting higher confidence levels. <b>For the error bars with Standard Error value of NA, the confidence level is unknown.</b>
 
-Graph 2 displays the standard deviation by Vessel Selection stratum name.
+Graph 2 displays the standard error by Vessel Selection stratum name.
 
 ```{r,warning=FALSE,message=FALSE,  fig.width=12,fig.height=8}
 # Fishing Operation
@@ -370,11 +371,11 @@ gg$x$data[[1]]$hoverinfo <- "none"
 
 gg
 
-FO_scatter1 <-ggplot(data=FO, aes(x=VS.stratumName, y=var.sd.x))+
+FO_scatter1 <-ggplot(data=FO, aes(x=VS.stratumName, y=se.total.x))+
   geom_point(color="aquamarine4", alpha= 0.7, size = 4) +
-  labs(title="FO Stand. Deviat. by VS Stratum",
+  labs(title="FO Stand. Error by VS Stratum",
        x="VS Stratum Name",
-       y = "Standard deviation") +
+       y = "Standard error") +
  theme_tech(theme="airbnb") +
  theme(plot.title = element_text(color = "grey30")) +
       theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) 
@@ -440,7 +441,7 @@ ggplotly(SA_scatter)
 
 ## 3D Plot
 
-3D graph showing the standard deviation and estimated total per Year, coloured by Sampling Details stratum name.
+3D graph showing the standard error and estimated total per Year, coloured by Sampling Details stratum name.
 
 ```{r}
 #3D Plot
@@ -451,25 +452,28 @@ joinedUpper <- left_join(VS,
   select(DE.Total, 
          est.total,
          var.total,
-         var.sd, 
+         #var.sd, 
+         se.total,
          Year.y, 
          stratumName.x, 
          se.total) %>%
   rename('VS.Total' = est.total,
-         'VS.sd' = var.sd,
+         #'VS.sd' = var.sd,
+         'VS.se' = se.total,
          'VS.Var.Total' = var.total)
 
 
 p <- plot_ly(joinedUpper, 
              x = ~as.factor(Year.y), 
-             y = ~VS.sd,  
+             #y = ~VS.sd,  
+             y = ~VS.se, 
              z= ~VS.Total, color = ~stratumName.x)
 p <- p %>% add_markers()
 p <- p %>% 
-  layout(title = paste0('Stand. Deviat. and Estimated Total for',
+  layout(title = paste0('Stand. Error and Estimated Total for',
                           'Vessel Selection per Year by SD Stratum'),
          scene = list(xaxis = list(tickvals= ~Year.y, title = 'Year'),
-         yaxis = list(title = 'Stand. Deviat. VS'),
+         yaxis = list(title = 'Stand. Error VS'),
          zaxis = list(title = 'Estimated Total VS')))
 
 p

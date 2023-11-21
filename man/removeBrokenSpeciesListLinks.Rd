@@ -6,13 +6,16 @@
 records i.e.those rows which have a value of SpeciesListName that does not
 exist in the SL table.}
 \usage{
-removeBrokenSpeciesListLinks(objectToCheck, verbose = FALSE)
+removeBrokenSpeciesListLinks(objectToCheck, verbose = FALSE, strict = TRUE)
 }
 \arguments{
 \item{objectToCheck}{an RDBESDataObject.}
 
 \item{verbose}{(Optional) If set to TRUE more detailed text will be printed
 out by the function.  Default is TRUE.}
+
+\item{strict}{(Optional) This function validates its input data - should
+the validation be strict? The default is TRUE.}
 }
 \value{
 an RDBESDataObject with any records with an invalid SpeciesListName
@@ -27,7 +30,7 @@ exist in the SL table.
 \dontrun{
 
 myH1RawObject <-
-  createRDBESDataObject(rdbesExtractPath = "tests\\\\testthat\\\\h1_v_1_19")
+  importRDBESDataCSV(rdbesExtractPath = "tests\\\\testthat\\\\h1_v_1_19")
 myFields <- c("SLspeclistName")
 myValues <- c("WGRDBES-EST TEST 5 - sprat data")
 myFilteredObject <- filterRDBESDataObject(myH1RawObject,

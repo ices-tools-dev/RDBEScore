@@ -8,3 +8,4 @@
 ^travis.yml$
 ^FishNCo$
 ^\.github$
+^.DS_Store$

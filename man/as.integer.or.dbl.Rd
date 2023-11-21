@@ -14,8 +14,8 @@ a vector of integers or doubles
 }
 \description{
 This function checks if any value in a vector is above 2e+09, and if so runs
-`round(as.double())` on it. If not it uses `as.integer()` instead. This is to
+\code{round(as.double())} on it. If not it uses \code{as.integer()} instead. This is to
 get around the 32-bit limitation in R that integers cannot be larger than
-around 2e+09, in which case `as.integer` would return an `NA`.
+around 2e+09, in which case \code{as.integer} would return an \code{NA}.
 }
 \keyword{internal}

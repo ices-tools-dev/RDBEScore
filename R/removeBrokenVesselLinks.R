@@ -4,6 +4,8 @@
 #' @param objectToCheck an RDBESDataObject.
 #' @param verbose (Optional) If set to TRUE more detailed text will be printed
 #' out by the function.  Default is TRUE.
+#' @param strict (Optional) This function validates its input data - should
+#' the validation be strict? The default is TRUE.
 #'
 #' @return an RDBESDataObject with any records with an invalid VDid removed
 #' @export
@@ -12,7 +14,7 @@
 #' \dontrun{
 #'
 #' myH1RawObject <-
-#'   createRDBESDataObject(rdbesExtractPath = "tests\\testthat\\h1_v_1_19")
+#'   importRDBESDataCSV(rdbesExtractPath = "tests\\testthat\\h1_v_1_19")
 #' myFields <- c("VDlenCat")
 #' myValues <- c("18-<24")
 #' myFilteredObject <- filterRDBESDataObject(myH1RawObject,
@@ -24,11 +26,13 @@
 #'   verbose = FALSE
 #' )
 #' }
-removeBrokenVesselLinks <- function(objectToCheck, verbose = FALSE) {
+removeBrokenVesselLinks <- function(objectToCheck,
+                                    verbose = FALSE,
+                                    strict = TRUE) {
 
 
   # Check we have a valid RDBESDataObject before doing anything else
-  validateRDBESDataObject(objectToCheck, verbose = FALSE)
+  validateRDBESDataObject(objectToCheck, verbose = verbose, strict = strict)
 
   # Get all the VDid fields
   myIds <- RDBEScore::mapColNamesFieldR[

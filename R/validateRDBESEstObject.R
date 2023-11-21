@@ -11,7 +11,7 @@
 #' @examples
 #' \dontrun{
 #' myH1RawObject <-
-#' createRDBESDataObject(rdbesExtractPath = "tests/testthat/h1_v_1_19")
+#' importRDBESDataCSV(rdbesExtractPath = "tests/testthat/h1_v_1_19")
 #' myEStObj <- createRDBESEstObject(myH1RawObject,1)
 #' validateRDBESEstObject(myEStObj)}
 validateRDBESEstObject <- function(objectToCheck, verbose = FALSE){
@@ -35,13 +35,12 @@ validateRDBESEstObject <- function(objectToCheck, verbose = FALSE){
     warningText <- "objectToCheck does not inherit from data.table"
   }
 
-
-  # Print out any information if we need to
-  if (!is.na(warningText)) {
-    print(warningText)
+  # stop and give an error message if there's a problem
+  if(!validRDBESEstObject) {
+    stop(warningText)
   }
 
   # Return the validation result
-  validRDBESEstObject
+  return(invisible(objectToCheck));
 
 }

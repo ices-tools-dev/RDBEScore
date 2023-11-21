@@ -8,7 +8,9 @@ filterRDBESDataObject(
   RDBESDataObjectToFilter,
   fieldsToFilter,
   valuesToFilter,
-  killOrphans = FALSE
+  killOrphans = FALSE,
+  verbose = FALSE,
+  strict = TRUE
 )
 }
 \arguments{
@@ -19,6 +21,12 @@ filterRDBESDataObject(
 \item{valuesToFilter}{A vector of the field values you wish to filter for}
 
 \item{killOrphans}{Controls if orphan rows are removed. Default is \code{FALSE}.}
+
+\item{verbose}{(Optional) Set to TRUE if you want informative text printed
+out, or FALSE if you don't.  The default is FALSE.}
+
+\item{strict}{(Optional) This function validates its input data - should
+the validation be strict? The default is TRUE.}
 }
 \value{
 the filtered input object of the same class as
@@ -28,6 +36,10 @@ the filtered input object of the same class as
 The returned object will include all rows which either: a) do not included
 any of the field names in \code{fieldsToFilter}, or b) do include the field names
 and have one of the allowed values in \code{valuesToFilter}.
+If you want to filter for a id field like \code{DEid}, \code{FTid} etc, the filtering
+works only on the table where the id field is its key. For example, if you
+try to filter on \code{FOid} it does not look  \code{FOid} in other tables like \code{FT},
+although the field \code{FOid} exists in \code{FT} table.
 }
 \details{
 \code{killOrphans} allows you to remove orphaned rows if set to \code{TRUE}. The
@@ -37,7 +49,7 @@ default is \code{FALSE}.
 \dontrun{
 
 myH1RawObject <-
-  createRDBESDataObject(rdbesExtractPath = "tests\\\\testthat\\\\h1_v_1_19")
+  importRDBESDataCSV(rdbesExtractPath = "tests\\\\testthat\\\\h1_v_1_19")
 
 myFields <- c("SDctry", "VDctry", "VDflgCtry", "FTarvLoc")
 myValues <- c("ZW", "ZWBZH", "ZWVFA")

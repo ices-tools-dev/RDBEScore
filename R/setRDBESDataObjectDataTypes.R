@@ -54,9 +54,13 @@ setRDBESDataObjectDataTypes <- function(RDBESDataObjectToConvert){
 
 
   # Update the original object so we don't lose its class type
-  for (myTable in names(RDBESDataObjectToConvert)){
-    if (!is.null(alteredObject[[myTable]])){
-      RDBESDataObjectToConvert[[myTable]] <- alteredObject[[myTable]]
+  for (aTable in names(RDBESDataObjectToConvert)){
+    if (!is.null(alteredObject[[aTable]])){
+      RDBESDataObjectToConvert[[aTable]] <- alteredObject[[aTable]]
+      # SET KEY
+      # essentially orders rows by id column?
+      check_key_column(RDBESDataObjectToConvert[[aTable]], paste0(aTable,"id"))
+      data.table::setkeyv(RDBESDataObjectToConvert[[aTable]], paste0(aTable,"id"))
     }
 
   }
