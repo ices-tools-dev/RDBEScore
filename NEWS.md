@@ -1,3 +1,7 @@
+# RDBEScore 0.3.1 
+
+* update to the latest RDBES data format (version 1.19.20)
+
 # RDBEScore 0.3.0 - 20/11/2023
 
 This version introduces a bunch of changes to the package. The updated behaviour is best explained in the vignettes. The main changes are:
