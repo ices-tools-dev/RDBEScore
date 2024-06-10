@@ -72,19 +72,20 @@ if(nrow(mapColNamesFieldR[mapColNamesFieldR$Table.Prefix == "FT" & mapColNamesFi
                              mapColNamesFieldR[(ind+1):nrow(mapColNamesFieldR),])
 
 }
-# there is currently no hierarchy where LE directly preceeds SA (without SS) so this is not needed:
-#this was a bug in the RDBES download part
+# 10/6/24 - The SA data downloaded from the RDBES still includes an LEid column so we'll add it
+# here to avoid giving validation warnings even though its not actually in the data model.
+# (there is currently no hierarchy where LE directly preceeds SA (without SS))
 # Similar fix to above for LEid in the SA table
-#if(nrow(mapColNamesFieldR[mapColNamesFieldR$Table.Prefix == "SA" & mapColNamesFieldR$Field.Name == "LEid",]) == 0) {
-#  # this is the row after which the new row needs to be added
-#  ind <- intersect(which(mapColNamesFieldR$Table.Prefix == "SA"),
-#                   which(mapColNamesFieldR$Field.Name == "SSid"))
-#
-#  mapColNamesFieldR <- rbind(mapColNamesFieldR[1:ind,],
-#                             c("SA", "LEid", "LEid", "Integer", "integer"),
-#                             mapColNamesFieldR[(ind+1):nrow(mapColNamesFieldR),])
-#
-#}
+if(nrow(mapColNamesFieldR[mapColNamesFieldR$Table.Prefix == "SA" & mapColNamesFieldR$Field.Name == "LEid",]) == 0) {
+ # this is the row after which the new row needs to be added
+ ind <- intersect(which(mapColNamesFieldR$Table.Prefix == "SA"),
+                  which(mapColNamesFieldR$Field.Name == "SSid"))
+
+ mapColNamesFieldR <- rbind(mapColNamesFieldR[1:ind,],
+                            c("SA", "LEid", "LEid", "Integer", "integer"),
+                            mapColNamesFieldR[(ind+1):nrow(mapColNamesFieldR),])
+
+}
 
 # Another similar fix to above for FOid in the LE table
 if(nrow(mapColNamesFieldR[mapColNamesFieldR$Table.Prefix == "LE" & mapColNamesFieldR$Field.Name == "FOid",]) == 0) {
