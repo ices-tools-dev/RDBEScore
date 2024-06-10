@@ -10,7 +10,7 @@ test_that("combineRDBESDataObjects returns error for NA",  {
 test_that("combineRDBESDataObjects returns invalid RDBESDataObject when
           supplied with duplicate RDBESDataObjects",  {
 
-  myPath <- "./h1_v_1_19_18"
+  myPath <- "./h1_v_1_19_26"
   myObject1 <- importRDBESDataCSV(rdbesExtractPath = myPath)
   myObject2 <- importRDBESDataCSV(rdbesExtractPath = myPath)
 
@@ -27,8 +27,8 @@ test_that("combineRDBESDataObjects returns invalid RDBESDataObject when
 test_that("combineRDBESDataObjects returns valid RDBESDataObject when supplied
           with valid, different RDBESDataObjects",  {
 
-  myObject1 <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_18")
-  myObject2 <- importRDBESDataCSV(rdbesExtractPath = "./h5_v_1_19_18")
+  myObject1 <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_26")
+  myObject2 <- importRDBESDataCSV(rdbesExtractPath = "./h5_v_1_19_26")
 
   # Check these are valid objects before we try and combine them
   expect_error(validateRDBESDataObject(myObject1), NA)

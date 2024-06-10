@@ -4,7 +4,7 @@ capture.output({  ## suppresses printing of console output when running test()
 
     ## Step 1) load and prepare some test data
 
-    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_18")
+    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_26")
 
     #Filter our data for WGRDBES-EST TEST 1, 1965, H1
     myValues <- c(1965,1,"National Routine","DE_stratum1_H1",1019159)
@@ -154,7 +154,7 @@ test_that("doEstimationForAllStrata gets some results for H8ExampleEE1",  {
 
 test_that("doEstimationForAllStrata creates get correct results for Lohr worked examples",  {
 
-  myTestData <- RDBEScore::createRDBESDataObject("./h1_v_1_19_18/ZW_1965_WGRDBES-EST_TEST_1.zip")
+  myTestData <- RDBEScore::createRDBESDataObject("./h1_v_1_19_26/ZW_1965_WGRDBES-EST_TEST_1.zip")
 
   # Only use a subset of the test data
   myTestData <- filterRDBESDataObject(myTestData,c("DEstratumName"),c("Pckg_SDAResources_agstrat_H1"))
