@@ -59,6 +59,10 @@ mapColNamesFieldR$RDataType <- NA
 mapColNamesFieldR[mapColNamesFieldR$R.Name == "Clid","Field.Name"] <- "CLid"
 mapColNamesFieldR[mapColNamesFieldR$R.Name == "Clid","R.Name"] <- "CLid"
 
+# 4/7/24 Fix for two more issues
+mapColNamesFieldR[mapColNamesFieldR$Field.Name == "OSLocationName","Field.Name"] <- "OSlocationName"
+mapColNamesFieldR[mapColNamesFieldR$Field.Name == "LELocationName","Field.Name"] <- "LElocationName"
+
 # Fix for missing LEid column in FT table (remove when Excel model doc is updated from v 1.19.18)
 # If no match on this then this column is still missing, so needs added
 # So at least if model doc is updated and this is not removed then it shouldn't break anything
