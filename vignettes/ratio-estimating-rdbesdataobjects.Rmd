@@ -52,7 +52,23 @@ estData <- createRDBESEstObject(H8ExampleEE1, 8, "BV" )
 ```
 
 ```{r}
+sampling_ratio <- estData$SAtotalWtMes/ estData$SAsampWtMes
+unique(sampling_ratio)
+```
 
+```{r}
+sampling_ratio <- estData$su5numTotal / estData$su5numSamp
+unique(sampling_ratio)
+```
+
+
+```{r}
+#
+```
+
+
+```{r}
+colnames(estData)
 ```
 
 
