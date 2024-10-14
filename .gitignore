@@ -45,3 +45,5 @@ FishNCo/testData/RegionalTestData/*
 # MS Excel temp files
 ~$*
 
+/doc/
+/Meta/

@@ -13,7 +13,7 @@ test_that("generateZerosUsingSL creates rows for SLcou*SLinst*SLspeclistName*SLy
 
 # create test data from download [to be used in different tests]
 
-	myH1DataObject <- RDBEScore::createRDBESDataObject("./h1_v_1_19_18/ZW_1965_WGRDBES-EST_TEST_1.zip")
+	myH1DataObject <- RDBEScore::createRDBESDataObject("./h1_v_1_19_26/ZW_1965_WGRDBES-EST_TEST_1.zip")
 
 	# Only use a subset of the test data
 	myH1DataObject0 <- filterRDBESDataObject(myH1DataObject,c("DEstratumName"),c("Pckg_survey_apistrat_H1"))

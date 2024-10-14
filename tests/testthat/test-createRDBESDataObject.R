@@ -5,11 +5,11 @@ capture.output({  ## suppresses printing of console output when running test()
 
   # common parameters
   # H1 directory
-  dirH1 <- "./h1_v_1_19_18/"
+  dirH1 <- "./h1_v_1_19_26/"
   # H5 directory
-  dirH5 <- "./h5_v_1_19_18/"
+  dirH5 <- "./h5_v_1_19_26/"
   # H7 directory
-  dirH7 <- "./h7_v_1_19_18/"
+  dirH7 <- "./h7_v_1_19_26/"
 
   # H1 object for comparison
   expObjH1 <- H1Example

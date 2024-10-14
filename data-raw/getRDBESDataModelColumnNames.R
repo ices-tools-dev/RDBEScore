@@ -59,6 +59,10 @@ mapColNamesFieldR$RDataType <- NA
 mapColNamesFieldR[mapColNamesFieldR$R.Name == "Clid","Field.Name"] <- "CLid"
 mapColNamesFieldR[mapColNamesFieldR$R.Name == "Clid","R.Name"] <- "CLid"
 
+# 4/7/24 Fix for two more issues
+mapColNamesFieldR[mapColNamesFieldR$Field.Name == "OSLocationName","Field.Name"] <- "OSlocationName"
+mapColNamesFieldR[mapColNamesFieldR$Field.Name == "LELocationName","Field.Name"] <- "LElocationName"
+
 # Fix for missing LEid column in FT table (remove when Excel model doc is updated from v 1.19.18)
 # If no match on this then this column is still missing, so needs added
 # So at least if model doc is updated and this is not removed then it shouldn't break anything
@@ -72,16 +76,18 @@ if(nrow(mapColNamesFieldR[mapColNamesFieldR$Table.Prefix == "FT" & mapColNamesFi
                              mapColNamesFieldR[(ind+1):nrow(mapColNamesFieldR),])
 
 }
-
+# 10/6/24 - The SA data downloaded from the RDBES still includes an LEid column so we'll add it
+# here to avoid giving validation warnings even though its not actually in the data model.
+# (there is currently no hierarchy where LE directly preceeds SA (without SS))
 # Similar fix to above for LEid in the SA table
 if(nrow(mapColNamesFieldR[mapColNamesFieldR$Table.Prefix == "SA" & mapColNamesFieldR$Field.Name == "LEid",]) == 0) {
-  # this is the row after which the new row needs to be added
-  ind <- intersect(which(mapColNamesFieldR$Table.Prefix == "SA"),
-                   which(mapColNamesFieldR$Field.Name == "SSid"))
+ # this is the row after which the new row needs to be added
+ ind <- intersect(which(mapColNamesFieldR$Table.Prefix == "SA"),
+                  which(mapColNamesFieldR$Field.Name == "SSid"))
 
-  mapColNamesFieldR <- rbind(mapColNamesFieldR[1:ind,],
-                             c("SA", "LEid", "LEid", "Integer", "integer"),
-                             mapColNamesFieldR[(ind+1):nrow(mapColNamesFieldR),])
+ mapColNamesFieldR <- rbind(mapColNamesFieldR[1:ind,],
+                            c("SA", "LEid", "LEid", "Integer", "integer"),
+                            mapColNamesFieldR[(ind+1):nrow(mapColNamesFieldR),])
 
 }
 
