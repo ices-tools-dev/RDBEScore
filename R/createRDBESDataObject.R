@@ -53,6 +53,8 @@
 #'   attempt to cast the required columns to the correct data type.  If `FALSE`
 #'   then the column data types will be determined by how the csv files are read
 #'   in. Default is `TRUE`.
+#' @param verbose (Optional) Set to TRUE if you want informative text printed
+#'  out, or FALSE if you don't.  The default is FALSE.
 #' @param ... parameters passed to validateRDBESDataObject
 #' if input is list of data frames e.g.`strict=FALSE`
 #' @importFrom utils file_test
@@ -67,6 +69,7 @@
 createRDBESDataObject <- function(input = NULL,
                                   listOfFileNames = NULL,
                                   castToCorrectDataTypes = TRUE,
+                                  verbose = FALSE,
                                   ...) {
 
   # Classify input type
@@ -98,7 +101,10 @@ createRDBESDataObject <- function(input = NULL,
 
   if(import.type == "list.of.dfs") {
     warning("NOTE: Creating RDBES data objects from a list of local data frames bypasses the RDBES upload data integrity checks.\n")
-    output <- importRDBESDataDFS(myList = input, castToCorrectDataTypes = castToCorrectDataTypes, ...)
+    output <- importRDBESDataDFS(myList = input,
+                                 castToCorrectDataTypes = castToCorrectDataTypes,
+                                 verbose = verbose,
+                                 ...)
   }
 
   if(import.type == "null") {

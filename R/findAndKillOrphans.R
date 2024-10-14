@@ -5,7 +5,7 @@
 #'
 #' @param objectToCheck an RDBESDataObject.
 #' @param verbose (Optional) If set to TRUE more detailed text will be printed
-#' out by the function.  Default is TRUE.
+#' out by the function.  Default is FALSE.
 #' @param strict (Optional) This function validates its input data - should
 #' the validation be strict? The default is TRUE.
 #'

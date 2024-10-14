@@ -7,6 +7,8 @@
 #'   data frame with an RDBES two-letter name (e.g. "DE").
 #' @param castToCorrectDataTypes logical. Indicates whether to cast the columns
 #'   to the correct data types. Default is `TRUE`.
+#' @param verbose (Optional) Set to TRUE if you want informative text printed
+#'  out, or FALSE if you don't.  The default is FALSE.
 #' @param strict logical. Indicates level of validation of the `RDBESDataObject`
 #'   it creates - should the validation be strict? Default is `TRUE`.
 #' @param addMissingColumns logical. Indicates whether to add missing columns
@@ -38,6 +40,7 @@
 #'   `RDBEScore::validateRDBESDataObject` and returns it.
 importRDBESDataDFS <- function(myList,
                                castToCorrectDataTypes = TRUE,
+                               verbose = FALSE,
                                strict = TRUE,
                                addMissingColumns = FALSE,
                                ...){
@@ -122,6 +125,7 @@ importRDBESDataDFS <- function(myList,
   #check the data
   validateRDBESDataObject(dt,
                           checkDataTypes = castToCorrectDataTypes,
+                          verbose = verbose,
                           strict = strict,
                           ...)
 

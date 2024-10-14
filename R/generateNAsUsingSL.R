@@ -18,7 +18,12 @@
 #' @examples
 #' # To be added
 
-generateNAsUsingSL<-function(RDBESDataObject, targetAphiaId, overwriteSampled=TRUE, validate = TRUE, verbose=FALSE, strict=TRUE){
+generateNAsUsingSL<-function(RDBESDataObject,
+                             targetAphiaId,
+                             overwriteSampled = TRUE,
+                             validate = TRUE,
+                             verbose = FALSE,
+                             strict = TRUE){
 
 if(validate){
   validateRDBESDataObject(RDBESDataObject,
@@ -31,8 +36,8 @@ if(validate){
 	  # we don't want to update the original version
 	  tmpSS <- data.table::copy(RDBESDataObject[["SS"]])
 	  tmpSL <- data.table::copy(fixSLids(RDBESDataObject)$SL)
-	  tmpSA <- data.table::copy(RDBESDataObject[["SA"]])	
-			
+	  tmpSA <- data.table::copy(RDBESDataObject[["SA"]])
+
 		tmpSSwithSL<-merge(tmpSS, tmpSL, by="SLid", all.x=T)
 
 		ls1 <- split(tmpSSwithSL, tmpSSwithSL$SSid)
@@ -41,10 +46,10 @@ if(validate){
 			colsToConvertToNumeric <- c("SAid", "SAseqNum")
 			rdbesSA[, (colsToConvertToNumeric) := lapply(.SD, as.double),
 				.SDcols = colsToConvertToNumeric]
-		
+
 		# determines aphias that need generation
 		aphiaNeedingGenerateNAs <- targetAphiaId1[!targetAphiaId1 %in% tmpSSwithSLrow$SLcommTaxon]
-	
+
 		if(length(aphiaNeedingGenerateNAs)>0)
 		{
 		# checks if they already exist in SA [case of the exceptional observer]
@@ -52,7 +57,7 @@ if(validate){
 		if(any(!inSA))
 		# creates a new row
 		{
-		draftNewRows <- do.call("rbind", replicate(n=length(aphiaNeedingGenerateNAs[!inSA]), 
+		draftNewRows <- do.call("rbind", replicate(n=length(aphiaNeedingGenerateNAs[!inSA]),
 							rdbesSA[SSid == tmpSSwithSLrow$SSid,][1,], simplify = FALSE))
 
 		draftNewRows$SAspeCode <- aphiaNeedingGenerateNAs[!inSA]
@@ -66,22 +71,22 @@ if(validate){
 			rdbesSA <- rbind(rdbesSA, draftNewRows)
 		# checks if spp were added ok
 		#browser()
-			test_fail <- length(aphiaNeedingGenerateNAs <- targetAphiaId1[!targetAphiaId1 %in% rdbesSA$SAspeCode])>0	
+			test_fail <- length(aphiaNeedingGenerateNAs <- targetAphiaId1[!targetAphiaId1 %in% rdbesSA$SAspeCode])>0
 			if(test_fail) stop()
-		} 
-		
+		}
+
 		if(any(inSA)){
 			# if they do and overwrite==T give him/her bonus points and but overwrite their data with NAs
 			# if they do and overwrite==F give him/her bonus points and and keep their data
 			if(overwriteSampled==T) {
 				rdbesSA[SSid == tmpSSwithSLrow$SSid & SAspeCode %in% aphiaNeedingGenerateNAs,c("SAtotalWtLive",
-															"SAsampWtLive","SAtotalWtMes","SAsampWtMes")] <- NA 
+															"SAsampWtLive","SAtotalWtMes","SAsampWtMes")] <- NA
 			} else {"do nothing"}}
 		}
-		#browser()		
-		rdbesSA} 	
+		#browser()
+		rdbesSA}
 		)
 		RDBESDataObject[["SA"]] <- data.table::setDT(do.call("rbind", ls2))
 		setkey(RDBESDataObject[["SA"]],"SAid")
 		RDBESDataObject
-}	
+}

@@ -3,6 +3,8 @@
 #' @param x RDBES data object
 #' @param probType  "selection" or "inclusion" for selection and inclusion
 #' probabilities respectively
+#' @param verbose (Optional) Set to TRUE if you want informative text printed
+#' out, or FALSE if you don't.  The default is FALSE.
 #'
 #' @details When the selection method is SRSWR selection probabilities are
 #' calculated as \eqn{1 / N} and inclusion probabilities as
@@ -25,7 +27,9 @@
 #' generateProbs(x = Pckg_SDAResources_agstrat_H1[["VS"]], probType = ("selection"))
 #'
 #' }
-generateProbs <- function(x, probType) {
+generateProbs <- function(x,
+                          probType,
+                          verbose = FALSE) {
 
   # Only allow "inclusion" or "selection" probType at the moment
   if (!probType %in% c("inclusion", "selection")) {
