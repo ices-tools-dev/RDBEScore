@@ -9,3 +9,5 @@
 ^FishNCo$
 ^\.github$
 ^.DS_Store$
+^doc$
+^Meta$
