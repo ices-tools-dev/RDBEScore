@@ -1,0 +1,70 @@
+---
+title: "Ratio Estimation of Lenght Composition from RDBESDataObjects"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Estimating Population parameters from RDBESDataObjects}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+## Introduction 
+
+The aim of this document is to demonstrate how to estimate population parameters from RDBESDataObjects. 
+
+```{r}
+library(RDBEScore)
+```
+
+## Prerequisites
+
+We'll use some example data from the RDBES.  For your own data it's a good idea to check your RDBESDataObjects are valid after any manipulations you perform.
+
+
+## Estimation workflow
+
+Estimation actually  is done on a *RDBESEstObject* that is generate from *RDBESDataObject* using **createRDBESEstObject(...)**. The following example uses a dataset that  resembles in many ways real data at ICES area 27.3.d.28.1 from the Estonian Baltic Trawling fleet for 2022 sprat (*Sprattus sprattus*).The dataset has both total landings and commercial sampling data.
+
+```{r}
+H8ExampleEE1
+```
+The data has not gone through RDBES upload and download procedure and  contains invalid data types but also may have some other validity problems. However the fields for estimation should be present and valid.
+```{r eval=FALSE, echo=TRUE}
+#to check data types
+validateRDBESDataObject(H8ExampleEE1, checkDataTypes = TRUE, strict = FALSE)
+```
+
+```{r}
+View(H8ExampleEE1$CL)
+```
+
+```{r}
+#create the estimation object to estimate values on the BV table
+estData <- createRDBESEstObject(H8ExampleEE1, 8, "BV" )
+```
+
+```{r}
+
+```
+
+
+```{r}
+View(estData)
+```
+
+
+
+
+```{r}
+
+#END
+```
+
