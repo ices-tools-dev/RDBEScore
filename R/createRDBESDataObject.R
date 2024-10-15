@@ -72,18 +72,26 @@ createRDBESDataObject <- function(input = NULL,
                                   verbose = FALSE,
                                   ...) {
 
+
   # Classify input type
   if(any(is.character(input)) && any(grepl(".zip", input))) {
     if(!(all(grepl(".zip", input)))) stop("You cannot import a mix of 'csv' and 'zip' inputs. To import multiple tables unzip all files and import as a folder of 'csv' files.")
     import.type <- "zip"
+    if (verbose) print("Input is a zip file")
     # if input is string and folder/directory assume it contains csv files
   } else if(length(input) == 1 && is.character(input) && file_test("-d", input)) {
     import.type <- "csv"
-    # if input is a list assume it is list of tables
+    if (verbose) print("Input is a folder name which is assumed to contains csv files")
+    # if input is a list of data tables
+  } else if(is.list(input) && !is.data.frame(input) && all(sapply(input, is.data.table))) {
+    import.type <- "list.of.dts"
+    if (verbose) print("Input is a list of data.tables")
+    # if input is a list of data frames
   } else if(is.list(input) && !is.data.frame(input) && all(sapply(input, class) == "data.frame")) {
     import.type <- "list.of.dfs"
+    if (verbose) print("Input is a list of data frames")
     # if input is NULL...
-  } else if(is.null(input)) {
+  }else if(is.null(input)) {
     import.type <- "null"
   } else {
     stop("Input type not recognised. Should be a RDBES zip file, folder of csv files, or list of data frames.")
@@ -99,8 +107,8 @@ createRDBESDataObject <- function(input = NULL,
                                                            castToCorrectDataTypes = castToCorrectDataTypes)
 
 
-  if(import.type == "list.of.dfs") {
-    warning("NOTE: Creating RDBES data objects from a list of local data frames bypasses the RDBES upload data integrity checks.\n")
+  if(import.type == "list.of.dfs" || import.type == "list.of.dts") {
+    warning("NOTE: Creating RDBES data objects from a list of local data frames or data.tables bypasses the RDBES upload data integrity checks.\n")
     output <- importRDBESDataDFS(myList = input,
                                  castToCorrectDataTypes = castToCorrectDataTypes,
                                  verbose = verbose,

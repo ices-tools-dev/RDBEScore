@@ -320,6 +320,10 @@ capture.output({  ## suppresses printing of console output when running test()
     colnames(df) <- colMapping[colnames(df)]
     df
   }, colMapping)
+  # convert list_of_dfs and list_of_dfs_long_names to lists of data.tables
+  list_of_dts <- lapply(list_of_dfs, as.data.table)
+  list_of_dts_long_names <- lapply(list_of_dfs_long_names, as.data.table)
+
 
   test_that("Importing list of dfs works",{
     genObj <- suppressWarnings(createRDBESDataObject(list_of_dfs, castToCorrectDataTypes = FALSE))
@@ -328,16 +332,38 @@ capture.output({  ## suppresses printing of console output when running test()
 
   })
 
-  test_that("Long column names are converted to R names",{
+  test_that("Importing list of data.tables works",{
+    genObj <- suppressWarnings(createRDBESDataObject(list_of_dts, castToCorrectDataTypes = FALSE))
+
+    expect_equal(genObj, expObjH1)
+
+  })
+
+  test_that("Long column names are converted to R names (using list of data frames as input)",{
     genObj <- suppressWarnings(createRDBESDataObject(list_of_dfs_long_names, castToCorrectDataTypes = FALSE))
 
     expect_equal(genObj, expObjH1)
 
   })
 
-  test_that("Extra column names are ignored",{
+  test_that("Long column names are converted to R names (using list of data tables as input)",{
+    genObj <- suppressWarnings(createRDBESDataObject(list_of_dts_long_names, castToCorrectDataTypes = FALSE))
+
+    expect_equal(genObj, expObjH1)
+
+  })
+
+  test_that("Extra column names are ignored (using list of data frames as input)",{
     colnames(list_of_dfs_long_names[["VS"]])[27] <- "wrong"
     genObj <- suppressWarnings(createRDBESDataObject(list_of_dfs_long_names, castToCorrectDataTypes = FALSE, strict=FALSE))
+    colnames(expObjH1[["VS"]])[27] <- "wrong"
+    expect_equal(genObj, expObjH1)
+
+  })
+
+  test_that("Extra column names are ignored (using list of data tables as input)",{
+    colnames(list_of_dts_long_names[["VS"]])[27] <- "wrong"
+    genObj <- suppressWarnings(createRDBESDataObject(list_of_dts_long_names, castToCorrectDataTypes = FALSE, strict=FALSE))
     colnames(expObjH1[["VS"]])[27] <- "wrong"
     expect_equal(genObj, expObjH1)
 
@@ -353,20 +379,47 @@ capture.output({  ## suppresses printing of console output when running test()
 
   })
 
+  test_that("Importing list of data tables with castToCorrectDataTypes = TRUE works",{
+    genObj <- suppressWarnings(createRDBESDataObject(list_of_dts, castToCorrectDataTypes = TRUE))
+
+    myDiffs <- validateRDBESDataObjectDataTypes(genObj)
+
+    numberOfDifferences <- nrow(myDiffs)
+    expect_equal(numberOfDifferences,0)
+
+  })
+
   test_that("Importing list of dfs with different names than the ones requested does not work",{
 
     names(list_of_dfs)[1] <- "Design"
     expect_error(expect_warning(createRDBESDataObject(list_of_dfs, castToCorrectDataTypes = FALSE),
-                                "NOTE: Creating RDBES data objects from a list of local data frames bypasses the RDBES upload data integrity checks.\n"),
+                                "NOTE: Creating RDBES data objects from a list of local data frames or data.tables bypasses the RDBES upload data integrity checks.\n"),
                  "You have given list names that are not valid:\nDesign")
 
+  })
+
+  test_that("Importing list of data.tables with different names than the ones requested does not work",{
+
+    names(list_of_dts)[1] <- "Design"
+    expect_error(expect_warning(createRDBESDataObject(list_of_dts, castToCorrectDataTypes = FALSE),
+                                "NOTE: Creating RDBES data objects from a list of local data frames or data.tables bypasses the RDBES upload data integrity checks.\n"),
+                 "You have given list names that are not valid:\nDesign")
   })
 
   test_that("Importing list of dfs with duplicate table names does not work",{
 
     names(list_of_dfs)[1] <- "DE"
     names(list_of_dfs)[2] <- "DE"
-    expect_error(expect_warning(createRDBESDataObject(list_of_dfs, castToCorrectDataTypes = FALSE), "NOTE: Creating RDBES data objects from a list of local data frames bypasses the RDBES upload data integrity checks.\n"),
+    expect_error(expect_warning(createRDBESDataObject(list_of_dfs, castToCorrectDataTypes = FALSE), "NOTE: Creating RDBES data objects from a list of local data frames or data.tables bypasses the RDBES upload data integrity checks.\n"),
+                 "You have given list names that have duplicate table names:\nDE")
+
+  })
+
+  test_that("Importing list of data.tables with duplicate table names does not work",{
+
+    names(list_of_dts)[1] <- "DE"
+    names(list_of_dts)[2] <- "DE"
+    expect_error(expect_warning(createRDBESDataObject(list_of_dts, castToCorrectDataTypes = FALSE), "NOTE: Creating RDBES data objects from a list of local data frames or data.tables bypasses the RDBES upload data integrity checks.\n"),
                  "You have given list names that have duplicate table names:\nDE")
 
   })
@@ -378,7 +431,19 @@ capture.output({  ## suppresses printing of console output when running test()
     names(list_of_dfs)[3] <- "DE"
     expect_error(expect_warning(createRDBESDataObject(list_of_dfs,
                                                       castToCorrectDataTypes = FALSE),
-                                "NOTE: Creating RDBES data objects from a list of local data frames bypasses the RDBES upload data integrity checks."),
+                                "NOTE: Creating RDBES data objects from a list of local data frames or data.tables bypasses the RDBES upload data integrity checks."),
+                 "You have given list names that are not valid:\nDesign")
+
+  })
+
+  test_that("Importing list of data.tables with different names than the ones requested & duplicate table names does not work",{
+
+    names(list_of_dts)[1] <- "Design"
+    names(list_of_dts)[2] <- "DE"
+    names(list_of_dts)[3] <- "DE"
+    expect_error(expect_warning(createRDBESDataObject(list_of_dts,
+                                                      castToCorrectDataTypes = FALSE),
+                                "NOTE: Creating RDBES data objects from a list of local data frames or data.tables bypasses the RDBES upload data integrity checks."),
                  "You have given list names that are not valid:\nDesign")
 
   })
@@ -389,7 +454,7 @@ capture.output({  ## suppresses printing of console output when running test()
    list2 <- list_of_dfs
     expect_error(expect_warning(createRDBESDataObject(input = c(list1, list2),
                                                       castToCorrectDataTypes = FALSE),
-                                "NOTE: Creating RDBES data objects from a list of local data frames bypasses the RDBES upload data integrity checks.\n"),
+                                "NOTE: Creating RDBES data objects from a list of local data frames or data.tables bypasses the RDBES upload data integrity checks.\n"),
                  "You have given list names that have duplicate table names:\nDE, SD, VS, FT, FO, SS, SA, FM, BV, VD, SL")
 
   })
