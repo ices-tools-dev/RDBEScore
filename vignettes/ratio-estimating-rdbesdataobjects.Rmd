@@ -43,13 +43,81 @@ validateRDBESDataObject(H8ExampleEE1, checkDataTypes = TRUE, strict = FALSE)
 ```
 
 ```{r}
+#create the estimation object to estimate values on the SA table
+SampleWeightEstData <- createRDBESEstObject(H8ExampleEE1, 8, "SA" )
+
+#the SAsampWtMes is in grammes let's estimate in tonnes
+SampleWeightEstData$SAsampWtMes <- SampleWeightEstData$SAsampWtMes / (1000 * 1000)
+
+results <- doEstimationForAllStrata(SampleWeightEstData, "SAsampWtMes", verbose = T, estimMethod = "ratio")
+```
+
+
+
+```{r}
 View(H8ExampleEE1$CL)
 ```
 
 ```{r}
 #create the estimation object to estimate values on the BV table
 estData <- createRDBESEstObject(H8ExampleEE1, 8, "BV" )
+#for length we want the LengthTotal
+estData <- estData[estData$BVtypeMeas == "LengthTotal",]
+
+#the BV valuemeasured is character
+head(estData$BVvalueMeas)
 ```
+```{r}
+estData$BVfishLen <- as.numeric(estData$BVvalueMeas)
+```
+
+
+```{r}
+for(SAid in c(1:15)){
+  bvt <- as.data.frame(H8ExampleEE1$BV)[as.data.frame(H8ExampleEE1$BV)$SAid== SAid,]
+  bvt <- bvt[bvt$BVtypeMeas == "LengthTotal",]
+  bvt$BVfishLen <- as.numeric(bvt$BVvalueMeas)
+  
+  print(paste("SAid:", SAid, "Number of fish:", nrow(bvt)))
+}
+```
+
+
+```{r}
+resultsFishLen <- doEstimationForAllStrata(estData, "BVfishLen", verbose = T, estimMethod = "ratio")
+```
+
+```{r}
+bvw <- bvt <- as.data.frame(H8ExampleEE1$BV)
+bvw <- bvw[bvw$BVtypeMeas == "WeightMeasured",]
+bvt <- bvt[bvt$BVtypeMeas == "LengthTotal",]
+bv <- merge(bvw, bvt, by = c("BVfishId", "SAid"), suffixes = c("Wt", "Len"))
+bv$BVvalueMeasWt <- as.numeric(bv$BVvalueMeasWt)
+bv$BVvalueMeasLen <- as.numeric(bv$BVvalueMeasLen)
+#group by lenght class
+
+bv$BVfishLenClass <- cut(bv$BVvalueMeasLen, breaks = seq(10, 300, 10), include.lowest = TRUE)
+#aggregate by lenght class
+bvta <- aggregate(cbind(countAtLen= BVvalueMeasLen) ~ BVfishLenClass + SAid, data = bv, FUN = length)
+bvtb <- aggregate( cbind(totalWeightAtLen=  BVvalueMeasWt) ~ BVfishLenClass + SAid, data = bv, FUN = sum)
+bvtc <- aggregate( cbind(totCount=  BVvalueMeasLen) ~  SAid, data = bv, FUN = length)
+
+bvta <- merge(bvta, bvtb, by = c("BVfishLenClass", "SAid"))
+bvta <- merge(bvta, bvtc, by = "SAid")
+bvta$prop <- bvta$countAtLen / bvta$totCount
+
+SA <- as.data.frame(H8ExampleEE1$SA)
+sam <- merge(SA, bvta, by = "SAid")
+
+#get length class proportions
+sam$ratio <- (sam$SAtotalWtMes * sam$prop) / sam$totalWeightAtLen
+
+#the auciliary variable can be either the ratio itself r the 
+
+sam$countAtLen <- sam$ratio * sam$countAtLen
+sam[c("SAid", "BVfishLenClass", "countAtLen",  "SAtotalWtMes", "ratio", "prop")]
+```
+
 
 ```{r}
 sampling_ratio <- estData$SAtotalWtMes/ estData$SAsampWtMes
@@ -60,10 +128,16 @@ unique(sampling_ratio)
 sampling_ratio <- estData$su5numTotal / estData$su5numSamp
 unique(sampling_ratio)
 ```
+```{r}
+
+```
 
 
 ```{r}
-#
+#how many uniqe fish are there in the BV
+length(unique(estData$BVfishId))
+unique(estData$BVtypeMeas)
+  
 ```
 
 
