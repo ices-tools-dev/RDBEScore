@@ -4,7 +4,8 @@
 #' environment.
 #'
 #' The `input` should be either:
-#'  - A `zip` file downloaded from RDBES (or multiple zip files if you want to include or overwrite tables, for example CL and CE data)
+#'  - A `zip` file downloaded from RDBES (or multiple zip files if you want to include or overwrite tables, for example CL and CE data). NOTE: Only the downloaded 
+#' RDBES data with Table data format with ids is loaded by this function and not the uploaded format.
 #'  - A folder containing `csv` files downloaded from RDBES (e.g. the unzipped file), or any set of csv files of the RDBES tables.
 #'  - A `list` of data frames in the current environment representing different tables in the hierarchy.
 #'  - A `NULL` input will return and empty RDBES data object
