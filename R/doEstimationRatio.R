@@ -54,7 +54,7 @@ doEstimationRatio <- function(RDBESEstObjectForEstim,
 
   if(targetValue == "LengthComp"){ # numbers at length
 
-    if(lowerhierarchy %in% c("A", "B"){
+    if(lowerhierarchy %in% c("A", "B")){
 
       # Only FM data
 
