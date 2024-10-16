@@ -43,59 +43,114 @@ doEstimationRatio <- function(RDBESEstObjectForEstim,
                               classUnits = "mm",
                               classBreaks = c(100, 300, 10), # cut
                               LWparam = NULL, # vector of two values
+                              lowerAux = NULL, # you can use a strongly correlated value present in your data for the estimation of the values of interest
                               verbose = FALSE){
 
+  # Check we have a valid RDBESEstObject before doing anything else
+  RDBEScore::validateRDBESEstObject(RDBESEstObjectForEstim, verbose = verbose)
+
+  # Take out SU levels depending on the hierarchy
+  suLevels <-
+    names(RDBESEstObjectForEstim)[
+      grep("^su.table$", names(RDBESEstObjectForEstim))
+    ]
+
+# TODO implemented for a combination of lower hierarchies
+# For now only works on one lower hierarchy at a time
+
+  if(length(unique(RDBESEstObjectForEstim$SAlowHierarchy)) > 1){
+    stop("Multiple lower hierarchies not yet implemented")}
 
 
-  # internal fun
+#----------------------------------------------------------
 
-  # 1. Combine BV
-  # 2. Combine FM
 
-  if(targetValue == "LengthComp"){ # numbers at length
+# Length composition ------------------------------------------------------
+  if(targetValue == "LengthComp"){
 
-    if(lowerhierarchy %in% c("A", "B")){
+
+# LH A & B ----------------------------------------------------------------
+    if(unique(RDBESEstObjectForEstim$SAlowHierarchy) %in% c("A", "B")){
+
 
       # Only FM data
 
       # if both lengths and weight exist
-       # then do length compo
+      # then do length comp
       # else LW relationship: give a, b parameters
       # else stop
 
-    }else if(lowerhierarchy == "C"){
+      if(isTRUE(any(grepl("Length", RDBESEstObjectForEstim$BVtypeAssess)) & any(grepl("Weight", RDBESEstObjectForEstim$BVtypeAssess)))){
+
+
+        # if aux exist use aux
+        if(all(!is.na(RDBESEstObjectForEstim[[paste0(substr(tail(suLevels, n = 1), 1, 3), "auxVarValue")]]))){
+
+          print("Ok")
+
+        }else{
+
+
+          stop("Missing values in auxiliary variable sample table")
+
+
+        }
+
+        # otherwise check if you can calculate it
+        # otherwise stop
+      }
+
+
+
+
+
+# LH C --------------------------------------------------------------------
+    }else if(unique(RDBESEstObjectForEstim$SAlowHierarchy) == "C"){
 
       # Only BV data
 
       # If length exists
-        #if weight exists run
-        # else ask for a, b
-        # else stop
+      #if weight exists run
+      # else ask for a, b
       # else stop
+      # else stop
+
+      stop("Not yet implemented")
     }
 
 
-  }else if(targetValue == "AgeComp"){ # numbers at age
 
-    if(lowerhierarchy == "C"){
+# Age composition ---------------------------------------------------------
+  }else if(targetValue == "AgeComp"){
+
+
+# LH C --------------------------------------------------------------------
+
+
+    if(unique(RDBESEstObjectForEstim$SAlowHierarchy) == "C"){
       # Check which biol data are present
 
       # if age exists
 
-          # if indv weights + lengths  exist
+      # if indv weights + lengths  exist
 
-          # then Full data set back
+      # then Full data set back
 
-          # if only indv weights
-          # then you don't have the mean length at age unless you use the inverse LW relationship :provide a, b parameters or model them (Future work)
-          # if only lengths
-          # the you don't have the mean weight at age unless LW: a, b or model (Future work)
-          # else stop you don't sufficient data
+      # if only indv weights
+      # then you don't have the mean length at age unless you use the inverse LW relationship :provide a, b parameters or model them (Future work)
+      # if only lengths
+      # the you don't have the mean weight at age unless LW: a, b or model (Future work)
+      # else stop you don't sufficient data
 
       # else stop
 
 
-    }else if(lowerhierarchy == "A"){
+# LH A --------------------------------------------------------------------
+
+
+    }else if(unique(RDBESEstObjectForEstim$SAlowHierarchy) == "A"){
+
+
 
       # if age exists
 
@@ -113,12 +168,6 @@ doEstimationRatio <- function(RDBESEstObjectForEstim,
 
       # TODO include FM. For now the FM is not yet implemented
     }
-
-
-  }else if (targetValue == "SexComp") { # sex comp
-
-  }else { # Weight comp
-    stop("Not implemented")
   }
 
 }
