@@ -1,4 +1,16 @@
-#'Function which rename SAspeCode
+#' Function which changes the value of SAspeCode in SA.
+#'
+#' Function checks the rank of aphia id in both of tables SA and SL, and tries
+#' to replace a more accurate rank in SA with a broader rank from SL.
+#' There are 3 possible situations:
+#' 1) If the aphiaid id in the SA table is more accurate than in the SL table
+#' and the aphiaids are from the same kingdom, phylum, class, order, family,
+#' or genus then the aphiaid in the SA table is changed to the aphia id from
+#' the SL table.
+#' 2) If the aphia Ids are from different kingdom, phylum, class, order, family,
+#' or genus then the function retains the original SA species code.
+#' 3) If the SL table has a more accurate rank than in the SA table, the
+#' function also retains the original SA species code.
 #'
 #' @param RDBESDataObject An RDBESDataObject.
 #' @param validate Set to TRUE if you want validation to be carried out. The
@@ -13,131 +25,138 @@
 #' Sprat(126425), in SL Clupeidae (125464) function renameSpeciesSA rename Sprat
 #' from SA to Clupeidae. Clupeidae(family rank) is higher rank than Sprat(species rank).
 #'
-#' @example
+#' @export
+#'
+#' @examples
 #' \dontrun{
 #' myObject <- createRDBESDataObject(input = "WGRDBES-EST/personal/Kasia/vignettes/vignetteData")
 #' renameSpeciesSA(RDBESDataObject=myObject,validate,verbose,strict)}
 
-renameSpeciesSA<-function(RDBESDataObject, validate=TRUE, verbose=FALSE, strict=TRUE){
-  if(validate){
+renameSpeciesSA <- function(RDBESDataObject,
+                            validate = TRUE,
+                            verbose = FALSE,
+                            strict = TRUE) {
+  if (validate) {
     validateRDBESDataObject(RDBESDataObject,
-                            verbose = verbose,
-                            strict = strict
+      verbose = verbose,
+      strict = strict
     )
-    }
+  }
 
-H1_SA <- RDBESDataObject[["SA"]]
-H1_SL <- fixSLids(RDBESDataObject)$SL
-H1_SS <- RDBESDataObject[["SS"]]
+  H1_SA <- RDBESDataObject[["SA"]]
+  H1_SL <- fixSLids(RDBESDataObject)$SL
+  H1_SS <- RDBESDataObject[["SS"]]
 
-aphiaRecords <- RDBEScore::wormsAphiaRecord
+  aphiaRecords <- RDBEScore::wormsAphiaRecord
 
-# Change the AphiaID to a char (so it is easier to join to the RDBES specCode field)
-aphiaRecords$AphiaID <- as.character(aphiaRecords$AphiaID)
+  # Change the AphiaID to a char (so it is easier to join to the RDBES specCode field)
+  aphiaRecords$AphiaID <- as.character(aphiaRecords$AphiaID)
 
-#1st
-# Append ahpia records to SA data
-H1_SA_new <- dplyr::left_join(H1_SA,
-                              aphiaRecords,
-                              by=c("SAspeCode"="AphiaID"))
+  # 1st
+  # Append ahpia records to SA data
+  H1_SA_new <- dplyr::left_join(H1_SA,
+    aphiaRecords,
+    by = c("SAspeCode" = "AphiaID")
+  )
 
-#Append ahpia records to SL data
-H1_SL$SLsppCode<-as.character(H1_SL$SLsppCode)
-H1_SL_new <- dplyr::left_join(H1_SL,
-                              aphiaRecords,
-                              by=c("SLsppCode"="AphiaID"))
+  # Append ahpia records to SL data
+  H1_SL$SLsppCode <- as.character(H1_SL$SLsppCode)
+  H1_SL_new <- dplyr::left_join(H1_SL,
+    aphiaRecords,
+    by = c("SLsppCode" = "AphiaID")
+  )
 
 
-#SS only information about SLspecieslistName
-H1_SS<-H1_SS[,c('SSid','SLid','SSspecListName','SScatchFra')]
-H1_SA_new<-merge(H1_SA_new,H1_SS, by='SSid')
+  # SS only information about SLspecieslistName
+  H1_SS <- H1_SS[, c("SSid", "SLid", "SSspecListName", "SScatchFra")]
+  H1_SA_new <- merge(H1_SA_new, H1_SS, by = "SSid")
 
-#key of species list name and species
+  # key of species list name and species
 
-H1_SA_new$SAkey<-paste(H1_SA_new$SLid,H1_SA_new$SAspeCode,H1_SA_new$SSspecListName,H1_SA_new$SScatchFra,sep='_')
-H1_SL_new$SLkey<-paste(H1_SL_new$SLid,H1_SL_new$SLsppCode,H1_SL_new$SLspeclistName,H1_SL_new$SLcatchFrac,sep='_')
+  H1_SA_new$SAkey <- paste(H1_SA_new$SLid, H1_SA_new$SAspeCode, H1_SA_new$SSspecListName, H1_SA_new$SScatchFra, sep = "_")
+  H1_SL_new$SLkey <- paste(H1_SL_new$SLid, H1_SL_new$SLsppCode, H1_SL_new$SLspeclistName, H1_SL_new$SLcatchFrac, sep = "_")
 
-newest_SA<-data.frame(NULL)
+  newest_SA <- data.frame(NULL)
 
-#unique(H1_SA_new$SSid)->sequence_SSid
-sequence_SSid<-unique(H1_SA_new$SSid)
-#unique(H1_SA_new$SAcatchCat)->sequence_catchCategory
+  # unique(H1_SA_new$SSid)->sequence_SSid
+  sequence_SSid <- unique(H1_SA_new$SSid)
+  # unique(H1_SA_new$SAcatchCat)->sequence_catchCategory
 
-for (k in sequence_SSid){
-
+  for (k in sequence_SSid) {
     # subset of all SA by SSid for all catch category!!!
-    temp<-H1_SA_new[H1_SA_new$SSid==k,]
+    temp <- H1_SA_new[H1_SA_new$SSid == k, ]
     temp$SAnewSpeciesCode <- NA
-    temp$SAnewSpeciesCode <- as.character( temp$SAnewSpeciesCode)
-    #check correct list of Species
-    if (unique(temp$SSspecListName)%in%H1_SL_new$SLspeclistName){
-      SL_Subset<-H1_SL_new[H1_SL_new$SLspeclistName%in%temp$SSspecListName,]
-      #loopup in with level you have species and species are inside
-      temp$speciesExistsInList<-ifelse(temp$SAkey %in% SL_Subset$SLkey,'Y','N')
-      for (i in 1:nrow(temp)){
-        for (j in 1:nrow(SL_Subset)){
-          if (temp[i,c('speciesExistsInList')]=='Y'){
-            temp[i,c('SAnewSpeciesCode')]<-temp[i,c('SAspeCode')]
-            #if (verbose) print("Species exists in list. No change needed.")
-          }else{
-            if (verbose) {
-              #print("Species does not exist in list.")
-              #if(temp[i,c('taxonRankID')]>SL_Subset[j,c('taxonRankID')]){
-              #  print("SA species rank is higher than SL species rank.")
-              #} else {
-              #  print("SA species rank is lower than SL species rank.")
-              #}
-              #print(SL_Subset[j,c('scientificname')])
-              # print(temp[i,c('kingdom')])
-              # print(temp[i,c('phylum')])
-              # print(temp[i,c('class')])
-              # print(temp[i,c('order')])
-              #print(temp[i,c('family')])
-              #print(temp[i,c('genus')])
-              #print(temp[i,c('SAspeCode')])
-              #print(SL_Subset[j,c('SLsppCode')])
-            }
-            if ((temp[i,c('taxonRankID')]>SL_Subset[j,c('taxonRankID')]) &
-                (SL_Subset[j,c('scientificname')] %in% temp[i,c('kingdom')]|
-                 SL_Subset[j,c('scientificname')] %in% temp[i,c('phylum')]|
-                 SL_Subset[j,c('scientificname')] %in% temp[i,c('class')]|
-                 SL_Subset[j,c('scientificname')] %in% temp[i,c('order')]|
-                 SL_Subset[j,c('scientificname')] %in% temp[i,c('family')]|
-                 SL_Subset[j,c('scientificname')] %in% temp[i,c('genus')]
-                )&
-                temp[i,c('SAspeCode')]!=SL_Subset[j,c('SLsppCode')]
-            ){
+    temp$SAnewSpeciesCode <- as.character(temp$SAnewSpeciesCode)
+    temp$SAnewSpeciesCodeTaxonRank <- -1
+    # check correct list of Species
+    if (unique(temp$SSspecListName) %in% H1_SL_new$SLspeclistName) {
+      SL_Subset <- H1_SL_new[H1_SL_new$SLspeclistName %in% temp$SSspecListName, ]
+      # loopup in with level you have species and species are inside
+      temp$speciesExistsInList <- ifelse(temp$SAkey %in% SL_Subset$SLkey, "Y", "N")
+      for (i in 1:nrow(temp)) {
+        for (j in 1:nrow(SL_Subset)) {
+          if (temp[i, c("speciesExistsInList")] == "Y") {
+            temp[i, c("SAnewSpeciesCode")] <- temp[i, c("SAspeCode")]
+            # if (verbose) print("Species exists in list. No change needed.")
+          } else {
+            #if (verbose)  print("Species does not exist in list.")
+            if ((temp[i, c("taxonRankID")] > SL_Subset[j, c("taxonRankID")]) &
+              (SL_Subset[j, c("scientificname")] %in% temp[i, c("kingdom")] |
+                SL_Subset[j, c("scientificname")] %in% temp[i, c("phylum")] |
+                SL_Subset[j, c("scientificname")] %in% temp[i, c("class")] |
+                SL_Subset[j, c("scientificname")] %in% temp[i, c("order")] |
+                SL_Subset[j, c("scientificname")] %in% temp[i, c("family")] |
+                SL_Subset[j, c("scientificname")] %in% temp[i, c("genus")]
+              ) &
+              temp[i, c("SAspeCode")] != SL_Subset[j, c("SLsppCode")]
+            ) {
               #if (verbose) print("SA species rank is higher than SL species rank. Changing species code.")
-              temp[i,c('SAnewSpeciesCode')]<-SL_Subset$SLsppCode[j]
+              # There is the possibility of finding mutiple matches in the SL table - this
+              # can lead to updating SAnewSpeciesCode mutiple times.
+              # We want to end up with the broadest taxon rank from the SL table at the end
+              # of our matching.
+              if (is.na(temp[i, c("SAnewSpeciesCode")])){
+                # if we don't yet have a new species code, set it to the SL species code
+                temp[i, c("SAnewSpeciesCode")] <- SL_Subset$SLsppCode[j]
+                temp[i, c("SAnewSpeciesCodeTaxonRank")] <- SL_Subset[j, c("taxonRankID")]
+                #if (verbose) print("We don't have a new species code yet. Changing species code.")
+              } else {
+                # check if SAnewSpeciesCodeTaxonRank is greater than SL taxonRankID
+                if (temp[i, c("SAnewSpeciesCodeTaxonRank")] > SL_Subset[j, c("taxonRankID")]) {
+                  temp[i, c("SAnewSpeciesCode")] <- SL_Subset$SLsppCode[j]
+                  temp[i, c("SAnewSpeciesCodeTaxonRank")] <- SL_Subset[j, c("taxonRankID")]
+                  #if (verbose) print("New SA species rank is higher than SL species rank. Changing species code again.")
+                } else {
+                  #if (verbose) print("New SA species rank is lower than SL species rank. Not changing species code.")
+                }
+              }
             }
-            if((temp[i,c('taxonRankID')]<SL_Subset[j,c('taxonRankID')]) ){
+            if ((temp[i, c("taxonRankID")] < SL_Subset[j, c("taxonRankID")])) {
               #if (verbose) print("SA species rank is lower than SL species rank. Not changing species code.")
-              temp[i,c('SAnewSpeciesCode')]<-temp$SAspeCode[i]
+              temp[i, c("SAnewSpeciesCode")] <- temp$SAspeCode[i]
             }
           }
-        }#j
-        if(is.na(temp[i,c('SAnewSpeciesCode')])){
-          temp$SAnewSpeciesCode<-as.character(temp$SAnewSpeciesCode)
-          temp[i,c('SAnewSpeciesCode')]<-temp$SAspeCode[i]
+        } # j
+        if (is.na(temp[i, c("SAnewSpeciesCode")])) {
+          temp$SAnewSpeciesCode <- as.character(temp$SAnewSpeciesCode)
+          temp[i, c("SAnewSpeciesCode")] <- temp$SAspeCode[i]
         }
-      }#i
-      newest_SA<-rbind(newest_SA,temp)
-      #if (verbose) print(paste0("Number of rows in newest_SA: ", nrow(newest_SA)))
+      } # i
+      newest_SA <- rbind(newest_SA, temp)
+      # if (verbose) print(paste0("Number of rows in newest_SA: ", nrow(newest_SA)))
     }
+  } # k
 
-}#k
-#rename SAspeCode
 
-#if (verbose) print(newest_SA[,c("SAspeCode","SAnewSpeciesCode")])
+  # find all rows from newest_SA where SAspecCode is different from SAnewSpeciesCode
+  changedSpecies <- newest_SA[newest_SA$SAspeCode != newest_SA$SAnewSpeciesCode, ]
+  if (verbose) print(paste0("Number of rows changed: ", nrow(changedSpecies)))
 
-# find all rows from newest_SA where SAspecCode is different from SAnewSpeciesCode
-changedSpecies <- newest_SA[newest_SA$SAspeCode != newest_SA$SAnewSpeciesCode,]
-if (verbose) print(paste0("Number of rows changed: ", nrow(changedSpecies)))
-
-newest_SA$SAspeCode<-newest_SA$SAnewSpeciesCode
-x<-colnames(H1_SA)
-newest_SA<-data.table::setDT(newest_SA[,..x])
-RDBESDataObject[["SA"]] <- newest_SA
-setkey(RDBESDataObject[["SA"]],"SAid")
-RDBESDataObject
+  # rename SAspeCode
+  newest_SA$SAspeCode <- newest_SA$SAnewSpeciesCode
+  x <- colnames(H1_SA)
+  newest_SA <- data.table::setDT(newest_SA[, ..x])
+  RDBESDataObject[["SA"]] <- newest_SA
+  setkey(RDBESDataObject[["SA"]], "SAid")
+  RDBESDataObject
 }
