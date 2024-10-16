@@ -49,7 +49,7 @@ createH5TestData <- function(){
 }
 
 
-test_that("renameSpeciesSA changes sprat to clupeidae when it is in the Species List - Family", {
+test_that("updateSAwithTaxonFromSL changes sprat to clupeidae when it is in the Species List - Family", {
 
   # Create test data
   myH1 <- createH1TestData()
@@ -65,15 +65,15 @@ test_that("renameSpeciesSA changes sprat to clupeidae when it is in the Species 
                          myH1[["SL"]]$SLcatchFrac=="Lan","SLcommTaxon"] <- 125464
 
   # Run the function
-  myH1renamed <- renameSpeciesSA(myH1)
+  myH1renamed <- updateSAwithTaxonFromSL(myH1)
 
   # Check that the species codes have been changed to Clupeidae(125464)
   expect_equal(myH1renamed[["SA"]]$SAspeCode, rep("125464", numOfRows))
 
 })
 
-# using testthat test that the function renameSpeciesSA changes Gadus Morpha (126436) to Gadus (125732) - Genus
-test_that("renameSpeciesSA changes Gadus Morpha (126436) to Gadus (125732) - Genus", {
+# using testthat test that the function updateSAwithTaxonFromSL changes Gadus Morpha (126436) to Gadus (125732) - Genus
+test_that("updateSAwithTaxonFromSL changes Gadus Morpha (126436) to Gadus (125732) - Genus", {
 
   # Create test data
   myH1 <- createH1TestData()
@@ -89,15 +89,15 @@ test_that("renameSpeciesSA changes Gadus Morpha (126436) to Gadus (125732) - Gen
                          myH1[["SL"]]$SLcatchFrac=="Lan","SLcommTaxon"] <- 125732
 
   # Run the function
-  myH1renamed <- renameSpeciesSA(myH1)
+  myH1renamed <- updateSAwithTaxonFromSL(myH1)
 
   # Check that the species codes have been changed to Gadus(125732)
   expect_equal(myH1renamed[["SA"]]$SAspeCode, rep("125732", numOfRows))
 
 })
 
-# using testthat test that the function renameSpeciesSA changes Gadus Morpha (126436) to Gadidae (125469) - Family
-test_that("renameSpeciesSA changes Gadus Morpha (126436) to Gadidae (125469)", {
+# using testthat test that the function updateSAwithTaxonFromSL changes Gadus Morpha (126436) to Gadidae (125469) - Family
+test_that("updateSAwithTaxonFromSL changes Gadus Morpha (126436) to Gadidae (125469)", {
 
   # Create test data
   myH1 <- createH1TestData()
@@ -113,15 +113,15 @@ test_that("renameSpeciesSA changes Gadus Morpha (126436) to Gadidae (125469)", {
                          myH1[["SL"]]$SLcatchFrac=="Lan","SLcommTaxon"] <- 125469
 
   # Run the function
-  myH1renamed <- renameSpeciesSA(myH1)
+  myH1renamed <- updateSAwithTaxonFromSL(myH1)
 
   # Check that the species codes have been changed to Gadidae(125469)
   expect_equal(myH1renamed[["SA"]]$SAspeCode, rep("125469", numOfRows))
 
 })
 
-# using testthat test that the function renameSpeciesSA changes Gadus Morpha (126436) to Gadiformes (10313) - Order
-test_that("renameSpeciesSA changes Gadus Morpha (126436) to Gadiformes (10313) - Order", {
+# using testthat test that the function updateSAwithTaxonFromSL changes Gadus Morpha (126436) to Gadiformes (10313) - Order
+test_that("updateSAwithTaxonFromSL changes Gadus Morpha (126436) to Gadiformes (10313) - Order", {
 
   # Create test data
   myH1 <- createH1TestData()
@@ -137,15 +137,15 @@ test_that("renameSpeciesSA changes Gadus Morpha (126436) to Gadiformes (10313) -
                          myH1[["SL"]]$SLcatchFrac=="Lan","SLcommTaxon"] <- 10313
 
   # Run the function
-  myH1renamed <- renameSpeciesSA(myH1)
+  myH1renamed <- updateSAwithTaxonFromSL(myH1)
 
   # Check that the species codes have been changed to Gadiformes(10313)
   expect_equal(myH1renamed[["SA"]]$SAspeCode, rep("10313", numOfRows))
 
 })
 
-# using testthat test that the function renameSpeciesSA changes Gadus Morpha (126436) to Teleostei (293496) - Class
-test_that("renameSpeciesSA changes Gadus Morpha (126436) to Teleostei (293496) - Class", {
+# using testthat test that the function updateSAwithTaxonFromSL changes Gadus Morpha (126436) to Teleostei (293496) - Class
+test_that("updateSAwithTaxonFromSL changes Gadus Morpha (126436) to Teleostei (293496) - Class", {
 
   # Create test data
   myH1 <- createH1TestData()
@@ -161,7 +161,7 @@ test_that("renameSpeciesSA changes Gadus Morpha (126436) to Teleostei (293496) -
                          myH1[["SL"]]$SLcatchFrac=="Lan","SLcommTaxon"] <- 293496
 
   # Run the function
-  myH1renamed <- renameSpeciesSA(myH1)
+  myH1renamed <- updateSAwithTaxonFromSL(myH1)
 
   # Check that the species codes have been changed to Teleostei(293496)
   expect_equal(myH1renamed[["SA"]]$SAspeCode, rep("293496", numOfRows))
@@ -170,8 +170,8 @@ test_that("renameSpeciesSA changes Gadus Morpha (126436) to Teleostei (293496) -
 
 
 
-# test that the function renameSpeciesSA changes Melanogrammus aeglefinus (126437) to Animalia (2) - Kingdom
-test_that("renameSpeciesSA changes Melanogrammus aeglefinus (126437) to Animalia (2) - Kingdom", {
+# test that the function updateSAwithTaxonFromSL changes Melanogrammus aeglefinus (126437) to Animalia (2) - Kingdom
+test_that("updateSAwithTaxonFromSL changes Melanogrammus aeglefinus (126437) to Animalia (2) - Kingdom", {
 
   # Create test data
   myH1 <- createH1TestData()
@@ -187,7 +187,7 @@ test_that("renameSpeciesSA changes Melanogrammus aeglefinus (126437) to Animalia
                          myH1[["SL"]]$SLcatchFrac=="Lan","SLcommTaxon"] <- 2
 
   # Run the function
-  myH1renamed <- renameSpeciesSA(myH1)
+  myH1renamed <- updateSAwithTaxonFromSL(myH1)
 
   # Check that the species codes have been changed to Animalia(2)
   expect_equal(myH1renamed[["SA"]]$SAspeCode, rep("2", numOfRows))
@@ -195,10 +195,10 @@ test_that("renameSpeciesSA changes Melanogrammus aeglefinus (126437) to Animalia
 })
 
 
-# using testthat test that the function renameSpeciesSA changes
+# using testthat test that the function updateSAwithTaxonFromSL changes
 # Gadus Morpha (126436) to Teleostei 293496 when both Genus (Gadus 125732) and
 # Class (Teleostei 293496) are present
-test_that("renameSpeciesSA changes Gadus Morpha (126436) to Teleostei (293496) - Genus and Class present (1)", {
+test_that("updateSAwithTaxonFromSL changes Gadus Morpha (126436) to Teleostei (293496) - Genus and Class present (1)", {
 
   # Create test data
   myH1 <- createH1TestData()
@@ -232,18 +232,18 @@ test_that("renameSpeciesSA changes Gadus Morpha (126436) to Teleostei (293496) -
                  myH1[["SL"]]$SLcatchFrac=="Lan",]
 
   # Run the function
-  myH1renamed <- renameSpeciesSA(myH1)
+  myH1renamed <- updateSAwithTaxonFromSL(myH1)
 
   # Check that the species codes have been changed to Teleostei (293496)
   expect_equal(myH1renamed[["SA"]]$SAspeCode, rep("293496", numOfRows))
 
 })
 
-# using testthat test that the function renameSpeciesSA changes
+# using testthat test that the function updateSAwithTaxonFromSL changes
 # Gadus Morpha (126436) to Teleostei 293496 when both Genus (Gadus 125732) and
 # Class (Teleostei 293496) are present
 # (Reverse the order of Genus and Class in SL compared to previous test)
-test_that("renameSpeciesSA changes Gadus Morpha (126436) to Teleostei (293496) - Genus and Class present (2)", {
+test_that("updateSAwithTaxonFromSL changes Gadus Morpha (126436) to Teleostei (293496) - Genus and Class present (2)", {
 
   # Create test data
   myH1 <- createH1TestData()
@@ -277,14 +277,14 @@ test_that("renameSpeciesSA changes Gadus Morpha (126436) to Teleostei (293496) -
                  myH1[["SL"]]$SLcatchFrac=="Lan",]
 
   # Run the function
-  myH1renamed <- renameSpeciesSA(myH1, verbose = TRUE)
+  myH1renamed <- updateSAwithTaxonFromSL(myH1, verbose = TRUE)
 
   # Check that the species codes have been changed to Teleostei (293496)
   expect_equal(myH1renamed[["SA"]]$SAspeCode, rep("293496", numOfRows))
 
 })
 
-test_that("renameSpeciesSA does not change sprat to clupeidae when it is not in the Species List", {
+test_that("updateSAwithTaxonFromSL does not change sprat to clupeidae when it is not in the Species List", {
 
   # Create test data
   myH1 <- createH1TestData()
@@ -295,15 +295,15 @@ test_that("renameSpeciesSA does not change sprat to clupeidae when it is not in 
 
 
   # Run the function
-  myH1renamed <- renameSpeciesSA(myH1)
+  myH1renamed <- updateSAwithTaxonFromSL(myH1)
 
   # Check that the species codes have been left as sprat(126425)
   expect_equal(myH1renamed[["SA"]]$SAspeCode, rep("126425", numOfRows))
 
 })
 
-# test that the function renameSpeciesSA does not changes Gadus Morpha (126436) to Gadidae (125469) when it is not in the species list
-test_that("renameSpeciesSA does not change Gadus Morpha (126436) to Gadidae (125469) when it is not in the species list", {
+# test that the function updateSAwithTaxonFromSL does not changes Gadus Morpha (126436) to Gadidae (125469) when it is not in the species list
+test_that("updateSAwithTaxonFromSL does not change Gadus Morpha (126436) to Gadidae (125469) when it is not in the species list", {
 
   # Create test data
   myH1 <- createH1TestData()
@@ -313,16 +313,16 @@ test_that("renameSpeciesSA does not change Gadus Morpha (126436) to Gadidae (125
   myH1[["SA"]]$SAspeCode[1:numOfRows] <- rep("126436", numOfRows)
 
   # Run the function
-  myH1renamed <- renameSpeciesSA(myH1)
+  myH1renamed <- updateSAwithTaxonFromSL(myH1)
 
   # Check that the species codes have been left as Gadus Morpha(126436)
   expect_equal(myH1renamed[["SA"]]$SAspeCode, rep("126436", numOfRows))
 
 })
 
-# using testthat test that the function renameSpeciesSA changes Gadus Morpha (126436) to Gadus (125732)
+# using testthat test that the function updateSAwithTaxonFromSL changes Gadus Morpha (126436) to Gadus (125732)
 # using H5 test data
-test_that("Using H5 data renameSpeciesSA changes Gadus Morpha (126436) to Gadus (125732) - Genus", {
+test_that("Using H5 data updateSAwithTaxonFromSL changes Gadus Morpha (126436) to Gadus (125732) - Genus", {
 
   # Create test data
   myH5 <- createH5TestData()
@@ -338,7 +338,7 @@ test_that("Using H5 data renameSpeciesSA changes Gadus Morpha (126436) to Gadus 
                          myH5[["SL"]]$SLcatchFrac=="Lan","SLcommTaxon"] <- 125732
 
   # Run the function
-  myH5renamed <- renameSpeciesSA(myH5)
+  myH5renamed <- updateSAwithTaxonFromSL(myH5)
 
   # Check that the species codes have been changed to Gadus(125732)
   expect_equal(myH5renamed[["SA"]]$SAspeCode, rep("125732", numOfRows))
@@ -346,8 +346,8 @@ test_that("Using H5 data renameSpeciesSA changes Gadus Morpha (126436) to Gadus 
 })
 
 
-# Using testthat test the function renameSpeciesSA with an invalid RDBESDataObject
-test_that("renameSpeciesSA with an invalid RDBESDataObject", {
+# Using testthat test the function updateSAwithTaxonFromSL with an invalid RDBESDataObject
+test_that("updateSAwithTaxonFromSL with an invalid RDBESDataObject", {
 
   # Create test data
   myH1 <- createH1TestData()
@@ -356,7 +356,7 @@ test_that("renameSpeciesSA with an invalid RDBESDataObject", {
   myH1$SA <- NULL
 
   # Check that the function returns an error
-  expect_error(renameSpeciesSA(myH1))
+  expect_error(updateSAwithTaxonFromSL(myH1))
 
 })
 

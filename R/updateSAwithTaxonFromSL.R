@@ -32,7 +32,7 @@
 #' myObject <- createRDBESDataObject(input = "WGRDBES-EST/personal/Kasia/vignettes/vignetteData")
 #' renameSpeciesSA(RDBESDataObject=myObject,validate,verbose,strict)}
 
-renameSpeciesSA <- function(RDBESDataObject,
+updateSAwithTaxonFromSL <- function(RDBESDataObject,
                             validate = TRUE,
                             verbose = FALSE,
                             strict = TRUE) {
