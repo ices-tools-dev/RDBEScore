@@ -26,8 +26,6 @@
 lowerTblData <- function(field, values, tbls, level, verbose = FALSE) {
   #check if tables are of correct type
   if(!is.list(tbls)) stop("tbls must be a list")
-  #no null values are allowed
-  if(!all(sapply(tbls, data.table::is.data.table))) stop("tbls must be a list of data tables")
 
   start <- substr(field, start = 1, stop = 2)
   if (start == level) {
@@ -35,9 +33,18 @@ lowerTblData <- function(field, values, tbls, level, verbose = FALSE) {
     return(res[get(field) %in% values])
   }
   currTbl <- which(start == names(tbls))
+
   #this assumes that the tables are in the correct order and no empty tables
-  nextTbl <- tbls[[currTbl + 1]]
-  nextTblField <- paste0(names(tbls)[currTbl + 1], "id")
+  tc <- 1
+  nextTbl <- tbls[[currTbl + tc]]
+  #skip tables that are NULL
+  while (is.null(nextTbl)) {
+    tc <- tc + 1
+    if(currTbl + tc > length(tbls)) stop("No more lower tables found")
+    nextTbl <- tbls[[currTbl + tc]]
+  }
+
+  nextTblField <- paste0(names(tbls)[currTbl + tc], "id")
   if (verbose) {
     cat(paste0(field, ": ", paste0(values, collapse = ", "), "\n"))
   }

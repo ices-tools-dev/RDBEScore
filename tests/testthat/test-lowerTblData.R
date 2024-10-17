@@ -46,6 +46,11 @@ test_that("Function returns empty dataframe when no match is found", {
   expect_equal(nrow(result), 0)
 })
 
+test_that("Function works with RDBESdataObjects", {
+  tbl <- lowerTblData("TEid", c(4), H8ExampleEE1, "SA", FALSE)
+  expect_equal(nrow(tbl), 2)
+})
+
 # Test for wrong input type
 test_that("Function handles invalid inputs gracefully", {
   expect_error(lowerTblData("invalidField", c(1), tblsSprat, "LE", FALSE))

@@ -82,3 +82,20 @@ test_that("doBVestimCANUM calculates TWCoef correctly", {
   expect_equal(lenCANUMQ1$TWCoef, lenCANUMQ1$expected_TWCoef)
 })
 
+test_that("doBVestimCANUM works for age without lenght data", {
+  biolCLQ1_noLength <- copy(biolCLQ1[BVvalUnitScale != "Lengthmm",])
+  lenCANUMQ1 <- doBVestimCANUM(biolCLQ1_noLength, c("sumCLoffWeight"),
+                               classUnits = "Ageyear",
+                               classBreaks = 1:8,
+                               verbose = FALSE)
+  expect_true(all(c("Group", "WeightgMean", "WeightgLen", "lenMeas", "targetMeas","LengthmmMean",
+                    "propSample", "WeightIndex", "totWeight", "totNum") %in% names(lenCANUMQ1)))
+
+  expect_true(all(unique(lenCANUMQ1$Group) %in% c("1", "2", "3", "4", "5", "6", "7", "8+")))
+
+
+  expect_true(all(is.nan(lenCANUMQ1$LengthmmMean)))
+
+
+})
+
