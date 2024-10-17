@@ -36,6 +36,9 @@
 # TODO check differences if length classes are defined later
 # Unit conversion later step : for LC
 
+# TODO add check for unique sampling scheme
+# TODO add an argument to toggle stratification in estimation on/off
+
 
 
 doEstimationRatio <- function(RDBESEstObjectForEstim,
@@ -62,7 +65,6 @@ doEstimationRatio <- function(RDBESEstObjectForEstim,
     stop("Multiple lower hierarchies not yet implemented")}
 
 
-#----------------------------------------------------------
 
 
 # Length composition ------------------------------------------------------
@@ -73,24 +75,25 @@ doEstimationRatio <- function(RDBESEstObjectForEstim,
     if(unique(RDBESEstObjectForEstim$SAlowHierarchy) %in% c("A", "B")){
 
 
-      # Only FM data
+      # Select only FM data for now - BV possibly used for ALK
+
+
+
 
       # if both lengths and weight exist
-      # then do length comp
-      # else LW relationship: give a, b parameters
-      # else stop
-
       if(isTRUE(any(grepl("Length", RDBESEstObjectForEstim$BVtypeAssess)) & any(grepl("Weight", RDBESEstObjectForEstim$BVtypeAssess)))){
 
 
         # if aux exist use aux
         if(all(!is.na(RDBESEstObjectForEstim[[paste0(substr(tail(suLevels, n = 1), 1, 3), "auxVarValue")]]))){
 
-          print("Ok")
 
+
+
+          # else LW relationship: give a, b parameters
         }else{
 
-
+          # else stop
           stop("Missing values in auxiliary variable sample table")
 
 
