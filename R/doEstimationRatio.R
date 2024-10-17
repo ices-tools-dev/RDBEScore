@@ -1,16 +1,18 @@
 #' Title
 #'
-#' @param RDBESEstObjectForEstim
+#' @param RDBESDataObj
 #' @param targetValue
-#' @param lenClassUnits
-#' @param lenClassBreaks
-#' @param PlusGroup
+#' @param classUnits
+#' @param classBreaks
+#' @param LWparam
+#' @param lowerAux
 #' @param verbose
 #'
 #' @return
 #' @export
 #'
 #' @examples
+
 
 
 
@@ -24,6 +26,8 @@
 
 # Numbers at legth
 # Mean weight at length
+
+
 ## Measure indv weight of fish
 ## LW relationship: a, b parameters
 
@@ -39,9 +43,11 @@
 # TODO add check for unique sampling scheme
 # TODO add an argument to toggle stratification in estimation on/off
 
+# TODO need to implement the BV conversion from typeMeas to typeAssess
 
 
-doEstimationRatio <- function(RDBESEstObjectForEstim,
+
+doEstimationRatio <- function(RDBESDataObj,
                               targetValue = "LengthComp",
                               classUnits = "mm",
                               classBreaks = c(100, 300, 10), # cut
@@ -50,65 +56,87 @@ doEstimationRatio <- function(RDBESEstObjectForEstim,
                               verbose = FALSE){
 
   # Check we have a valid RDBESEstObject before doing anything else
-  RDBEScore::validateRDBESEstObject(RDBESEstObjectForEstim, verbose = verbose)
+  RDBEScore::validateRDBESDataObject(RDBESDataObj, verbose = FALSE)
 
-  # Take out SU levels depending on the hierarchy
-  suLevels <-
-    names(RDBESEstObjectForEstim)[
-      grep("^su.table$", names(RDBESEstObjectForEstim))
-    ]
 
-# TODO implemented for a combination of lower hierarchies
+
+# TODO implement for a combination of lower hierarchies
 # For now only works on one lower hierarchy at a time
 
-  if(length(unique(RDBESEstObjectForEstim$SAlowHierarchy)) > 1){
+  if(length(unique(RDBESDataObj$SA$SAlowHierarchy)) > 1){
     stop("Multiple lower hierarchies not yet implemented")}
 
+# Do we need both CL and CE? Allow the user to define the population (i.e. effort or landings or both)?
 
+  if(!names(RDBESDataObj) %in% c("CL", "CE")){
+    stop("The object does not have population data")
+  }
 
+# Order table based on hierarchy - it's a bottom up estimation
+  DEhierarchy <- unique(RDBESDataObj$DE$DEhierarchy)
+  if(length(unique(DEhierarchy )) > 1){
+    stop("Multiple upper hierarchies not yet implemented")}
+
+  RDBESEstRatioObj <- RDBESDataObj[c("CL", "CE",  RDBEScore::getTablesInRDBESHierarchy(DEhierarchy))]
+
+# Filter out NULL tables
+  RDBESEstRatioObj <- Filter(Negate(is.null), RDBESEstRatioObj)
+
+# Check which tables exist after SA
+
+# Does anything exist after SA?
+
+ if(length(unique(names(RDBESEstRatioObj))) > 1){
+   if(!tail(names(RDBESEstRatioObj), n = 1) %in% c("FM", "BV")){
+     stop("No FM or BV tables provided")
+   }
+ }
 
 # Length composition ------------------------------------------------------
   if(targetValue == "LengthComp"){
 
 
 # LH A & B ----------------------------------------------------------------
-    if(unique(RDBESEstObjectForEstim$SAlowHierarchy) %in% c("A", "B")){
+    if(unique(RDBESEstRatioObj$SA$SAlowHierarchy) %in% c("A", "B")){
 
 
       # Select only FM data for now - BV possibly used for ALK
+      warning("Only FM table used. BV is not yet implemented")
 
 
 
 
-      # if both lengths and weight exist
-      if(isTRUE(any(grepl("Length", RDBESEstObjectForEstim$BVtypeAssess)) & any(grepl("Weight", RDBESEstObjectForEstim$BVtypeAssess)))){
+
+
 
 
         # if aux exist use aux
-        if(all(!is.na(RDBESEstObjectForEstim[[paste0(substr(tail(suLevels, n = 1), 1, 3), "auxVarValue")]]))){
+        if(all(!is.na(RDBESDataObj[[paste0(substr(tail(suLevels, n = 1), 1, 3), "auxVarValue")]]))){
 
 
 
 
           # else LW relationship: give a, b parameters
+        }else if(!is.null(LWparam)){
+
+            stop("Not yet implemented")
+
+
         }else{
-
           # else stop
-          stop("Missing values in auxiliary variable sample table")
-
-
+          stop("Nor an auxiliary variable nor lw params are provided. Not possible to produce the mean weight at length ")
         }
 
         # otherwise check if you can calculate it
         # otherwise stop
-      }
+
 
 
 
 
 
 # LH C --------------------------------------------------------------------
-    }else if(unique(RDBESEstObjectForEstim$SAlowHierarchy) == "C"){
+    }else if(unique(RDBESEstRatioObj$SAlowHierarchy) == "C"){
 
       # Only BV data
 
@@ -116,9 +144,14 @@ doEstimationRatio <- function(RDBESEstObjectForEstim,
       #if weight exists run
       # else ask for a, b
       # else stop
-      # else stop
 
-      stop("Not yet implemented")
+      # if both lengths and weight exist
+      if(isTRUE(any(grepl("Length", RDBESEstRatioObj$BV$BVtypeAssess)) & any(grepl("Weight", RDBESEstRatioObj$BV$BVtypeAssess)))){
+
+      }else{
+        stop("Not yet implemented")
+      }
+
     }
 
 
@@ -130,7 +163,7 @@ doEstimationRatio <- function(RDBESEstObjectForEstim,
 # LH C --------------------------------------------------------------------
 
 
-    if(unique(RDBESEstObjectForEstim$SAlowHierarchy) == "C"){
+    if(unique(RDBESDataObj$SAlowHierarchy) == "C"){
       # Check which biol data are present
 
       # if age exists
@@ -151,7 +184,7 @@ doEstimationRatio <- function(RDBESEstObjectForEstim,
 # LH A --------------------------------------------------------------------
 
 
-    }else if(unique(RDBESEstObjectForEstim$SAlowHierarchy) == "A"){
+    }else if(unique(RDBESDataObj$SAlowHierarchy) == "A"){
 
 
 
