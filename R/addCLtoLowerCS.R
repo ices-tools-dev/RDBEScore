@@ -10,11 +10,11 @@
 #'   The names of the list should match column names in any of the `CS` tables.
 #' @param strataListCL A named list of filter criteria for subsetting the `CL` data in the `RDBESDataObject`.
 #'   The names of the list should match column names in the `CL` table.
-#' @param samplingEventsTable A character string specifying the sampling events table name in the `RDBESDataObject`.
 #' @param combineStrata Logical, if `TRUE`, strata in the `strataListCS` are combined using a vertical bar (`|`).
 #' @param lowerHierarchy A character string specifying the level of the lower hierarchy table to which the CL data will be added.
 #'   Currently, only "C" is supported ie BV data only.
 #' @param CLfields A character vector of field names from the `CL` table that will be summed and added as new columns to the lower-level biological data.
+#' @param verbose Logical, if `TRUE`, the function prints informative text.
 #'
 #' @return A data.table containing the biological data from the lower hierarchy with added strata information from the `CL` table and
 #'   the sum of the specified fields from the `CL` data.
@@ -35,7 +35,6 @@
 #'                      CLmetier6 = "OTM_SPF_16-31_0_0",
 #'                      CLspecFAO = "SPR")
 #' biolCL <- addCLtoLowerCS(rdbesObject, strataListCS, strataListCL,
-#'                          samplingEventsTable = "VS",
 #'                          combineStrata = TRUE,
 #'                          lowerHierarchy = "C",
 #'                          CLfields = c("CLoffWeight"))
@@ -43,14 +42,7 @@
 #'
 #' @seealso \code{\link{getLowerTableSubsets}}, \code{\link{upperTblData}}
 #' @export
-addCLtoLowerCS <- function(rdbes, strataListCS, strataListCL, samplingEventsTable, combineStrata =T, lowerHierarchy = "C", CLfields = c("CLoffWeight")){
-  if(inherits(rdbes, "RDBESDataObject")) {
-    tableNames <- names(summary(rdbes)$data)
-    #select only the relevant hierarchy table names
-    rdbesTbl <- rdbes[tableNames]
-  } else {
-    stop("rdbes must be of class RDBESDataObject")
-  }
+addCLtoLowerCS <- function(rdbes, strataListCS, strataListCL, combineStrata =T, lowerHierarchy = "C", CLfields = c("CLoffWeight"), verbose = FALSE){
 
   # Function to subset data.table based on criteria list
   subset_dt <- function(dt, criteria) {
@@ -78,10 +70,6 @@ addCLtoLowerCS <- function(rdbes, strataListCS, strataListCL, samplingEventsTabl
   #get the sampling data
   biolData <- getLowerTableSubsets(strataListCS, tblName, rdbes, combineStrata = combineStrata)
 
-  #get the trip count
-  biolTrips <- upperTblData(tblId, biolData[[tblId]], rdbesTbl,samplingEventsTable)
-  biolTrips$samplingEvents <- nrow(biolTrips)
-
 
   #get the CL data
   CL <- subset_dt(rdbes$CL, strataListCL)
@@ -91,6 +79,7 @@ addCLtoLowerCS <- function(rdbes, strataListCS, strataListCL, samplingEventsTabl
     x_new <- ifelse(length(x) == 1, x, paste0(x, collapse = "|"))
     rep(x_new, nrow(biolData))
     })
+
   strataList <- as.data.table(strataList)
   biolData <- cbind(biolData, strataList)
 

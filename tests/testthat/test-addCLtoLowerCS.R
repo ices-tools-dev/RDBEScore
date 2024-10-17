@@ -10,8 +10,8 @@ strataListCL <- list(CLarea="27.3.d.28.1", CLquar = 1, CLmetier6 = "OTM_SPF_16-3
 # Test 1: Expect error if rdbes is not of class RDBESDataObject
 test_that("addCLtoLowerCS throws an error if rdbes is not of class RDBESDataObject", {
   expect_error(
-    addCLtoLowerCS(list(), strataListCS, strataListCL, samplingEventsTable = "VS", combineStrata = TRUE, lowerHierarchy = "C", CLfields = c("CLoffWeight")),
-    "rdbes must be of class RDBESDataObject"
+    addCLtoLowerCS(list(), strataListCS, strataListCL, combineStrata = TRUE, lowerHierarchy = "C", CLfields = c("CLoffWeight")),
+    "No CL data in the input RDBESDataObject"
   )
 })
 
@@ -20,14 +20,14 @@ test_that("addCLtoLowerCS throws an error if CL data is missing in rdbes", {
   mock_rdbes_no_CL <- mock_rdbes
   mock_rdbes_no_CL$CL <- NULL
   expect_error(
-    addCLtoLowerCS(mock_rdbes_no_CL, strataListCS, strataListCL, samplingEventsTable = "VS", combineStrata = TRUE, lowerHierarchy = "C", CLfields = c("CLoffWeight")),
+    addCLtoLowerCS(mock_rdbes_no_CL, strataListCS, strataListCL, combineStrata = TRUE, lowerHierarchy = "C", CLfields = c("CLoffWeight")),
     "No CL data in the input RDBESDataObject"
   )
 })
 
 # Test 3: Check correct output with valid input
 test_that("addCLtoLowerCS adds the correct sumCLoffWeight column with valid input", {
-  result <- expect_warning(addCLtoLowerCS(mock_rdbes, strataListCS, strataListCL, samplingEventsTable = "VS", combineStrata = TRUE, lowerHierarchy = "C", CLfields = c("CLoffWeight")))
+  result <- expect_warning(addCLtoLowerCS(mock_rdbes, strataListCS, strataListCL, combineStrata = TRUE, lowerHierarchy = "C", CLfields = c("CLoffWeight")))
 
   # Check that the result has the correct columns
   expect_true("sumCLoffWeight" %in% names(result))
@@ -37,7 +37,7 @@ test_that("addCLtoLowerCS adds the correct sumCLoffWeight column with valid inpu
 # Test 4: Check that the function handles unsupported lowerHierarchy correctly
 test_that("addCLtoLowerCS throws an error if lowerHierarchy is unsupported", {
   expect_error(
-    addCLtoLowerCS(mock_rdbes, strataListCS, strataListCL, samplingEventsTable = "VS", combineStrata = TRUE, lowerHierarchy = "A", CLfields = c("CLoffWeight")),
+    addCLtoLowerCS(mock_rdbes, strataListCS, strataListCL, combineStrata = TRUE, lowerHierarchy = "A", CLfields = c("CLoffWeight")),
     "Lower hierarchy A not yet supported"
   )
 })

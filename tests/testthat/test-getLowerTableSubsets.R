@@ -25,7 +25,7 @@ test_that("Function throws error for missing table name", {
 })
 
 test_that("Function returns correct data with valid inputs", {
-  res <- getLowerTableSubsets(list(TEstratumName = "January"), "SA", H8ExampleEE1, F)
+  res <- getLowerTableSubsets(list(TEstratumName = "January"), "SA", H8ExampleEE1, T)
 
   expect_equal(nrow(res), 3)
   #expect last column to be "TEstratumName"
@@ -45,14 +45,14 @@ test_that("Function works with combineStrata = TRUE and collapsing strata", {
 })
 
 test_that("Function works with empty subsets", {
-  res <- getLowerTableSubsets(list(TEstratumName = character(0)), "SA", H8ExampleEE1, F)
+  res <- getLowerTableSubsets(list(TEstratumName = character(0)), "SA", H8ExampleEE1, T)
 
   expect_equal(nrow(res), 0)
 
 })
 
 test_that("Function handles intersection correctly", {
-  res <- getLowerTableSubsets(list(TEid = 4, TEstratumName = "January"), "SA", H8ExampleEE1, F)
+  res <- getLowerTableSubsets(list(TEid = 4, TEstratumName = "January"), "SA", H8ExampleEE1, T)
 
   expect_equal(nrow(res), 2)
   #expect last column to be "TEstratumName"
