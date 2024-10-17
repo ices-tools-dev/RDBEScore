@@ -27,7 +27,7 @@ lowerTblData <- function(field, values, tbls, level, verbose = FALSE) {
   #check if tables are of correct type
   if(!is.list(tbls)) stop("tbls must be a list")
   #no null values are allowed
-  if(!all(sapply(tbls, is.data.table))) stop("tbls must be a list of data tables")
+  if(!all(sapply(tbls, data.table::is.data.table))) stop("tbls must be a list of data tables")
 
   start <- substr(field, start = 1, stop = 2)
   if (start == level) {

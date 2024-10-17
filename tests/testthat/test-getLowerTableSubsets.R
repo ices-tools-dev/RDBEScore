@@ -34,13 +34,30 @@ test_that("Function returns correct data with valid inputs", {
 })
 
 test_that("Function works with combineStrata = TRUE and collapsing strata", {
+  res <- expect_warning(getLowerTableSubsets(list(TEstratumName = c("January", "February")), "SA", H8ExampleEE1, T))
+
+  expect_equal(nrow(res), 6)
+  #expect last column to be "TEstratumName"
+  expect_equal(colnames(res)[ncol(res)], "TEstratumName")
+  #ecpect all values in ast column to be January|February
+  expect_equal(all(grepl("January|February", res$TEstratumName)), TRUE)
 
 })
 
 test_that("Function works with empty subsets", {
+  res <- getLowerTableSubsets(list(TEstratumName = character(0)), "SA", H8ExampleEE1, F)
+
+  expect_equal(nrow(res), 0)
 
 })
 
 test_that("Function handles intersection correctly", {
+  res <- getLowerTableSubsets(list(TEid = 4, TEstratumName = "January"), "SA", H8ExampleEE1, F)
+
+  expect_equal(nrow(res), 2)
+  #expect last column to be "TEstratumName"
+  expect_equal(colnames(res)[ncol(res)], "TEstratumName")
+  #expect value in last column to be "January"
+  expect_equal(res$TEstratumName, rep("January",2))
 
 })

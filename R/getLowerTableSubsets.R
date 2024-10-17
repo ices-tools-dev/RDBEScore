@@ -67,9 +67,10 @@ getLowerTableSubsets <- function(subsets, tblName, rdbesTables, combineStrata=F)
       }
     }
 
-
-    res <- cbind(res,as.data.frame(subsets))
   }
+
+  res <- cbind(res,as.data.frame(subsets))
+
 
   return(res)
 }

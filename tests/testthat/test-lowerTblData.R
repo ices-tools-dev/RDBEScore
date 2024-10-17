@@ -1,8 +1,8 @@
 # Define some mock data for testing
-DE <- data.table(DEid = c(1, 2, 3, 4), SDid = c(1, 2, 3, 4))
-SD <- data.table(SDid = c(1, 2, 3, 4), TEid = c(1, 2, 3, 4))
-TE <- data.table(SDid = c(1, 2, 3, 4), TEid = c(1, 2, 3, 4))
-VS <- data.table(TEid = c(1, 2, 3, 4), VSid = c(1, 2, 3, 4))
+DE <- data.table(DEid = c(1, 2, 3, 4))
+SD <- data.table(SDid = c(1, 2, 3, 4), DEid = c(1, 2, 3, 4))
+TE <- data.table(TEid = c(1, 2, 3, 4), SDid = c(1, 2, 3, 4))
+VS <- data.table(VSid = c(1, 2, 3, 4), TEid = c(1, 2, 3, 4))
 LE <- data.table(VSid = 1:5, LEid = 1:5, value = c(10, 20, 3, 4, 6))
 
 tblsSprat <- list(DE = DE, SD = SD, TE = TE, VS = VS, LE = LE)
