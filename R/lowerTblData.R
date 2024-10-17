@@ -14,11 +14,11 @@
 #'   the given values of the upper table field.
 #'
 #' @examples
-#'DE <- data.table(DEid = c(1, 2, 3, 4), SDid = c(1, 2, 3, 4))
-#'SD <- data.table(SDid = c(1, 2, 3, 4), TEid = c(1, 2, 3, 4))
-#'TE <- data.table(SDid = c(1, 2, 3, 4), TEid = c(1, 2, 3, 4))
-#'VS <- data.table(TEid = c(1, 2, 3, 4), VSid = c(1, 2, 3, 4))
-#'LE <- data.table(VSid = 1:5, LEid = 1:5, value = c(10, 20, 3, 4, 6))
+#'DE <- data.table::data.table(DEid = c(1, 2, 3, 4), SDid = c(1, 2, 3, 4))
+#'SD <- data.table::data.table(SDid = c(1, 2, 3, 4), TEid = c(1, 2, 3, 4))
+#'TE <- data.table::data.table(SDid = c(1, 2, 3, 4), TEid = c(1, 2, 3, 4))
+#'VS <- data.table::data.table(TEid = c(1, 2, 3, 4), VSid = c(1, 2, 3, 4))
+#'LE <- data.table::data.table(VSid = 1:5, LEid = 1:5, value = c(10, 20, 3, 4, 6))
 #' tblsSprat <- list( DE = DE ,SD = SD, TE = TE, VS = VS, LE = LE )
 #'
 #' lowerTblData("TEid", c(4), tblsSprat, "LE", T)

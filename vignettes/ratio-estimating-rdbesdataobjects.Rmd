@@ -42,132 +42,100 @@ The data has not gone through RDBES upload and download procedure and  contains 
 validateRDBESDataObject(H8ExampleEE1, checkDataTypes = TRUE, strict = FALSE)
 ```
 
+
+
+
+### Simple Estimation Example
+
+
+For the simplest case of estimation we need the RDBESDataObject with CS tables and a CL table. In the following example we will estimate the total number of sprat caught in the area 27.3.d.28.1 with the gear OTM_SPF_16-31_0_0 for the first and last quarter of the year.
+
 ```{r}
-#create the estimation object to estimate values on the SA table
-SampleWeightEstData <- createRDBESEstObject(H8ExampleEE1, 8, "SA" )
+#From the commertial landings table we need to get the total weight of the catches
+CLfieldstoSum <- c("CLoffWeight")
+```
 
-#the SAsampWtMes is in grammes let's estimate in tonnes
-SampleWeightEstData$SAsampWtMes <- SampleWeightEstData$SAsampWtMes / (1000 * 1000)
+The most important thing in this estimation is to get the same strata for the CS and CL tables. This means we want to take the samples from the same area, with the same gear and the same species. Exacctly how this is done depends on the upper and lower hierarchy used and how the sampling is stratified. In the following example we are using the lower hierarchy C meaning that we are extracting the BV data as the biological data. 
 
-results <- doEstimationForAllStrata(SampleWeightEstData, "SAsampWtMes", verbose = T, estimMethod = "ratio")
+```{r}
+#get the first quarter data from CS 
+strataListCS <- list(LEarea="27.3.d.28.1",
+                     LEmetier6 = "OTM_SPF_16-31_0_0",
+                     TEstratumName = month.name[1:3],
+                    SAspeCodeFAO = "SPR")
+
+#get the first quarter data from CL table
+strataListCL <- list(CLarea="27.3.d.28.1",
+                     CLquar = 1,
+                     CLmetier6 = "OTM_SPF_16-31_0_0",
+                     CLspecFAO = "SPR")
+
+#we are using the lower hierarchy C meaning that we are extracting the BV data
+#as the biological data
+biolCLQ1 <- addCLtoLowerCS(H8ExampleEE1, strataListCS, strataListCL,
+                         combineStrata =T, lowerHierarchy = "C",
+                         CLfields = CLfieldstoSum)
+```
+
+To estimate the total number of sprat caught in the area 27.3.d.28.1 with the gear OTM_SPF_16-31_0_0 for the first quarter of the year we need to use the function **doBVestimCANUM(...)**. The function takes the biological data table, the columns to be added to the final result and the class breaks for the estimation. The function returns a table with the estimates for the given class breaks.
+The allowed class units are "Ageyears", "Lenghtmm" and "Weightg". The class breaks are the number of classes to break the data into. The function will return the estimates for each class.
+The addColumns parameter is a vector of column names that will be added to the final result. The columns should be present in the biological data table. A minimum of one column (the sum column that in our case is "sumCLoffWeight") is required. The function will return the estimates for each unique value in the columns.
+
+```{r}
+lenCANUMQ1 <- doBVestimCANUM(biolCLQ1, c("sumCLoffWeight"),
+             classUnits = "Lengthmm",
+             classBreaks = seq(70,130,10),
+             verbose = FALSE)
+
+lenCANUMQ1
 ```
 
 
+To have the estimates for several Quarters in the result same biolCL table creation is done for the last quarter of the year. 
 
 ```{r}
-View(H8ExampleEE1$CL)
+strataListCS <- list(LEarea="27.3.d.28.1",
+                     LEmetier6 = "OTM_SPF_16-31_0_0",
+                     TEstratumName = month.name[10:12], #the last 3 months of the year
+                    SAspeCodeFAO = "SPR")
+
+strataListCL <- list(CLarea="27.3.d.28.1",
+                     CLquar = 4,
+                     CLmetier6 = "OTM_SPF_16-31_0_0",
+                     CLspecFAO = "SPR")
+
+biolCLQ4 <- addCLtoLowerCS(H8ExampleEE1, strataListCS, strataListCL,
+                         combineStrata =T, lowerHierarchy = "C",
+                         CLfields = CLfieldstoSum)
 ```
 
 ```{r}
-#create the estimation object to estimate values on the BV table
-estData <- createRDBESEstObject(H8ExampleEE1, 8, "BV" )
-#for length we want the LengthTotal
-estData <- estData[estData$BVtypeMeas == "LengthTotal",]
-
-#the BV valuemeasured is character
-head(estData$BVvalueMeas)
-```
-```{r}
-estData$BVfishLen <- as.numeric(estData$BVvalueMeas)
+#lets combine the two quarters into one table
+biolCL <- rbind(biolCLQ1, biolCLQ4)
 ```
 
+More columns from the above table can be added to the final result. The output is broken down by unique values in these columns.
 
 ```{r}
-for(SAid in c(1:15)){
-  bvt <- as.data.frame(H8ExampleEE1$BV)[as.data.frame(H8ExampleEE1$BV)$SAid== SAid,]
-  bvt <- bvt[bvt$BVtypeMeas == "LengthTotal",]
-  bvt$BVfishLen <- as.numeric(bvt$BVvalueMeas)
-  
-  print(paste("SAid:", SAid, "Number of fish:", nrow(bvt)))
-}
+#this alllows to add extra columns into the final result 
+addCols <- c(names(strataListCS),
+             names(strataListCL),
+             paste0('sum', CLfieldstoSum))
+
+ageCANUM <- doBVestimCANUM(biolCL, addCols,
+             classUnits = "Ageyear",
+             classBreaks = 1:8,
+             verbose = FALSE)
+
+ageCANUM
+             
 ```
 
 
-```{r}
-resultsFishLen <- doEstimationForAllStrata(estData, "BVfishLen", verbose = T, estimMethod = "ratio")
-```
-
-```{r}
-bvw <- bvt <- as.data.frame(H8ExampleEE1$BV)
-bvw <- bvw[bvw$BVtypeMeas == "WeightMeasured",]
-bvt <- bvt[bvt$BVtypeMeas == "LengthTotal",]
-bv <- merge(bvw, bvt, by = c("BVfishId", "SAid"), suffixes = c("Wt", "Len"))
-bv$BVvalueMeasWt <- as.numeric(bv$BVvalueMeasWt)
-bv$BVvalueMeasLen <- as.numeric(bv$BVvalueMeasLen)
-#group by lenght class
-
-bv$BVfishLenClass <- cut(bv$BVvalueMeasLen, breaks = seq(10, 300, 10), include.lowest = TRUE)
-#aggregate by lenght class
-bvta <- aggregate(cbind(countAtLen= BVvalueMeasLen) ~ BVfishLenClass + SAid, data = bv, FUN = length)
-bvtb <- aggregate( cbind(totalWeightAtLen=  BVvalueMeasWt) ~ BVfishLenClass + SAid, data = bv, FUN = sum)
-bvtc <- aggregate( cbind(totCount=  BVvalueMeasLen) ~  SAid, data = bv, FUN = length)
-
-bvta <- merge(bvta, bvtb, by = c("BVfishLenClass", "SAid"))
-bvta <- merge(bvta, bvtc, by = "SAid")
-bvta$prop <- bvta$countAtLen / bvta$totCount
-
-SA <- as.data.frame(H8ExampleEE1$SA)
-SA$aux <- c(
-  1659, 
-3377, 
-8110, 
-20118, 
-1138, 
-4323, 
-2049, 
-4412, 
-1165, 
-3031, 
-1207, 
-11698, 
-2623, 
-3025, 
-12635
-)
-sam <- merge(SA, bvta, by = "SAid")
-
-#get length class proportions
-sam$ratio <- (sam$SAtotalWtMes * sam$prop) / sam$totalWeightAtLen
-
-sam$numAtLen <- sam$aux * sam$countAtLen
-#the auxiliary variable how to use it? instead
-
-sam$countAtLen <- sam$ratio * sam$countAtLen
-sam[c("SAid", "BVfishLenClass", "countAtLen",  "SAtotalWtMes", "ratio","numAtLen", "prop")]
-```
+The output table should be enough to populate a classic Intercatch data call table. 
 
 
 
-```{r}
-sampling_ratio <- estData$SAtotalWtMes/ estData$SAsampWtMes
-unique(sampling_ratio)
-```
-
-```{r}
-sampling_ratio <- estData$su5numTotal / estData$su5numSamp
-unique(sampling_ratio)
-```
-```{r}
-
-```
-
-
-```{r}
-#how many uniqe fish are there in the BV
-length(unique(estData$BVfishId))
-unique(estData$BVtypeMeas)
-  
-```
-
-
-```{r}
-colnames(estData)
-```
-
-
-```{r}
-View(estData)
-```
 
 
 
