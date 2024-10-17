@@ -3,6 +3,8 @@
 #' This function takes an upper table field name, values for that field, a list of tables,
 #' and a target lower level table name. It returns the rows of the target lower level table
 #' that are associated with the given values of the upper table field.
+#' NB! running on the RDBESDataObject will not always work properly as the tables are not
+#' in the correct order for all Hierarchies.
 #'
 #' @param field A character string specifying the name of the upper table field.
 #' @param values A vector of values for the upper table field.

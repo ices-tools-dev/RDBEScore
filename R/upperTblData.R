@@ -9,11 +9,14 @@
 #' gets the values for its `id` column that match the provided values for the
 #' specified field. The function then calls itself recursively with these new
 #' values and returns the result.
+#' NB! running on the RDBESDataObject will not always work properly as the tables are not
+#' in the correct order for all Hierarchies.
 #'
 #' @param field A character string specifying the field to get.
 #' @param values A vector of values to match for the specified field.
 #' @param tbls A named list of data frames containing tables at different levels.
 #' @param level A character string specifying the level to get data from.
+#' @param verbose (Optional) Set to TRUE if you want informative text printed
 #'
 #' @return A data frame containing rows from an upper table that match the
 #'  provided values for the specified field.
@@ -25,12 +28,9 @@
 #' tbls <- list(DE = DE, SD = SD, VS = VS)
 #' upperTblData("VSid", c(1), tbls, "DE")
 #'
-upperTblData <- function(field, values, tbls, level){
+upperTblData <- function(field, values, tbls, level, verbose = FALSE){
   #check if tables are of correct type
   if(!is.list(tbls)) stop("tbls must be a list")
-  #no null values are allowed
-  if(!all(sapply(tbls, data.table::is.data.table))) stop("tbls must be a list of data tables")
-  #the level must be a character string in the names of the tables
   if(!level %in% names(tbls)) stop(level, " must be a character string in the names of the tables")
 
   start <- substr(field, start=1, stop=2)
@@ -40,7 +40,22 @@ upperTblData <- function(field, values, tbls, level){
   }
   tbl <- tbls[[start]]
   currTbl <- which(start == names(tbls))
-  prevTblfield <-  paste0(names(tbls)[currTbl-1], "id")
+  if(verbose){
+    print(paste0(start,": ", paste0(values, collapse = ", ")))
+  }
+  #skip NULL tables
+  tc <- -1
+  prevTbl <- names(tbls)[currTbl+tc]
+  while(is.null(tbls[[prevTbl]])){
+    if(verbose){
+      print(paste0("Skipping: ", prevTbl))
+    }
+    tc <- tc - 1
+    if((currTbl+tc) < 1) stop("No table found")
+    prevTbl <- names(tbls)[currTbl+tc]
+
+  }
+  prevTblfield <-  paste0(names(tbls)[currTbl+tc], "id")
   prevTblvalues <- tbl[get(field) %in% values, get(prevTblfield)]
-  upperTblData(prevTblfield,prevTblvalues, tbls[1:currTbl], level )
+  upperTblData(prevTblfield,prevTblvalues, tbls[1:currTbl], level, verbose)
 }
