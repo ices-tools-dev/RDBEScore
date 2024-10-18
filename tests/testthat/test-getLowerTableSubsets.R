@@ -21,7 +21,7 @@ test_that("Function throws error for missing table name", {
   subsets <- list(TEid = c(4))
 
   expect_error(getLowerTableSubsets(subsets, "XYZ", H8ExampleEE1),
-               "Table XYZ not found in the RDBESData object")
+               "Table XYZ not found in the RDBESDataObject")
 })
 
 test_that("Function returns correct data with valid inputs", {

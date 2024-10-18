@@ -29,7 +29,6 @@
 #' VS <- data.table(VSid = c(1, 2),SDid =c(1,2),  value = c(10, 20))
 #' tbls <- list(DE = DE, SD = SD, VS = VS)
 #' upperTblData("VSid", c(1), tbls, "DE")
-#'@export
 upperTblData <- function(field, values, tbls, level, verbose = FALSE){
   #check if tables are of correct type
   if(!is.list(tbls)) stop("tbls must be a list")

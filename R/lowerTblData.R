@@ -27,7 +27,6 @@
 #' tblsSprat <- list( DE = DE ,SD = SD, TE = TE, VS = VS, LE = LE )
 #'
 #' lowerTblData("TEid", c(4), tblsSprat, "LE", T)
-#'@export
 lowerTblData <- function(field, values, tbls, level, verbose = FALSE) {
   #check if tables are of correct type
   if(!is.list(tbls)) stop("tbls must be a list")
