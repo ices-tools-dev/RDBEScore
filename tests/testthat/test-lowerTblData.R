@@ -51,6 +51,11 @@ test_that("Function works with RDBESdataObjects", {
   expect_equal(nrow(tbl), 2)
 })
 
+test_that("Function works with sorted RDBESdataObjects", {
+  tbl <- lowerTblData("DEid", c(1), sort(H8ExampleEE1), "SA", FALSE)
+  expect_equal(nrow(tbl), 15)
+})
+
 # Test for wrong input type
 test_that("Function handles invalid inputs gracefully", {
   expect_error(lowerTblData("invalidField", c(1), tblsSprat, "LE", FALSE))

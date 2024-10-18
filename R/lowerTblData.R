@@ -3,8 +3,8 @@
 #' This function takes an upper table field name, values for that field, a list of tables,
 #' and a target lower level table name. It returns the rows of the target lower level table
 #' that are associated with the given values of the upper table field.
-#' NB! running on the RDBESDataObject will not always work properly as the tables are not
-#' in the correct order for all Hierarchies.
+#' NB! running on the RDBESDataObject will work properly if it is sorted by default the tables are not
+#' in the correct order for a spesific hierarchy.
 #'
 #' @param field A character string specifying the name of the upper table field.
 #' @param values A vector of values for the upper table field.
@@ -16,6 +16,9 @@
 #'   the given values of the upper table field.
 #'
 #' @examples
+#' #it is important to run these functions only on sorted RDBESDataObject
+#' lowerTblData("TEid", c(4), sort(H8ExampleEE1), "SA", T)
+#'
 #'DE <- data.table::data.table(DEid = c(1, 2, 3, 4), SDid = c(1, 2, 3, 4))
 #'SD <- data.table::data.table(SDid = c(1, 2, 3, 4), TEid = c(1, 2, 3, 4))
 #'TE <- data.table::data.table(SDid = c(1, 2, 3, 4), TEid = c(1, 2, 3, 4))
@@ -24,7 +27,7 @@
 #' tblsSprat <- list( DE = DE ,SD = SD, TE = TE, VS = VS, LE = LE )
 #'
 #' lowerTblData("TEid", c(4), tblsSprat, "LE", T)
-#'
+#'@export
 lowerTblData <- function(field, values, tbls, level, verbose = FALSE) {
   #check if tables are of correct type
   if(!is.list(tbls)) stop("tbls must be a list")

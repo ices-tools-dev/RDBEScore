@@ -35,6 +35,14 @@ test_that("upperTblData works with RDBESDataObjects", {
   expect_equal((result$TEid), 1)
 })
 
+test_that("upperTblData works with sorted RDBESDataObjects", {
+
+  result <- upperTblData("SAid", c(1, 2), sort(H8ExampleEE1), "DE")
+
+  expect_equal((nrow(result)), 1)
+  expect_equal((result$DEid), 1)
+})
+
 test_that("upperTblData throws error for incorrect tbls type", {
   expect_error(upperTblData("VSid", c(1), list(DE = 1, SD = 2, VS = 3), "DE"), "object 'VSid' not found")
 })
