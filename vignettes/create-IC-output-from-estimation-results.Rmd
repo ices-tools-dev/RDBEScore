@@ -77,7 +77,7 @@ myH1 <- fixProbs(myH1RawObject)
 
 ```
 
-## Step 2) Create an estimation object, but stop at SA
+## Step 2) Estimate for live weight for the data
 
 
 ```{r}
@@ -104,6 +104,7 @@ dataToOutput <- data.frame(Country = myH1[["SD"]]$SDctry,
                            Fleet= NA,
                            AreaType = "Stratum",
                            FishingArea = psuEstimates$stratumName,
+                           DepthRange = "NA",
                            Species = mySpecies ,
                            Stock = mySpecies,
                            CatchCategory = substr(myCatchFraction, 1, 1),
@@ -112,7 +113,18 @@ dataToOutput <- data.frame(Country = myH1[["SD"]]$SDctry,
                            SamplesOrigin = "O",
                            UnitCATON = "kg",
                            CATON = psuEstimates$est.total/1000.0,
-                           varCATON = psuEstimates$var.total/1000000.0)
+                           varCATON = psuEstimates$var.total/1000000.0,
+                           Sex = "NA",
+                           PlusGroup = "NA",
+                           MeanWeight = -9,
+                           unitMeanWeight = "kg",
+                           unitCANUM = "n",
+                           UnitAgeOrLength = "year",
+                           NumberCaught = -9,
+                           MeanWeight = -9,
+                           CANUMtype = "Age",
+                           AgeLength = c(1,1,1,2,2,2,3,3,3),
+                           NumSamplesAge = c(300,300,300,200,200,200,100,100,100))
 
 tempIC <- exportEstimationResultsToInterCatchFormat(dataToOutput)
 print(tempIC)

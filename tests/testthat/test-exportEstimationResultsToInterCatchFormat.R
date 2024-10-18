@@ -71,6 +71,7 @@ test_that("exportEstimationResultsToInterCatchFormat runs without errors or warn
                                  Fleet= NA,
                                  AreaType = "Stratum",
                                  FishingArea = psuEstimates$stratumName,
+                                 DepthRange = "NA",
                                  Species = mySpecies ,
                                  Stock = mySpecies,
                                  CatchCategory = substr(myCatchFraction, 1, 1),
@@ -79,18 +80,82 @@ test_that("exportEstimationResultsToInterCatchFormat runs without errors or warn
                                  SamplesOrigin = "O",
                                  UnitCATON = "kg",
                                  CATON = psuEstimates$est.total/1000.0,
-                                 varCATON = psuEstimates$var.total/1000000.0)
+                                 varCATON = psuEstimates$var.total/1000000.0,
+                                 Sex = "NA",
+                                 PlusGroup = "NA",
+                                 MeanWeight = -9,
+                                 unitMeanWeight = "kg",
+                                 unitCANUM = "n",
+                                 UnitAgeOrLength = "year",
+                                 NumberCaught = -9,
+                                 MeanWeight = -9,
+                                 CANUMtype = "Age",
+                                 AgeLength = c(1,1,1,2,2,2,3,3,3),
+                                 NumSamplesAge = c(300,300,300,200,200,200,100,100,100))
 
 
       expect_error(exportEstimationResultsToInterCatchFormat(dataToOutput),NA )
       expect_warning(exportEstimationResultsToInterCatchFormat(dataToOutput),NA )
 
       icOutput <- exportEstimationResultsToInterCatchFormat(dataToOutput)
-      expect_equal(length(icOutput), 6)
+      expect_equal(length(icOutput), 15)
       expect_equal(icOutput[1], "HI,ZW,1965,NA,NA,NA,Stratum,VS_stratum1,NA,NA,-9,NA")
       expect_equal(icOutput[2], "SI,ZW,1965,NA,NA,NA,Stratum,VS_stratum1,NA,1019159,1019159,L,A,NA,H,O,NA,kg, 3342.222,-9, 1053266,NA,NA,NA")
 
   })
+
+test_that("exportEstimationResultsToInterCatchFormat gikves a warning when mandatory column AgeLength is missing",  {
+
+  # get some test data
+  myH1RawObject <- generateTestData()
+
+  ## Create an estimation object, but stop at SA
+
+  myTestData <- createRDBESEstObject(myH1RawObject, 1, stopTable = "SA")
+  # Get rid of rows that don't have an SA row
+  myTestData <- myTestData[!is.na(myTestData$SAid),]
+  # Estimate using the data
+  myStrataResults <- doEstimationForAllStrata(myTestData, "SAsampWtLive")
+  myStrataResults
+
+  # Get our estimated values for the PSU
+  psuEstimates <- myStrataResults[myStrataResults$recType == "VS",]
+
+  # This is the data we will export to IC format
+  dataToOutput <- data.frame(Country = myCountry,
+                             Year = myYear,
+                             SeasonType = NA,
+                             Season = NA,
+                             Fleet= NA,
+                             AreaType = "Stratum",
+                             FishingArea = psuEstimates$stratumName,
+                             DepthRange = "NA",
+                             Species = mySpecies ,
+                             Stock = mySpecies,
+                             CatchCategory = substr(myCatchFraction, 1, 1),
+                             ReportingCategory = "A",
+                             Usage = "H",
+                             SamplesOrigin = "O",
+                             UnitCATON = "kg",
+                             CATON = psuEstimates$est.total/1000.0,
+                             varCATON = psuEstimates$var.total/1000000.0,
+                             Sex = "NA",
+                             PlusGroup = "NA",
+                             MeanWeight = -9,
+                             unitMeanWeight = "kg",
+                             unitCANUM = "n",
+                             UnitAgeOrLength = "year",
+                             NumberCaught = -9,
+                             MeanWeight = -9,
+                             CANUMtype = "Age",
+                             #AgeLength = c(1,1,1,2,2,2,3,3,3),
+                             NumSamplesAge = c(300,300,300,200,200,200,100,100,100))
+
+
+   expect_warning(exportEstimationResultsToInterCatchFormat(dataToOutput),"The column AgeLength is mandatory but is not present in the SD data\n" )
+
+
+})
 
 
 #}) ## end capture.output
