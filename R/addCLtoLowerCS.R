@@ -80,7 +80,7 @@ addCLtoLowerCS <- function(rdbes, strataListCS, strataListCL, combineStrata =T, 
     rep(x_new, nrow(biolData))
     })
 
-  strataList <- as.data.table(strataList)
+  strataList <- data.table::as.data.table(strataList)
   biolData <- cbind(biolData, strataList)
 
   for(field in CLfields){
