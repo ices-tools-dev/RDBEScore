@@ -186,7 +186,35 @@ validateRDBESDataObject(myFilteredObjectValidSpeciesLinks, verbose = FALSE)
 
 ```
 
+## Getting Subsets of RDBESDataObject Tables
 
+Sometimes it we want to see how a field or values in the **RDBESDataObject** are connected to otther tables.
+One use case would be e.g. to see when a specific Landing Event (LE) occured.For this we can use the **getLinkedDataFromLevel()** function. 
+
+```{r}
+#get the TE table corresponding to the first LEid in the H8ExampleEE1 object
+getLinkedDataFromLevel("LEid", c(1), H8ExampleEE1, "TE", verbose = TRUE)
+```
+Similarly we can get the subset of the LE table corresponding to a specific value in the TE table. This does not have to be the *id* field, but can be any field in the table.
+
+```{r}
+#get the TE table corresponding to the first LEid in the H8ExampleEE1 object
+getLinkedDataFromLevel("TEstratumName", c("November"), H8ExampleEE1, "LE", verbose = TRUE)
+```
+Several values can be used to get a subset of the table. 
+
+```{r}
+#get the SA table corresponding to the first 2 TEids in the H8ExampleEE1 object
+getLinkedDataFromLevel("TEid", c(1,2), H8ExampleEE1, "SA", verbose = TRUE)
+```
+Also lower hierarchy tables can be used to get the subset of the higher hierarchy tables.
+
+```{r}
+#which vessel caught those fish?
+getLinkedDataFromLevel("BVfishId", c("410472143", "410472144"), H8ExampleEE1, "VS", TRUE)
+```
+
+If some table is missing it is skipped if possible. If it is not possible to skip it, the function will return an error.
 
 See also other package vignettes:
 

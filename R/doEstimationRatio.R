@@ -55,6 +55,8 @@ doEstimationRatio <- function(RDBESDataObj,
                               lowerAux = NULL, # you can use a strongly correlated value present in your data for the estimation of the values of interest
                               verbose = FALSE){
 
+
+  RDBESDataObj <- H8ExampleEE1
   # Check we have a valid RDBESEstObject before doing anything else
   RDBEScore::validateRDBESDataObject(RDBESDataObj, verbose = FALSE)
 
@@ -68,9 +70,11 @@ doEstimationRatio <- function(RDBESDataObj,
 
 # Do we need both CL and CE? Allow the user to define the population (i.e. effort or landings or both)?
 
-  if(!names(RDBESDataObj) %in% c("CL", "CE")){
-    stop("The object does not have population data")
-  }
+  # Not working check
+
+  # if(!names(RDBESDataObj) %in% c("CL", "CE")){
+  #   stop("The object does not have population data")
+  # }
 
 # Order table based on hierarchy - it's a bottom up estimation
   DEhierarchy <- unique(RDBESDataObj$DE$DEhierarchy)
@@ -136,21 +140,61 @@ doEstimationRatio <- function(RDBESDataObj,
 
 
 # LH C --------------------------------------------------------------------
-    }else if(unique(RDBESEstRatioObj$SAlowHierarchy) == "C"){
+    }else if(unique(RDBESEstRatioObj$SA$SAlowHierarchy) == "C"){
 
-      # Only BV data
 
-      # If length exists
-      #if weight exists run
-      # else ask for a, b
-      # else stop
+      bv <- setDT(RDBESEstRatioObj$BV)
+      bv <- bv[, unique(.SD), .SDcols = c("SAid", "BVfishId", "BVtypeMeas", "BVvalueMeas")]
+      bv <- dcast(bv, ... ~ BVtypeMeas , value.var = c("BVvalueMeas"), drop = TRUE)
+      bv[, `:=`(LengthTotal = as.numeric(LengthTotal), WeightMeasured = as.numeric(WeightMeasured))]
+      # TODO this probably needs to be an argument
+      # or needs to be defined later on?
+      bv$LengthClass <- floor(bv$LengthTotal/10) # or ceiling option? Half cm?
+
+      bv1 <- bv[, .(BVMeanWeight = mean(WeightMeasured, na.rm = TRUE),
+                    BVNumbersAtLength = .N),
+                by = .(SAid, LengthClass)][, TotCount := sum(BVNumbersAtLength), by = SAid]
+      bv1$BVLengthClassProp <- bv1$BVNumbersAtLength/bv1$TotCount
+
+
+      sa <- setDT(RDBESEstRatioObj$SA)
+      sa <- sa[, unique(.SD), .SDcols = c("SSid","SAid", "SAspeCode","SAlowHierarchy", "SAauxVarValue")]
+
+      # To test
+      sa[, SAauxVarValue  := as.numeric(SAauxVarValue )]
+      sa$SAauxVarValue <- 10
+
+      # TODO add check for subsampling STOP it does not work
+
+      su <- merge(bv1, sa, by = c("SAid"))
+
+      su$SANumbersAtLength <- su$BVNumbersAtLength * su$SAauxVarValue
+
+      # From here onwards need the column names
+
+      s <- RDBEScore::getTablesInRDBESHierarchy(DEhierarchy)
+      keywords <- c("SA|FM|BV")
+      hierarchyTabs <-s[!is.na(gsub(keywords, NA, s))]
+      # Get the table before the SA (most likely SS)
+      nextTab <- tail(hierarchyTabs, n = 1)
+      # Get table SA - 2
+      nextTab1 <- tail(hierarchyTabs, n = )
+
+
+      upperHier1 <- setDT(RDBESEstRatioObj[[nextTab]])
+      cnames1 <- paste0(nextTab, "year")
+      upperHier1 <- upperHier1[, unique(.SD), .SDcols = c("SAid", "SAspeCode","SAlowHierarchy", "SAauxVarValue")]
+
+
 
       # if both lengths and weight exist
-      if(isTRUE(any(grepl("Length", RDBESEstRatioObj$BV$BVtypeAssess)) & any(grepl("Weight", RDBESEstRatioObj$BV$BVtypeAssess)))){
-
-      }else{
-        stop("Not yet implemented")
-      }
+      # if(isTRUE(any(grepl("Length", RDBESEstRatioObj$BV$BVtypeAssess)) & any(grepl("Weight", RDBESEstRatioObj$BV$BVtypeAssess)))){
+      #
+      #
+      #
+      # }else{
+      #   stop("Not yet implemented")
+      # }
 
     }
 
@@ -163,7 +207,7 @@ doEstimationRatio <- function(RDBESDataObj,
 # LH C --------------------------------------------------------------------
 
 
-    if(unique(RDBESDataObj$SAlowHierarchy) == "C"){
+    if(unique(RDBESDataObj$SA$SAlowHierarchy) == "C"){
       # Check which biol data are present
 
       # if age exists
@@ -184,7 +228,7 @@ doEstimationRatio <- function(RDBESDataObj,
 # LH A --------------------------------------------------------------------
 
 
-    }else if(unique(RDBESDataObj$SAlowHierarchy) == "A"){
+    }else if(unique(RDBESDataObj$SA$SAlowHierarchy) == "A"){
 
 
 

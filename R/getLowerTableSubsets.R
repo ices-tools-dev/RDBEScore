@@ -22,24 +22,10 @@
 #' based on the ID column of the target table.
 #'
 getLowerTableSubsets <- function(subsets, tblName, rdbesTables, combineStrata = TRUE, verbose = FALSE) {
-  # Check if rdbesTables is of class "RDBESDataObject"
-  if(inherits(rdbesTables, "RDBESDataObject")) {
-    tableNames <- names(summary(rdbesTables)$data)
-    # Select only the relevant hierarchy table names
-    rdbesTables <- rdbesTables[tableNames]
-  } else {
-    stop("rdbesTables must be of class RDBESDataObject")
-  }
-  if(!tblName %in% names(rdbesTables)){
-    stop("Table ", tblName, " not found in the RDBESData object")
-  }
-
   res <- list()
-  if(verbose) print("Getting lower table data")
-
   # Process each subset
   for(ss in names(subsets)){
-    res[[ss]] <- lowerTblData(ss, subsets[[ss]], rdbesTables, tblName, verbose)
+    res[[ss]] <- getLinkedDataFromLevel(ss, subsets[[ss]], rdbesTables, tblName, verbose)
   }
 
   # Function to get the intersection of IDs
