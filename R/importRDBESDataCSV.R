@@ -96,7 +96,7 @@ importRDBESDataCSV <- function(rdbesExtractPath = NULL,
         myList[[myFile]] <-
           utils::read.csv(
             paste(rdbesExtractPath, "/", fileNames[myFile],  sep = ""),
-            header = TRUE, sep = ",", stringsAsFactors = FALSE
+            header = TRUE, sep = ",",quote = "", stringsAsFactors = FALSE
           )
 
         # Change each entry to a data table
