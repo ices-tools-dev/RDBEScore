@@ -321,4 +321,22 @@ test_that("createRDBESEstObject does not need explicit hierarcy",  {
   expect_s3_class(myEstObject,"RDBESEstObject")
 })
 
+test_that("createRDBESEstObject can create an object from an H1 data extract
+          when the same id is used for SAseqNum and SAparSeqNum",  {
+
+            myRawObject <- H1Example
+
+            # Only use a subset of the test data
+            myRawObject <- filterRDBESDataObject(myRawObject,c("DEstratumName"),c("DE_stratum1_H1","DE_stratum2_H1","DE_stratum3_H1"))
+            myRawObject <- findAndKillOrphans(myRawObject, verbose = FALSE)
+
+            # Use the same id for SAseqNum and SAparSeqNum
+            myRawObject[["SA"]]$SAparSequNum <- myRawObject[["SA"]]$SAseqNum
+
+            myEstObject <- expect_warning(createRDBESEstObject(myRawObject,1),NA)
+            myEstObject <- expect_error(createRDBESEstObject(myRawObject,1),NA)
+
+
+          })
+
 }) ## end capture.output
