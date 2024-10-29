@@ -161,6 +161,8 @@ capture.output({  ## suppresses printing of console output when running test()
 
             expect_warning(createRDBESDataObject(input = csvFilesH1), NA)
             expect_error(createRDBESDataObject(input = csvFilesH1), NA)
+
+
           })
 
 
@@ -176,6 +178,30 @@ capture.output({  ## suppresses printing of console output when running test()
             expect_error(
               createRDBESDataObject(input = csvFilesH1,
                                     castToCorrectDataTypes = FALSE), NA)
+          })
+
+  test_that("createRDBESDataObject can create an object from a H1 data extract
+          with the right number of rows",  {
+
+            csvFilesH1 <- dirH1
+
+            myH1 <- createRDBESDataObject(input = csvFilesH1)
+
+            # Get the default file names
+            fileNames <- RDBEScore::DefaultFileNames
+            # Remove any unnecessary files
+            fileNames[names(fileNames) %in% c("TE","LO","OS","LE")] <- NULL
+            # Append the right path
+            fileNames <-lapply(fileNames, function(x){paste(csvFilesH1,x,".csv",sep="")})
+            # Read the number of rows in each file
+            fileNumberOfRows <- lapply(fileNames, function(x){length(readLines(x))-1})
+
+            # For each file
+            for(x in names(fileNumberOfRows)){
+              # check if the value of nrow is equal to the length of readlines()-1
+              expect_true(nrow(myH1[[x]]) == fileNumberOfRows[x])
+            }
+
           })
 
 
@@ -200,6 +226,30 @@ capture.output({  ## suppresses printing of console output when running test()
             expect_error(
               createRDBESDataObject(input = csvFilesH5,
                                     castToCorrectDataTypes = FALSE), NA)
+          })
+
+  test_that("createRDBESDataObject can create an object from a H5 data extract
+          with the right number of rows",  {
+
+            csvFilesH5 <- dirH5
+
+            myH5 <- createRDBESDataObject(input = csvFilesH5)
+
+            # Get the default file names
+            fileNames <- RDBEScore::DefaultFileNames
+            # Remove any unnecessary files
+            fileNames[names(fileNames) %in% c("TE","LO","VS","FO")] <- NULL
+            # Append the right path
+            fileNames <-lapply(fileNames, function(x){paste(csvFilesH5,x,".csv",sep="")})
+            # Read the number of rows in each file
+            fileNumberOfRows <- lapply(fileNames, function(x){length(readLines(x))-1})
+
+            # For each file
+            for(x in names(fileNumberOfRows)){
+              # check if the value of nrow is equal to the length of readlines()-1
+              expect_true(nrow(myH5[[x]]) == fileNumberOfRows[x])
+            }
+
           })
 
 
@@ -308,6 +358,35 @@ capture.output({  ## suppresses printing of console output when running test()
 
   })
 
+
+  test_that("createRDBESDataObject can create an object from a H1 data extract
+          with the right number of rows, when CL has partially quoted vessel identifiers (issue #210)",  {
+
+            # Test related to following issue
+            #https://github.com/ices-tools-dev/RDBEScore/issues/210
+
+            csvFilesH1 <- paste0(dirH1, "BadVesselIdentifiers/")
+            print(csvFilesH1)
+
+            myH1 <- createRDBESDataObject(input = csvFilesH1)
+            print(myH1)
+
+            # Get the default file names
+            fileNames <- RDBEScore::DefaultFileNames
+            # Remove any unnecessary files
+            fileNames[!names(fileNames) %in% c("CL")] <- NULL
+            # Append the right path
+            fileNames <-lapply(fileNames, function(x){paste(csvFilesH1,x,".csv",sep="")})
+            # Read the number of rows in each file
+            fileNumberOfRows <- lapply(fileNames, function(x){length(readLines(x))-1})
+
+            # For each file
+            for(x in names(fileNumberOfRows)){
+              # check if the value of nrow is equal to the length of readlines()-1
+              expect_true(nrow(myH1[[x]]) == fileNumberOfRows[x])
+            }
+
+          })
 
   # Test list of dfs ---------------------------------------------------------
 
