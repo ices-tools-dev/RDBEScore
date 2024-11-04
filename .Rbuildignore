@@ -11,3 +11,5 @@
 ^.DS_Store$
 ^docs$
 ^Meta$
+package_overview.Rmd
+*.pptx$
