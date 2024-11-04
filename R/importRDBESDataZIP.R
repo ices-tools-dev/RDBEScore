@@ -54,6 +54,24 @@ importRDBESDataZIP <- function(filenames,
 
   # the files are not used currently but can be if we want to
   files <- unique(unlist(sapply(filenames, unzipFile, tmp)))
+
+  dirs <- list.dirs(tmp, full.names = FALSE, recursive = FALSE)
+  if(length(dirs) > 0) {
+    hdirs <- dirs[grepl("H[0-9]+", dirs)]
+    if(length(hdirs) > 1) {
+      stop("You cannot import a mix of different hierarchies in one 'zip' ",
+           "input. To import multiple tables unzip all files and import as ",
+           "a folder of 'csv' files.")
+    }
+    #remove directory structure
+    for(d in dirs){
+      files <- list.files(file.path(tmp, d), full.names = FALSE)
+      file.rename(file.path(tmp, d, files), file.path(tmp, files))
+    }
+
+
+  }
+
   res <- importRDBESDataCSV(tmp,
                             castToCorrectDataTypes = castToCorrectDataTypes)
   unlink(tmp, recursive = T)
