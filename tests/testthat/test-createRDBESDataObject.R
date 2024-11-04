@@ -57,6 +57,31 @@ capture.output({  ## suppresses printing of console output when running test()
 
   # Test ZIP inputs ---------------------------------------------------------
 
+  test_that("importing foldered zipped H1 example data works", {
+    zipFiles <- c(
+      "H1_2023_10_16_fd.zip"
+    )
+
+    genObj <- createRDBESDataObject(paste0(dirH1, zipFiles),
+                                    castToCorrectDataTypes = TRUE)
+
+    expect_equal(genObj, expObjH1)
+
+  })
+
+  test_that("importing foldered zipped H1 and H2 gives an error", {
+    zipFiles <- c(
+      "H1_H2_2023_10_16_fd.zip"
+    )
+
+    genObj <- expect_error(
+      createRDBESDataObject(paste0(dirH1, zipFiles),
+                            castToCorrectDataTypes = TRUE),
+      "You cannot import a mix of different hierarchies in one 'zip' input. To import multiple tables unzip all files and import as a folder of 'csv' files."
+    )
+
+  })
+
   test_that("importing zipped H1 example data works", {
     zipFiles <- c(
       "H1_2023_10_16.zip"
