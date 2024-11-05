@@ -89,7 +89,7 @@ createRDBESDataObject <- function(input = NULL,
   # -------------------------------------------------------------------------
 
   if(import.type == "zip") output <- importRDBESDataZIP(filenames = input,
-                                                        castToCorrectDataTypes = castToCorrectDataTypes)
+                                                        castToCorrectDataTypes = castToCorrectDataTypes, ...)
 
   if(import.type == "csv") output <- importRDBESDataCSV(rdbesExtractPath = input,
                                                            listOfFileNames = listOfFileNames,

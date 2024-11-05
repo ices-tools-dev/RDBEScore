@@ -77,7 +77,34 @@ capture.output({  ## suppresses printing of console output when running test()
     genObj <- expect_error(
       createRDBESDataObject(paste0(dirH1, zipFiles),
                             castToCorrectDataTypes = TRUE),
-      "You cannot import a mix of different hierarchies in one 'zip' input. To import multiple tables unzip all files and import as a folder of 'csv' files."
+      "The zip file contains multiple hierarchies.\nTo import a selected hierarchy, please provide the hierarchy as an argument e.g like:\nHierachy = 1"
+    )
+
+  })
+
+  test_that("importing foldered zipped H1 and H2 example data works when hierarchy is specified", {
+    zipFiles <- c(
+      "H1_H2_2023_10_16_fd.zip"
+    )
+
+    genObj <- createRDBESDataObject(paste0(dirH1, zipFiles),
+                                    castToCorrectDataTypes = TRUE,
+                                    Hierarchy = 1)
+
+    expect_equal(genObj, expObjH1)
+
+  })
+
+  test_that("importing foldered zipped H1 and H2 example does not work when hierarchy is misspecified", {
+    zipFiles <- c(
+      "H1_H2_2023_10_16_fd.zip"
+    )
+
+    genObj <- expect_error(
+      createRDBESDataObject(paste0(dirH1, zipFiles),
+                            castToCorrectDataTypes = TRUE,
+                            Hierarchy = "H1"),
+      "The zip file does not contain the hierarchy specified. The options are: 1, 2\nPlease provide a valid hierarchy as an argument. e.g like:\nHierachy = 1"
     )
 
   })
