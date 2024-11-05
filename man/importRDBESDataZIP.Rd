@@ -4,7 +4,7 @@
 \alias{importRDBESDataZIP}
 \title{Import RDBES Downloaded Data}
 \usage{
-importRDBESDataZIP(filenames, castToCorrectDataTypes = TRUE)
+importRDBESDataZIP(filenames, castToCorrectDataTypes = TRUE, Hierarchy = NULL)
 }
 \arguments{
 \item{filenames}{\itemize{
@@ -15,7 +15,9 @@ instance, you want to add CL and CE tables to the same object.
 \item{castToCorrectDataTypes}{Logical. If \code{TRUE} then the function will
 attempt to cast the required columns to the correct data type.  If \code{FALSE}
 then the column data types will be determined by how the csv files are read
-in. Default is \code{TRUE}.}
+in. Default is \code{TRUE}.
+@param Hierarchy - Optional. A number specifying the hierarchy of the data
+to be imported. If the .zip file contains multiple hierarchies.}
 }
 \value{
 a list of all the RDBES data tables The table that are not in input

@@ -11,6 +11,8 @@
 #'   attempt to cast the required columns to the correct data type.  If `FALSE`
 #'   then the column data types will be determined by how the csv files are read
 #'   in. Default is `TRUE`.
+#'  @param Hierarchy - Optional. A number specifying the hierarchy of the data
+#'   to be imported. If the .zip file contains multiple hierarchies.
 #'
 #' @return a list of all the RDBES data tables The table that are not in input
 #'   data are NULL
@@ -25,7 +27,8 @@
 #' }
 
 importRDBESDataZIP <- function(filenames,
-                               castToCorrectDataTypes = TRUE) {
+                               castToCorrectDataTypes = TRUE,
+                               Hierarchy = NULL) {
 
   # Generates random number for the temp import folder name
   randInt <- paste0(sample(1:100, 3), collapse = "")
@@ -44,7 +47,8 @@ importRDBESDataZIP <- function(filenames,
       unzipped <- unzipped[grep("*.csv", unzipped)]
       intersected <- intersect(unzipped, all_unzipped)
       if(length(intersected) != 0) {
-        warning(paste0("Duplicate unzipped files detected:\n",  paste0("\t", intersected, "\n", collapse="\n")))
+        warning(paste0("Duplicate unzipped files detected:\n",
+                       paste0("\t", intersected, "\n", collapse="\n")))
       }
       all_unzipped <<- c(all_unzipped, unzipped)
       return(unzipped)
@@ -59,9 +63,23 @@ importRDBESDataZIP <- function(filenames,
   if(length(dirs) > 0) {
     hdirs <- dirs[grepl("H[0-9]+", dirs)]
     if(length(hdirs) > 1) {
-      stop("You cannot import a mix of different hierarchies in one 'zip' ",
-           "input. To import multiple tables unzip all files and import as ",
-           "a folder of 'csv' files.")
+      valid_hierarchies <- as.numeric(gsub("H", "", hdirs))
+      example  <- paste0("Hierachy = ", valid_hierarchies[1])
+      if(is.null(Hierarchy)) {
+        stop("The zip file contains multiple hierarchies.\n",
+             "To import a selected hierarchy, please provide the hierarchy ",
+             "as an argument e.g like:\n",example)
+      }
+      else if(!Hierarchy %in% valid_hierarchies) {
+        stop("The zip file does not contain the hierarchy specified. ",
+             "The options are: ", paste0(valid_hierarchies, collapse = ", "),
+             "\nPlease provide a valid hierarchy as an argument. e.g like:\n",
+             example)
+
+      }
+      else {
+        dirs <- c(setdiff(dirs, hdirs), paste0("H", Hierarchy))
+      }
     }
     #remove directory structure
     for(d in dirs){
