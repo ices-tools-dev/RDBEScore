@@ -32,7 +32,14 @@ install.packages("RDBEScore")
 ```
 -->
 
-RDBEScore can be installed from GitHub using the `install_github`
+The most recent production version of the package can be installed from ICES tools (production). Theese are 
+tools that are operational and maintained by the ICES Secretariat.
+
+```R
+install.packages("RDBEScore", repos = c("https://ices-tools-prod.r-universe.dev", "https://cloud.r-project.org"))
+```
+
+A more updated version of RDBEScore can be installed from GitHub using the `install_github`
 command from the [remotes](https://remotes.r-lib.org/) package:
 
 ```R
