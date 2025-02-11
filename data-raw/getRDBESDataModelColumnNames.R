@@ -23,7 +23,7 @@ for (i in 2:14) {
 }
 
 
-for (i in 1:2) {
+for (i in 1:3) {
   dat_1 <- read.xlsx(rdbesDataModelVDSL, sheet = i)
 
   tablePrefix <- NA
