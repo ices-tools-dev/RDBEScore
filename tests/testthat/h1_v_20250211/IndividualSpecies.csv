@@ -1,4 +1,4 @@
-ISid,Slid,SLrecordType,SLcommercialTaxon,SLspeciesCode
+ISid,Slid,ISrecordType,IScommercialTaxon,ISspeciesCode
 1001,1000,IS,100684,100684
 1002,1000,IS,100782,100782
 1003,1000,IS,100930,100930
