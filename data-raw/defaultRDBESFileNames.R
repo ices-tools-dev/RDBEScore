@@ -15,6 +15,7 @@ DefaultFileNames <- list(
   "BV" = "BiologicalVariable",
   "VD" = "VesselDetails",
   "SL" = "SpeciesList",
+  "IS" = "IndividualSpecies",
   "CL" = "CommercialLanding",
   "CE" = "CommercialEffort"
 )

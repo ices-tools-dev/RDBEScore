@@ -72,6 +72,7 @@ importRDBESDataDFS <- function(myList,
                                       BV = makeDT(myList[["BV"]]),
                                       VD = makeDT(myList[["VD"]]),
                                       SL = makeDT(myList[["SL"]]),
+                                      IS = makeDT(myList[["IS"]]),
                                       CL = makeDT(myList[["CL"]]),
                                       CE = makeDT(myList[["CE"]]))
 

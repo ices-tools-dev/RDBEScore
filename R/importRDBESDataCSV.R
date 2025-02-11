@@ -125,6 +125,7 @@ importRDBESDataCSV <- function(rdbesExtractPath = NULL,
                                                      BV = myList[["BV"]],
                                                      VD = myList[["VD"]],
                                                      SL = myList[["SL"]],
+                                                     IS = myList[["IS"]],
                                                      CL = myList[["CL"]],
                                                      CE = myList[["CE"]])
 
