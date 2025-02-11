@@ -41,7 +41,7 @@ test_that("validateRDBESDataObject returns same object for valid object from H1
 test_that("validateRDBESDataObject returns same object for valid object from H5
           data",  {
 
-  myObject <- importRDBESDataCSV(rdbesExtractPath = "./h5_v_1_19_26")
+  myObject <- importRDBESDataCSV(rdbesExtractPath = "./h5_v_20250211")
   myReturn <- validateRDBESDataObject(objectToCheck = myObject,
                                      verbose = FALSE)
   expect_equal(myObject, myReturn)
@@ -50,7 +50,7 @@ test_that("validateRDBESDataObject returns same object for valid object from H5
 test_that("validateRDBESDataObject returns same object for valid object from H5
           data (also checking data types)",  {
 
-  myObject <- importRDBESDataCSV(rdbesExtractPath = "./h5_v_1_19_26")
+  myObject <- importRDBESDataCSV(rdbesExtractPath = "./h5_v_20250211")
   myReturn <- validateRDBESDataObject(objectToCheck = myObject,
                                      checkDataTypes = TRUE,
                                      verbose = FALSE)
