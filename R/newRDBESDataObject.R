@@ -15,6 +15,7 @@
 #' @param BV Data table of RDBES DE data or null
 #' @param VD Data table of RDBES DE data or null
 #' @param SL Data table of RDBES DE data or null
+#' @param IS Data table of RDBES DE data or null
 #' @param CL Data table of RDBES DE data or null
 #' @param CE Data table of RDBES DE data or null
 #' @param verbose (Optional) Set to TRUE if you want informative text printed
@@ -38,6 +39,7 @@ newRDBESDataObject <- function(DE = NULL,
                               BV = NULL,
                               VD = NULL,
                               SL = NULL,
+                              IS = NULL,
                               CL = NULL,
                               CE = NULL,
                               verbose = FALSE){
@@ -59,6 +61,7 @@ newRDBESDataObject <- function(DE = NULL,
   stopifnot(is.null(BV) | ("data.table" %in% class(BV)))
   stopifnot(is.null(VD) | ("data.table" %in% class(VD)))
   stopifnot(is.null(SL) | ("data.table" %in% class(SL)))
+  stopifnot(is.null(IS) | ("data.table" %in% class(IS)))
   stopifnot(is.null(CL) | ("data.table" %in% class(CL)))
   stopifnot(is.null(CE) | ("data.table" %in% class(CE)))
 
@@ -82,6 +85,7 @@ newRDBESDataObject <- function(DE = NULL,
             BV = BV,
             VD = VD,
             SL = SL,
+            IS = IS,
             CL = CL,
             CE = CE)
 
