@@ -9,7 +9,7 @@ capture.output({  ## suppresses printing of console output when running test()
 
   test_that("newRDBESDataObject returns correct fields",  {
             myObject <- newRDBESDataObject()
-            fields <- c("DE","SD","VS","FT","FO","TE","LO","OS","LE","SS","SA","FM","BV","VD","SL","CL","CE")
+            fields <- c("DE","SD","VS","FT","FO","TE","LO","OS","LE","SS","SA","FM","BV","VD","SL","IS","CL","CE")
             expect_equal(sort(names(myObject)), sort(fields))
           })
 }) ## end capture.output
