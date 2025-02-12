@@ -1,7 +1,7 @@
 #capture.output({  ## suppresses printing of console output when running test()
 
   # H1 directory
-  dirH1 <- "./h1_v_1_19_26/"
+  dirH1 <- "./h1_v_20250211/"
   myCountry <- "ZW"
   myYear <- 1965
   myCatchFraction <- "Lan"
