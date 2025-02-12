@@ -75,12 +75,12 @@ validateRDBESDataObject <- function(objectToCheck,
 
   # CHECK 5 Does the list have an entry for all the required names?
   if (!all(allowedNamesInList %in% names(objectToCheck))) {
+      missingNames <- setdiff(allowedNamesInList,names(objectToCheck))
       print(paste(names(objectToCheck), collapse = ","))
       stop(paste("objectToCheck is a list but does not contain ",
-                 "all the required names ",
-                 paste(names(objectToCheck), collapse = ","),
-                 sep = ""
-      ))
+                 "all the required names. The missing table names are: ",
+                 paste(missingNames, collapse = ","),
+                 sep = "" ))
   }
 
   # STEP 2 OF CHECKS
