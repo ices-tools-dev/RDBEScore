@@ -4,7 +4,7 @@ capture.output({  ## suppresses printing of console output when running test()
 
     ## Step 1) load and prepare some test data
 
-    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_26")
+    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
 
     #Filter our data for WGRDBES-EST TEST 1, 1965, H1
     myValues <- c(1965,1,"National Routine","DE_stratum1_H1",1019159)
