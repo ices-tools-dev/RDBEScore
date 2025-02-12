@@ -5,9 +5,9 @@ capture.output({  ## suppresses printing of console output when running test()
 
   # common parameters
   # H1 directory
-  dirH1 <- "./h1_v_1_19_26/"
+  dirH1 <- "./h1_v_20250211/"
   # H5 directory
-  dirH5 <- "./h5_v_1_19_26/"
+  dirH5 <- "./h5_v_20250211/"
   # H7 directory
   dirH7 <- "./h7_v_1_19_26/"
 
@@ -45,7 +45,7 @@ capture.output({  ## suppresses printing of console output when running test()
 
   test_that("createRDBESDataObject will throw an error when given multiple inputs", {
     zipFiles <- c(
-      "H1_2023_10_16.zip"
+      "H1_Example.zip"
     )
     H1 <- paste0(dirH1, zipFiles)
     df <- as.data.frame(1)
@@ -59,7 +59,7 @@ capture.output({  ## suppresses printing of console output when running test()
 
   test_that("importing foldered zipped H1 example data works", {
     zipFiles <- c(
-      "H1_2023_10_16_fd.zip"
+      "H1_Example_fd.zip"
     )
 
     genObj <- createRDBESDataObject(paste0(dirH1, zipFiles),
@@ -71,7 +71,7 @@ capture.output({  ## suppresses printing of console output when running test()
 
   test_that("importing foldered zipped H1 and H2 gives an error", {
     zipFiles <- c(
-      "H1_H2_2023_10_16_fd.zip"
+      "H1_H2_Example_fd.zip"
     )
 
     genObj <- expect_error(
@@ -84,7 +84,7 @@ capture.output({  ## suppresses printing of console output when running test()
 
   test_that("importing foldered zipped H1 and H2 example data works when hierarchy is specified", {
     zipFiles <- c(
-      "H1_H2_2023_10_16_fd.zip"
+      "H1_H2_Example_fd.zip"
     )
 
     genObj <- createRDBESDataObject(paste0(dirH1, zipFiles),
@@ -97,7 +97,7 @@ capture.output({  ## suppresses printing of console output when running test()
 
   test_that("importing foldered zipped H1 and H2 example does not work when hierarchy is misspecified", {
     zipFiles <- c(
-      "H1_H2_2023_10_16_fd.zip"
+      "H1_H2_Example_fd.zip"
     )
 
     genObj <- expect_error(
@@ -111,7 +111,7 @@ capture.output({  ## suppresses printing of console output when running test()
 
   test_that("importing zipped H1 example data works", {
     zipFiles <- c(
-      "H1_2023_10_16.zip"
+      "H1_Example.zip"
     )
 
     genObj <- createRDBESDataObject(paste0(dirH1, zipFiles),
@@ -123,8 +123,8 @@ capture.output({  ## suppresses printing of console output when running test()
 
   test_that("importing some data that is not zipped with some data that are zipped H1 example data should not work", {
     zipFiles <- c(
-      "H1_2023_10_16.zip",
-      "HSL_2023_10_16.zip",
+      "H1_Example.zip",
+      "HSL_Example.zip",
       "VesselDetails.csv"
     )
 
@@ -138,8 +138,8 @@ capture.output({  ## suppresses printing of console output when running test()
 
   test_that("importing subset H1 example data works", {
     zipFiles <- c(
-      "HSL_2023_10_16.zip",
-      "HVD_2023_10_16.zip"
+      "HSL_Example.zip",
+      "HVD_Example.zip"
     )
 
     genObj <- createRDBESDataObject(paste0(dirH1, zipFiles),
@@ -151,8 +151,8 @@ capture.output({  ## suppresses printing of console output when running test()
 
   test_that("Overwriting a table from a zip file produces a warning", {
     zipFiles <- c(
-      "H1_2023_10_16.zip",
-      "HVD_2023_10_16.zip")
+      "H1_Example.zip",
+      "HVD_Example.zip")
 
 
     expect_warning(
@@ -165,15 +165,15 @@ capture.output({  ## suppresses printing of console output when running test()
 
   test_that("The order of importing should not matter", {
     zipFiles1 <- c(
-      "H1_2023_10_16.zip",
-      "HVD_2023_10_16.zip")
+      "H1_Example.zip",
+      "HVD_Example.zip")
 
     genObj1 <- suppressWarnings(
       createRDBESDataObject(paste0(dirH1, zipFiles1),
                             castToCorrectDataTypes = TRUE))
 
-    zipFiles2 <- c("HVD_2023_10_16.zip",
-                   "H1_2023_10_16.zip")
+    zipFiles2 <- c("HVD_Example.zip",
+                   "H1_Example.zip")
 
     genObj2 <- suppressWarnings(
       createRDBESDataObject(paste0(dirH1, zipFiles2),
@@ -190,8 +190,8 @@ capture.output({  ## suppresses printing of console output when running test()
   test_that("createRDBESDataObject creates an object with the correct data types",  {
 
     zipFiles <- c(
-      "H1_2023_10_16.zip",
-      "HVD_2023_10_16.zip")
+      "H1_Example.zip",
+      "HVD_Example.zip")
 
     genObj <- suppressWarnings(createRDBESDataObject(input =  paste0(dirH1, zipFiles),
                                                      castToCorrectDataTypes = TRUE))
@@ -443,7 +443,7 @@ capture.output({  ## suppresses printing of console output when running test()
   # Test list of dfs ---------------------------------------------------------
 
   # Create list of dfs for comparison
-  list_with_nulls  <-  createRDBESDataObject(paste0(dirH1, "H1_2023_10_16.zip"))
+  list_with_nulls  <-  createRDBESDataObject(paste0(dirH1, "H1_Example.zip"))
   list_of_dfs <- list_with_nulls[!(sapply(list_with_nulls, is.null))]
   list_of_dfs <- lapply(list_of_dfs, as.data.frame)
   colMapping <-   stats::setNames(mapColNamesFieldR$Field.Name, mapColNamesFieldR$R.Name)

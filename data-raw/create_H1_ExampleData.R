@@ -3,7 +3,7 @@ ddir <- "./data-raw/exampleData/"
 
 dataDate <- "2025_02_11"
 
-outputDir <- paste0("./tests/testthat/h1_v_",gsub("_","",dataDate),"/")
+outputDir <- paste0(getwd(),"/tests/testthat/h1_v_",gsub("_","",dataDate),"/")
 
 H1_Example <- createRDBESDataObject(paste0(ddir, "H1_",dataDate,".zip"),
                                        castToCorrectDataTypes = TRUE)
@@ -70,19 +70,48 @@ for (file in h1_files) {
 unlink(paste0(tmp, "/", files), recursive = F)
 
 
+#create the HSL and HVD folder zip files
+final_zip <- paste0(outputDir, "HVD_Example.zip")
+#delete the previous version
+if (file.exists(final_zip)) {
+  file.remove(final_zip)
+}
+zip(zipfile = final_zip,
+          files =  list.files(paste0(tmp, "/HVD"), full.names = T),
+    flags = "",
+    extras = paste0("-j ", tmp))
+
+final_zip <- paste0(outputDir, "HSL_Example.zip")
+#delete the previous version
+if (file.exists(final_zip)) {
+  file.remove(final_zip)
+}
+zip(zipfile = final_zip,
+    files = list.files(paste0(tmp, "/HSL"), full.names = T),
+    flags = "",
+    extras = paste0("-j ", tmp))
+
 
 #zip the temp so it has the same format as the download
 # Zip the 'H1', 'HVD', and 'HSL' folders without including the 'tmp' directory
 
 #define the name and path of the final ZIP file
-final_zip <- paste0(getwd(),file.path(outputDir, "H1_Example_fd.zip"))
+final_zip <- paste0(outputDir, "H1_Example_fd.zip")
+#delete the previous version
+if (file.exists(final_zip)) {
+  file.remove(final_zip)
+}
 
 zip::zipr(zipfile = final_zip,
           files = c("H1", "HVD", "HSL", "Disclaimer.txt"),
           root = tmp)
 
 #make a new Directory in tmp called H2 and zip it
-final_zip <- paste0(getwd(),file.path(outputDir, "H1_H2_Example_fd.zip"))
+final_zip <- paste0(outputDir, "H1_H2_Example_fd.zip")
+#delete the previous version
+if (file.exists(final_zip)) {
+  file.remove(final_zip)
+}
 dir.create(paste0(tmp, "/H2"))
 zip::zipr(zipfile = final_zip,
           files = c("H1","H2", "HVD", "HSL", "Disclaimer.txt"),
