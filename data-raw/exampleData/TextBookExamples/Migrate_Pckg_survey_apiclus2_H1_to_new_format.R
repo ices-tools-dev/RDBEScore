@@ -1,11 +1,11 @@
 # 12/2/2025
-# Update "Pckg_survey_apistrat_H1" to the new data format
+# Update "Pckg_survey_apiclus2_H1" to the new data format
 
 library(RDBEScore)
 # Get the data
-load(file='./data/Pckg_survey_apistrat_H1.rda')
-validateRDBESDataObject(Pckg_survey_apistrat_H1, strict = TRUE, verbose = TRUE)
-newH1 <- Pckg_survey_apistrat_H1
+load(file='./data/Pckg_survey_apiclus2_H1.rda')
+validateRDBESDataObject(Pckg_survey_apiclus2_H1, strict = TRUE, verbose = TRUE)
+newH1 <- Pckg_survey_apiclus2_H1
 validateRDBESDataObject(newH1, strict = TRUE, verbose = TRUE)
 
 # Add an entry for IS and create the entries using SL
@@ -45,6 +45,6 @@ newH1[["BV"]]$BVmeasEquip <- NULL
 validateRDBESDataObject(newH1, strict = TRUE, verbose = TRUE)
 
 # Save the data
-Pckg_survey_apistrat_H1 <- newH1
-usethis::use_data(Pckg_survey_apistrat_H1, overwrite = TRUE)
+Pckg_survey_apiclus2_H1 <- newH1
+usethis::use_data(Pckg_survey_apiclus2_H1, overwrite = TRUE)
 
