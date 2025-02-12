@@ -1,19 +1,19 @@
 capture.output({  ## suppresses printing of console output when running test()
 test_that("sorting a raw object works for H8", {
   correctOrder <- c('DE', 'SD', 'TE', 'VS', 'FT', 'LE', 'SS', 'SA', 'FM', 'BV',
-                    'FO', 'LO', 'OS', 'VD', 'SL', 'CL', 'CE')
+                    'FO', 'LO', 'OS', 'VD', 'SL','IS', 'CL', 'CE')
   expect_equal(names(sort(H8ExampleEE1)),correctOrder)
 })
 
 test_that("sorting a raw object works for H5", {
   correctOrder <- c('DE', 'SD', 'OS', 'LE', 'FT', 'SS', 'SA', 'FM', 'BV',
-                    'VS', 'FO', 'TE', 'LO', 'VD', 'SL', 'CL', 'CE')
+                    'VS', 'FO', 'TE', 'LO', 'VD', 'SL','IS', 'CL', 'CE')
   expect_equal(names(sort(H5Example)),correctOrder)
 })
 
 test_that("sorting a raw object works for H1", {
   correctOrder <- c('DE', 'SD', 'VS', 'FT', 'FO', 'SS', 'SA', 'FM', 'BV',
-                    'TE', 'LO', 'OS', 'LE', 'VD', 'SL', 'CL', 'CE')
+                    'TE', 'LO', 'OS', 'LE', 'VD', 'SL','IS', 'CL', 'CE')
   expect_equal(names(sort(H1Example)),correctOrder)
 })
 
