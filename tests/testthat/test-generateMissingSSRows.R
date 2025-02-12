@@ -2,7 +2,7 @@ capture.output({ ## suppresses printing of console output when running test()
 
   test_that("generateMissingSSRows does not add any SS rows if none are missing (H1)", {
 
-    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_26")
+    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
 
     # Only use a subset of the test data
     myH1RawObject <- filterRDBESDataObject(myH1RawObject, c("DEstratumName"), c("DE_stratum1_H1", "DE_stratum2_H1", "DE_stratum3_H1"))
@@ -23,7 +23,7 @@ capture.output({ ## suppresses printing of console output when running test()
 
   test_that("generateMissingSSRows produces an error if there is no SL data", {
 
-    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_26")
+    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
     # Only use a subset of the test data
     myH1RawObject <- filterRDBESDataObject(myH1RawObject, c("DEstratumName"), c("DE_stratum1_H1", "DE_stratum2_H1", "DE_stratum3_H1"))
     myH1RawObject <- findAndKillOrphans(myH1RawObject, verbose = FALSE)
@@ -43,7 +43,7 @@ capture.output({ ## suppresses printing of console output when running test()
 
   test_that("generateMissingSSRows produces an error if there is no SS data", {
 
-    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_26")
+    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
     # Only use a subset of the test data
     myH1RawObject <- filterRDBESDataObject(myH1RawObject, c("DEstratumName"), c("DE_stratum1_H1", "DE_stratum2_H1", "DE_stratum3_H1"))
     myH1RawObject <- findAndKillOrphans(myH1RawObject, verbose = FALSE)
@@ -63,7 +63,7 @@ capture.output({ ## suppresses printing of console output when running test()
 
   test_that("generateMissingSSRows produces an error if there is no FO data", {
 
-    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_26")
+    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
     # Only use a subset of the test data
     myH1RawObject <- filterRDBESDataObject(myH1RawObject, c("DEstratumName"), c("DE_stratum1_H1", "DE_stratum2_H1", "DE_stratum3_H1"))
     myH1RawObject <- findAndKillOrphans(myH1RawObject, verbose = FALSE)
@@ -83,7 +83,7 @@ capture.output({ ## suppresses printing of console output when running test()
 
   test_that("generateMissingSSRows produces an error if a species list name that does not exist is provided", {
 
-    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_26")
+    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
     # Only use a subset of the test data
     myH1RawObject <- filterRDBESDataObject(myH1RawObject, c("DEstratumName"), c("DE_stratum1_H1", "DE_stratum2_H1", "DE_stratum3_H1"))
     myH1RawObject <- findAndKillOrphans(myH1RawObject, verbose = FALSE)
@@ -96,7 +96,7 @@ capture.output({ ## suppresses printing of console output when running test()
 
   test_that("generateMissingSSRows produces an error if a species list name is provided that is not compatible with the Year/Country", {
 
-    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_26")
+    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
     # Only use a subset of the test data
     myH1RawObject <- filterRDBESDataObject(myH1RawObject, c("DEstratumName"), c("DE_stratum1_H1", "DE_stratum2_H1", "DE_stratum3_H1"))
     myH1RawObject <- findAndKillOrphans(myH1RawObject, verbose = FALSE)
@@ -112,7 +112,7 @@ capture.output({ ## suppresses printing of console output when running test()
 
   test_that("generateMissingSSRows runs correctly for FO Dis, when there are no missing SS Dis rows (H1)", {
 
-    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_26")
+    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
     # Only use a subset of the test data
     myH1RawObject <- filterRDBESDataObject(myH1RawObject, c("DEstratumName"), c("DE_stratum1_H1", "DE_stratum2_H1", "DE_stratum3_H1"))
     myH1RawObject <- findAndKillOrphans(myH1RawObject, verbose = FALSE)
@@ -141,7 +141,7 @@ capture.output({ ## suppresses printing of console output when running test()
 
   test_that("generateMissingSSRows runs correctly for FO Dis, generates missing SS Dis rows (H1)", {
 
-    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_26")
+    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
     # Only use a subset of the test data
     myH1RawObject <- filterRDBESDataObject(myH1RawObject, c("DEstratumName"), c("DE_stratum1_H1", "DE_stratum2_H1", "DE_stratum3_H1"))
     myH1RawObject <- findAndKillOrphans(myH1RawObject, verbose = FALSE)
@@ -174,7 +174,7 @@ capture.output({ ## suppresses printing of console output when running test()
 
   test_that("generateMissingSSRows runs correctly for FO Lan, when there are no missing SS Lan rows (H1)", {
 
-    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_26")
+    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
     # Only use a subset of the test data
     myH1RawObject <- filterRDBESDataObject(myH1RawObject, c("DEstratumName"), c("DE_stratum1_H1", "DE_stratum2_H1", "DE_stratum3_H1"))
     myH1RawObject <- findAndKillOrphans(myH1RawObject, verbose = FALSE)
@@ -203,7 +203,7 @@ capture.output({ ## suppresses printing of console output when running test()
 
   test_that("generateMissingSSRows runs correctly for FO Lan, generates missing SS Lan rows (H1)", {
 
-    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_26")
+    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
     # Only use a subset of the test data
     myH1RawObject <- filterRDBESDataObject(myH1RawObject, c("DEstratumName"), c("DE_stratum1_H1", "DE_stratum2_H1", "DE_stratum3_H1"))
     myH1RawObject <- findAndKillOrphans(myH1RawObject, verbose = FALSE)
@@ -234,7 +234,7 @@ capture.output({ ## suppresses printing of console output when running test()
 
   test_that("generateMissingSSRows runs correctly for FO All, generates missing SS Lan rows (H1)", {
 
-    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_26")
+    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
     # Only use a subset of the test data
     myH1RawObject <- filterRDBESDataObject(myH1RawObject, c("DEstratumName"), c("DE_stratum1_H1", "DE_stratum2_H1", "DE_stratum3_H1"))
     myH1RawObject <- findAndKillOrphans(myH1RawObject, verbose = FALSE)
@@ -265,7 +265,7 @@ capture.output({ ## suppresses printing of console output when running test()
 
   test_that("generateMissingSSRows runs correctly for FO All, generates missing SS Dis rows (H1)", {
 
-    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_26")
+    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
     # Only use a subset of the test data
     myH1RawObject <- filterRDBESDataObject(myH1RawObject, c("DEstratumName"), c("DE_stratum1_H1", "DE_stratum2_H1", "DE_stratum3_H1"))
     myH1RawObject <- findAndKillOrphans(myH1RawObject, verbose = FALSE)
@@ -296,7 +296,7 @@ capture.output({ ## suppresses printing of console output when running test()
 
   test_that("generateMissingSSRows runs correctly for FO All, generates missing SS Dis rows (H1).  Add extra SS col (strict validation = FALSE)", {
 
-    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_26")
+    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
     # Only use a subset of the test data
     myH1RawObject <- filterRDBESDataObject(myH1RawObject, c("DEstratumName"), c("DE_stratum1_H1", "DE_stratum2_H1", "DE_stratum3_H1"))
     myH1RawObject <- findAndKillOrphans(myH1RawObject, verbose = FALSE)
@@ -332,7 +332,7 @@ capture.output({ ## suppresses printing of console output when running test()
 
   test_that("generateMissingSSRows runs correctly for FO All, generates missing SS Dis rows (H1).  Add extra FO col (strict validation = FALSE)", {
 
-    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_26")
+    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
     # Only use a subset of the test data
     myH1RawObject <- filterRDBESDataObject(myH1RawObject, c("DEstratumName"), c("DE_stratum1_H1", "DE_stratum2_H1", "DE_stratum3_H1"))
     myH1RawObject <- findAndKillOrphans(myH1RawObject, verbose = FALSE)
@@ -368,7 +368,7 @@ capture.output({ ## suppresses printing of console output when running test()
 
   test_that("generateMissingSSRows runs correctly for FO All, generates missing SS Dis rows (H1).  Remove non-essential FO col (strict validation = FALSE)", {
 
-    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_26")
+    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
     # Only use a subset of the test data
     myH1RawObject <- filterRDBESDataObject(myH1RawObject, c("DEstratumName"), c("DE_stratum1_H1", "DE_stratum2_H1", "DE_stratum3_H1"))
     myH1RawObject <- findAndKillOrphans(myH1RawObject, verbose = FALSE)
@@ -405,7 +405,7 @@ capture.output({ ## suppresses printing of console output when running test()
 
   test_that("generateMissingSSRows runs correctly for FO All, generates missing SS Dis rows (H1).  Add extra SL col (strict validation = FALSE)", {
 
-    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_26")
+    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
     # Only use a subset of the test data
     myH1RawObject <- filterRDBESDataObject(myH1RawObject, c("DEstratumName"), c("DE_stratum1_H1", "DE_stratum2_H1", "DE_stratum3_H1"))
     myH1RawObject <- findAndKillOrphans(myH1RawObject, verbose = FALSE)
@@ -441,7 +441,7 @@ capture.output({ ## suppresses printing of console output when running test()
 
   test_that("generateMissingSSRows runs correctly for FO All, when there are no missing SS Catch rows (H1)", {
 
-    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_26")
+    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
     # Only use a subset of the test data
     myH1RawObject <- filterRDBESDataObject(myH1RawObject, c("DEstratumName"), c("DE_stratum1_H1", "DE_stratum2_H1", "DE_stratum3_H1"))
     myH1RawObject <- findAndKillOrphans(myH1RawObject, verbose = FALSE)
@@ -471,7 +471,7 @@ capture.output({ ## suppresses printing of console output when running test()
 
   test_that("generateMissingSSRows can be used to create a validRDBESDataObject", {
 
-    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_26")
+    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
     # Only use a subset of the test data
     myH1RawObject <- filterRDBESDataObject(myH1RawObject, c("DEstratumName"), c("DE_stratum1_H1", "DE_stratum2_H1", "DE_stratum3_H1"))
     myH1RawObject <- findAndKillOrphans(myH1RawObject, verbose = FALSE)
