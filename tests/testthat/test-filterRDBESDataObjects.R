@@ -3,7 +3,7 @@ capture.output({  ## suppresses printing of console output when running test()
 test_that("filterRDBESDataObject returns the correct result for
           H1 (1)", {
 
-  myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_26")
+  myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
 
   # Only use a subset of the test data
   myH1RawObject <- filterRDBESDataObject(myH1RawObject,c("DEstratumName"),c("DE_stratum1_H1","DE_stratum2_H1","DE_stratum3_H1"))
@@ -25,7 +25,7 @@ test_that("filterRDBESDataObject returns the correct result for
 })
 
 test_that("filterRDBESDataObject returns the correct result for H1 (2)", {
-  myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_26")
+  myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
 
   # Only use a subset of the test data
   myH1RawObject <- filterRDBESDataObject(myH1RawObject,c("DEstratumName"),c("DE_stratum1_H1","DE_stratum2_H1","DE_stratum3_H1"))
@@ -46,7 +46,7 @@ test_that("filterRDBESDataObject returns the correct result for H1 (2)", {
 })
 test_that("filterRDBESDataObject returns the correct result for two fields/
           two values", {
-  myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_26")
+  myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
   myFields <- c("DEyear", "DEhierarchy")
   myValues <- c(1965, 2)
   myFilteredObject <- filterRDBESDataObject(myH1RawObject,
@@ -61,7 +61,7 @@ test_that("filterRDBESDataObject returns the correct result for two fields/
   expect_equal(nrow(myFilteredObject[["DE"]]), 0)
 })
 test_that("filterRDBESDataObject returns the correct result for H1 (3)", {
-  myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_26")
+  myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
   # Only use a subset of the test data
   myH1RawObject <- filterRDBESDataObject(myH1RawObject,c("DEstratumName"),c("DE_stratum1_H1","DE_stratum2_H1","DE_stratum3_H1"))
   myH1RawObject <- findAndKillOrphans(myH1RawObject, verbose = FALSE)
@@ -80,7 +80,7 @@ test_that("filterRDBESDataObject returns the correct result for H1 (3)", {
 })
 test_that("filterRDBESDataObject returns the correct result for three fields/
           three values", {
-  myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_26")
+  myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
   myFields <- c("DEsampSchemeType", "DEsampScheme", "DEstratumName")
   myValues <- c("NatPilCF", "National Routine", "DE_stratum3_H1")
   myFilteredObject <- filterRDBESDataObject(myH1RawObject,
@@ -95,7 +95,7 @@ test_that("filterRDBESDataObject returns the correct result for three fields/
   expect_equal(nrow(myFilteredObject[["DE"]]), 1)
 })
 test_that("filterRDBESDataObject returns a warning if incorrect field name is used", {
-  myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_26")
+  myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
   myFields <- c("DEabc")
   myValues <- c("ZWBFO")
 
@@ -109,7 +109,7 @@ test_that("filterRDBESDataObject returns a warning if incorrect field name is us
 })
 
 test_that("filterRDBESDataObject successfully removes orphans", {
-  myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_26")
+  myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
 
   # remove all the VS rows (but not any other rows)
   myFields <- c("VSunitName")
@@ -131,7 +131,7 @@ test_that("filterRDBESDataObject successfully removes orphans", {
 })
 
 test_that("filterRDBESDataObject does not removes orphans when killOrphans = FALSE", {
-  myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_26")
+  myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
 
   # remove all the VS rows (but not any other rows)
   myFields <- c("VSunitName")
