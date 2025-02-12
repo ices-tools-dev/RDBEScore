@@ -348,7 +348,7 @@ capture.output({  ## suppresses printing of console output when running test()
     myRDBESDataObject <- createRDBESDataObject(input = csvFilesH1)
 
     # Not all of the RDBES table types are in the sample data
-    expectedNumberOfTablesWithKeys <- 13
+    expectedNumberOfTablesWithKeys <- 14
     actualNumberOfTablesWithKeys <- 0
 
     for(aTable in names(myRDBESDataObject)){
@@ -372,7 +372,7 @@ capture.output({  ## suppresses printing of console output when running test()
     myRDBESDataObject <- createRDBESDataObject(input = csvFilesH5)
 
     # Not all of the RDBES table types are in the sample data
-    expectedNumberOfTablesWithKeys <- 13
+    expectedNumberOfTablesWithKeys <- 14
     actualNumberOfTablesWithKeys <- 0
 
     for(aTable in names(myRDBESDataObject)){
