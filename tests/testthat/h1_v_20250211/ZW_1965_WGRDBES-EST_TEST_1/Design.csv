@@ -1,0 +1,11 @@
+DEid,DErecordType,DEsamplingScheme,DEsamplingSchemeType,DEyear,DEstratumName,DEhierarchyCorrect,DEhierarchy,DEsampled,DEreasonNotSampled,DEnonResponseCollected,DEauxiliaryVariableTotal,DEauxiliaryVariableValue,DEauxiliaryVariableName,DEauxiliaryVariableUnit
+5351,DE,WGRDBES-EST TEST 1,NatRouCF,1965,Pckg_SDAResources_agstrat_H1,Y,1,Y,,Y,,,,
+5393,DE,WGRDBES-EST TEST 1,NatRouCF,1965,Pckg_SDAResources_gpa_H1,Y,1,Y,,Y,,,,
+5402,DE,WGRDBES-EST TEST 1,NatRouCF,1965,Pckg_SDAResources_coots_H1,Y,1,Y,,Y,,,,
+5403,DE,WGRDBES-EST TEST 1,NatRouCF,1965,Pckg_SDAResources_schools_H1,Y,1,Y,,Y,,,,
+5404,DE,WGRDBES-EST TEST 1,NatRouCF,1965,Pckg_SDAResources_algebra_H1,Y,1,Y,,Y,,,,
+5406,DE,National Routine,NatPilCF,1965,DE_stratum1_H1,Y,1,Y,,,,,,
+5407,DE,National Routine,NatPilCF,1965,DE_stratum2_H1,Y,1,Y,,,,,,
+5408,DE,National Routine,NatPilCF,1965,DE_stratum3_H1,Y,1,Y,,,,,,
+5432,DE,WGRDBES-EST TEST 1,NatRouCF,1965,Pckg_SDAResources_apiclus2_v2_H1,Y,1,Y,,Y,,,,
+5433,DE,WGRDBES-EST TEST 1,NatRouCF,1965,Pckg_survey_apistrat_H1,Y,1,Y,,Y,,,,
