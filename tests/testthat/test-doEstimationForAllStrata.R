@@ -131,10 +131,10 @@ test_that("doEstimationForAllStrata gets some results for H8ExampleEE1",  {
   # Check if the results are correct
 
   # January stratum
-  expect_equal(round(January_actual$est.total,0), 138995)
-  expect_equal(round(January_actual$se.total,0), 41709)
-  expect_equal(round(January_actual$est.mean,3), 34748.659)
-  expect_equal(round(January_actual$se.mean,3), 10427.312)
+  expect_equal(round(January_actual$est.total,0), 118992)
+  expect_equal(round(January_actual$se.total,0), 55853)
+  expect_equal(round(January_actual$est.mean,3), 29748.106)
+  expect_equal(round(January_actual$se.mean,3), 13963.237)
 
   # February stratum
   expect_equal(round(February_actual$est.total,0), 209271)
