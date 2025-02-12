@@ -51,8 +51,8 @@ combineRDBESDataObjects <- function(RDBESDataObject1,
       data.table::setkeyv(myRDBESDataObject[[myTable]],paste0(myTable,"id"))
 
 
-      # De-duplicate the resulting SL,VD, CL, and CE tables
-      if (myTable %in% c('VD','SL','CL','CE')){
+      # De-duplicate the resulting SL,IS,VD,CL,and CE tables
+      if (myTable %in% c('VD','SL','IS','CL','CE')){
         # Note - uniqueness will be based only on the data table key
         myRDBESDataObject[[myTable]] <- unique(myRDBESDataObject[[myTable]])
         #myRDBESDataObject[[myTable]] <-
