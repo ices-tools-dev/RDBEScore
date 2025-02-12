@@ -2,24 +2,31 @@ capture.output({  ## suppresses printing of console output when running test()
 
 # download and subset original data
 
-	myH1DataObject <- RDBEScore::createRDBESDataObject("./h1_v_1_19_26/ZW_1965_WGRDBES-EST_TEST_1.zip")
+	myH1DataObject <- RDBEScore::createRDBESDataObject("./h1_v_20250211/ZW_1965_WGRDBES-EST_TEST_1")
+	#myH1DataObject <- RDBEScore::createRDBESDataObject("./tests/testthat/h1_v_20250211/ZW_1965_WGRDBES-EST_TEST_1")
 
 	# Subset data
 		myH1DataObject <- filterRDBESDataObject(myH1DataObject,c("DEstratumName","SLspeclistName"),
 				c("Pckg_survey_apistrat_H1","WGRDBES-EST_TEST_1_Pckg_survey_apistrat_H1"),
 					killOrphans=TRUE, strict=TRUE)
 
-	# adds a species to SL
-	rowToAdd <- data.frame('31831','SL','ZW','4484',myH1DataObject[["SL"]]$SLspeclistName,'1965','Dis','107254','107254')
-	colnames(rowToAdd) <- names(myH1DataObject[["SL"]])
+		#myH1DataObject[["SL"]]
+		#myH1DataObject[["SS"]]
+
+	# adds a species to IS
+	#rowToAdd <- data.frame('31831','SL','ZW','4484',myH1DataObject[["SL"]]$SLspeclistName,'1965','Dis','107254','107254')
+	rowToAdd <- data.frame('1099',myH1DataObject[["SL"]]$SLid,'IS','107254','107254')
+	#colnames(rowToAdd) <- names(myH1DataObject[["SL"]])
+	colnames(rowToAdd) <- names(myH1DataObject[["IS"]])
 
 	# myH1DataObject[["SL"]] <- rbind(myH1DataObject[["SL"]],rowToAdd)
 	# myH1DataObject[["SL"]]$SLid <- as.integer(myH1DataObject[["SL"]]$SLid)
 	# myH1DataObject[["SL"]]$SLyear <- as.integer(myH1DataObject[["SL"]]$SLyear)
 	# myH1DataObject[["SL"]]$SLcommTaxon <- as.integer(myH1DataObject[["SL"]]$SLcommTaxon)
 	# myH1DataObject[["SL"]]$SLsppCode <- as.integer(myH1DataObject[["SL"]]$SLsppCode)
-	# ensure key is set on SL
-	setkey(myH1DataObject[["SL"]], SLid)
+	# ensure key is set on IS
+	#setkey(myH1DataObject[["SL"]], SLid)
+	setkey(myH1DataObject[["IS"]], ISid)
 
 	# adds a row to SS
 	myH1DataObject[["SS"]]<-rbind(myH1DataObject[["SS"]][1,],myH1DataObject[["SS"]][1,])
@@ -44,15 +51,19 @@ capture.output({  ## suppresses printing of console output when running test()
 
 # prepare myH1DataObject2: test data >1 species
 	myH1DataObject2 <- myH1DataObject1
-	myH1DataObject2$SL<-rbind(myH1DataObject2$SL,myH1DataObject2$SL)
-	myH1DataObject2$SL[,c("SLcommTaxon","SLsppCode")]<-as.integer(c(107254, 107253))
-	myH1DataObject2$SL$SLid[2]<-as.integer(47892)
+	#myH1DataObject2$SL<-rbind(myH1DataObject2$SL,myH1DataObject2$SL)
+	myH1DataObject2$IS<-rbind(myH1DataObject2$IS,myH1DataObject2$IS)
+	#myH1DataObject2$SL[,c("SLcommTaxon","SLsppCode")]<-as.integer(c(107254, 107253))
+	myH1DataObject2$IS[,c("IScommTaxon","ISsppCode")]<-as.integer(c(107254, 107253))
+	#myH1DataObject2$SL$SLid[2]<-as.integer(47892)
+	myH1DataObject2$IS$ISid[2]<-as.integer(47892)
 
 	myH1DataObject2$SA<-rbind(myH1DataObject2$SA,myH1DataObject2$SA)
 	myH1DataObject2$SA$SAspeCode[2] <- "107253"
 	myH1DataObject2$SA$SAid[2] <- as.integer(572814)
 
-	setkey(myH1DataObject2[["SL"]], SLid)
+	#setkey(myH1DataObject2[["SL"]], SLid)
+	setkey(myH1DataObject2[["IS"]], ISid)
 	setkey(myH1DataObject2[["SS"]], SSid)
 	setkey(myH1DataObject2[["SA"]], SAid)
 
