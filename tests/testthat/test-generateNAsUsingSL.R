@@ -3,15 +3,11 @@ capture.output({  ## suppresses printing of console output when running test()
 # download and subset original data
 
 	myH1DataObject <- RDBEScore::createRDBESDataObject("./h1_v_20250211/ZW_1965_WGRDBES-EST_TEST_1")
-	#myH1DataObject <- RDBEScore::createRDBESDataObject("./tests/testthat/h1_v_20250211/ZW_1965_WGRDBES-EST_TEST_1")
 
 	# Subset data
 		myH1DataObject <- filterRDBESDataObject(myH1DataObject,c("DEstratumName","SLspeclistName"),
 				c("Pckg_survey_apistrat_H1","WGRDBES-EST_TEST_1_Pckg_survey_apistrat_H1"),
 					killOrphans=TRUE, strict=TRUE)
-
-		#myH1DataObject[["SL"]]
-		#myH1DataObject[["SS"]]
 
 	# adds a species to IS
 	#rowToAdd <- data.frame('31831','SL','ZW','4484',myH1DataObject[["SL"]]$SLspeclistName,'1965','Dis','107254','107254')
@@ -19,11 +15,6 @@ capture.output({  ## suppresses printing of console output when running test()
 	#colnames(rowToAdd) <- names(myH1DataObject[["SL"]])
 	colnames(rowToAdd) <- names(myH1DataObject[["IS"]])
 
-	# myH1DataObject[["SL"]] <- rbind(myH1DataObject[["SL"]],rowToAdd)
-	# myH1DataObject[["SL"]]$SLid <- as.integer(myH1DataObject[["SL"]]$SLid)
-	# myH1DataObject[["SL"]]$SLyear <- as.integer(myH1DataObject[["SL"]]$SLyear)
-	# myH1DataObject[["SL"]]$SLcommTaxon <- as.integer(myH1DataObject[["SL"]]$SLcommTaxon)
-	# myH1DataObject[["SL"]]$SLsppCode <- as.integer(myH1DataObject[["SL"]]$SLsppCode)
 	# ensure key is set on IS
 	#setkey(myH1DataObject[["SL"]], SLid)
 	setkey(myH1DataObject[["IS"]], ISid)
