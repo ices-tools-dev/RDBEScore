@@ -10,6 +10,7 @@ dirH5 <- "./h5_v_20250211/"
 
 createH1TestData<- function(){
 
+  #setwd("./tests/testthat/")
   myH1 <- createRDBESDataObject(input = dirH1)
   myH1 <- filterAndTidyRDBESDataObject(myH1,
                                        fieldsToFilter =c("DEsampScheme"),
@@ -20,8 +21,8 @@ createH1TestData<- function(){
   myH1[["SA"]] <- head(myH1[["SA"]],numOfRows)
   myH1 <- findAndKillOrphans(myH1)
 
-  # Just keep the first row of the SL data
-  myH1[["SL"]] <- head( myH1[["SL"]][myH1[["SL"]]$SLspeclistName=="ZW_1965_SpeciesList" &
+  # Just keep 1 row of the SL data
+  myH1[["SL"]] <- head( myH1[["SL"]][myH1[["SL"]]$SLspeclistName=="ZW_1965_SpeciesList1" &
                  myH1[["SL"]]$SLcatchFrac=="Lan",],1)
 
   myH1
@@ -57,11 +58,11 @@ test_that("updateSAwithTaxonFromSL changes sprat to clupeidae when it is in the 
   numOfRows <- nrow(myH1[["SA"]])
   myH1[["SA"]]$SAspeCode[1:numOfRows] <- rep("126425", numOfRows)
 
-  # Change SL species codes to Clupeidae(125464) to test the function
-  myH1[["SL"]][myH1[["SL"]]$SLspeclistName=="ZW_1965_SpeciesList" &
-                         myH1[["SL"]]$SLcatchFrac=="Lan","SLsppCode"] <- 125464
-  myH1[["SL"]][myH1[["SL"]]$SLspeclistName=="ZW_1965_SpeciesList" &
-                         myH1[["SL"]]$SLcatchFrac=="Lan","SLcommTaxon"] <- 125464
+  # Change IS species codes to Clupeidae(125464) to test the function
+  SLidToUse <- myH1[["SL"]][myH1[["SL"]]$SLspeclistName=="ZW_1965_SpeciesList1" &
+                              myH1[["SL"]]$SLcatchFrac=="Lan","SLid"][[1]]
+  myH1[["IS"]][myH1[["IS"]]$SLid==SLidToUse,"ISsppCode"] <- 125464
+  myH1[["IS"]][myH1[["IS"]]$SLid==SLidToUse,"IScommTaxon"] <- 125464
 
   # Run the function
   myH1renamed <- updateSAwithTaxonFromSL(myH1)
@@ -81,11 +82,11 @@ test_that("updateSAwithTaxonFromSL changes Gadus Morpha (126436) to Gadus (12573
   numOfRows <- nrow(myH1[["SA"]])
   myH1[["SA"]]$SAspeCode[1:numOfRows] <- rep("126436", numOfRows)
 
-  # Change SL species codes to Gadus(125732) to test the function
-  myH1[["SL"]][myH1[["SL"]]$SLspeclistName=="ZW_1965_SpeciesList" &
-                         myH1[["SL"]]$SLcatchFrac=="Lan","SLsppCode"] <- 125732
-  myH1[["SL"]][myH1[["SL"]]$SLspeclistName=="ZW_1965_SpeciesList" &
-                         myH1[["SL"]]$SLcatchFrac=="Lan","SLcommTaxon"] <- 125732
+  # Change IS species codes to Gadus(125732) to test the function
+  SLidToUse <- myH1[["SL"]][myH1[["SL"]]$SLspeclistName=="ZW_1965_SpeciesList1" &
+                              myH1[["SL"]]$SLcatchFrac=="Lan","SLid"][[1]]
+  myH1[["IS"]][myH1[["IS"]]$SLid==SLidToUse,"ISsppCode"] <- 125732
+  myH1[["IS"]][myH1[["IS"]]$SLid==SLidToUse,"IScommTaxon"] <- 125732
 
   # Run the function
   myH1renamed <- updateSAwithTaxonFromSL(myH1)
@@ -105,11 +106,11 @@ test_that("updateSAwithTaxonFromSL changes Gadus Morpha (126436) to Gadidae (125
   numOfRows <- nrow(myH1[["SA"]])
   myH1[["SA"]]$SAspeCode[1:numOfRows] <- rep("126436", numOfRows)
 
-  # Change SL species codes to Gadidae(125469) to test the function
-  myH1[["SL"]][myH1[["SL"]]$SLspeclistName=="ZW_1965_SpeciesList" &
-                         myH1[["SL"]]$SLcatchFrac=="Lan","SLsppCode"] <- 125469
-  myH1[["SL"]][myH1[["SL"]]$SLspeclistName=="ZW_1965_SpeciesList" &
-                         myH1[["SL"]]$SLcatchFrac=="Lan","SLcommTaxon"] <- 125469
+  # Change IS species codes to Gadidae(125469) to test the function
+  SLidToUse <- myH1[["SL"]][myH1[["SL"]]$SLspeclistName=="ZW_1965_SpeciesList1" &
+                              myH1[["SL"]]$SLcatchFrac=="Lan","SLid"][[1]]
+  myH1[["IS"]][myH1[["IS"]]$SLid==SLidToUse,"ISsppCode"] <- 125469
+  myH1[["IS"]][myH1[["IS"]]$SLid==SLidToUse,"IScommTaxon"] <- 125469
 
   # Run the function
   myH1renamed <- updateSAwithTaxonFromSL(myH1)
@@ -129,11 +130,11 @@ test_that("updateSAwithTaxonFromSL changes Gadus Morpha (126436) to Gadiformes (
   numOfRows <- nrow(myH1[["SA"]])
   myH1[["SA"]]$SAspeCode[1:numOfRows] <- rep("126436", numOfRows)
 
-  # Change SL species codes to Gadiformes(10313) to test the function
-  myH1[["SL"]][myH1[["SL"]]$SLspeclistName=="ZW_1965_SpeciesList" &
-                         myH1[["SL"]]$SLcatchFrac=="Lan","SLsppCode"] <- 10313
-  myH1[["SL"]][myH1[["SL"]]$SLspeclistName=="ZW_1965_SpeciesList" &
-                         myH1[["SL"]]$SLcatchFrac=="Lan","SLcommTaxon"] <- 10313
+  # Change IS species codes to Gadiformes(10313) to test the function
+  SLidToUse <- myH1[["SL"]][myH1[["SL"]]$SLspeclistName=="ZW_1965_SpeciesList1" &
+                              myH1[["SL"]]$SLcatchFrac=="Lan","SLid"][[1]]
+  myH1[["IS"]][myH1[["IS"]]$SLid==SLidToUse,"ISsppCode"] <- 10313
+  myH1[["IS"]][myH1[["IS"]]$SLid==SLidToUse,"IScommTaxon"] <- 10313
 
   # Run the function
   myH1renamed <- updateSAwithTaxonFromSL(myH1)
@@ -153,11 +154,11 @@ test_that("updateSAwithTaxonFromSL changes Gadus Morpha (126436) to Teleostei (2
   numOfRows <- nrow(myH1[["SA"]])
   myH1[["SA"]]$SAspeCode[1:numOfRows] <- rep("126436", numOfRows)
 
-  # Change SL species codes to Teleostei(293496) to test the function
-  myH1[["SL"]][myH1[["SL"]]$SLspeclistName=="ZW_1965_SpeciesList" &
-                         myH1[["SL"]]$SLcatchFrac=="Lan","SLsppCode"] <- 293496
-  myH1[["SL"]][myH1[["SL"]]$SLspeclistName=="ZW_1965_SpeciesList" &
-                         myH1[["SL"]]$SLcatchFrac=="Lan","SLcommTaxon"] <- 293496
+  # Change IS species codes to Teleostei(293496) to test the function
+  SLidToUse <- myH1[["SL"]][myH1[["SL"]]$SLspeclistName=="ZW_1965_SpeciesList1" &
+                              myH1[["SL"]]$SLcatchFrac=="Lan","SLid"][[1]]
+  myH1[["IS"]][myH1[["IS"]]$SLid==SLidToUse,"ISsppCode"] <- 293496
+  myH1[["IS"]][myH1[["IS"]]$SLid==SLidToUse,"IScommTaxon"] <- 293496
 
   # Run the function
   myH1renamed <- updateSAwithTaxonFromSL(myH1)
@@ -179,11 +180,11 @@ test_that("updateSAwithTaxonFromSL changes Melanogrammus aeglefinus (126437) to 
   numOfRows <- nrow(myH1[["SA"]])
   myH1[["SA"]]$SAspeCode[1:numOfRows] <- rep("126437", numOfRows)
 
-  # Change SL species codes to Animalia(2) to test the function
-  myH1[["SL"]][myH1[["SL"]]$SLspeclistName=="ZW_1965_SpeciesList" &
-                         myH1[["SL"]]$SLcatchFrac=="Lan","SLsppCode"] <- 2
-  myH1[["SL"]][myH1[["SL"]]$SLspeclistName=="ZW_1965_SpeciesList" &
-                         myH1[["SL"]]$SLcatchFrac=="Lan","SLcommTaxon"] <- 2
+  # Change IS species codes to Animalia(2) to test the function
+  SLidToUse <- myH1[["SL"]][myH1[["SL"]]$SLspeclistName=="ZW_1965_SpeciesList1" &
+                              myH1[["SL"]]$SLcatchFrac=="Lan","SLid"][[1]]
+  myH1[["IS"]][myH1[["IS"]]$SLid==SLidToUse,"ISsppCode"] <- 2
+  myH1[["IS"]][myH1[["IS"]]$SLid==SLidToUse,"IScommTaxon"] <- 2
 
   # Run the function
   myH1renamed <- updateSAwithTaxonFromSL(myH1)
@@ -206,29 +207,19 @@ test_that("updateSAwithTaxonFromSL changes Gadus Morpha (126436) to Teleostei (2
   numOfRows <- nrow(myH1[["SA"]])
   myH1[["SA"]]$SAspeCode[1:numOfRows] <- rep("126436", numOfRows)
 
-  # Duplicate the SL data - we want to add another row
-  myH1[["SL"]] <- rbind(myH1[["SL"]],myH1[["SL"]])
-  myH1[["SL"]][2,"SLid"] <- myH1[["SL"]][1,"SLid"] +1
-  # Reset the key
-  data.table::setkeyv(myH1[["SL"]],"SLid")
-  numSLRows <- nrow(myH1[["SL"]][myH1[["SL"]]$SLspeclistName=="ZW_1965_SpeciesList" &
-                                   myH1[["SL"]]$SLcatchFrac=="Lan",])
+  SLidToUse <- myH1[["SL"]][myH1[["SL"]]$SLspeclistName=="ZW_1965_SpeciesList1" &
+                              myH1[["SL"]]$SLcatchFrac=="Lan","SLid"][[1]]
+  numISRows <- nrow(myH1[["IS"]][myH1[["IS"]]$SLid==SLidToUse,])
 
-  # Change first half of SL species codes to Gadus(125732)
-  firstSLRowIDs <- head(myH1[["SL"]][myH1[["SL"]]$SLspeclistName=="ZW_1965_SpeciesList" &
-                 myH1[["SL"]]$SLcatchFrac=="Lan","SLid"],numSLRows/2)
-  myH1[["SL"]][myH1[["SL"]]$SLid %in% firstSLRowIDs$SLid,"SLsppCode"] <- 125732
-  myH1[["SL"]][myH1[["SL"]]$SLid %in% firstSLRowIDs$SLid,"SLcommTaxon"] <- 125732
+  # Change first half of IS species codes to Gadus(125732)
+  firstISRowIDs <- head(myH1[["IS"]][myH1[["IS"]]$SLid==SLidToUse,"ISid"],numISRows/2)
+  myH1[["IS"]][myH1[["IS"]]$ISid %in% firstISRowIDs$ISid,"ISsppCode"] <- 125732
+  myH1[["IS"]][myH1[["IS"]]$ISid %in% firstISRowIDs$ISid,"IScommTaxon"] <- 125732
 
-
-  # Change second half of SL species codes to Teleostei (293496)
-  lastSLRowIDs <- tail(myH1[["SL"]][myH1[["SL"]]$SLspeclistName=="ZW_1965_SpeciesList" &
-                                       myH1[["SL"]]$SLcatchFrac=="Lan","SLid"],numSLRows/2)
-  myH1[["SL"]][myH1[["SL"]]$SLid %in% lastSLRowIDs$SLid,"SLsppCode"] <- 293496
-  myH1[["SL"]][myH1[["SL"]]$SLid %in% lastSLRowIDs$SLid,"SLcommTaxon"] <- 293496
-
-  myH1[["SL"]][myH1[["SL"]]$SLspeclistName=="ZW_1965_SpeciesList" &
-                 myH1[["SL"]]$SLcatchFrac=="Lan",]
+  # Change second half of IS species codes to Teleostei (293496)
+  lastISRowIDs <- tail(myH1[["IS"]][myH1[["IS"]]$SLid == SLidToUse,"ISid"],numISRows/2)
+  myH1[["IS"]][myH1[["IS"]]$ISid %in% lastISRowIDs$ISid,"ISsppCode"] <- 293496
+  myH1[["IS"]][myH1[["IS"]]$ISid %in% lastISRowIDs$ISid,"IScommTaxon"] <- 293496
 
   # Run the function
   myH1renamed <- updateSAwithTaxonFromSL(myH1)
@@ -251,32 +242,25 @@ test_that("updateSAwithTaxonFromSL changes Gadus Morpha (126436) to Teleostei (2
   numOfRows <- nrow(myH1[["SA"]])
   myH1[["SA"]]$SAspeCode[1:numOfRows] <- rep("126436", numOfRows)
 
-  # Duplicate the SL data - we want to add another row
-  myH1[["SL"]] <- rbind(myH1[["SL"]],myH1[["SL"]])
-  myH1[["SL"]][2,"SLid"] <- myH1[["SL"]][1,"SLid"] +1
-  # Reset the key
-  data.table::setkeyv(myH1[["SL"]],"SLid")
-  numSLRows <- nrow(myH1[["SL"]][myH1[["SL"]]$SLspeclistName=="ZW_1965_SpeciesList" &
-                                   myH1[["SL"]]$SLcatchFrac=="Lan",])
 
-  # Change first half of SL species codes to Teleostei (293496)
-  firstSLRowIDs <- head(myH1[["SL"]][myH1[["SL"]]$SLspeclistName=="ZW_1965_SpeciesList" &
-                                       myH1[["SL"]]$SLcatchFrac=="Lan","SLid"],numSLRows/2)
-  myH1[["SL"]][myH1[["SL"]]$SLid %in% firstSLRowIDs$SLid,"SLsppCode"] <- 293496
-  myH1[["SL"]][myH1[["SL"]]$SLid %in% firstSLRowIDs$SLid,"SLcommTaxon"] <- 293496
+  SLidToUse <- myH1[["SL"]][myH1[["SL"]]$SLspeclistName=="ZW_1965_SpeciesList1" &
+                              myH1[["SL"]]$SLcatchFrac=="Lan","SLid"][[1]]
+  numISRows <- nrow(myH1[["IS"]][myH1[["IS"]]$SLid==SLidToUse,])
+
+  # Change first half of IS species codes to Teleostei (293496)
+  firstISRowIDs <- head(myH1[["IS"]][myH1[["IS"]]$SLid==SLidToUse,"ISid"],numISRows/2)
+  myH1[["IS"]][myH1[["IS"]]$ISid %in% firstISRowIDs$ISid,"ISsppCode"] <- 293496
+  myH1[["IS"]][myH1[["IS"]]$ISid %in% firstISRowIDs$ISid,"IScommTaxon"] <- 293496
 
 
-  # Change second half of SL species codes to Gadus(125732)
-  lastSLRowIDs <- tail(myH1[["SL"]][myH1[["SL"]]$SLspeclistName=="ZW_1965_SpeciesList" &
-                                      myH1[["SL"]]$SLcatchFrac=="Lan","SLid"],numSLRows/2)
-  myH1[["SL"]][myH1[["SL"]]$SLid %in% lastSLRowIDs$SLid,"SLsppCode"] <- 125732
-  myH1[["SL"]][myH1[["SL"]]$SLid %in% lastSLRowIDs$SLid,"SLcommTaxon"] <- 125732
+  # Change second half of IS species codes to Gadus(125732)
+  lastISRowIDs <- tail(myH1[["IS"]][myH1[["IS"]]$SLid == SLidToUse,"ISid"],numISRows/2)
+  myH1[["IS"]][myH1[["IS"]]$ISid %in% lastISRowIDs$ISid,"ISsppCode"] <- 125732
+  myH1[["IS"]][myH1[["IS"]]$ISid %in% lastISRowIDs$ISid,"IScommTaxon"] <- 125732
 
-  myH1[["SL"]][myH1[["SL"]]$SLspeclistName=="ZW_1965_SpeciesList" &
-                 myH1[["SL"]]$SLcatchFrac=="Lan",]
 
   # Run the function
-  myH1renamed <- updateSAwithTaxonFromSL(myH1, verbose = TRUE)
+  myH1renamed <- updateSAwithTaxonFromSL(myH1)
 
   # Check that the species codes have been changed to Teleostei (293496)
   expect_equal(myH1renamed[["SA"]]$SAspeCode, rep("293496", numOfRows))
@@ -330,11 +314,11 @@ test_that("Using H5 data updateSAwithTaxonFromSL changes Gadus Morpha (126436) t
   numOfRows <- nrow(myH5[["SA"]])
   myH5[["SA"]]$SAspeCode[1:numOfRows] <- rep("126436", numOfRows)
 
-  # Change SL species codes to Gadus(125732) to test the function
-  myH5[["SL"]][myH5[["SL"]]$SLspeclistName=="ZW_1965_SpeciesList" &
-                         myH5[["SL"]]$SLcatchFrac=="Lan","SLsppCode"] <- 125732
-  myH5[["SL"]][myH5[["SL"]]$SLspeclistName=="ZW_1965_SpeciesList" &
-                         myH5[["SL"]]$SLcatchFrac=="Lan","SLcommTaxon"] <- 125732
+  # Change IS species codes to Gadus(125732) to test the function
+  SLidToUse <- myH5[["SL"]][myH5[["SL"]]$SLspeclistName=="ZW_1965_SpeciesList" &
+                              myH5[["SL"]]$SLcatchFrac=="Lan","SLid"][[1]]
+  myH5[["IS"]][myH5[["IS"]]$SLid==SLidToUse,"ISsppCode"] <- 125732
+  myH5[["IS"]][myH5[["IS"]]$SLid==SLidToUse,"IScommTaxon"] <- 125732
 
   # Run the function
   myH5renamed <- updateSAwithTaxonFromSL(myH5)
