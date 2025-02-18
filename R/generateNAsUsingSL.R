@@ -36,9 +36,12 @@ if(validate){
 	  # we don't want to update the original version
 	  tmpSS <- data.table::copy(RDBESDataObject[["SS"]])
 	  tmpSL <- data.table::copy(fixSLids(RDBESDataObject)$SL)
+	  tmpIS <- data.table::copy(fixSLids(RDBESDataObject)$IS)
 	  tmpSA <- data.table::copy(RDBESDataObject[["SA"]])
 
 		tmpSSwithSL<-merge(tmpSS, tmpSL, by="SLid", all.x=T)
+		# Also merge IS
+		tmpSSwithSL<-merge(tmpSSwithSL, tmpIS, by="SLid", all.x=T)
 
 		ls1 <- split(tmpSSwithSL, tmpSSwithSL$SSid)
 		ls2 <- lapply(ls1, function(tmpSSwithSLrow, targetAphiaId1=targetAphiaId, rdbesSA=tmpSA){
@@ -48,7 +51,8 @@ if(validate){
 				.SDcols = colsToConvertToNumeric]
 
 		# determines aphias that need generation
-		aphiaNeedingGenerateNAs <- targetAphiaId1[!targetAphiaId1 %in% tmpSSwithSLrow$SLcommTaxon]
+		#aphiaNeedingGenerateNAs <- targetAphiaId1[!targetAphiaId1 %in% tmpSSwithSLrow$SLcommTaxon]
+		aphiaNeedingGenerateNAs <- targetAphiaId1[!targetAphiaId1 %in% tmpSSwithSLrow$IScommTaxon]
 
 		if(length(aphiaNeedingGenerateNAs)>0)
 		{
@@ -57,6 +61,7 @@ if(validate){
 		if(any(!inSA))
 		# creates a new row
 		{
+		  if (verbose) print("Adding new row")
 		draftNewRows <- do.call("rbind", replicate(n=length(aphiaNeedingGenerateNAs[!inSA]),
 							rdbesSA[SSid == tmpSSwithSLrow$SSid,][1,], simplify = FALSE))
 
