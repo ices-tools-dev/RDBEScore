@@ -19,6 +19,7 @@ generateZerosUsingSL <- function(x,
                                  verbose = FALSE,
                                  strict = TRUE) {
 
+
   # Check we have a valid RDBESDataObject before doing anything else
   validateRDBESDataObject(x, verbose = verbose, strict = strict)
 
@@ -28,6 +29,9 @@ generateZerosUsingSL <- function(x,
   # we don't want to update the original version
   tmpSA <- data.table::copy(x[["SA"]])
   tmpSL <- data.table::copy(x[["SL"]])
+  tmpIS <- data.table::copy(x[["IS"]])
+  #tmpSL <- dplyr::left_join(tmpSL,tmpIS, by = "SLid")
+  tmpSL <- merge(tmpSL, tmpIS,  by = "SLid", all.x = TRUE )
   # Now convert some columns from int to numeric
   colsToConvertToNumeric <- c("SAid", "SAseqNum")
   tmpSA[, (colsToConvertToNumeric) := lapply(.SD, as.double),
@@ -56,7 +60,8 @@ if(nrow(tmpSA)>0)
 
 	# creates tmpKey in SL
 	tmpSL[, tmpKey0 := paste(SLyear, SLcou, SLinst, SLspeclistName, SLcatchFrac)]
-	tmpSL[, tmpKey1 := paste(SLyear, SLcou, SLinst, SLspeclistName, SLcatchFrac, SLcommTaxon)]
+	#tmpSL[, tmpKey1 := paste(SLyear, SLcou, SLinst, SLspeclistName, SLcatchFrac, SLcommTaxon)]
+	tmpSL[, tmpKey1 := paste(SLyear, SLcou, SLinst, SLspeclistName, SLcatchFrac, IScommTaxon)]
 
   # stop: (rare?) situation still to be considered [multiple SAcatchCat, SAsex, SAlandCat per id]
   if (any(tmpSA[, .N, .(SSid,SAstratumName, SAcatchCat, SAsex, SAlandCat)][
@@ -82,7 +87,8 @@ tmpSS$tmpKey0<-tmpSL$tmpKey0[match(tmpSS$SLid, tmpSL$SLid)]
 		maxSAid<-max(tmpSA[tmpSA$parentIdVar==parentIdValue,]$SAid)
 	# adding the zeros
 		# vector of species to add
-		sppToAdd<-tmpSL$SLcommTaxon[tmpSL$SLid %in% tmpSS$SLid[!check]]
+		#sppToAdd<-tmpSL$SLcommTaxon[tmpSL$SLid %in% tmpSS$SLid[!check]]
+		sppToAdd<-tmpSL$IScommTaxon[tmpSL$SLid %in% tmpSS$SLid[!check]]
 		# picks up a row to be used as dummy
 		dummyRows<-do.call("rbind", replicate(n=length(sppToAdd), tmpSA[SAid == maxSAid,][1,], simplify = FALSE))
 		# fills in with NA (some vars will be specified below

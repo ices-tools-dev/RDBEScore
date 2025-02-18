@@ -13,7 +13,7 @@ test_that("generateZerosUsingSL creates rows for SLcou*SLinst*SLspeclistName*SLy
 
 # create test data from download [to be used in different tests]
 
-	myH1DataObject <- RDBEScore::createRDBESDataObject("./h1_v_1_19_26/ZW_1965_WGRDBES-EST_TEST_1.zip")
+	myH1DataObject <- RDBEScore::createRDBESDataObject("./h1_v_20250211/ZW_1965_WGRDBES-EST_TEST_1")
 
 	# Only use a subset of the test data
 	myH1DataObject0 <- filterRDBESDataObject(myH1DataObject,c("DEstratumName"),c("Pckg_survey_apistrat_H1"))
@@ -22,20 +22,35 @@ test_that("generateZerosUsingSL creates rows for SLcou*SLinst*SLspeclistName*SLy
 
 	validateRDBESDataObject(myH1DataObject0, checkDataTypes = TRUE)
 
-	df1 <- data.frame('31831','SL','ZW','4484',myH1DataObject0[["SL"]]$SLspeclistName,'1965','Dis','107254','107254')
+	#df1 <- data.frame('31831','SL','ZW','4484',myH1DataObject0[["SL"]]$SLspeclistName,'1965','Dis','107254','107254')
+	df1SL <- data.frame('31831','SL','ZW','4484',myH1DataObject0[["SL"]]$SLspeclistName,'1965','Dis')
+	df1IS <- data.frame('31832','31831','IS','107254','107254')
 
-
-	colnames(df1) <- names(myH1DataObject0[["SL"]])
-	myH1DataObject0[["SL"]] <- rbind(myH1DataObject0[["SL"]],df1)
+	#colnames(df1) <- names(myH1DataObject0[["SL"]])
+	#colnames(df1SL) <- names(myH1DataObject0[["SL"]])
+	data.table::setnames(df1SL, names(myH1DataObject0[["SL"]]))
+	#colnames(df1IS) <- names(myH1DataObject0[["IS"]])
+	data.table::setnames(df1IS, names(myH1DataObject0[["IS"]]))
+	#myH1DataObject0[["SL"]] <- rbind(myH1DataObject0[["SL"]],df1)
+	myH1DataObject0[["SL"]] <- rbind(myH1DataObject0[["SL"]],df1SL)
 	myH1DataObject0[["SL"]]$SLid <- as.integer(myH1DataObject0[["SL"]]$SLid)
 	myH1DataObject0[["SL"]]$SLyear <- as.integer(myH1DataObject0[["SL"]]$SLyear)
-	myH1DataObject0[["SL"]]$SLcommTaxon <- as.integer(myH1DataObject0[["SL"]]$SLcommTaxon)
-	myH1DataObject0[["SL"]]$SLsppCode <- as.integer(myH1DataObject0[["SL"]]$SLsppCode)
+	myH1DataObject0[["IS"]] <- rbind(myH1DataObject0[["IS"]],df1IS)
+	myH1DataObject0[["IS"]]$ISid <- as.integer(myH1DataObject0[["IS"]]$ISid)
+	myH1DataObject0[["IS"]]$SLid <- as.integer(myH1DataObject0[["IS"]]$SLid)
+	#myH1DataObject0[["SL"]]$SLcommTaxon <- as.integer(myH1DataObject0[["SL"]]$SLcommTaxon)
+	#myH1DataObject0[["SL"]]$SLsppCode <- as.integer(myH1DataObject0[["SL"]]$SLsppCode)
+	myH1DataObject0[["IS"]]$IScommTaxon <- as.integer(myH1DataObject0[["IS"]]$IScommTaxon)
+	myH1DataObject0[["IS"]]$ISsppCode <- as.integer(myH1DataObject0[["IS"]]$ISsppCode)
 	# add an additional species list - could be many in the SL download
-	myH1DataObject0[["SL"]]<-rbind(myH1DataObject0[["SL"]], myH1DataObject[["SL"]][1,])
+	extraSL <- myH1DataObject[["SL"]][1,]
+	extraSL$SLid <- as.integer(max(myH1DataObject[["SL"]]$SLid) +1)
+	myH1DataObject0[["SL"]]<-rbind(myH1DataObject0[["SL"]], extraSL)
+	#myH1DataObject0[["SL"]]<-rbind(myH1DataObject0[["SL"]], myH1DataObject[["SL"]][1,])
 
-	# ensure key is set on SL
+	# ensure key is set on SL and IS
 	setkey(myH1DataObject0[["SL"]], SLid)
+	setkey(myH1DataObject0[["IS"]], ISid)
 
 	myH1DataObject0[["SS"]]<-rbind(myH1DataObject0[["SS"]][1,],myH1DataObject0[["SS"]][1,])
 	myH1DataObject0[["SS"]]$SScatchFra[2]<-"Dis"
@@ -46,6 +61,7 @@ test_that("generateZerosUsingSL creates rows for SLcou*SLinst*SLspeclistName*SLy
 	# ensure key is set on SS
 	setkey(myH1DataObject0[["SS"]], SSid)
 
+
 	myH1DataObject1 <- filterRDBESDataObject(myH1DataObject0, c("SAid"), c(572813), killOrphans = TRUE)
 	validateRDBESDataObject(myH1DataObject0, checkDataTypes = TRUE)
 	validateRDBESDataObject(myH1DataObject1, checkDataTypes = TRUE)
@@ -55,6 +71,10 @@ test_that("generateZerosUsingSL creates rows for SLcou*SLinst*SLspeclistName*SLy
 
 	  # check generateZerosUsingSL is creating missing row in SA
 		myTest3 <- generateZerosUsingSL(myH1DataObject1)
+		myH1DataObject1[["SA"]]
+		myH1DataObject1[["SL"]]
+		myH1DataObject1[["IS"]]
+		myTest3[["SA"]]$SAid
 
 	  # create aux id_table [Nuno's function] and tmpKey to use in test
 		aux<-createTableOfRDBESIds(x = myTest3, addSAseqNums=FALSE)
