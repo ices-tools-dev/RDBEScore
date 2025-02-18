@@ -36,7 +36,6 @@ combineRDBESDataObjects <- function(RDBESDataObject1,
 
   # For each entry, bind the data tables together
   for (myTable in names(myRDBESDataObject)) {
-
     # Only bind the data tables if one of them is not null
     if (!(is.null(RDBESDataObject1[[myTable]]) &
       is.null(RDBESDataObject2[[myTable]]))) {
@@ -54,7 +53,9 @@ combineRDBESDataObjects <- function(RDBESDataObject1,
       # De-duplicate the resulting SL,IS,VD,CL,and CE tables
       if (myTable %in% c('VD','SL','IS','CL','CE')){
         # Note - uniqueness will be based only on the data table key
-        myRDBESDataObject[[myTable]] <- unique(myRDBESDataObject[[myTable]])
+        # (data.table now needs this behaviour set explicitly using by=...)
+        myRDBESDataObject[[myTable]] <- unique(myRDBESDataObject[[myTable]]
+                                      , by = key(myRDBESDataObject[[myTable]]))
         #myRDBESDataObject[[myTable]] <-
         #  dplyr::distinct(myRDBESDataObject[[myTable]], .keep_all = TRUE)
       }
