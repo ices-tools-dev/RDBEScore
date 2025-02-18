@@ -29,8 +29,6 @@ fixSLids<-function(RDBESDataObject, verbose = FALSE, strict = TRUE){
     strict = strict
   )
 
-  #RDBESDataObject <- H1Example
-
 # issues error if fixSLids already been run
 if("SLtaxaId" %in% colnames(RDBESDataObject[["SL"]])){
   stop ("SLtaxaId already added - maybe function has already been run?")
