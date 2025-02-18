@@ -44,7 +44,9 @@ updateSAwithTaxonFromSL <- function(RDBESDataObject,
   }
 
   H1_SA <- RDBESDataObject[["SA"]]
-  H1_SL <- fixSLids(RDBESDataObject)$SL
+  #H1_SL <- fixSLids(RDBESDataObject)$SL
+  H1_SL <- RDBESDataObject[["SL"]]
+  H1_IS <- fixSLids(RDBESDataObject)$IS
   H1_SS <- RDBESDataObject[["SS"]]
 
   aphiaRecords <- RDBEScore::wormsAphiaRecord
@@ -59,12 +61,21 @@ updateSAwithTaxonFromSL <- function(RDBESDataObject,
     by = c("SAspeCode" = "AphiaID")
   )
 
-  # Append ahpia records to SL data
-  H1_SL$SLsppCode <- as.character(H1_SL$SLsppCode)
-  H1_SL_new <- dplyr::left_join(H1_SL,
-    aphiaRecords,
-    by = c("SLsppCode" = "AphiaID")
+  # Append ahpia records to IS data
+  #H1_SL$SLsppCode <- as.character(H1_SL$SLsppCode)
+  #H1_SL_new <- dplyr::left_join(H1_SL,
+  #  aphiaRecords,
+  #  by = c("SLsppCode" = "AphiaID")
+  #)
+  H1_IS$ISsppCode <- as.character(H1_IS$ISsppCode)
+  H1_IS_new <- dplyr::left_join(H1_IS,
+                                aphiaRecords,
+                                by = c("ISsppCode" = "AphiaID")
   )
+  # Combine SL with IS
+  H1_SL_new <- dplyr::left_join(H1_SL,
+                                H1_IS_new,
+                                by = "SLid")
 
 
   # SS only information about SLspecieslistName
@@ -74,7 +85,9 @@ updateSAwithTaxonFromSL <- function(RDBESDataObject,
   # key of species list name and species
 
   H1_SA_new$SAkey <- paste(H1_SA_new$SLid, H1_SA_new$SAspeCode, H1_SA_new$SSspecListName, H1_SA_new$SScatchFra, sep = "_")
-  H1_SL_new$SLkey <- paste(H1_SL_new$SLid, H1_SL_new$SLsppCode, H1_SL_new$SLspeclistName, H1_SL_new$SLcatchFrac, sep = "_")
+
+  #H1_SL_new$SLkey <- paste(H1_SL_new$SLid, H1_SL_new$SLsppCode, H1_SL_new$SLspeclistName, H1_SL_new$SLcatchFrac, sep = "_")
+  H1_SL_new$SLkey <- paste(H1_SL_new$SLid, H1_SL_new$ISsppCode, H1_SL_new$SLspeclistName, H1_SL_new$SLcatchFrac, sep = "_")
 
   newest_SA <- data.frame(NULL)
 
@@ -97,7 +110,7 @@ updateSAwithTaxonFromSL <- function(RDBESDataObject,
         for (j in 1:nrow(SL_Subset)) {
           if (temp[i, c("speciesExistsInList")] == "Y") {
             temp[i, c("SAnewSpeciesCode")] <- temp[i, c("SAspeCode")]
-            # if (verbose) print("Species exists in list. No change needed.")
+            #if (verbose) print("Species exists in list. No change needed.")
           } else {
             #if (verbose)  print("Species does not exist in list.")
             if ((temp[i, c("taxonRankID")] > SL_Subset[j, c("taxonRankID")]) &
@@ -108,7 +121,8 @@ updateSAwithTaxonFromSL <- function(RDBESDataObject,
                 SL_Subset[j, c("scientificname")] %in% temp[i, c("family")] |
                 SL_Subset[j, c("scientificname")] %in% temp[i, c("genus")]
               ) &
-              temp[i, c("SAspeCode")] != SL_Subset[j, c("SLsppCode")]
+              #temp[i, c("SAspeCode")] != SL_Subset[j, c("SLsppCode")]
+              temp[i, c("SAspeCode")] != SL_Subset[j, c("ISsppCode")]
             ) {
               #if (verbose) print("SA species rank is higher than SL species rank. Changing species code.")
               # There is the possibility of finding mutiple matches in the SL table - this
@@ -117,13 +131,15 @@ updateSAwithTaxonFromSL <- function(RDBESDataObject,
               # of our matching.
               if (is.na(temp[i, c("SAnewSpeciesCode")])){
                 # if we don't yet have a new species code, set it to the SL species code
-                temp[i, c("SAnewSpeciesCode")] <- SL_Subset$SLsppCode[j]
+                #temp[i, c("SAnewSpeciesCode")] <- SL_Subset$SLsppCode[j]
+                temp[i, c("SAnewSpeciesCode")] <- SL_Subset$ISsppCode[j]
                 temp[i, c("SAnewSpeciesCodeTaxonRank")] <- SL_Subset[j, c("taxonRankID")]
                 #if (verbose) print("We don't have a new species code yet. Changing species code.")
               } else {
                 # check if SAnewSpeciesCodeTaxonRank is greater than SL taxonRankID
                 if (temp[i, c("SAnewSpeciesCodeTaxonRank")] > SL_Subset[j, c("taxonRankID")]) {
-                  temp[i, c("SAnewSpeciesCode")] <- SL_Subset$SLsppCode[j]
+                  #temp[i, c("SAnewSpeciesCode")] <- SL_Subset$SLsppCode[j]
+                  temp[i, c("SAnewSpeciesCode")] <- SL_Subset$ISsppCode[j]
                   temp[i, c("SAnewSpeciesCodeTaxonRank")] <- SL_Subset[j, c("taxonRankID")]
                   #if (verbose) print("New SA species rank is higher than SL species rank. Changing species code again.")
                 } else {
@@ -143,7 +159,7 @@ updateSAwithTaxonFromSL <- function(RDBESDataObject,
         }
       } # i
       newest_SA <- rbind(newest_SA, temp)
-      # if (verbose) print(paste0("Number of rows in newest_SA: ", nrow(newest_SA)))
+      #if (verbose) print(paste0("Number of rows in newest_SA: ", nrow(newest_SA)))
     }
   } # k
 
