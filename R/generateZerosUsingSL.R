@@ -31,7 +31,8 @@ generateZerosUsingSL <- function(x,
   tmpSL <- data.table::copy(x[["SL"]])
   tmpIS <- data.table::copy(x[["IS"]])
   #tmpSL <- dplyr::left_join(tmpSL,tmpIS, by = "SLid")
-  tmpSL <- merge(tmpSL, tmpIS,  by = "SLid", all.x = TRUE )
+  #tmpSL <- merge(tmpSL, tmpIS,  by = "SLid", all.x = TRUE )
+  tmpSL <- merge(tmpSL, tmpIS,  by = "SLid")
   # Now convert some columns from int to numeric
   colsToConvertToNumeric <- c("SAid", "SAseqNum")
   tmpSA[, (colsToConvertToNumeric) := lapply(.SD, as.double),
@@ -72,10 +73,14 @@ if(nrow(tmpSA)>0)
 tmpSS <- data.table::copy(x[["SS"]])
 tmpSS$tmpKey0<-tmpSL$tmpKey0[match(tmpSS$SLid, tmpSL$SLid)]
 # case where SS exists and was sampled but there is no child record (all SL is added)
+#print(tmpSS$SSid)
+#print(tmpSA$SSid)
  check <- !tmpSS$SSid %in% tmpSA$SSid
  if(any(check))
 	for (targetSLid in tmpSS$SLid[check])
 	{
+	  #print("Got here! Row 80")
+	  #print(paste0("targetSLid: ", targetSLid))
 	# in the following, the max SAid is determined. That SAid + a decimal will constitute the SAid of the new 0 rows
 	# determine upper table (parentIdVar) and its value (parentIdValue)
 		# note, the use of which is an attempt to make this hierarchy independent - there may be better forms to achieve this.
@@ -89,6 +94,7 @@ tmpSS$tmpKey0<-tmpSL$tmpKey0[match(tmpSS$SLid, tmpSL$SLid)]
 		# vector of species to add
 		#sppToAdd<-tmpSL$SLcommTaxon[tmpSL$SLid %in% tmpSS$SLid[!check]]
 		sppToAdd<-tmpSL$IScommTaxon[tmpSL$SLid %in% tmpSS$SLid[!check]]
+		#print(sppToAdd)
 		# picks up a row to be used as dummy
 		dummyRows<-do.call("rbind", replicate(n=length(sppToAdd), tmpSA[SAid == maxSAid,][1,], simplify = FALSE))
 		# fills in with NA (some vars will be specified below
@@ -114,6 +120,8 @@ tmpSS$tmpKey0<-tmpSL$tmpKey0[match(tmpSS$SLid, tmpSL$SLid)]
 		dummyRows$SApres <- 'Unknown'
 		dummyRows$SAstateOfProc <- 'Unknown'
 		dummyRows$SAspecState <- 'Unknown'
+	#print(paste0("Adding ",nrow(dummyRows)," rows"))
+	#print(dummyRows$SAid)
 	tmpSA<-rbind(dummyRows, tmpSA)
 	tmpSA[ ,tmpKey1 := paste(DEyear, SDctry, SDinst, SSspecListName, SAcatchCat, SAspeCode)]
 	# cleans up parentIdVar
@@ -126,6 +134,9 @@ tmpSS$tmpKey0<-tmpSL$tmpKey0[match(tmpSS$SLid, tmpSL$SLid)]
     for (w in tmpSL$tmpKey1[tmpSL$tmpKey0==z$tmpKey0[z$SSid==x$SSid]]) {
 
 		if (!w %in% tmpSA$tmpKey1) {
+		  #print("Got here! Row 130")
+		  #print(paste0("w: ",w))
+		  #print(tmpSA$tmpKey1)
 		   # duplicates SA row
           y <- x[1, ]
   		  # handles the key
