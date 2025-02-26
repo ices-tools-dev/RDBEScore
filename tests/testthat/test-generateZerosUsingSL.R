@@ -80,12 +80,79 @@ test_that("generateZerosUsingSL creates rows for SLcou*SLinst*SLspeclistName*SLy
 	  # create aux id_table [Nuno's function] and tmpKey to use in test
 		#aux<-createTableOfRDBESIds(x = myTest3, addSAseqNums=FALSE)
 
-
   	# Check we have the correct number of SA rows
 	  expect_equal(nrow(myTest$SA),  nrow(myH1DataObject1$SA)+expectSARowsFromSS+expectSARowsFromSL)
 	  # Check all species in species list are now present in SA (that won't always be the case but should be here)
 	  tempSL <- merge(myTest[["SL"]], myTest[["IS"]],  by = "SLid")
 	  expect_equal(all(tempSL$IScommTaxon %in% myTest[["SA"]]$SAspeCode),TRUE)
+
+})
+
+test_that("Adds 1 more species to SL to test (SSuseCalcZero = Y)", {
+
+  myH1DataObject1 <- createTestData()
+
+  # adds 1 more species to IS to test
+  df1IS <- data.frame('31833','31831','IS','126437','126437')
+  data.table::setnames(df1IS, names(myH1DataObject1[["IS"]]))
+  myH1DataObject1[["IS"]] <- rbind(myH1DataObject1[["IS"]],df1IS)
+  myH1DataObject1[["IS"]]$ISid <- as.integer(myH1DataObject1[["IS"]]$ISid)
+  myH1DataObject1[["IS"]]$SLid <- as.integer(myH1DataObject1[["IS"]]$SLid)
+  myH1DataObject1[["IS"]]$IScommTaxon <- as.integer(myH1DataObject1[["IS"]]$IScommTaxon)
+  myH1DataObject1[["IS"]]$ISsppCode <- as.integer(myH1DataObject1[["IS"]]$ISsppCode)
+  setkey(myH1DataObject1[["IS"]], ISid)
+
+  # check generateZerosUsingSL is creating missing rows in SA
+  # generateZerosUsingSL should:
+  #   a) create 1 extra row in SA for the SS row that does not have a child SA row
+  #   b) create 3 extra rows in SA for the SL/IS rows that do not match an SA row
+  expectSARowsFromSS <- 1
+  expectSARowsFromSL <- 3
+
+  myTest <- generateZerosUsingSL(myH1DataObject1)
+
+  # Check we have the correct number of SA rows
+  expect_equal(nrow(myTest$SA),  nrow(myH1DataObject1$SA)+expectSARowsFromSS+expectSARowsFromSL)
+  # Check all species in species list are now present in SA (that won't always be the case but should be here)
+  tempSL <- merge(myTest[["SL"]], myTest[["IS"]],  by = "SLid")
+  expect_equal(all(tempSL$IScommTaxon %in% myTest[["SA"]]$SAspeCode),TRUE)
+
+
+})
+
+test_that("Check that when SSuseCalcZero = N no rows are added)", {
+
+  myH1DataObject1 <- createTestData()
+  myH1DataObject1[["SS"]]$SSuseCalcZero <- 'N'
+
+  # check generateZerosUsingSL is not creating rows in SA
+  # generateZerosUsingSL should not create any new rows because SSuseCalcZero = N
+  expectSARowsFromSS <- 0
+  expectSARowsFromSL <- 0
+
+  myTest <- generateZerosUsingSL(myH1DataObject1)
+
+  # Check we have the correct number of SA rows
+  expect_equal(nrow(myTest$SA),  nrow(myH1DataObject1$SA)+expectSARowsFromSS+expectSARowsFromSL)
+
+
+})
+
+test_that("Species already there - no rows are added", {
+
+  #species*catchFrac in SL and in SA: expected behavior -> do not generate a 0 row in SA
+
+})
+
+test_that("SScatchFra=='Catch' and spp present", {
+
+  # if SScatchFra=="Catch" it should not generate 0s for any SA strata if spp present in list
+
+})
+
+test_that("SScatchFra=='Catch' and spp absent", {
+
+  # if SScatchFra=="Catch" it should generate 0s for all SA strata present if spp absent(but in SL)
 
 })
 
