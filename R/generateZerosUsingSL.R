@@ -20,6 +20,10 @@ generateZerosUsingSL <- function(x,
                                  strict = TRUE) {
 
 
+  #x <-myH1DataObject1
+  #verbose <- FALSE
+  #strict <- TRUE
+
   # Check we have a valid RDBESDataObject before doing anything else
   validateRDBESDataObject(x, verbose = verbose, strict = strict)
 
@@ -72,7 +76,10 @@ if(nrow(tmpSA)>0)
 
 tmpSS <- data.table::copy(x[["SS"]])
 tmpSS$tmpKey0<-tmpSL$tmpKey0[match(tmpSS$SLid, tmpSL$SLid)]
-# case where SS exists and was sampled but there is no child record (all SL is added)
+
+# Case 1)
+# SS exists and was sampled but there is no child SA record - all SL is added
+
 #print(tmpSS$SSid)
 #print(tmpSA$SSid)
  check <- !tmpSS$SSid %in% tmpSA$SSid
@@ -93,8 +100,9 @@ tmpSS$tmpKey0<-tmpSL$tmpKey0[match(tmpSS$SLid, tmpSL$SLid)]
 	# adding the zeros
 		# vector of species to add
 		#sppToAdd<-tmpSL$SLcommTaxon[tmpSL$SLid %in% tmpSS$SLid[!check]]
-		sppToAdd<-tmpSL$IScommTaxon[tmpSL$SLid %in% tmpSS$SLid[!check]]
-		#print(sppToAdd)
+		#sppToAdd<-tmpSL$IScommTaxon[tmpSL$SLid %in% tmpSS$SLid[!check]]
+		sppToAdd<-tmpSL$IScommTaxon[tmpSL$SLid %in% tmpSS$SLid[check]]
+		#print(paste0("sppToAdd: ",sppToAdd))
 		# picks up a row to be used as dummy
 		dummyRows<-do.call("rbind", replicate(n=length(sppToAdd), tmpSA[SAid == maxSAid,][1,], simplify = FALSE))
 		# fills in with NA (some vars will be specified below
@@ -120,7 +128,7 @@ tmpSS$tmpKey0<-tmpSL$tmpKey0[match(tmpSS$SLid, tmpSL$SLid)]
 		dummyRows$SApres <- 'Unknown'
 		dummyRows$SAstateOfProc <- 'Unknown'
 		dummyRows$SAspecState <- 'Unknown'
-	#print(paste0("Adding ",nrow(dummyRows)," rows"))
+	print(paste0("Adding ",nrow(dummyRows)," rows for SS without SA"))
 	#print(dummyRows$SAid)
 	tmpSA<-rbind(dummyRows, tmpSA)
 	tmpSA[ ,tmpKey1 := paste(DEyear, SDctry, SDinst, SSspecListName, SAcatchCat, SAspeCode)]
@@ -128,13 +136,71 @@ tmpSS$tmpKey0<-tmpSL$tmpKey0[match(tmpSS$SLid, tmpSL$SLid)]
 	tmpSA$parentIdVar<-NULL
 	}
 
+ # Case 2
+ # SS exists and was sampled and there are child SA records but they don't include
+ # all the species in SL/IS.  The additional species from SL/IS should be added.
+
+ # For each SS record linked to an SA record
+ for (mySSid in sort(unique(tmpSA$SSid))){
+   #mySSid <- 227695
+   # Get the SA records liked to this SSid
+   mySA <- tmpSA[ tmpSA$SSid ==  mySSid ,]
+   maxSAid <- max(mySA$SAid)
+   mySS <- tmpSS[tmpSS$SSid == mySSid,]
+   mySL <- tmpSL[tmpSL$SLid == mySS$SLid,]
+   targetSLid <- mySS$SLid
+   targetCatchCat <- mySS$SScatchFra
+   if (nrow(mySA)>0){
+     # See if there are any SL/IS records not in these SA records
+     tmpSLNotinSA <- mySL[!(mySL$tmpKey1 %in% mySA$tmpKey1),]
+     # If there are some records we will try and add them to SA
+     if (nrow(tmpSLNotinSA)>0){
+       sppToAdd<-tmpSLNotinSA$IScommTaxon
+       # picks up a row to be used as dummy
+       dummyRows<-do.call("rbind", replicate(n=length(sppToAdd), mySA[SAid == maxSAid,][1,], simplify = FALSE))
+       # fills in with NA (some vars will be specified below
+       dummyRows[,10:31]<-NA
+       # handling of a few specific variables (probably will need some tunning later on)
+       dummyRows$SAid <- maxSAid+0.001*c(1:length(sppToAdd))
+       dummyRows$SSid <- mySSid
+       dummyRows$SAseqNum <- 1:length(sppToAdd)
+       dummyRows$SAunitName <- 1:length(sppToAdd)
+       dummyRows$SAstratification <- 'N'
+       dummyRows$SAstratumName <- 'U'
+       dummyRows$SAspeCode<-sppToAdd
+       dummyRows[,c("SAtotalWtLive","SAsampWtLive","SAtotalWtMes","SAsampWtMes","SAspecState")]<-0
+       dummyRows$SAnumTotal <- ifelse(dummyRows$SAunitType=="Individuals", 0, dummyRows$SAnumTotal)
+       dummyRows$SAnumSamp <- ifelse(dummyRows$SAunitType=="Individuals", 0, dummyRows$SAnumSamp)
+       dummyRows$SAselProb <- 1
+       dummyRows$SAincProb <- 1
+       dummyRows$SAlowHierarchy <- "D"
+       dummyRows$SAsamp <- "N"
+       dummyRows$SAcatchCat <- targetCatchCat
+       dummyRows$SAsex <- 'U'
+       dummyRows$SAstateOfProc <- 'UNK'
+       dummyRows$SApres <- 'Unknown'
+       dummyRows$SAstateOfProc <- 'Unknown'
+       dummyRows$SAspecState <- 'Unknown'
+       #print(dummyRows)
+       print(paste0("Adding ", nrow(dummyRows), " rows for SS with SA, but unmatched spp"))
+       tmpSA<-rbind(dummyRows, tmpSA)
+       tmpSA[ ,tmpKey1 := paste(DEyear, SDctry, SDinst, SSspecListName, SAcatchCat, SAspeCode)]
+
+     }
+   }
+ }
+
+
+
 # handles remaining (more usual) cases
   ls1 <- split(tmpSA, paste(tmpSA$SSid, tmpSA$SAstratumName))
+  #print(ls1)
   ls2 <- lapply(ls1, function(x, z=tmpSS) {
+    #print(tmpSL$tmpKey1[tmpSL$tmpKey0==z$tmpKey0[z$SSid==x$SSid]])
     for (w in tmpSL$tmpKey1[tmpSL$tmpKey0==z$tmpKey0[z$SSid==x$SSid]]) {
 
-		if (!w %in% tmpSA$tmpKey1) {
-		  #print("Got here! Row 130")
+		if (!is.na(w) & !w %in% tmpSA$tmpKey1) {
+		  #print("Got here! Row 137")
 		  #print(paste0("w: ",w))
 		  #print(tmpSA$tmpKey1)
 		   # duplicates SA row
