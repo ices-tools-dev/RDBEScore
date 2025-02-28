@@ -39,11 +39,15 @@ generateZerosUsingSL <- function(x,
   if(nrow(tmpSA)>0)
   {
 
-    # stop: (rare?) situation still to be considered [multiple SAcatchCat, SAsex, SAlandCat per id]
+    # stop: (rare?) situation still to be considered
+    # (multiple SAcatchCat, SAsex, SAlandCat per id)
     if (any(tmpSA[, .N, .(SSid,SAstratumName, SAcatchCat, SAsex, SAlandCat)][
-  			,.N, .(SSid,SAstratumName)]$N>1)) stop("cannot generateZerosUsingSL because >1 SAcatchCat
-  								OR SAsex OR SAlandCat in same SSid*SAstratumName: situation
-  										still to be analyzed - likely you should have them ")
+  			,.N, .(SSid,SAstratumName)]$N>1)) {
+  			stop(paste0("Cannot generateZerosUsingSL because >1 SAcatchCat",
+  								"OR SAsex OR SAlandCat in the same SSid*SAstratumName: ",
+  								"this situation is still to be analyzed - ",
+  								"its likely there is a problem with the data"))
+    }
 
     tmpSS <- data.table::copy(x[["SS"]])
     # Only consider SS rows that can be used to calculate zero
