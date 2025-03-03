@@ -188,5 +188,32 @@ test_that("validateRDBESDataObject produces error for unnecessary column when st
 
 })
 
+test_that("validateRDBESDataObject produces correct text output", {
+
+  myObject <- Pckg_survey_apistrat_H1
+
+  expectedText <- c("Note that TE is NULL but this is allowed in an RDBESDataObject",
+    "Note that LO is NULL but this is allowed in an RDBESDataObject",
+    "Note that OS is NULL but this is allowed in an RDBESDataObject",
+    "Note that LE is NULL but this is allowed in an RDBESDataObject",
+    "Note that CL is NULL but this is allowed in an RDBESDataObject",
+    "Note that CE is NULL but this is allowed in an RDBESDataObject",
+    "Note that FM has 0 rows but this is allowed in an RDBESDataObject",
+    "Note that BV has 0 rows but this is allowed in an RDBESDataObject"
+    )
+  expectedText <- paste("^.*",expectedText,".*$", sep = "")
+
+  myOutput <- capture_output_lines(validateRDBESDataObject(objectToCheck = myObject,
+                                         verbose = TRUE))
+  # Make sure we have the right number of text lines output
+  expect_equal(length(myOutput),length(expectedText))
+  # Make sure we have the text about NULL entries
+  for (i in 1:length(expectedText)){
+    expect_match(myOutput[i],expectedText[i])
+  }
+
+
+})
+
 
 }) ## end capture.output

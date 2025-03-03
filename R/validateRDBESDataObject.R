@@ -120,7 +120,7 @@ validateRDBESDataObject <- function(objectToCheck,
 
     emptyTables <- unlist(sapply(objectToCheck, function(x){nrow(x) == 0}))
     if (any(emptyTables)){
-      print(paste("Note that ",names(emptyTables)
+      print(paste("Note that ",names(emptyTables[emptyTables])
                   ," has 0 rows but this is allowed in an RDBESDataObject"
                   , sep = ""))
     }
