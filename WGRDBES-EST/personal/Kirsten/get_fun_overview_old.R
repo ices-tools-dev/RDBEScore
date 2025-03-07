@@ -42,7 +42,7 @@ getRdTitle <- function(rd) {
 
 # Past version ----
 
-v <- "fc7683c9744c733d5282ab12d79fd53fbf58626b"
+v <- "fc7683c"
 
 library(remotes)
 
@@ -55,17 +55,3 @@ function_table <- listPackageFunctions("RDBEScore")
 function_table$Description <- gsub("\"", "'", function_table$Description)
 
 write.table(function_table, paste0(path, "functions_from_", v, ".csv"), row.names = F, sep = ";;")
-#
-# # Past version ----
-#
-# v <- "fc7683c9744c733d5282ab12d79fd53fbf58626b"
-#
-# # system(paste0("git checkout ", v))
-#
-# devtools::package_info("RDBEScore")
-# function_table <- listPackageFunctions("RDBEScore")
-#
-# function_table$Description <- gsub("\"", "'", function_table$Description)
-#
-# write.table(function_table, paste0(path, "functions_from_", v, ".csv"), row.names = F, sep = ";;")
-#
