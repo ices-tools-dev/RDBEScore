@@ -1,0 +1,101 @@
+"Function";;"Description";;"Exported"
+".onAttach";;"";;FALSE
+"add_column_if_not_exists";;"";;FALSE
+"add_extra_columns";;"";;FALSE
+"applyGenerateProbs";;"Generate probabilities missing from RDBES Data";;TRUE
+"as.integer.or.dbl";;"as.integer.or.dbl";;FALSE
+"check_key_column";;"Check if a column exists in a data table and has unique values";;FALSE
+"checkRDBESDataObject";;"Check Whether an  RDBESDataObject  is in a Valid Format";;TRUE
+"combineRDBESDataObjects";;"Combine Two RDBES Raw Objects
+ combines 2 RDBESDataObjects into a single RDBESDataObject by merging individual
+ tables one by one";;TRUE
+"convert.col.names";;"convert.col.names";;FALSE
+"createDBEPrepObj";;"Load raw object and create prepared object
+ Function relies on the data being
+ correctly named following established hierarchy";;FALSE
+"createRDBESDataObject";;"Create an RDBES Data Object";;TRUE
+"createRDBESEstObject";;"Creates an rdbesEStObject from prepared RDBES data";;TRUE
+"createTableOfRDBESIds";;"Create a table of RDBES Ids";;TRUE
+"doDBEestimantionObjUpp";;"Generates the DBE estimation object for the upper hierarchy tables";;FALSE
+"doDBestimation";;"Create design-based point and variance estimates from
+ RDBES estimation object (rdbesEstimObj)";;FALSE
+"doEstimationForAllStrata";;"Estimate totals and means, and try to generate samples variances for all
+ strata in an RDBESEstObject";;TRUE
+"estim";;"Generic function for estimation of population total and variance";;TRUE
+"estimMC";;"Multiple Count Estimator for Population Total and Variance";;TRUE
+"extractHigherFields";;"";;FALSE
+"fileExt";;"fileExt";;FALSE
+"filterAndTidyRDBESDataObject";;"Filter and remove orphan records in an RDBESDataObject";;TRUE
+"filterRDBESDataObject";;"Filter an RDBESDataObject";;TRUE
+"findAndKillOrphans";;"This function finds and removed any orphan records in an
+ RDBESDataObject.  Normally data that has been downloaded from the RDBES
+ will not contain orphan records - however if the data is subsequently
+ filtered it is possible to introduce orphan records.";;TRUE
+"findOrphansByTable";;"Internal function to identify orphan records in a given
+ RDBESDataObject table";;FALSE
+"fixSLids";;"Fixes SLid in SL table (facilitating SS-SL joins).";;TRUE
+"generateMissingSSRows";;"Generate any missing SS rows.
+ When FOcatchReg=='All' it is expected that SScatchFraction is either 'Catch'
+ OR 'Lan'+'Dis'. In the latter case, if one is missing the other is to
+ be assumed 0.
+ This function generates SS rows for any missing catch fractions.";;TRUE
+"generateNAsUsingSL";;"Generate NAs in samples using Species List information";;TRUE
+"generateProbs";;"Generate vector of selection or inclusion probabilities";;TRUE
+"generateSSRows";;"Private function to generate SS rows";;FALSE
+"generateTestTbls";;"Generate a List of Related Data Tables";;FALSE
+"generateZerosUsingSL";;"Generate zeros in samples using Species List information";;TRUE
+"get_vars_needed";;"";;FALSE
+"getColnames";;"";;FALSE
+"getDesignSummary";;"";;FALSE
+"getEstimForStratum";;"Private function used by doEstimationForAllStrata to get the estimates";;FALSE
+"getInfo";;"";;FALSE
+"getMissingSSCatchFraction";;"Private function to find which FO rows are not matching SS";;FALSE
+"getPrintInfoForTable";;"";;FALSE
+"getSubSampleLevel";;"Private function to get sub-sample level and top-level SAid for SA data";;FALSE
+"getTablesInRDBESHierarchy";;"Returns the tables for a given hierarchy";;TRUE
+"handle_clustering";;"";;FALSE
+"handle_table";;"";;FALSE
+"handlePrefixInVarNames";;"";;FALSE
+"importRDBESDataCSV";;"Create an RDBES Raw Object";;FALSE
+"importRDBESDataDFS";;"Convert List of Data Frames to a RDBES Data Object";;FALSE
+"importRDBESDataZIP";;"Import RDBES Downloaded Data";;FALSE
+"is.zip";;"is.zip";;FALSE
+"killOrphans";;"Internal function to remove orphan records from an RDBESDataObject";;FALSE
+"makeDT";;"";;FALSE
+"makeTbl";;"Generate a Data Table";;FALSE
+"newRDBESDataObject";;"Constructor for RDBESDataObject class";;TRUE
+"print.RDBESDataObject";;"Print method for RDBESDataObject";;FALSE
+"process_table";;"";;FALSE
+"procRDBESEstObjLowHier";;"Private function to process the lower hierarchies when creating
+ the RDBESEstObject";;FALSE
+"procRDBESEstObjUppHier";;"Private function to process the upper hierarchies when creating
+ the RDBESEstObject";;FALSE
+"removeBrokenSpeciesListLinks";;"Remove rows which are not pointing to a valid SpecliestListDetails (SL)
+ records i.e.those rows which have a value of SpeciesListName that does not
+ exist in the SL table.";;TRUE
+"removeBrokenVesselLinks";;"Remove rows which are not pointing to a valid VesselDetails (VD) records i.e.
+ those rows which have a value of VDid that does not exist in the VD table.";;TRUE
+"removePrefixFromVarNames";;"Remove table prefix from variable names";;TRUE
+"runChecksOnSelectionAndProbs";;"Run basic checks on selection methods and probabilities";;TRUE
+"setRDBESDataObjectDataTypes";;"For a given RDBESDataObject convert the required
+ columns to the correct data types.  (This function can cause an error if we
+ have data in the columns that can't be cast to the desired data type.)";;FALSE
+"sort.RDBESDataObject";;"Print method for RDBESDataObject";;FALSE
+"summary.RDBESDataObject";;"Print method for RDBESDataObject";;FALSE
+"validateRDBESDataObject";;"Check Whether an  RDBESDataObject  is in a Valid Format";;TRUE
+"validateRDBESDataObjectDataTypes";;"Checks the data types of the columns in an
+ RDBESDataObject against an expected list of data types.  Any differences
+ are returned";;FALSE
+"validateRDBESDataObjectDuplicates";;"check RDBES Raw Object Content
+ Private function to do some basic checks on
+ the content of the RDBESDataObject (e.g. all required field names are
+ present).  Function is only used by checkRDBESDataObject and should only
+ be passed a list of non-null objects";;FALSE
+"validateRDBESDataObjectFieldNames";;"check RDBES Data Object field names
+ Private function to do some checks on the columns of an RDBESDataObject -
+ 
+  are all required fields present? 2) are there any extra fields present?
+ It is used by validateRDBESDataObject() and should only be passed a list
+ of non-null objects
+";;FALSE
+"validateRDBESEstObject";;"Check whether an object is a valid RDBESEstObject";;TRUE
