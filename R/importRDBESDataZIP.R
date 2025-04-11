@@ -38,6 +38,7 @@ importRDBESDataZIP <- function(filenames,
   unzipFile <- function(x, tmp) {
 
     if (!file.exists(x)) {
+      warning(paste0("File ", x, " does not exist."))
       return()
     }
 
