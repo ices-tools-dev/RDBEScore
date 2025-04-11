@@ -22,49 +22,37 @@
 ##' ### Mathematical Logic:
 ##' Let:
 ##' \itemize{
-##'   \item \( W_{mean} \) be the mean weight for each group.
-##'   \item \( L_{mean} \) be the mean length for each group.
-##'   \item \( n_W \) be the number of weight measurements in each group.
-##'   \item \( N \) be the total number of measurements in the sample.
-##'   \item \( P \) be the proportion of the sample represented by each group.
-##'   \item \( I_W \) be the weight index for each group.
-##'   \item \( S \) be the sum of weight indices across all groups.
-##'   \item \( C \) be the total catch weight.
-##'   \item \( T_W \) be the total weight for each group.
-##'   \item \( C_{num} \) be the total catch number for each group.
+##'   \item \eqn{W_{mean}} be the mean weight for each group.
+##'   \item \eqn{L_{mean}} be the mean length for each group.
+##'   \item \eqn{n_W} be the number of weight measurements in each group.
+##'   \item \eqn{N} be the total number of measurements in the sample.
+##'   \item \eqn{P} be the proportion of the sample represented by each group.
+##'   \item \eqn{I_W} be the weight index for each group.
+##'   \item \eqn{S} be the sum of weight indices across all groups.
+##'   \item \eqn{C} be the total catch weight.
+##'   \item \eqn{T_W} be the total weight for each group.
+##'   \item \eqn{C_{num}} be the total catch number for each group.
 ##' }
 ##'
 ##' The calculations are as follows:
 ##' \enumerate{
 ##'   \item Proportion of sample:
-##'   \[
-##'   P = \frac{n_W}{N}
-##'   \]
+##'   \deqn{P = \frac{n_W}{N}}
 ##'
 ##'   \item Weight Index:
-##'   \[
-##'   I_W = P \times \left( \frac{W_{mean}}{1000} \right)
-##'   \]
+##'   \deqn{I_W = P \times \left( \frac{W_{mean}}{1000} \right)}
 ##'
 ##'   \item Sum of Weight Indices:
-##'   \[
-##'   S = \sum I_W
-##'   \]
+##'   \deqn{S = \sum I_W}
 ##'
 ##'   \item Total Weight Coefficient:
-##'   \[
-##'   \text{TWCoef} = \frac{C}{S}
-##'   \]
+##'   \deqn{\mathrm{TWCoef} = \frac{C}{S}}
 ##'
 ##'   \item Total Weight per Group:
-##'   \[
-##'   T_W = I_W \times \text{TWCoef}
-##'   \]
+##'   \deqn{T_W = I_W \times \mathrm{TWCoef}}
 ##'
 ##'   \item Total Catch Number per Group:
-##'   \[
-##'   C_{num} = \frac{T_W}{\left( \frac{W_{mean}}{1000} \right)}
-##'   \]
+##'   \deqn{C_{num} = \frac{T_W}{\left( \frac{W_{mean}}{1000} \right)}}
 ##' }
 ##'
 ##' @export
