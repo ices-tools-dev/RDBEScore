@@ -28,7 +28,7 @@ library(RDBEScore)
 
 ```{r}
 #the directory holding the data to import
-dataDir <- "./vignettes/vignetteData/"
+dataDir <- "./vignetteData/"
 ```
 
 

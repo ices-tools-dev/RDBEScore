@@ -130,6 +130,7 @@ agstrat_H1 <- Pckg_SDAResources_agstrat_H1 #valid
 agstrat_H1
 ```
 
+
 ```{r}
 
 #create the estimation object to estimate values on the SA table

@@ -636,10 +636,26 @@ SA_df<-data.frame(
 
 
 
+
+
 #====Builds final format===========
 
 
 RDBESlist = list(DE = DE_df,SD = SD_df, VS = VS_df, FT = FT_df, FO = FO_df, SS = SS_df, SA = SA_df)
+
+
+a<-RDBESlist
+a[c("TE","LO","OS","LE","CL","CE","BV","FM")] <- NULL
+a$SA[c("SAgeoDatBas","SAgeoSou","SAgeaDatBas","SAgearSou","SAtotWtMeaDatBas")] <- NA
+a$FO[c("FOfishDuraDatBas","FOgeoDatBas","FOgeoSou","FOgeaDatBas","FOgearSou")] <- NA
+a$SS[c("SStimeTotalDatBas","SSnumTotalDatBas")] <- NA
+a$FT$FTdomLanDate <- NA
+#a$IS <- data.frame(ISid = 1, SLid = 47865, IScommTaxon = 107254, ISsppCode = 107254)
+a$SL[c("SLcommTaxon","SLsppCode")] <- NULL
+Pckg_SDAResources_agstrat_H1 <- createRDBESDataObject(a, verbose = F)
+usethis::use_data(Pckg_SDAResources_agstrat_H1, overwrite = TRUE)
+
+stop("The new code stops here!")
 
 #id table
 a<-merge(DE_df["DEid"],SD_df[c("DEid","SDid")])
