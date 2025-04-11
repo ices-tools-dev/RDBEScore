@@ -1,52 +1,32 @@
-#' Title
+#' Estimate Numbers and Mean Values by Length or Age Class
 #'
-#' @param RDBESDataObj
-#' @param targetValue
-#' @param classUnits
-#' @param classBreaks
-#' @param LWparam
-#' @param lowerAux
-#' @param verbose
+#' The function is under development and does not work yet.
 #'
-#' @return
-#' @export
+#' @param RDBESDataObj A validated RDBESDataObject containing hierarchical sampling and biological data. Must include appropriate tables (e.g., CL, CE, SA, FM, or BV) depending on estimation requirements.
+#' @param targetValue A character string specifying the type of composition to estimate. Options are "LengthComp" or "AgeComp".
+#' @param classUnits Units of the class intervals for length or age, typically "mm" for millimeters or "cm" for centimeters. Used in defining class intervals.
+#' @param classBreaks A numeric vector of three values: minimum value, maximum value, and class width (e.g., c(100, 300, 10)). Defines the class intervals for grouping lengths or ages.
+#' @param LWparam A numeric vector of length two specifying parameters (a, b) for the weight-length relationship (W = a * L^b). Used if no direct weights are available but lengths are provided.
+#' @param lowerAux A numeric or character vector referencing a variable in the SA table used as an auxiliary variable for ratio estimation (e.g., sample weights, sub-sample expansion factors).
+#' @param verbose Logical; if TRUE, detailed messages are printed during processing.
 #'
-#' @examples
-
-
-
-
+#' @return A list or data.table containing the estimated numbers at length or age and associated mean values such as weight and length, depending on input and target type.
 # InterCatch age composition data
-
 # Numbers at age
 # Mean weight at age
 # Mean length at age
-
 # Intercatch length composition data
-
 # Numbers at legth
 # Mean weight at length
-
-
 ## Measure indv weight of fish
 ## LW relationship: a, b parameters
-
-
 # For now assume we have all the data we need
 # Counts, indv weights, lengths (mm) and ages
-
-
-
 # TODO check differences if length classes are defined later
 # Unit conversion later step : for LC
-
 # TODO add check for unique sampling scheme
 # TODO add an argument to toggle stratification in estimation on/off
-
 # TODO need to implement the BV conversion from typeMeas to typeAssess
-
-
-
 doEstimationRatio <- function(RDBESDataObj,
                               targetValue = "LengthComp",
                               classUnits = "mm",

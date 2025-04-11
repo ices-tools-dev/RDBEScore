@@ -4,7 +4,15 @@
 \alias{estimMC}
 \title{Multiple Count Estimator for Population Total and Variance}
 \usage{
-estimMC(y, sampled, total, method = "SRSWOR", selProb = NULL, incProb = NULL)
+estimMC(
+  y,
+  sampled,
+  total,
+  method = "SRSWOR",
+  selProb = NULL,
+  incProb = NULL,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{y}{numeric variable to be estimated}
@@ -18,6 +26,9 @@ estimMC(y, sampled, total, method = "SRSWOR", selProb = NULL, incProb = NULL)
 \item{selProb}{the selection probabilities (if known)}
 
 \item{incProb}{the inclusion probabilities (if known)}
+
+\item{verbose}{(Optional) Set to TRUE if you want informative text printed
+out, or FALSE if you don't.  The default is FALSE.}
 }
 \value{
 list of 7 elements including the population mean, total

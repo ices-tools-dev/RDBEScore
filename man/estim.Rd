@@ -4,7 +4,15 @@
 \alias{estim}
 \title{Generic function for estimation of population total and variance}
 \usage{
-estim(y, enk, enkl, method = "SRSWOR", estFunction, varFunction)
+estim(
+  y,
+  enk,
+  enkl,
+  method = "SRSWOR",
+  estFunction,
+  varFunction,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{y}{numeric variable to be estimated}
@@ -20,6 +28,9 @@ parameters y and enk}
 
 \item{varFunction}{the function to use to estimate variance given
 parameters y,enk and enkl}
+
+\item{verbose}{(Optional) Set to TRUE if you want informative text printed
+out, or FALSE if you don't.  The default is FALSE.}
 }
 \value{
 list of 7 elements including the population mean, total

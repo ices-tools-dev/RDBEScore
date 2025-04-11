@@ -1,4 +1,4 @@
-#' exportEstimationResultsToInterCatchFormat
+#' Export Estimation Results to InterCatch Exchange Format
 #'
 #'This function transforms the estimation results into the InterCatch format.
 #'
@@ -8,7 +8,10 @@
 #' @param verbose (Optional) Set to TRUE if you want informative text printed
 #' out, or FALSE if you don't.  The default is FALSE.
 #'
-#' @return
+#' @return A character vector representing the flattened InterCatch exchange
+#'  format. The vector includes all fields from the HI, SI, and SD components,
+#'  ordered by their associated keys, and is suitable for writing to an
+#'  InterCatch-formatted exchange file.
 #' @export
 #'
 exportEstimationResultsToInterCatchFormat <- function(dataToExport,
