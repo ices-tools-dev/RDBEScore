@@ -26,11 +26,11 @@ This function takes an upper table field name, values for that field, a list of 
 and a target lower level table name. It returns the rows of the target lower level table
 that are associated with the given values of the upper table field.
 NB! running on the RDBESDataObject will work properly if it is sorted by default the tables are not
-in the correct order for a spesific hierarchy.
+in the correct order for a specific hierarchy.
 }
 \examples{
-#it is important to run these functions only on sorted RDBESDataObject
-lowerTblData("TEid", c(4), sort(H8ExampleEE1), "SA", T)
+# it is important to run the function only on the sorted RDBESDataObject
+RDBEScore:::lowerTblData("TEid", c(4), sort(H8ExampleEE1), "SA", TRUE)
 
 DE <- data.table::data.table(DEid = c(1, 2, 3, 4), SDid = c(1, 2, 3, 4))
 SD <- data.table::data.table(SDid = c(1, 2, 3, 4), TEid = c(1, 2, 3, 4))
@@ -39,5 +39,6 @@ VS <- data.table::data.table(TEid = c(1, 2, 3, 4), VSid = c(1, 2, 3, 4))
 LE <- data.table::data.table(VSid = 1:5, LEid = 1:5, value = c(10, 20, 3, 4, 6))
 tblsSprat <- list( DE = DE ,SD = SD, TE = TE, VS = VS, LE = LE )
 
-lowerTblData("TEid", c(4), tblsSprat, "LE", T)
+RDBEScore:::lowerTblData("TEid", c(4), tblsSprat, "LE", TRUE)
 }
+\keyword{internal}

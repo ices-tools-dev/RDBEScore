@@ -56,6 +56,7 @@
 ##' }
 ##'
 ##' @export
+##' @importFrom stats formula
 doBVestimCANUM <- function(bv, addColumns,
                            classUnits = "Ageyear",
                            classBreaks = 1:8,

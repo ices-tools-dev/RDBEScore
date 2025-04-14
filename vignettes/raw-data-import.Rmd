@@ -28,7 +28,10 @@ library(RDBEScore)
 
 ```{r}
 #the directory holding the data to import
-dataDir <- "./vignetteData/"
+dataDir <- "./yourDataDirectory/"
+
+#for demonstration purposes we will use the example data included in the package
+dataDir <- paste0(system.file("extdata", package = "RDBEScore"), "/")
 ```
 
 

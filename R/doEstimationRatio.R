@@ -27,6 +27,7 @@
 # TODO add check for unique sampling scheme
 # TODO add an argument to toggle stratification in estimation on/off
 # TODO need to implement the BV conversion from typeMeas to typeAssess
+#' @importFrom utils tail
 doEstimationRatio <- function(RDBESDataObj,
                               targetValue = "LengthComp",
                               classUnits = "mm",
