@@ -29,7 +29,7 @@ NB! running on the RDBESDataObject will work properly if it is sorted by default
 in the correct order for a spesific hierarchy.
 }
 \examples{
-#it is important to run these functions only on sorted RDBESDataObject
+# it is important to run these functions only on sorted RDBESDataObject
 lowerTblData("TEid", c(4), sort(H8ExampleEE1), "SA", T)
 
 DE <- data.table::data.table(DEid = c(1, 2, 3, 4), SDid = c(1, 2, 3, 4))

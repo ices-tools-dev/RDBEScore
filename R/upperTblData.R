@@ -22,7 +22,7 @@
 #'  provided values for the specified field.
 #'
 #' @examples
-#' it is important to run these functions only on sorted RDBESDataObject
+#' # it is important to run these functions only on sorted RDBESDataObject
 #' upperTblData("SAid", c(1), sort(H8ExampleEE1), "DE", verbose = TRUE)
 #' DE <- data.table(DEid = c(1, 2))
 #' SD <- data.table(SDid = c(1, 2), DEid = c(1, 2))
