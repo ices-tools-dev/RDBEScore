@@ -36,10 +36,11 @@ in the correct order for a spesific hierarchy.
 }
 \examples{
 # it is important to run these functions only on sorted RDBESDataObject
-upperTblData("SAid", c(1), sort(H8ExampleEE1), "DE", verbose = TRUE)
-DE <- data.table(DEid = c(1, 2))
-SD <- data.table(SDid = c(1, 2), DEid = c(1, 2))
-VS <- data.table(VSid = c(1, 2),SDid =c(1,2),  value = c(10, 20))
+RDBEScore:::upperTblData("SAid", c(1), sort(H8ExampleEE1), "DE", verbose = TRUE)
+DE <- data.table::data.table(DEid = c(1, 2))
+SD <- data.table::data.table(SDid = c(1, 2), DEid = c(1, 2))
+VS <- data.table::data.table(VSid = c(1, 2),SDid =c(1,2),  value = c(10, 20))
 tbls <- list(DE = DE, SD = SD, VS = VS)
-upperTblData("VSid", c(1), tbls, "DE")
+RDBEScore:::upperTblData("VSid", c(1), tbls, "DE")
 }
+\keyword{internal}
