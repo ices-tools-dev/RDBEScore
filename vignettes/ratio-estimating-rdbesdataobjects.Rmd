@@ -3,7 +3,7 @@ title: "Ratio Estimation of Lenght Composition from RDBESDataObjects"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Estimating Population parameters from RDBESDataObjects}
+  %\VignetteIndexEntry{Ratio Estimation of Lenght Composition from RDBESDataObjects}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -55,7 +55,7 @@ For the simplest case of estimation we need the RDBESDataObject with CS tables a
 CLfieldstoSum <- c("CLoffWeight")
 ```
 
-The most important thing in this estimation is to get the same strata for the CS and CL tables. This means we want to take the samples from the same area, with the same gear and the same species. Exacctly how this is done depends on the upper and lower hierarchy used and how the sampling is stratified. In the following example we are using the lower hierarchy C meaning that we are extracting the BV data as the biological data. 
+The most important thing in this estimation is to get the same strata for the CS and CL tables. This means we want to take the samples from the same area, with the same gear and the same species. Exactly how this is done depends on the upper and lower hierarchy used and how the sampling is stratified. In the following example we are using the lower hierarchy C meaning that we are extracting the BV data as the biological data. 
 
 ```{r}
 #get the first quarter data from CS 
