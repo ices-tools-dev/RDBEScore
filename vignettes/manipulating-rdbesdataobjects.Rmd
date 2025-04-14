@@ -134,7 +134,7 @@ myFilteredObject <- filterRDBESDataObject(myH1RawObject,
                                          valuesToFilter = myValues )
 
 # Number of rows in each non-null table
-unlist(summary(myFilteredObject)$rows)
+print(myFilteredObject)
 
 validateRDBESDataObject(myFilteredObject, verbose = FALSE)
 ```
