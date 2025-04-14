@@ -62,7 +62,7 @@ fixProbs <- function(myH1RawObject){
 
 
 ## Step 1) load and prepare some test data
-myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = dirH1)
+myH1RawObject <- createRDBESDataObject(rdbesExtractPath = dirH1)
 #Filter our data for WGRDBES-EST TEST 1, 1965, H1
 myCatchFraction <- "Lan"
 mySpecies <- 1019159

@@ -20,8 +20,10 @@ newRDBESDataObject(
   BV = NULL,
   VD = NULL,
   SL = NULL,
+  IS = NULL,
   CL = NULL,
-  CE = NULL
+  CE = NULL,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -55,9 +57,14 @@ newRDBESDataObject(
 
 \item{SL}{Data table of RDBES DE data or null}
 
+\item{IS}{Data table of RDBES DE data or null}
+
 \item{CL}{Data table of RDBES DE data or null}
 
 \item{CE}{Data table of RDBES DE data or null}
+
+\item{verbose}{(Optional) Set to TRUE if you want informative text printed
+out, or FALSE if you don't.  The default is FALSE.}
 }
 \value{
 a named list

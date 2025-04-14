@@ -8,9 +8,9 @@ filterAndTidyRDBESDataObject(
   RDBESDataObjectToFilterAndTidy,
   fieldsToFilter,
   valuesToFilter,
-  killOrphans = FALSE,
-  verboseOrphans = FALSE,
-  verboseBrokenVesselLinks = FALSE
+  killOrphans = TRUE,
+  verbose = FALSE,
+  strict = TRUE
 )
 }
 \arguments{
@@ -20,11 +20,13 @@ filterAndTidyRDBESDataObject(
 
 \item{valuesToFilter}{A vector of the field values you wish to filter for.}
 
-\item{killOrphans}{Controls if orphan rows are removed. Default is \code{FALSE}.}
+\item{killOrphans}{Controls if orphan rows are removed. Default is TRUE.}
 
-\item{verboseOrphans}{Controls if verbose output for orphan rows is printed. Default is \code{FALSE}.}
+\item{verbose}{(Optional) Set to TRUE if you want informative text printed
+out, or FALSE if you don't.  The default is FALSE.}
 
-\item{verboseBrokenVesselLinks}{Controls if verbose output for broken vessel links is printed. Default is \code{FALSE}.}
+\item{strict}{(Optional) This function validates its input data - should
+the validation be strict? The default is TRUE.}
 }
 \value{
 The filtered input object of the same class as \code{RDBESDataObjectToFilterAndTidy}.
@@ -32,7 +34,7 @@ The filtered input object of the same class as \code{RDBESDataObjectToFilterAndT
 \description{
 This function filters an RDBESDataObject based on specified fields and values, and can optionally remove any orphan records.
 The returned object will include all rows which either: a) do not include any of the field names in \code{fieldsToFilter}, or b) do include the field names and have one of the allowed values in \code{valuesToFilter}.
-If \code{killOrphans} is set to \code{TRUE}, the function will remove orphaned rows. The default is \code{FALSE}.
+If \code{killOrphans} is set to \code{TRUE}, the function will remove orphaned rows. The default is \code{TRUE}.
 }
 \examples{
 \dontrun{

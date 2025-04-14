@@ -7,6 +7,7 @@
 importRDBESDataDFS(
   myList,
   castToCorrectDataTypes = TRUE,
+  verbose = FALSE,
   strict = TRUE,
   addMissingColumns = FALSE,
   ...
@@ -18,6 +19,9 @@ data frame with an RDBES two-letter name (e.g. "DE").}
 
 \item{castToCorrectDataTypes}{logical. Indicates whether to cast the columns
 to the correct data types. Default is \code{TRUE}.}
+
+\item{verbose}{(Optional) Set to TRUE if you want informative text printed
+out, or FALSE if you don't.  The default is FALSE.}
 
 \item{strict}{logical. Indicates level of validation of the \code{RDBESDataObject}
 it creates - should the validation be strict? Default is \code{TRUE}.}
