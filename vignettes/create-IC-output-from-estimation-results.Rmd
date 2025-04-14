@@ -29,7 +29,7 @@ library(RDBEScore)
 # load an example dataset
 
 # H1 directory
-dirH1 <- "../tests/testthat/h1_v_1_19_26/"
+dirH1 <- "../tests/testthat/h1_v_20250211/"
 
 fixProbs <- function(myH1RawObject){
 
@@ -62,7 +62,7 @@ fixProbs <- function(myH1RawObject){
 
 
 ## Step 1) load and prepare some test data
-myH1RawObject <- createRDBESDataObject(rdbesExtractPath = dirH1)
+myH1RawObject <- createRDBESDataObject(input  = dirH1)
 #Filter our data for WGRDBES-EST TEST 1, 1965, H1
 myCatchFraction <- "Lan"
 mySpecies <- 1019159
