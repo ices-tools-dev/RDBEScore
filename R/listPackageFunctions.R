@@ -1,12 +1,12 @@
 #' Extract Functions and Descriptions from an R Package
 #'
-#' This function extracts the list of functions contained within a specified R package and retrieves a brief description for each function from the package documentation. The description is obtained by parsing the Rd file associated with each function to extract the text from the \code{\title} field. In addition, the function determines whether each function is exported from the package by comparing against the package’s exported names.
+#' This function extracts the list of functions contained within a specified R package and retrieves a brief description for each function from the package documentation. The description is obtained by parsing the Rd file associated with each function to extract the text from the \code{\\title} field. In addition, the function determines whether each function is exported from the package by comparing against the package’s exported names.
 #'
 #' @param pkg A character string or an unquoted name specifying the package from which to extract functions. The package must be installed and accessible.
 #'
 #' @return A data frame with three columns. The \code{Function} column lists the names of the functions found in the package. The \code{Description} column contains the brief descriptions extracted from each function’s documentation, and the \code{Exported} column is a logical vector indicating whether the function is exported from the package.
 #'
-#' @details The function first accesses the package namespace using \code{asNamespace} and retrieves all objects using \code{ls}. It filters these objects to include only functions. For each function, the associated help file is retrieved using \code{utils::help} and the Rd file is extracted with \code{utils:::.getHelpFile}. The internal helper function \code{getRdTitle} is then used to parse the Rd object and extract the text in the \code{\title} field. Finally, the function assembles the output into a data frame that also includes an indicator of whether each function is exported.
+#' @details The function first accesses the package namespace using \code{asNamespace} and retrieves all objects using \code{ls}. It filters these objects to include only functions. For each function, the associated help file is retrieved using \code{utils::help} and the Rd file is extracted with \code{utils:::.getHelpFile}. The internal helper function \code{getRdTitle} is then used to parse the Rd object and extract the text in the \code{\\title} field. Finally, the function assembles the output into a data frame that also includes an indicator of whether each function is exported.
 #'
 #' @examples
 #' \dontrun{
@@ -28,7 +28,7 @@ listPackageFunctions <- function(pkg) {
     h <- utils::help(f, package = as.character(pkg))
     desc <- ""
     if (length(h) > 0) {
-      rd <- tryCatch(utils:::.getHelpFile(h), error = function(e) NULL)
+      rd <- tryCatch(getHelpFile(h), error = function(e) NULL)
       if (!is.null(rd)) {
         desc <- getRdTitle(rd)
       }
@@ -42,9 +42,9 @@ listPackageFunctions <- function(pkg) {
 
 #' Extract Title from an Rd Object
 #'
-#' This internal helper function traverses an Rd object to extract the text from the \code{\title} field. It is used by \code{listPackageFunctions} to obtain a concise description for each documented function.
+#' This internal helper function traverses an Rd object to extract the text from the \code{\\title} field. It is used by \code{listPackageFunctions} to obtain a concise description for each documented function.
 #'
-#' @param rd An Rd object typically obtained via \code{utils:::.getHelpFile}.
+#' @param rd An Rd object typically obtained via function like \code{utils:::.getHelpFile}.
 #'
 #' @return A character string containing the title extracted from the Rd object. If the title is not found, an empty string is returned.
 #'
@@ -59,3 +59,50 @@ getRdTitle <- function(rd) {
   }
   title
 }
+
+#' Get Help File from Rd Database
+#'
+#' @keywords internal
+getHelpFile <- function (file) {
+  fetchRdDB <-  function (filebase, key = NULL)  {
+      fun <- function(db) {
+        vals <- db$vals
+        vars <- db$vars
+        datafile <- db$datafile
+        compressed <- db$compressed
+        envhook <- db$envhook
+        fetch <- function(key) lazyLoadDBfetch(vals[key][[1L]],
+                                               datafile, compressed, envhook)
+        if (length(key)) {
+          if (key %notin% vars)
+            stop(gettextf("No help on %s found in RdDB %s",
+                          sQuote(key), sQuote(filebase)), domain = NA)
+          fetch(key)
+        }
+        else {
+          res <- lapply(vars, fetch)
+          names(res) <- vars
+          res
+        }
+      }
+      res <- lazyLoadDBexec(filebase, fun)
+      if (length(key))
+        res
+      else invisible(res)
+  }
+  path <- dirname(file)
+  dirpath <- dirname(path)
+  if (!file.exists(dirpath))
+    stop(gettextf("invalid %s argument", sQuote("file")),
+         domain = NA)
+  pkgname <- basename(dirpath)
+  RdDB <- file.path(path, pkgname)
+  if (!file.exists(paste0(RdDB, ".rdx")))
+    stop(gettextf("package %s exists but was not installed under R >= 2.10.0 so help cannot be accessed",
+                  sQuote(pkgname)), domain = NA)
+  fetchRdDB(RdDB, basename(file))
+}
+
+
+
+
