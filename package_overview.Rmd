@@ -1,0 +1,311 @@
+---
+title: "RDBEScore: Using R for ICES Regional Database & Estimation System (RDBES) Data"
+output:
+  powerpoint_presentation: 
+    reference_doc: "./data-raw/styles.pptx"
+    slide_level: 2
+    keep_md: true
+    incremental: true
+---
+
+## Importing RDBES Data
+
+The aim of this document is to outline the basic workflow of importing data downloaded from the [ICES Regional Database & Estimation System (RDBES)](https://rdbes.ices.dk/#/) or a `list` object containing data frames (or data.tables) into `R` using the `RDBEScore` package.
+
+The function **createRDBESDataObject** is intended to directly import Commercial Landing (CL), Commercial Effort (CE) and Commercial Sampling (CS) tables downloaded from [RDBES](https://rdbes.ices.dk/#/).
+
+## Introducton
+
+RDBEScore is an R package developed to facilitate the analysis of data from the ICES Regional Database and Estimation System (RDBES). The package provides functions to:
+
+- import functions like `createRDBESDataObject` and `validateRDBESDataObject` 
+- manipulate functions like `filterAndTidyRDBESDataObject`, `combineRDBESDataObjects` and `removeBrokenVesselLinks`
+- analyse functions like 
+
+data from the RDBES. The package is designed to work with data from the RDBES, which is a relational database system used by ICES to store data from regional sampling programmes. The `RDBEScore` package is intended to be used by national data coordinators, data analysts, and scientists working with data from the RDBES.
+
+
+
+## RDBEScore package
+
+The package can be found on [RDBEScore GitHub](https://github.com/ices-tools-dev/RDBEScore/tree/dev)
+
+The best way to get started is to read the package documentation and the vignettes. The package documentation can be found on the [RDBEScore GitHub pages](https://ices-tools-dev.github.io/RDBEScore/).
+
+These resources provide information on how to install the package, how to use the functions, and how to contribute to the development of the package. The following will now demonstrate some of the functionality of the package that is available now at the **dev** branch.
+
+
+## Load RDBEScore Development Version
+
+The suggested way to install the   package is from the `main` or development (`dev`) branch on GitHub using the `remotes` package.
+
+```{r eval=FALSE, echo=TRUE}
+install.packages("remotes")
+remotes::install_github("ices-tools-dev/RDBEScore@dev", build_vignettes = TRUE)
+```
+
+Then you can load the package using:
+
+```{r, message=TRUE, warning=TRUE}
+library(RDBEScore)
+```
+
+
+To see the complete list of vignettes available in the package use the following command:
+```{rm echo=TRUE, eval=FALSE}
+browseVignettes(package = "RDBEScore")
+```
+
+
+
+## Importing zipped files
+
+It can directly import the `.zip` archive from the RDBES download containing all mandatory hierarchy tables plus VD and SL:
+
+```{r}
+importedH1 <- createRDBESDataObject(input = "./vignettes/vignetteData/H1_2023_10_16.zip")
+#print the not NULL table names
+names(importedH1[!unlist(lapply(importedH1, is.null))])
+```
+
+For this to work the zip file should contain these tables in the root of the zip file.
+
+## Data Object Structure
+
+The easiest way to get a glimpse of the imported data hierarchy and single table row counts is just to print it. The information also includes the range of number sampled and number total for each table together with the selection method and number of rows.
+
+```{r, size="tiny"}
+#calls the print function 
+importedH1
+```
+
+## Import Formats
+
+It can import the CL, CE, VD or SL tables `.zip` archives, but will include all other tables as `NULL`:
+
+```{r}
+importedSL <- createRDBESDataObject(input = "./vignettes/vignetteData/HSL_2023_10_16.zip")
+#print the not NULL table names
+importedSL
+```
+
+## Importing a List of Data Frames
+
+It can also import a `list` object containing data frames (or data.tables). However, it should be noted that this type of import bypasses the RDBES upload data integrity checks.
+
+```{r}
+#list of data frames 
+listOfDfsH1 <- readRDS("./vignettes/vignetteData/H1_2023_10_19.rds")
+importedList <- createRDBESDataObject(listOfDfsH1)
+```
+
+## Object class RDBESDataObject
+
+It should be noted that the objects created are of the S3 class "**RDBESDataObject**". The class has defined **print()**, **summary()** and **sort()** methods. For more info on these see vignette [Manipulating RDBESDataObjects](https://ices-tools-dev.github.io/RDBEScore/articles/manipulating-rdbesdataobjects.html). 
+
+
+
+### validate RDBESDataObject
+
+RDBESDataObject structure can be validated using the **validateRDBESDataObject()** function.
+
+```{r, size="small"}
+validateRDBESDataObject(importedList, verbose = TRUE)
+```
+
+
+## Filtering RDBESDataObjects
+
+RDBESDataObjects can be filtered using the **filterRDBESDataObject()** function - this allows the RDBESDataObject to be filtered by any field.  A typical use of filtering might be to extract all data collected in a particular ICES division.  
+
+
+```{r filter}
+myFields <- c("SDctry","VDctry","VDflgCtry","FTarvLoc")
+myValues <- c("ZW","ZWBZH","ZWVFA" )
+
+myFilteredObject <- filterRDBESDataObject(H1Example,
+                                         fieldsToFilter = myFields,
+                                         valuesToFilter = myValues )
+
+# Number of rows in each non-null table
+unlist(summary(myFilteredObject)$rows)
+
+validateRDBESDataObject(myFilteredObject, verbose = FALSE)
+```
+
+## Remowing Unlinked Data
+
+It is important to note that filtering is likely to result in "orphan" rows being produced so it is usual to also apply the **findAndKillOrphans()** function to the filtered data to remove these records.
+
+```{r clean1}
+
+myFilteredObjectNoOrphans <- 
+  findAndKillOrphans(objectToCheck = myFilteredObject, verbose = FALSE)
+
+validateRDBESDataObject(myFilteredObjectNoOrphans, verbose = FALSE)
+
+
+```
+
+Again to see more details on the functions see the vignette [Manipulating RDBESDataObjects](https://ices-tools-dev.github.io/RDBEScore/articles/manipulating-rdbesdataobjects.html).
+
+
+## Getting Subsets of RDBESDataObject Tables
+
+Sometimes it we want to see how a field or values in the **RDBESDataObject** are connected to other tables.
+One use case would be e.g. to see when a specific Landing Event (LE) occurred.For this we can use the **getLinkedDataFromLevel()** function. 
+
+```{r}
+#get the TE table corresponding to the first LEid in the H8ExampleEE1 object
+ld <- getLinkedDataFromLevel("LEid", c(1), H8ExampleEE1, "TE", verbose = TRUE)
+knitr::kable(ld[,c(1:2,5:8 )])
+```
+
+## Getting Subsets of RDBESDataObject Tables
+
+Similarly we can get the subset of the LE table corresponding to a specific value in the TE table. This does not have to be the *id* field, but can be any field in the table.
+
+```{r}
+#get the SA table corresponding to the first 2 TEids in the H8ExampleEE1 object
+ld <- getLinkedDataFromLevel("TEid", c(1,2), H8ExampleEE1, "SA", verbose = TRUE)
+knitr::kable(ld[,1:5])
+```
+
+Also lower hierarchy tables can be used to get the subset of the higher hierarchy tables.
+
+```{r}
+#which vessel caught those fish?
+ld <- getLinkedDataFromLevel("BVfishId", c("410472143", "410472144"), H8ExampleEE1, "VS", TRUE)
+knitr::kable(ld[,1:5])
+```
+
+
+## Estimating
+
+The RDBEScore package aims to provide a set of functions to estimate values from the RDBES data. The development of the estimation functions is ongoing and the current version provides functions to estimate values using the Multiple Count Estimator (MCE) for the upper hierarchies.
+
+To estimate the last level values for a single FMid so that estimation is done for one top level record 
+```{r}
+FMidSel <- "4033243"
+BV <- H1Example$BV[H1Example$BV$FMid == FMidSel,]
+```
+
+
+## Single level Multiple Count Estimator
+
+This **estimMC(...)** function is actually the core of the estimation functions running on multiple levels as well. For implementation details see: [Variance calculation functions using "Multiple count" estimator](https://github.com/ices-tools-dev/RDBEScore/issues/13) 
+
+```{r, size="small"}
+estimMC(as.numeric(BV$BVvalueMeas),
+        BV$BVnumSamp,
+        BV$BVnumTotal, 
+        method=unique(BV$BVselectMeth))
+```
+
+## Estimation workflow
+
+Right now estimation actually  is done on a *RDBESEstObject* that is generate from *RDBESDataObject* using **createRDBESEstObject(...)**. 
+
+In the next sections we will use data from R packages [survey](https://CRAN.R-project.org/package=survey) and [SDAResources](https://CRAN.R-project.org/package=SDAResources) that are converted into the *RDBESDataObject* to demonstrate the estimation procedure.
+
+For more detailed information on the estimation functions see the vignette [Estimating Population parameters from RDBESDataObjects](https://ices-tools-dev.github.io/RDBEScore/articles/estimating-rdbesdataobjects.html).
+
+
+```{r}
+#create the estimation object to estimate values on the SA table
+estObj <- createRDBESEstObject(Pckg_SDAResources_agstrat_H1, 1, "SA")
+```
+
+## Estimation on Multiple Strata
+
+```{r}
+res <- doEstimationForAllStrata(estObj, "SAsampWtMes")
+
+# Get the estimated total and mean  for "SAsampWtMes" for the VS stratum "NC"
+columns2Get <- c("est.total","est.mean", "se.total","se.mean")
+round(unlist(res[res$recType == "VS" & res$stratumName == "NC" ,columns2Get]),1)
+ 
+```
+
+How to interpret these results in the above example?
+
+ - *est.total* - total SAsampWtMes sampled weight per vessel per year in the stratum
+ - *est.mean* - mean SAsampWtMes per vessel per year in the stratum (i.e  how much in total one ship on average contributed to the sampled total in this stratum)
+ 
+
+
+## Basic Ratio Estimation
+
+In practice the data submitters have to prepare Intercatch data call tables. In the future the estimation functions should be made so that they estimate the values for these tables. 
+
+in the **dev** branch there is a function **doBVestimCANUM(...)** that can be used for a very basic estimation of the total catch at number (CANUM) for a specified biological variable, such as age or length. 
+
+
+### Simple Estimation Example
+
+
+For the simplest case of estimation we need the **RDBESDataObject** with CS tables and a CL table. In the following example we will estimate the total number of sprat caught in the area *27.3.d.28.1* with the gear *OTM_SPF_16-31_0_0* for the first quarter of the year.
+
+```{r}
+#From the commertial landings table we need to get the total weight of the catches
+CLfieldstoSum <- c("CLoffWeight")
+```
+
+## Getting the Right Data
+
+The most important thing in this estimation is to get the same strata for the CS and CL tables. This means we want to take the samples from the same area, with the same gear and the same species. Exactly how this is done depends on the upper and lower hierarchy used and how the sampling is stratified. In the following example we are using the lower hierarchy C meaning that we are extracting the BV data as the biological data. 
+
+```{r}
+#get the first quarter data from CS 
+strataListCS <- list(LEarea="27.3.d.28.1",
+                     LEmetier6 = "OTM_SPF_16-31_0_0",
+                     TEstratumName = month.name[1:3],
+                    SAspeCodeFAO = "SPR")
+
+#get the first quarter data from CL table
+strataListCL <- list(CLarea="27.3.d.28.1",
+                     CLquar = 1,
+                     CLmetier6 = "OTM_SPF_16-31_0_0",
+                     CLspecFAO = "SPR")
+```
+
+
+## Adding CL data to the lower hierarchy
+
+There is a function in development **addCLtoLowerCS(...)** that can be used to add the CL data to the lower hierarchy.
+
+```{r}
+#we are using the lower hierarchy C meaning that we are extracting the BV data
+#as the biological data
+biolCLQ1 <- addCLtoLowerCS(H8ExampleEE1, strataListCS, strataListCL,
+                         combineStrata =T, lowerHierarchy = "C",
+                         CLfields = CLfieldstoSum)
+```
+
+## Estimation based on CL and BV
+
+To estimate the total number of sprat caught in the area 27.3.d.28.1 with the gear OTM_SPF_16-31_0_0 for the first quarter of the year we need to use the function **doBVestimCANUM(...)**. For more details on the function see the vignette in the **dev** branch.
+The output table should be enough to populate a classic InterCatch data call table. 
+
+```{r canNum}
+lenCANUMQ1 <- doBVestimCANUM(biolCLQ1, c("sumCLoffWeight"),
+             classUnits = "Lengthmm",
+             classBreaks = seq(70,130,10),
+             verbose = FALSE)
+
+knitr::kable(lenCANUMQ1[, c("Group", "WeightgMean", "LengthmmMean", "totNum")],
+             digits = 2)
+```
+
+
+## Issues Reporting
+
+If something is not working as expected, or if you have a feature request, please open an issue on [RDBEScore GitHub](https://github.com/ices-tools-dev/RDBEScore/issues)
+
+The general idea of the package is to provide a set of tools to work with the RDBES data in R. The package is under development and we are looking for feedback from users to improve the package.
+
+Of course you can also contribute to the development of the package by forking the repository and submitting a pull request.
+
+
+
+

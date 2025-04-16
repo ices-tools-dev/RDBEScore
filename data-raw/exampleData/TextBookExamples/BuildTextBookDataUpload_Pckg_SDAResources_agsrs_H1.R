@@ -96,7 +96,7 @@ DE_df<-data.frame(
 		  DEauxiliaryVariableTotal = "",
 		  DEauxiliaryVariableValue = "",
 		  DEauxiliaryVariableName = "",
-		  DEauxiliaryVariableUnit = "", 
+		  DEauxiliaryVariableUnit = "",
 		  stringsAsFactors=FALSE
 			)
 
@@ -194,12 +194,12 @@ VS_df <- data.frame(
   VSselectionProbCluster = "",
   VSinclusionProbCluster = "",
   VSsampled = "Y",#M
-  VSreasonNotSampled = "", 
+  VSreasonNotSampled = "",
   VSnonResponseCollected = "N",
   VSauxiliaryVariableTotal = "",
   VSauxiliaryVariableValue = "",
   VSauxiliaryVariableName = "",
-  VSauxiliaryVariableUnit = "", 
+  VSauxiliaryVariableUnit = "",
   stringsAsFactors=FALSE
   )
 
@@ -294,7 +294,7 @@ FT_df <- data.frame(
   FTauxiliaryVariableTotal = "",
   FTauxiliaryVariableValue = "",
   FTauxiliaryVariableName = "",
-  FTauxiliaryVariableUnit = "", 
+  FTauxiliaryVariableUnit = "",
   stringsAsFactors=FALSE
 )
 
@@ -432,7 +432,7 @@ FO_df <- data.frame(
 	FOauxiliaryVariableTotal = "",
 	FOauxiliaryVariableValue = "",
 	FOauxiliaryVariableName = "",
-	FOauxiliaryVariableUnit = "", 
+	FOauxiliaryVariableUnit = "",
 stringsAsFactors=FALSE
 )
 
@@ -518,8 +518,8 @@ SS_df<-data.frame(
 	SSauxiliaryVariableTotal = "",
 	SSauxiliaryVariableValue = "",
 	SSauxiliaryVariableName = "",
-	SSauxiliaryVariableUnit = "", 
-	stringsAsFactors=FALSE	
+	SSauxiliaryVariableUnit = "",
+	stringsAsFactors=FALSE
 )
 
 #====SA===========
@@ -633,7 +633,7 @@ SA_df<-data.frame(
 		SAauxiliaryVariableTotal = "",
 		SAauxiliaryVariableValue = "",
 		SAauxiliaryVariableName = "",
-		SAauxiliaryVariableUnit = "", 
+		SAauxiliaryVariableUnit = "",
 		stringsAsFactors=FALSE
 )
 
@@ -739,9 +739,9 @@ write.table(b$V1, file=paste0(dir_outputs,filename_output_CS), col.names=FALSE, 
 # -----Clean SL after dowload-----------------
 
 # cleans excess of SL rows frequently present in download
-	# note:
-		# since it is an example - nicer to do here, fixing directly data input to scripts than patching it over multiple scripts later
-		# since example data are very simple, a simple select is done on specieaListName - this may not be sufficient in some minor cases
+# note:
+# since it is an example - nicer to do here, fixing directly data input to scripts than patching it over multiple scripts later
+# since example data are very simple, a simple select is done on specieaListName - this may not be sufficient in some minor cases
 
 filename_download <- "2022_10_14_062441.zip"
 unzip(paste0(dir_outputs, filename_download), exdir = paste0(dir_outputs,"tmp"))
@@ -750,7 +750,7 @@ tmp<-fread(paste0(dir_outputs,"tmp/SpeciesList.csv"))
 tmp<-tmp[SLspeciesListName==project_name_outputs,]
 write.csv(tmp, file=paste0(dir_outputs,"tmp/SpeciesList.csv"), quote=F, row.names=F)
 # re-zips the file, puts it in final dir and deletes tmp dir
-library(zip)
+
 zip::zip(zipfile = paste0(project_name_outputs,".zip"), files =paste0(dir_outputs,"tmp/",dir(paste0(dir_outputs,"tmp"))), mode="cherry-pick")
 unlink(paste0(dir_outputs,"tmp"), force=T, recursive = T)
 

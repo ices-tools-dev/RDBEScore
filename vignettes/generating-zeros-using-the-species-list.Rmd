@@ -36,17 +36,17 @@ myH1DataObject1$SL<-myH1DataObject1$SL[grepl(myH1DataObject1$SL$SLspeclistName, 
 #myH1DataObject1<-filterAndTidyRDBESDataObject(myH1DataObject1, fieldsToFilter="FOid",valuesToFilter=70849, killOrphans = TRUE)
 myH1DataObject1<-filterRDBESDataObject(myH1DataObject1, fieldsToFilter="SSid",valuesToFilter=227694, killOrphans = TRUE)
 # check it is a valid RDBESobject
-validateRDBESDataObject(myH1DataObject1, checkDataTypes = TRUE)
+validateRDBESDataObject(myH1DataObject1)
 ```
 
 ## A closer look the example data and its characteristics
 
 The example is from data in hierarchy 1. It contains a single trip with a single haul. For simplicity, we restrict our analysis to the tables SL, SS and SA which are the ones handled by the functions we which behaviour we want to demonstrate. 
 
-Examining a print of the Species List (SL) one can conclude that the sampling targeted the landings of only 1 species. In this case the species was *Nephrops norvegicus* (aphiaId 107254).
+Examining a print of the Species List (SL) and Individual Species tables (IS) one can conclude that the sampling targeted the landings of only 1 species. In this case the species was *Nephrops norvegicus* (aphiaId 107254).
 
 ```{r}
-myH1DataObject1[c("SL")]
+myH1DataObject1[c("SL","IS")]
 ```
 
 Examining a print of the Species Selection table (SS), one can confirm that only one fishing operation is present in the data (FOid 70849) and that landings were indeed sampled from it (for simplicity only a subset of columns is printed). Note that variable \code{SSuseCalcZero} is set to "N" (i.e., No). This will have to be changed later on if we want zeros calculated.
@@ -63,17 +63,17 @@ myH1DataObject1[[c("SA")]][,c(1:9,48:49)]
 
 Lets change the example, by adding a couple of new species (*Pandalus borealis* and *Cancer pagurus*) to the Species List table (SS). We also change variable \code{SSuseCalcZero} to "Y" so that zeros can be calculated.     
 ```{r}
-# first we duplicate the SL
-myH1DataObject1$SL<-rbind(myH1DataObject1$SL, myH1DataObject1$SL, myH1DataObject1$SL)
-# then we update a few fields and reset the SL key
-myH1DataObject1$SL[2:3,c("SLid","SLcommTaxon","SLsppCode")]<-data.frame(c(47892, 47893),c(107276, 107649),   c(107276, 107649))
-setkeyv(myH1DataObject1$SL,"SLid")
+# first we duplicate the IS
+myH1DataObject1$IS<-rbind(myH1DataObject1$IS, myH1DataObject1$IS, myH1DataObject1$IS)
+# then we update a few fields and reset the IS key
+myH1DataObject1$IS[2:3,c("ISid","IScommTaxon","ISsppCode")]<-data.frame(c(1002, 1003),c(107276, 107649),   c(107276, 107649))
+setkeyv(myH1DataObject1$IS,"ISid")
 # change SSuseCalcZero to "Y"
 myH1DataObject1$SS$SSuseCalcZero<-"Y"
 # finally we make sure the object we created is a valid RDBES data object. No message is a good sign.
-validateRDBESDataObject(myH1DataObject1, checkDataTypes = TRUE)
-# display new SL
-myH1DataObject1[c("SL")]
+validateRDBESDataObject(myH1DataObject1)
+# display new IS
+myH1DataObject1[c("IS")]
 ```
 
 After the update, the new dataset likens a situation where observers looked for three species (*Nephrops norvegicus*, *Cancer pagurus* and *Pandalus borealis*) with only one of them (*Nephrops norvegicus*) having been found in the sample. Running function \code{generateZerosUsingSL} the zeros for those additional species can be quickly added. 

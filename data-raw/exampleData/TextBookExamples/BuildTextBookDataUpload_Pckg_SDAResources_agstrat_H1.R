@@ -32,9 +32,10 @@
 		DEstratumName <- "Pckg_SDAResources_agstrat_H1"
     project_name_outputs <- gsub(" ","_", paste0(DEsamplingScheme,"_", DEstratumName))
 		baseDir <- "./data-raw/exampleData/TextBookExamples/"
-		baseDir <- ""
+		#baseDir <- ""
 		VD_base <- readRDS(paste0(baseDir,"aux_TextBookExamples/VD_base.rds"))
 		SL_base <- readRDS(paste0(baseDir,"aux_TextBookExamples/SL_base.rds"))
+		IS_base <- readRDS(paste0(baseDir,"aux_TextBookExamples/IS_base.rds"))
 
 		#nameof the directory where the outputs are saved currently
 		base_dir_outputs <- paste0(baseDir,"BuiltUploads")
@@ -92,7 +93,7 @@ DE_df<-data.frame(
 		  DEauxiliaryVariableTotal = "",
 		  DEauxiliaryVariableValue = "",
 		  DEauxiliaryVariableName = "",
-		  DEauxiliaryVariableUnit = "", 
+		  DEauxiliaryVariableUnit = "",
 		  stringsAsFactors=FALSE
 			)
 
@@ -190,12 +191,12 @@ VS_df <- data.frame(
   VSselectionProbCluster = "",
   VSinclusionProbCluster = "",
   VSsampled = "Y",#M
-  VSreasonNotSampled = "", 
+  VSreasonNotSampled = "",
   VSnonResponseCollected = "N",
   VSauxiliaryVariableTotal = "",
   VSauxiliaryVariableValue = "",
   VSauxiliaryVariableName = "",
-  VSauxiliaryVariableUnit = "", 
+  VSauxiliaryVariableUnit = "",
   stringsAsFactors=FALSE
   )
 
@@ -290,7 +291,7 @@ FT_df <- data.frame(
   FTauxiliaryVariableTotal = "",
   FTauxiliaryVariableValue = "",
   FTauxiliaryVariableName = "",
-  FTauxiliaryVariableUnit = "", 
+  FTauxiliaryVariableUnit = "",
   stringsAsFactors=FALSE
 )
 
@@ -428,7 +429,7 @@ FO_df <- data.frame(
 	FOauxiliaryVariableTotal = "",
 	FOauxiliaryVariableValue = "",
 	FOauxiliaryVariableName = "",
-	FOauxiliaryVariableUnit = "", 
+	FOauxiliaryVariableUnit = "",
 stringsAsFactors=FALSE
 )
 
@@ -514,8 +515,8 @@ SS_df<-data.frame(
 	SSauxiliaryVariableTotal = "",
 	SSauxiliaryVariableValue = "",
 	SSauxiliaryVariableName = "",
-	SSauxiliaryVariableUnit = "", 
-	stringsAsFactors=FALSE	
+	SSauxiliaryVariableUnit = "",
+	stringsAsFactors=FALSE
 )
 
 #====SA===========
@@ -629,9 +630,11 @@ SA_df<-data.frame(
 		SAauxiliaryVariableTotal = "",
 		SAauxiliaryVariableValue = "",
 		SAauxiliaryVariableName = "",
-		SAauxiliaryVariableUnit = "", 
+		SAauxiliaryVariableUnit = "",
 		stringsAsFactors=FALSE
 )
+
+
 
 
 
@@ -639,6 +642,20 @@ SA_df<-data.frame(
 
 
 RDBESlist = list(DE = DE_df,SD = SD_df, VS = VS_df, FT = FT_df, FO = FO_df, SS = SS_df, SA = SA_df)
+
+
+a<-RDBESlist
+a[c("TE","LO","OS","LE","CL","CE","BV","FM")] <- NULL
+a$SA[c("SAgeoDatBas","SAgeoSou","SAgeaDatBas","SAgearSou","SAtotWtMeaDatBas")] <- NA
+a$FO[c("FOfishDuraDatBas","FOgeoDatBas","FOgeoSou","FOgeaDatBas","FOgearSou")] <- NA
+a$SS[c("SStimeTotalDatBas","SSnumTotalDatBas")] <- NA
+a$FT$FTdomLanDate <- NA
+#a$IS <- data.frame(ISid = 1, SLid = 47865, IScommTaxon = 107254, ISsppCode = 107254)
+a$SL[c("SLcommTaxon","SLsppCode")] <- NULL
+Pckg_SDAResources_agstrat_H1 <- createRDBESDataObject(a, verbose = F)
+usethis::use_data(Pckg_SDAResources_agstrat_H1, overwrite = TRUE)
+
+stop("The new code stops here!")
 
 #id table
 a<-merge(DE_df["DEid"],SD_df[c("DEid","SDid")])
@@ -688,6 +705,7 @@ RDBESlist[[i]][which(grepl(colnames(RDBESlist[[i]]),pat="[A-Z]id"))]<-NULL
   dir.create(dir_outputs, recursive=T, showWarnings=FALSE)
 	filename_output_CS <- paste0("H1.csv")
 	filename_output_SL <- paste0("HSL.csv")
+	filename_output_IS <- paste0("IS.csv")
 	filename_output_VD <- paste0("HVD.csv")
 
 
@@ -722,6 +740,13 @@ write.table(b$V1, file=paste0(dir_outputs,filename_output_CS), col.names=FALSE, 
 # saves SL output
 	write.table(SL_base,  file=paste0(dir_outputs,filename_output_SL), col.names=FALSE, row.names = FALSE, quote=FALSE,sep=",")
 
+	# -----Builds and saves dummyIS-----------------
+
+
+	# saves IS output
+	write.table(IS_base,  file=paste0(dir_outputs,filename_output_IS), col.names=FALSE, row.names = FALSE, quote=FALSE,sep=",")
+
+
 
 # -----Builds and saves dummyVD-----------------
 
@@ -732,6 +757,7 @@ write.table(b$V1, file=paste0(dir_outputs,filename_output_CS), col.names=FALSE, 
 
 
 
+
 # -----Clean SL after dowload-----------------
 
 # cleans excess of SL rows frequently present in download
@@ -739,15 +765,15 @@ write.table(b$V1, file=paste0(dir_outputs,filename_output_CS), col.names=FALSE, 
 		# since it is an example - nicer to do here, fixing directly data input to scripts than patching it over multiple scripts later
 		# since example data are very simple, a simple select is done on specieaListName - this may not be sufficient in some minor cases
 
-filename_download <- "2022_10_14_063321.zip"
-unzip(paste0(dir_outputs, filename_download), exdir = paste0(dir_outputs,"tmp"))
+#filename_download <- "2022_10_14_063321.zip"
+#unzip(paste0(dir_outputs, filename_download), exdir = paste0(dir_outputs,"tmp"))
 # reads file to be fixed, fixes it and saves it back overwriting
-tmp<-fread(paste0(dir_outputs,"tmp/SpeciesList.csv"))
-tmp<-tmp[SLspeciesListName==project_name_outputs,]
-write.csv(tmp, file=paste0(dir_outputs,"tmp/SpeciesList.csv"), quote=F, row.names=F)
+#tmp<-fread(paste0(dir_outputs,"tmp/SpeciesList.csv"))
+#tmp<-tmp[SLspeciesListName==project_name_outputs,]
+#write.csv(tmp, file=paste0(dir_outputs,"tmp/SpeciesList.csv"), quote=F, row.names=F)
 # re-zips the file, puts it in final dir and deletes tmp dir
-library(zip)
-zip::zip(zipfile = paste0(project_name_outputs,".zip"), files =paste0(dir_outputs,"tmp/",dir(paste0(dir_outputs,"tmp"))), mode="cherry-pick")
-unlink(paste0(dir_outputs,"tmp"), force=T, recursive = T)
+#library(zip)
+#zip::zip(zipfile = paste0(project_name_outputs,".zip"), files =paste0(dir_outputs,"tmp/",dir(paste0(dir_outputs,"tmp"))), mode="cherry-pick")
+#unlink(paste0(dir_outputs,"tmp"), force=T, recursive = T)
 
 

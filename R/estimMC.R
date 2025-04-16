@@ -6,6 +6,8 @@
 #' @param method character selection method code e.g SRSWOR
 #' @param selProb the selection probabilities (if known)
 #' @param incProb the inclusion probabilities (if known)
+#' @param verbose (Optional) Set to TRUE if you want informative text printed
+#' out, or FALSE if you don't.  The default is FALSE.
 #'
 #' @return list of 7 elements including the population mean, total
 #' (and their variance), the algorithm name used and the I order
@@ -15,7 +17,7 @@
 #' @examples
 #' estimMC(c(3, 4, 4, 5), c(4, 4, 4, 4), c(8, 8, 8, 8))
 estimMC <- function(y, sampled, total, method = "SRSWOR", selProb = NULL,
-                    incProb = NULL) {
+                    incProb = NULL, verbose = FALSE) {
   implementedMethods <- c(
     "^SRSWR$",
     "^SRSWOR$",
@@ -82,10 +84,18 @@ estimMC <- function(y, sampled, total, method = "SRSWOR", selProb = NULL,
     }
   }
 
+  if (verbose){
+    print("Esimating total using Generalized Horvitz-Thompson aka Mutiple-Count")
+  }
+
   # Generalized Horvitz-Thompson estimator
   est.algorithm <- "Generalized Horvitz-Thompson aka Mutiple-Count"
   estFunction <- function(y,enk){
     sum(y / enk)
+  }
+
+  if (verbose){
+    print("Esimating variance using Sen-Yates-Grundy estimate")
   }
 
   # Sen-Yates-Grundy estimate of variance

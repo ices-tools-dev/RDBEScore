@@ -9,6 +9,7 @@ applyGenerateProbs(
   probType,
   overwrite,
   runInitialProbChecks = TRUE,
+  verbose = FALSE,
   strict = TRUE
 )
 }
@@ -31,6 +32,9 @@ SRSWR and SRSWOR
 \item{runInitialProbChecks}{\itemize{
 \item if TRUE runs runChecksOnSelectionAndProbs
 }}
+
+\item{verbose}{(Optional) Set to TRUE if you want informative text printed
+out, or FALSE if you don't.  The default is FALSE.}
 
 \item{strict}{(Optional) This function validates its input data - should
 the validation be strict? The default is TRUE.}

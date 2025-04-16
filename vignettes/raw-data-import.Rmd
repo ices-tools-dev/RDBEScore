@@ -26,13 +26,21 @@ The function **createRDBESDataObject** is intended to directly import Commercial
 library(RDBEScore)
 ```
 
+```{r}
+#the directory holding the data to import
+dataDir <- "./yourDataDirectory/"
+
+#for demonstration purposes we will use the example data included in the package
+dataDir <- paste0(system.file("extdata", package = "RDBEScore"), "/")
+```
+
 
 ## Importing zipped files
 
 It can directly import the `.zip` archive from the RDBES download containing all mandatory hierarchy tables plus VD and SL:
 
 ```{r}
-importedH1 <- createRDBESDataObject(input = "./vignetteData/H1_2023_10_16.zip")
+importedH1 <- createRDBESDataObject(input = paste0(dataDir,"H1_Example.zip"))
 #print the not NULL table names
 names(importedH1[!unlist(lapply(importedH1, is.null))])
 ```
@@ -46,7 +54,7 @@ importedH1
 It can import the CL, CE, VD or SL tables `.zip` archives, but will include all other tables as `NULL`:
 
 ```{r}
-importedSL <- createRDBESDataObject(input = "./vignetteData/HSL_2023_10_16.zip")
+importedSL <- createRDBESDataObject(input = paste0(dataDir,"HSL_Example.zip"))
 #print the not NULL table names
 importedSL
 ```
@@ -54,8 +62,8 @@ importedSL
 It can also handle overwriting `zip` file original files with files appearing later in the list. However each overwrite results in a warning!
 
 ```{r}
-importFiles <- c("./vignetteData/HSL_2023_10_16.zip",
-                 "./vignetteData/H1_2023_10_16.zip")
+importFiles <- c(paste0(dataDir,"HSL_Example.zip"),
+                 paste0(dataDir,"H1_Example.zip"))
 importedTables <- createRDBESDataObject(input = importFiles)
 #print the not NULL table names
 names(importedTables[!unlist(lapply(importedTables, is.null))])
@@ -66,10 +74,10 @@ names(importedTables[!unlist(lapply(importedTables, is.null))])
 It can also import the unzipped `.csv` files with the default RDBES names:
 
 ```{r}
-importedVS <- createRDBESDataObject(input = "./vignetteData/",
+importedVS <- createRDBESDataObject(input = dataDir,
                                     listOfFileNames = list("VS" = "VesselSelection.csv"))
 #print the not NULL table names
-names(importedTables[!unlist(lapply(importedTables, is.null))])
+names(importedVS[!unlist(lapply(importedVS, is.null))])
 ```
 
 ## Importing list of data frames
@@ -78,7 +86,7 @@ It can also import a `list` object containing data frames (or data.tables). Howe
 
 ```{r}
 #list of data frames 
-listOfDfsH1 <- readRDS("./vignetteData/H1_2023_10_19.rds")
+listOfDfsH1 <- readRDS(paste0(dataDir,"H1_Example.rds"))
 #print the class of the list elements 
 sapply(listOfDfsH1, class)
 ```
@@ -92,7 +100,7 @@ importedList <- createRDBESDataObject(listOfDfsH1)
 It should be noted that the objects created are of the S3 class "**RDBESDataObject**". The class has defined **print()**, **summary()** and **sort()** methods. For more info on theese see vignette [Manipulating RDBESDataObjects](manipulating-rdbesdataobjects.html). 
 
 ```{r}
-importedTables <- createRDBESDataObject("./vignetteData/H1_2023_10_16.zip")
+importedTables <- createRDBESDataObject(paste0(dataDir,"H1_Example.zip"))
 class(importedTables)
 ```
 

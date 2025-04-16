@@ -5,9 +5,9 @@ capture.output({  ## suppresses printing of console output when running test()
 
   # common parameters
   # H1 directory
-  dirH1 <- "./h1_v_1_19_26/"
+  dirH1 <- "./h1_v_20250211/"
   # H5 directory
-  dirH5 <- "./h5_v_1_19_26/"
+  dirH5 <- "./h5_v_20250211/"
   # H7 directory
   dirH7 <- "./h7_v_1_19_26/"
 
@@ -45,7 +45,7 @@ capture.output({  ## suppresses printing of console output when running test()
 
   test_that("createRDBESDataObject will throw an error when given multiple inputs", {
     zipFiles <- c(
-      "H1_2023_10_16.zip"
+      "H1_Example.zip"
     )
     H1 <- paste0(dirH1, zipFiles)
     df <- as.data.frame(1)
@@ -57,9 +57,61 @@ capture.output({  ## suppresses printing of console output when running test()
 
   # Test ZIP inputs ---------------------------------------------------------
 
+  test_that("importing foldered zipped H1 example data works", {
+    zipFiles <- c(
+      "H1_Example_fd.zip"
+    )
+
+    genObj <- createRDBESDataObject(paste0(dirH1, zipFiles),
+                                    castToCorrectDataTypes = TRUE)
+
+    expect_equal(genObj, expObjH1)
+
+  })
+
+  test_that("importing foldered zipped H1 and H2 gives an error", {
+    zipFiles <- c(
+      "H1_H2_Example_fd.zip"
+    )
+
+    genObj <- expect_error(
+      createRDBESDataObject(paste0(dirH1, zipFiles),
+                            castToCorrectDataTypes = TRUE),
+      "The zip file contains multiple hierarchies.\nTo import a selected hierarchy, please provide the hierarchy as an argument e.g like:\nHierachy = 1"
+    )
+
+  })
+
+  test_that("importing foldered zipped H1 and H2 example data works when hierarchy is specified", {
+    zipFiles <- c(
+      "H1_H2_Example_fd.zip"
+    )
+
+    genObj <- createRDBESDataObject(paste0(dirH1, zipFiles),
+                                    castToCorrectDataTypes = TRUE,
+                                    Hierarchy = 1)
+
+    expect_equal(genObj, expObjH1)
+
+  })
+
+  test_that("importing foldered zipped H1 and H2 example does not work when hierarchy is misspecified", {
+    zipFiles <- c(
+      "H1_H2_Example_fd.zip"
+    )
+
+    genObj <- expect_error(
+      createRDBESDataObject(paste0(dirH1, zipFiles),
+                            castToCorrectDataTypes = TRUE,
+                            Hierarchy = "H1"),
+      "The zip file does not contain the hierarchy specified. The options are: 1, 2\nPlease provide a valid hierarchy as an argument. e.g like:\nHierachy = 1"
+    )
+
+  })
+
   test_that("importing zipped H1 example data works", {
     zipFiles <- c(
-      "H1_2023_10_16.zip"
+      "H1_Example.zip"
     )
 
     genObj <- createRDBESDataObject(paste0(dirH1, zipFiles),
@@ -71,8 +123,8 @@ capture.output({  ## suppresses printing of console output when running test()
 
   test_that("importing some data that is not zipped with some data that are zipped H1 example data should not work", {
     zipFiles <- c(
-      "H1_2023_10_16.zip",
-      "HSL_2023_10_16.zip",
+      "H1_Example.zip",
+      "HSL_Example.zip",
       "VesselDetails.csv"
     )
 
@@ -86,8 +138,8 @@ capture.output({  ## suppresses printing of console output when running test()
 
   test_that("importing subset H1 example data works", {
     zipFiles <- c(
-      "HSL_2023_10_16.zip",
-      "HVD_2023_10_16.zip"
+      "HSL_Example.zip",
+      "HVD_Example.zip"
     )
 
     genObj <- createRDBESDataObject(paste0(dirH1, zipFiles),
@@ -99,8 +151,8 @@ capture.output({  ## suppresses printing of console output when running test()
 
   test_that("Overwriting a table from a zip file produces a warning", {
     zipFiles <- c(
-      "H1_2023_10_16.zip",
-      "HVD_2023_10_16.zip")
+      "H1_Example.zip",
+      "HVD_Example.zip")
 
 
     expect_warning(
@@ -113,15 +165,15 @@ capture.output({  ## suppresses printing of console output when running test()
 
   test_that("The order of importing should not matter", {
     zipFiles1 <- c(
-      "H1_2023_10_16.zip",
-      "HVD_2023_10_16.zip")
+      "H1_Example.zip",
+      "HVD_Example.zip")
 
     genObj1 <- suppressWarnings(
       createRDBESDataObject(paste0(dirH1, zipFiles1),
                             castToCorrectDataTypes = TRUE))
 
-    zipFiles2 <- c("HVD_2023_10_16.zip",
-                   "H1_2023_10_16.zip")
+    zipFiles2 <- c("HVD_Example.zip",
+                   "H1_Example.zip")
 
     genObj2 <- suppressWarnings(
       createRDBESDataObject(paste0(dirH1, zipFiles2),
@@ -138,8 +190,8 @@ capture.output({  ## suppresses printing of console output when running test()
   test_that("createRDBESDataObject creates an object with the correct data types",  {
 
     zipFiles <- c(
-      "H1_2023_10_16.zip",
-      "HVD_2023_10_16.zip")
+      "H1_Example.zip",
+      "HVD_Example.zip")
 
     genObj <- suppressWarnings(createRDBESDataObject(input =  paste0(dirH1, zipFiles),
                                                      castToCorrectDataTypes = TRUE))
@@ -161,6 +213,8 @@ capture.output({  ## suppresses printing of console output when running test()
 
             expect_warning(createRDBESDataObject(input = csvFilesH1), NA)
             expect_error(createRDBESDataObject(input = csvFilesH1), NA)
+
+
           })
 
 
@@ -176,6 +230,30 @@ capture.output({  ## suppresses printing of console output when running test()
             expect_error(
               createRDBESDataObject(input = csvFilesH1,
                                     castToCorrectDataTypes = FALSE), NA)
+          })
+
+  test_that("createRDBESDataObject can create an object from a H1 data extract
+          with the right number of rows",  {
+
+            csvFilesH1 <- dirH1
+
+            myH1 <- createRDBESDataObject(input = csvFilesH1)
+
+            # Get the default file names
+            fileNames <- RDBEScore::DefaultFileNames
+            # Remove any unnecessary files
+            fileNames[names(fileNames) %in% c("TE","LO","OS","LE")] <- NULL
+            # Append the right path
+            fileNames <-lapply(fileNames, function(x){paste(csvFilesH1,x,".csv",sep="")})
+            # Read the number of rows in each file
+            fileNumberOfRows <- lapply(fileNames, function(x){length(readLines(x))-1})
+
+            # For each file
+            for(x in names(fileNumberOfRows)){
+              # check if the value of nrow is equal to the length of readlines()-1
+              expect_true(nrow(myH1[[x]]) == fileNumberOfRows[x])
+            }
+
           })
 
 
@@ -200,6 +278,30 @@ capture.output({  ## suppresses printing of console output when running test()
             expect_error(
               createRDBESDataObject(input = csvFilesH5,
                                     castToCorrectDataTypes = FALSE), NA)
+          })
+
+  test_that("createRDBESDataObject can create an object from a H5 data extract
+          with the right number of rows",  {
+
+            csvFilesH5 <- dirH5
+
+            myH5 <- createRDBESDataObject(input = csvFilesH5)
+
+            # Get the default file names
+            fileNames <- RDBEScore::DefaultFileNames
+            # Remove any unnecessary files
+            fileNames[names(fileNames) %in% c("TE","LO","VS","FO")] <- NULL
+            # Append the right path
+            fileNames <-lapply(fileNames, function(x){paste(csvFilesH5,x,".csv",sep="")})
+            # Read the number of rows in each file
+            fileNumberOfRows <- lapply(fileNames, function(x){length(readLines(x))-1})
+
+            # For each file
+            for(x in names(fileNumberOfRows)){
+              # check if the value of nrow is equal to the length of readlines()-1
+              expect_true(nrow(myH5[[x]]) == fileNumberOfRows[x])
+            }
+
           })
 
 
@@ -246,7 +348,7 @@ capture.output({  ## suppresses printing of console output when running test()
     myRDBESDataObject <- createRDBESDataObject(input = csvFilesH1)
 
     # Not all of the RDBES table types are in the sample data
-    expectedNumberOfTablesWithKeys <- 13
+    expectedNumberOfTablesWithKeys <- 14
     actualNumberOfTablesWithKeys <- 0
 
     for(aTable in names(myRDBESDataObject)){
@@ -270,7 +372,7 @@ capture.output({  ## suppresses printing of console output when running test()
     myRDBESDataObject <- createRDBESDataObject(input = csvFilesH5)
 
     # Not all of the RDBES table types are in the sample data
-    expectedNumberOfTablesWithKeys <- 13
+    expectedNumberOfTablesWithKeys <- 14
     actualNumberOfTablesWithKeys <- 0
 
     for(aTable in names(myRDBESDataObject)){
@@ -309,10 +411,39 @@ capture.output({  ## suppresses printing of console output when running test()
   })
 
 
+  test_that("createRDBESDataObject can create an object from a H1 data extract
+          with the right number of rows, when CL has partially quoted vessel identifiers (issue #210)",  {
+
+            # Test related to following issue
+            #https://github.com/ices-tools-dev/RDBEScore/issues/210
+
+            csvFilesH1 <- paste0(dirH1, "BadVesselIdentifiers/")
+            print(csvFilesH1)
+
+            myH1 <- createRDBESDataObject(input = csvFilesH1)
+            print(myH1)
+
+            # Get the default file names
+            fileNames <- RDBEScore::DefaultFileNames
+            # Remove any unnecessary files
+            fileNames[!names(fileNames) %in% c("CL")] <- NULL
+            # Append the right path
+            fileNames <-lapply(fileNames, function(x){paste(csvFilesH1,x,".csv",sep="")})
+            # Read the number of rows in each file
+            fileNumberOfRows <- lapply(fileNames, function(x){length(readLines(x))-1})
+
+            # For each file
+            for(x in names(fileNumberOfRows)){
+              # check if the value of nrow is equal to the length of readlines()-1
+              expect_true(nrow(myH1[[x]]) == fileNumberOfRows[x])
+            }
+
+          })
+
   # Test list of dfs ---------------------------------------------------------
 
   # Create list of dfs for comparison
-  list_with_nulls  <-  createRDBESDataObject(paste0(dirH1, "H1_2023_10_16.zip"))
+  list_with_nulls  <-  createRDBESDataObject(paste0(dirH1, "H1_Example.zip"))
   list_of_dfs <- list_with_nulls[!(sapply(list_with_nulls, is.null))]
   list_of_dfs <- lapply(list_of_dfs, as.data.frame)
   colMapping <-   stats::setNames(mapColNamesFieldR$Field.Name, mapColNamesFieldR$R.Name)
@@ -320,6 +451,10 @@ capture.output({  ## suppresses printing of console output when running test()
     colnames(df) <- colMapping[colnames(df)]
     df
   }, colMapping)
+  # convert list_of_dfs and list_of_dfs_long_names to lists of data.tables
+  list_of_dts <- lapply(list_of_dfs, as.data.table)
+  list_of_dts_long_names <- lapply(list_of_dfs_long_names, as.data.table)
+
 
   test_that("Importing list of dfs works",{
     genObj <- suppressWarnings(createRDBESDataObject(list_of_dfs, castToCorrectDataTypes = FALSE))
@@ -328,16 +463,38 @@ capture.output({  ## suppresses printing of console output when running test()
 
   })
 
-  test_that("Long column names are converted to R names",{
+  test_that("Importing list of data.tables works",{
+    genObj <- suppressWarnings(createRDBESDataObject(list_of_dts, castToCorrectDataTypes = FALSE))
+
+    expect_equal(genObj, expObjH1)
+
+  })
+
+  test_that("Long column names are converted to R names (using list of data frames as input)",{
     genObj <- suppressWarnings(createRDBESDataObject(list_of_dfs_long_names, castToCorrectDataTypes = FALSE))
 
     expect_equal(genObj, expObjH1)
 
   })
 
-  test_that("Extra column names are ignored",{
+  test_that("Long column names are converted to R names (using list of data tables as input)",{
+    genObj <- suppressWarnings(createRDBESDataObject(list_of_dts_long_names, castToCorrectDataTypes = FALSE))
+
+    expect_equal(genObj, expObjH1)
+
+  })
+
+  test_that("Extra column names are ignored (using list of data frames as input)",{
     colnames(list_of_dfs_long_names[["VS"]])[27] <- "wrong"
     genObj <- suppressWarnings(createRDBESDataObject(list_of_dfs_long_names, castToCorrectDataTypes = FALSE, strict=FALSE))
+    colnames(expObjH1[["VS"]])[27] <- "wrong"
+    expect_equal(genObj, expObjH1)
+
+  })
+
+  test_that("Extra column names are ignored (using list of data tables as input)",{
+    colnames(list_of_dts_long_names[["VS"]])[27] <- "wrong"
+    genObj <- suppressWarnings(createRDBESDataObject(list_of_dts_long_names, castToCorrectDataTypes = FALSE, strict=FALSE))
     colnames(expObjH1[["VS"]])[27] <- "wrong"
     expect_equal(genObj, expObjH1)
 
@@ -353,20 +510,47 @@ capture.output({  ## suppresses printing of console output when running test()
 
   })
 
+  test_that("Importing list of data tables with castToCorrectDataTypes = TRUE works",{
+    genObj <- suppressWarnings(createRDBESDataObject(list_of_dts, castToCorrectDataTypes = TRUE))
+
+    myDiffs <- validateRDBESDataObjectDataTypes(genObj)
+
+    numberOfDifferences <- nrow(myDiffs)
+    expect_equal(numberOfDifferences,0)
+
+  })
+
   test_that("Importing list of dfs with different names than the ones requested does not work",{
 
     names(list_of_dfs)[1] <- "Design"
     expect_error(expect_warning(createRDBESDataObject(list_of_dfs, castToCorrectDataTypes = FALSE),
-                                "NOTE: Creating RDBES data objects from a list of local data frames bypasses the RDBES upload data integrity checks.\n"),
+                                "NOTE: Creating RDBES data objects from a list of local data frames or data.tables bypasses the RDBES upload data integrity checks.\n"),
                  "You have given list names that are not valid:\nDesign")
 
+  })
+
+  test_that("Importing list of data.tables with different names than the ones requested does not work",{
+
+    names(list_of_dts)[1] <- "Design"
+    expect_error(expect_warning(createRDBESDataObject(list_of_dts, castToCorrectDataTypes = FALSE),
+                                "NOTE: Creating RDBES data objects from a list of local data frames or data.tables bypasses the RDBES upload data integrity checks.\n"),
+                 "You have given list names that are not valid:\nDesign")
   })
 
   test_that("Importing list of dfs with duplicate table names does not work",{
 
     names(list_of_dfs)[1] <- "DE"
     names(list_of_dfs)[2] <- "DE"
-    expect_error(expect_warning(createRDBESDataObject(list_of_dfs, castToCorrectDataTypes = FALSE), "NOTE: Creating RDBES data objects from a list of local data frames bypasses the RDBES upload data integrity checks.\n"),
+    expect_error(expect_warning(createRDBESDataObject(list_of_dfs, castToCorrectDataTypes = FALSE), "NOTE: Creating RDBES data objects from a list of local data frames or data.tables bypasses the RDBES upload data integrity checks.\n"),
+                 "You have given list names that have duplicate table names:\nDE")
+
+  })
+
+  test_that("Importing list of data.tables with duplicate table names does not work",{
+
+    names(list_of_dts)[1] <- "DE"
+    names(list_of_dts)[2] <- "DE"
+    expect_error(expect_warning(createRDBESDataObject(list_of_dts, castToCorrectDataTypes = FALSE), "NOTE: Creating RDBES data objects from a list of local data frames or data.tables bypasses the RDBES upload data integrity checks.\n"),
                  "You have given list names that have duplicate table names:\nDE")
 
   })
@@ -378,7 +562,19 @@ capture.output({  ## suppresses printing of console output when running test()
     names(list_of_dfs)[3] <- "DE"
     expect_error(expect_warning(createRDBESDataObject(list_of_dfs,
                                                       castToCorrectDataTypes = FALSE),
-                                "NOTE: Creating RDBES data objects from a list of local data frames bypasses the RDBES upload data integrity checks."),
+                                "NOTE: Creating RDBES data objects from a list of local data frames or data.tables bypasses the RDBES upload data integrity checks."),
+                 "You have given list names that are not valid:\nDesign")
+
+  })
+
+  test_that("Importing list of data.tables with different names than the ones requested & duplicate table names does not work",{
+
+    names(list_of_dts)[1] <- "Design"
+    names(list_of_dts)[2] <- "DE"
+    names(list_of_dts)[3] <- "DE"
+    expect_error(expect_warning(createRDBESDataObject(list_of_dts,
+                                                      castToCorrectDataTypes = FALSE),
+                                "NOTE: Creating RDBES data objects from a list of local data frames or data.tables bypasses the RDBES upload data integrity checks."),
                  "You have given list names that are not valid:\nDesign")
 
   })
@@ -389,7 +585,7 @@ capture.output({  ## suppresses printing of console output when running test()
    list2 <- list_of_dfs
     expect_error(expect_warning(createRDBESDataObject(input = c(list1, list2),
                                                       castToCorrectDataTypes = FALSE),
-                                "NOTE: Creating RDBES data objects from a list of local data frames bypasses the RDBES upload data integrity checks.\n"),
+                                "NOTE: Creating RDBES data objects from a list of local data frames or data.tables bypasses the RDBES upload data integrity checks.\n"),
                  "You have given list names that have duplicate table names:\nDE, SD, VS, FT, FO, SS, SA, FM, BV, VD, SL")
 
   })

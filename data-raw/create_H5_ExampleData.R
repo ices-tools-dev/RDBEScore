@@ -1,7 +1,7 @@
 ## Load the csv files from our data-raw
 ddir <- "./data-raw/exampleData/"
 
-H5Example <- createRDBESDataObject(paste0(ddir, "H5_2023_10_16.zip"),
+H5Example <- createRDBESDataObject(paste0(ddir, "H5_2025_02_11.zip"),
                                        castToCorrectDataTypes = TRUE)
 validateRDBESDataObject(H5Example)
 

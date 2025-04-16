@@ -23,7 +23,7 @@ https://github.com/ices-eg/WK_RDBES/tree/master/WKRDB-EST2/chairs/Nuno
 
 myH1RawObject <-
   importRDBESDataCSV(rdbesExtractPath = "tests\\\\testthat\\\\h1_v_1_19_13")
-  
+
 myTableOfIds<- createTableOfRDBESIds(myH1RawObject)
 }
 }

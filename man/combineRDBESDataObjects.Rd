@@ -6,12 +6,20 @@
 combines 2 RDBESDataObjects into a single RDBESDataObject by merging individual
 tables one by one}
 \usage{
-combineRDBESDataObjects(RDBESDataObject1, RDBESDataObject2, strict = TRUE)
+combineRDBESDataObjects(
+  RDBESDataObject1,
+  RDBESDataObject2,
+  verbose = FALSE,
+  strict = TRUE
+)
 }
 \arguments{
 \item{RDBESDataObject1}{The first object to combine}
 
 \item{RDBESDataObject2}{The second object to combine}
+
+\item{verbose}{(Optional) Set to TRUE if you want informative text printed
+out, or FALSE if you don't.  The default is FALSE.}
 
 \item{strict}{(Optional) This function validates its input data - should
 the validation be strict? The default is TRUE.}

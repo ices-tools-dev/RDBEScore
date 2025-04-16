@@ -23,7 +23,7 @@ for (i in 2:14) {
 }
 
 
-for (i in 1:2) {
+for (i in 1:3) {
   dat_1 <- read.xlsx(rdbesDataModelVDSL, sheet = i)
 
   tablePrefix <- NA
@@ -62,6 +62,10 @@ mapColNamesFieldR[mapColNamesFieldR$R.Name == "Clid","R.Name"] <- "CLid"
 # 4/7/24 Fix for two more issues
 mapColNamesFieldR[mapColNamesFieldR$Field.Name == "OSLocationName","Field.Name"] <- "OSlocationName"
 mapColNamesFieldR[mapColNamesFieldR$Field.Name == "LELocationName","Field.Name"] <- "LElocationName"
+
+# 19/3/25 Temporary fix for SAcommCat to change it from int to string
+mapColNamesFieldR[mapColNamesFieldR$Field.Name == "SAcommSizeCat","Type"] <- "String"
+
 
 # Fix for missing LEid column in FT table (remove when Excel model doc is updated from v 1.19.18)
 # If no match on this then this column is still missing, so needs added

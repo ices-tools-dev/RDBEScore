@@ -4,7 +4,7 @@ capture.output({  ## suppresses printing of console output when running test()
 
     ## Step 1) load and prepare some test data
 
-    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_1_19_26")
+    myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
 
     #Filter our data for WGRDBES-EST TEST 1, 1965, H1
     myValues <- c(1965,1,"National Routine","DE_stratum1_H1",1019159)
@@ -131,10 +131,10 @@ test_that("doEstimationForAllStrata gets some results for H8ExampleEE1",  {
   # Check if the results are correct
 
   # January stratum
-  expect_equal(round(January_actual$est.total,0), 138995)
-  expect_equal(round(January_actual$se.total,0), 41709)
-  expect_equal(round(January_actual$est.mean,3), 34748.659)
-  expect_equal(round(January_actual$se.mean,3), 10427.312)
+  expect_equal(round(January_actual$est.total,0), 118992)
+  expect_equal(round(January_actual$se.total,0), 55853)
+  expect_equal(round(January_actual$est.mean,3), 29748.106)
+  expect_equal(round(January_actual$se.mean,3), 13963.237)
 
   # February stratum
   expect_equal(round(February_actual$est.total,0), 209271)
@@ -154,7 +154,7 @@ test_that("doEstimationForAllStrata gets some results for H8ExampleEE1",  {
 
 test_that("doEstimationForAllStrata creates get correct results for Lohr worked examples",  {
 
-  myTestData <- RDBEScore::createRDBESDataObject("./h1_v_1_19_26/ZW_1965_WGRDBES-EST_TEST_1.zip")
+  myTestData <- RDBEScore::createRDBESDataObject("./h1_v_20250211/ZW_1965_WGRDBES-EST_TEST_1")
 
   # Only use a subset of the test data
   myTestData <- filterRDBESDataObject(myTestData,c("DEstratumName"),c("Pckg_SDAResources_agstrat_H1"))

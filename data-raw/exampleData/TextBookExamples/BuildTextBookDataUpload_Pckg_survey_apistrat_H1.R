@@ -19,10 +19,11 @@
 		DEsamplingScheme<-"WGRDBES-EST TEST 1"
 		DEstratumName <- "Pckg_survey_apistrat_H1"
 		project_name_outputs <- gsub(" ","_", paste0(DEsamplingScheme,"_", DEstratumName))
-		baseDir <- "./data-raw/exampleData/TextBookExamples"
-		baseDir <- ""
+		baseDir <- "./data-raw/exampleData/TextBookExamples/"
+		#baseDir <- ""
 		VD_base <- readRDS(paste0(baseDir,"aux_TextBookExamples/VD_base.rds"))
 		SL_base <- readRDS(paste0(baseDir,"aux_TextBookExamples/SL_base.rds"))
+		IS_base <- readRDS(paste0(baseDir,"aux_TextBookExamples/IS_base.rds"))
 
 		#nameof the directory where the outputs are saved currently
 		base_dir_outputs <- paste0(baseDir,"BuiltUploads")

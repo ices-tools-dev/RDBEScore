@@ -7,6 +7,8 @@
 #' Default value is TRUE
 #' @param includeTablesNotInSampHier Include tables that aren't
 #' sampling units in that hierarcy?  Default value is TRUE
+#' @param verbose (Optional) Set to TRUE if you want informative text printed
+#' out, or FALSE if you don't.  The default is FALSE.
 #'
 #' @return A vector containing the 2-letter names of the tables in the
 #' requested hierarchy
@@ -17,7 +19,8 @@
 getTablesInRDBESHierarchy <- function(hierarchy,
                                       includeOptTables = TRUE,
                                       includeLowHierTables = TRUE,
-                                      includeTablesNotInSampHier = TRUE) {
+                                      includeTablesNotInSampHier = TRUE,
+                                      verbose = FALSE) {
   if (!is.numeric(hierarchy)) {
     stop("hierarchy parameter must be an integer")
   }

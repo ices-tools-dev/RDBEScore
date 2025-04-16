@@ -1,25 +1,23 @@
-capture.output({  ## suppresses printing of console output when running test()
+#capture.output({  ## suppresses printing of console output when running test()
 
 # download and subset original data
 
-	myH1DataObject <- RDBEScore::createRDBESDataObject("./h1_v_1_19_26/ZW_1965_WGRDBES-EST_TEST_1.zip")
+	myH1DataObject <- RDBEScore::createRDBESDataObject("./h1_v_20250211/ZW_1965_WGRDBES-EST_TEST_1")
 
 	# Subset data
 		myH1DataObject <- filterRDBESDataObject(myH1DataObject,c("DEstratumName","SLspeclistName"),
 				c("Pckg_survey_apistrat_H1","WGRDBES-EST_TEST_1_Pckg_survey_apistrat_H1"),
 					killOrphans=TRUE, strict=TRUE)
 
-	# adds a species to SL
-	rowToAdd <- data.frame('31831','SL','ZW','4484',myH1DataObject[["SL"]]$SLspeclistName,'1965','Dis','107254','107254')
-	colnames(rowToAdd) <- names(myH1DataObject[["SL"]])
+	# adds a species to IS
+	#rowToAdd <- data.frame('31831','SL','ZW','4484',myH1DataObject[["SL"]]$SLspeclistName,'1965','Dis','107254','107254')
+	rowToAdd <- data.frame('1099',myH1DataObject[["SL"]]$SLid,'IS','107254','107254')
+	#colnames(rowToAdd) <- names(myH1DataObject[["SL"]])
+	colnames(rowToAdd) <- names(myH1DataObject[["IS"]])
 
-	# myH1DataObject[["SL"]] <- rbind(myH1DataObject[["SL"]],rowToAdd)
-	# myH1DataObject[["SL"]]$SLid <- as.integer(myH1DataObject[["SL"]]$SLid)
-	# myH1DataObject[["SL"]]$SLyear <- as.integer(myH1DataObject[["SL"]]$SLyear)
-	# myH1DataObject[["SL"]]$SLcommTaxon <- as.integer(myH1DataObject[["SL"]]$SLcommTaxon)
-	# myH1DataObject[["SL"]]$SLsppCode <- as.integer(myH1DataObject[["SL"]]$SLsppCode)
-	# ensure key is set on SL
-	setkey(myH1DataObject[["SL"]], SLid)
+	# ensure key is set on IS
+	#setkey(myH1DataObject[["SL"]], SLid)
+	setkey(myH1DataObject[["IS"]], ISid)
 
 	# adds a row to SS
 	myH1DataObject[["SS"]]<-rbind(myH1DataObject[["SS"]][1,],myH1DataObject[["SS"]][1,])
@@ -37,22 +35,29 @@ capture.output({  ## suppresses printing of console output when running test()
 	myH1DataObject1 <- filterRDBESDataObject(myH1DataObject, c("SSid"), c(227694),
 		killOrphans = TRUE, strict=TRUE)
 
-	setkey(myH1DataObject1[["SS"]], SSid)
-	setkey(myH1DataObject1[["SA"]], SAid)
+	#myH1DataObject1[["SS"]]
+	#myH1DataObject1[["SL"]]
+
+	#setkey(myH1DataObject1[["SS"]], SSid)
+	#setkey(myH1DataObject1[["SA"]], SAid)
 
 	validateRDBESDataObject(myH1DataObject1, checkDataTypes = TRUE)
 
 # prepare myH1DataObject2: test data >1 species
 	myH1DataObject2 <- myH1DataObject1
-	myH1DataObject2$SL<-rbind(myH1DataObject2$SL,myH1DataObject2$SL)
-	myH1DataObject2$SL[,c("SLcommTaxon","SLsppCode")]<-as.integer(c(107254, 107253))
-	myH1DataObject2$SL$SLid[2]<-as.integer(47892)
+	#myH1DataObject2$SL<-rbind(myH1DataObject2$SL,myH1DataObject2$SL)
+	myH1DataObject2$IS<-rbind(myH1DataObject2$IS,myH1DataObject2$IS)
+	#myH1DataObject2$SL[,c("SLcommTaxon","SLsppCode")]<-as.integer(c(107254, 107253))
+	myH1DataObject2$IS[,c("IScommTaxon","ISsppCode")]<-as.integer(c(107254, 107253))
+	#myH1DataObject2$SL$SLid[2]<-as.integer(47892)
+	myH1DataObject2$IS$ISid[2]<-as.integer(47893)
 
 	myH1DataObject2$SA<-rbind(myH1DataObject2$SA,myH1DataObject2$SA)
 	myH1DataObject2$SA$SAspeCode[2] <- "107253"
 	myH1DataObject2$SA$SAid[2] <- as.integer(572814)
 
-	setkey(myH1DataObject2[["SL"]], SLid)
+	#setkey(myH1DataObject2[["SL"]], SLid)
+	setkey(myH1DataObject2[["IS"]], ISid)
 	setkey(myH1DataObject2[["SS"]], SSid)
 	setkey(myH1DataObject2[["SA"]], SAid)
 
@@ -70,9 +75,21 @@ capture.output({  ## suppresses printing of console output when running test()
 
   test_that("simpleSA: generateNAsUsingSL does not add any NA rows if none are missing (1 targetAphiaId, SS present)", {
 
-		expect_equal(myH1DataObject1,generateNAsUsingSL(myH1DataObject1, targetAphiaId = c("107254")))
-
+    dataAfter <- generateNAsUsingSL(myH1DataObject1,
+                                    targetAphiaId = c("107254"),
+                                    overwriteSampled = FALSE)
+    expect_equal(myH1DataObject1,dataAfter)
+		#expect_equal(myH1DataObject1,generateNAsUsingSL(myH1DataObject1, targetAphiaId = c("107254")))
   })
+
+	test_that("simpleSA: generateNAsUsingSL does not add any NA rows if none are missing (1 targetAphiaId, SS present), overwriteSampled = TRUE", {
+
+	  dataAfter <- generateNAsUsingSL(myH1DataObject1,
+	                                  targetAphiaId = c("107254"),
+	                                  overwriteSampled = TRUE)
+	  # When overwriteSampled = TRUE the objects won't be equal but they shoudl have the same number of rows
+	  expect_equal(nrow(myH1DataObject1[["SA"]]), nrow(dataAfter[["SA"]]))
+	})
 
   test_that("simpleSA: generateNAsUsingSL adds one NA row if spp not in list (case: 1 targetAphiaId, SS present)", {
 
@@ -139,6 +156,7 @@ capture.output({  ## suppresses printing of console output when running test()
 		# prepare test data
 			myH1DataObject21 <- myH1DataObject2
 			myH1DataObject21$SL <- myH1DataObject21$SL[1,]
+			myH1DataObject21$IS <- myH1DataObject21$IS[1,]
 			myH1DataObject21$SA <- myH1DataObject21$SA[1,]
 			validateRDBESDataObject(myH1DataObject21, checkDataTypes = TRUE)
 
@@ -162,6 +180,7 @@ capture.output({  ## suppresses printing of console output when running test()
 		# prepare test data
 			myH1DataObject21 <- myH1DataObject2
 			myH1DataObject21$SL <- myH1DataObject21$SL[1,]
+			myH1DataObject21$IS <- myH1DataObject21$IS[1,]
 			validateRDBESDataObject(myH1DataObject21, checkDataTypes = TRUE)
 
 		myH1DataObject21[c("SL","SS","SA")]
@@ -201,6 +220,6 @@ capture.output({  ## suppresses printing of console output when running test()
 
   })
 
-}) ## end capture.output
+#}) ## end capture.output
 
 

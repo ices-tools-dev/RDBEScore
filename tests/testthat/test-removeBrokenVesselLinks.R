@@ -1,7 +1,7 @@
 test_that("removeBrokenVesselLinks runs without errors
           or warnings when there are no invalid vessel links",  {
 
-  myPath <- "./h1_v_1_19_26"
+  myPath <- "./h1_v_20250211"
   myH1RawObject <-
     importRDBESDataCSV(rdbesExtractPath = myPath)
 
@@ -12,7 +12,7 @@ test_that("removeBrokenVesselLinks runs without errors
 })
 test_that("removeBrokenVesselLinks produces an error if the VD table is null ",  {
 
-  myPath <- "./h1_v_1_19_26"
+  myPath <- "./h1_v_20250211"
   myH1RawObject <-
     importRDBESDataCSV(rdbesExtractPath = myPath)
   myH1RawObject["VD"] <- list(NULL)
@@ -25,7 +25,7 @@ test_that("removeBrokenVesselLinks produces an error if the VD table is null ", 
 test_that("removeBrokenVesselLinks runs without errors
           or warnings when there are invalid vessel links",  {
 
-  myPath <- "./h1_v_1_19_26"
+  myPath <- "./h1_v_20250211"
   myH1RawObject <-
       importRDBESDataCSV(rdbesExtractPath = myPath)
   myFields <- c("VDlenCat")

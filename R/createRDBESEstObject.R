@@ -4,10 +4,10 @@
 #' create an estimation object
 #' @param hierarchyToUse (Optional) The upper RDBES hierarchy to use. An integer value
 #' between 1 and 13. If NULL, the hierarchy will be determined from the DE table
-#' 
-#' @param stopTable (Optional) The table to stop at in the RDBES hierarchy. 
-#' If specified, only tables up to and including this table will be included in the 
-#' resulting RDBESEstObject. The default is NULL, which means all tables in the hierarchy 
+#'
+#' @param stopTable (Optional) The table to stop at in the RDBES hierarchy.
+#' If specified, only tables up to and including this table will be included in the
+#' resulting RDBESEstObject. The default is NULL, which means all tables in the hierarchy
 #' will be included.
 #' @param verbose (Optional) Set to TRUE if you want informative text printed
 #' out, or FALSE if you don't.  The default is FALSE.
@@ -21,15 +21,15 @@
 #' @examples
 #' #Creates an rdbesEStObject from prepared RDBES data
 #' myH1EstObj <- createRDBESEstObject(H1Example, 1, "SA")
-#' 
+#'
 #'
 #' @param rdbesPrepObject The prepared RDBES object that should be used to
 #' create an estimation object
 #' @param hierarchyToUse The upper RDBES hiearchy to use
-#' 
-#' @param stopTable (Optional) The table to stop at in the RDBES hierarchy. 
-#' If specified, only tables up to and including this table will be included in the 
-#' resulting RDBESEstObject. The default is NULL, which means all tables in the hierarchy 
+#'
+#' @param stopTable (Optional) The table to stop at in the RDBES hierarchy.
+#' If specified, only tables up to and including this table will be included in the
+#' resulting RDBESEstObject. The default is NULL, which means all tables in the hierarchy
 #' will be included.
 #' @param verbose (Optional) Set to TRUE if you want informative text printed
 #' out, or FALSE if you don't.  The default is FALSE.
@@ -148,6 +148,14 @@ createRDBESEstObject <- function(rdbesPrepObject,
       rdbesPrepObjectCopy[["SA"]]$SAparentID <- myResults
     }
 
+    if (verbose) print("Sub-sampling: checking for SAid self-references")
+    # find any value of SAid that is the same as SAparentID - set that
+    # SAparentID to NA
+    rdbesPrepObjectCopy[["SA"]][
+      rdbesPrepObjectCopy[["SA"]]$SAid ==
+        rdbesPrepObjectCopy[["SA"]]$SAparentID,
+      "SAparentID"
+    ] <- NA
 
     subSampleLevels <- lapply(rdbesPrepObjectCopy[["SA"]][, SAid],
       getSubSampleLevel,

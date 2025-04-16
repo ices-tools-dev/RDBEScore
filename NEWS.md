@@ -1,3 +1,12 @@
+# RDBEScore 0.3.3 
+
+* Update to work with with the 2025 RDBES data call format
+
+# RDBEScore 0.3.2 
+
+* Can import zip files of the updated download format where each hierarchy is in a separate directory
+* added optional install method to readme
+
 # RDBEScore 0.3.1 
 
 * update to the latest RDBES data format (version 1.19.20)

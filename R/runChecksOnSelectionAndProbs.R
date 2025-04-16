@@ -37,7 +37,6 @@ runChecksOnSelectionAndProbs <- function(x,
   targetTables <- getTablesInRDBESHierarchy(x[["DE"]]$DEhierarchy[1],
                                             includeTablesNotInSampHier = FALSE)
   targetTables <- targetTables[targetTables != "DE"]
-  # Code doesn't handle lower hierachy A or B yet
   targetTables <- targetTables[targetTables != "FM"]
   parentId <- paste0(targetTables, "id")
   targetTables <- targetTables[targetTables != "SD"]
@@ -46,10 +45,6 @@ runChecksOnSelectionAndProbs <- function(x,
   # aspects needing development
   if (any(!is.na(x[["SA"]]$SAparentID))) stop("multiple sub-sampling present
                                                 in SA: not yet developed")
-  if (nrow(x[["SA"]]) >= 1 && any(x[["SA"]]$SAlowHierarchy %in% c("A", "B"))) {
-    stop("lower hierarchy A and B present: not yet developed")
-  }
-
 
   for (i in targetTables) {
     print(paste("====", i, "====="))

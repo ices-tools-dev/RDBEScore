@@ -12,6 +12,8 @@
 #' @param overwrite - if TRUE will overwrite probabilities already existing for
 #' SRSWR and SRSWOR
 #' @param runInitialProbChecks - if TRUE runs runChecksOnSelectionAndProbs
+#' @param verbose (Optional) Set to TRUE if you want informative text printed
+#' out, or FALSE if you don't.  The default is FALSE.
 #' @param strict (Optional) This function validates its input data - should
 #' the validation be strict? The default is TRUE.
 #'
@@ -27,10 +29,11 @@
 
 applyGenerateProbs <- function(x, probType, overwrite,
                                runInitialProbChecks = TRUE,
+                               verbose = FALSE,
                                strict = TRUE) {
 
   # Check we have a valid RDBESDataObject before doing anything else
-  validateRDBESDataObject(x, verbose = FALSE, strict = strict)
+  validateRDBESDataObject(x, verbose = verbose, strict = strict)
 
   if (runInitialProbChecks) {
     print("========start runChecksOnSelectionAndProbs=======")

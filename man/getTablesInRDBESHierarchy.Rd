@@ -8,7 +8,8 @@ getTablesInRDBESHierarchy(
   hierarchy,
   includeOptTables = TRUE,
   includeLowHierTables = TRUE,
-  includeTablesNotInSampHier = TRUE
+  includeTablesNotInSampHier = TRUE,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -22,6 +23,9 @@ Default value is TRUE}
 
 \item{includeTablesNotInSampHier}{Include tables that aren't
 sampling units in that hierarcy?  Default value is TRUE}
+
+\item{verbose}{(Optional) Set to TRUE if you want informative text printed
+out, or FALSE if you don't.  The default is FALSE.}
 }
 \value{
 A vector containing the 2-letter names of the tables in the

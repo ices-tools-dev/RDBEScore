@@ -39,25 +39,7 @@ importRDBESDataCSV <- function(rdbesExtractPath = NULL,
   if (is.null(listOfFileNames)){
 
     # A named list with the file names that are produced by the RDBES download
-    fileNames <- list(
-      "DE" = "Design",
-      "SD" = "SamplingDetails",
-      "VS" = "VesselSelection",
-      "FT" = "FishingTrip",
-      "FO" = "FishingOperation",
-      "TE" = "TemporalEvent",
-      "LO" = "Location",
-      "OS" = "OnshoreEvent",
-      "LE" = "LandingEvent",
-      "SS" = "SpeciesSelection",
-      "SA" = "Sample",
-      "FM" = "FrequencyMeasure",
-      "BV" = "BiologicalVariable",
-      "VD" = "VesselDetails",
-      "SL" = "SpeciesList",
-      "CL" = "CommercialLanding",
-      "CE" = "CommercialEffort"
-    )
+    fileNames <- RDBEScore::DefaultFileNames
 
     # Stick ".csv" on to each default name
     fileNames <-lapply(fileNames, function(x){paste(x,".csv",sep="")})
@@ -96,7 +78,7 @@ importRDBESDataCSV <- function(rdbesExtractPath = NULL,
         myList[[myFile]] <-
           utils::read.csv(
             paste(rdbesExtractPath, "/", fileNames[myFile],  sep = ""),
-            header = TRUE, sep = ",", stringsAsFactors = FALSE
+            header = TRUE, sep = ",", quote = "", stringsAsFactors = FALSE
           )
 
         # Change each entry to a data table
@@ -143,6 +125,7 @@ importRDBESDataCSV <- function(rdbesExtractPath = NULL,
                                                      BV = myList[["BV"]],
                                                      VD = myList[["VD"]],
                                                      SL = myList[["SL"]],
+                                                     IS = myList[["IS"]],
                                                      CL = myList[["CL"]],
                                                      CE = myList[["CE"]])
 

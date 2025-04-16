@@ -30,20 +30,34 @@ fixSLids<-function(RDBESDataObject, verbose = FALSE, strict = TRUE){
   )
 
 # issues error if fixSLids already been run
-if("SLtaxaId" %in% colnames(RDBESDataObject[["SL"]])) stop ("SLtaxaId already added - maybe function has already been run?")
+if("SLtaxaId" %in% colnames(RDBESDataObject[["SL"]])){
+  stop ("SLtaxaId already added - maybe function has already been run?")
+}
+if("IStaxaId" %in% colnames(RDBESDataObject[["IS"]])){
+  stop ("IStaxaId already added - maybe function has already been run?")
+}
+
 
 # makes a copy
-tmpSL <- data.table::copy(RDBESDataObject[["SL"]])
+#tmpSL <- data.table::copy(RDBESDataObject[["SL"]])
+tmpIS <- data.table::copy(RDBESDataObject[["IS"]])
 
-tmpSL <- merge(tmpSL[,list(SLtaxaId=SLid, SLid=SLid[1]), list(SLrecType,SLcou,SLinst,
-				SLspeclistName,SLyear,SLcatchFrac)], tmpSL[,c("SLid","SLcommTaxon","SLsppCode")],
-					by.x="SLtaxaId", by.y="SLid", all.x=T)
+#tmpSL <- merge(tmpSL[,list(SLtaxaId=SLid, SLid=SLid[1]), list(SLrecType,SLcou,SLinst,
+#				SLspeclistName,SLyear,SLcatchFrac)], tmpSL[,c("SLid","SLcommTaxon","SLsppCode")],
+#					by.x="SLtaxaId", by.y="SLid", all.x=T)
+tmpIS <- merge(tmpIS[,list(IStaxaId=ISid, ISid=ISid[1]), list(ISrecType)],
+               tmpIS[,c("ISid", "SLid","IScommTaxon","ISsppCode")],
+               by.x="IStaxaId", by.y="ISid", all.x=T)
 
-tmpSL<-cbind(tmpSL[,c("SLid","SLtaxaId")], tmpSL[,!c("SLid","SLtaxaId")])
 
-RDBESDataObject[["SL"]]<-tmpSL
+#tmpSL<-cbind(tmpSL[,c("SLid","SLtaxaId")], tmpSL[,!c("SLid","SLtaxaId")])
+tmpIS<-cbind(tmpIS[,c("ISid", "SLid","IStaxaId")], tmpIS[,!c("ISid","SLid","IStaxaId")])
 
-data.table::setkeyv(RDBESDataObject[["SL"]], c("SLid","SLtaxaId"))
+#RDBESDataObject[["SL"]]<-tmpSL
+RDBESDataObject[["IS"]]<-tmpIS
+
+#data.table::setkeyv(RDBESDataObject[["SL"]], c("SLid","SLtaxaId"))
+data.table::setkeyv(RDBESDataObject[["IS"]], c("ISid","IStaxaId"))
 
 RDBESDataObject
 }

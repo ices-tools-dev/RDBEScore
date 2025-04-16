@@ -8,6 +8,7 @@ createRDBESDataObject(
   input = NULL,
   listOfFileNames = NULL,
   castToCorrectDataTypes = TRUE,
+  verbose = FALSE,
   ...
 )
 }
@@ -29,6 +30,9 @@ attempt to cast the required columns to the correct data type.  If \code{FALSE}
 then the column data types will be determined by how the csv files are read
 in. Default is \code{TRUE}.}
 
+\item{verbose}{(Optional) Set to TRUE if you want informative text printed
+out, or FALSE if you don't.  The default is FALSE.}
+
 \item{...}{parameters passed to validateRDBESDataObject
 if input is list of data frames e.g.\code{strict=FALSE}}
 }
@@ -42,7 +46,8 @@ environment.
 \details{
 The \code{input} should be either:
 \itemize{
-\item A \code{zip} file downloaded from RDBES (or multiple zip files if you want to include or overwrite tables, for example CL and CE data)
+\item A \code{zip} file downloaded from RDBES (or multiple zip files if you want to include or overwrite tables, for example CL and CE data). NOTE: Only the downloaded
+RDBES data with Table data format with ids is loaded by this function and not the uploaded format.
 \item A folder containing \code{csv} files downloaded from RDBES (e.g. the unzipped file), or any set of csv files of the RDBES tables.
 \item A \code{list} of data frames in the current environment representing different tables in the hierarchy.
 \item A \code{NULL} input will return and empty RDBES data object
