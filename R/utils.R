@@ -24,7 +24,13 @@ moreUsedVars  <- c("..clustFields", "DEyear", "SAcatchCat",
                "optional", "sortOrder", "tablesInRDBESHierarchies",
                "tmpKey0", "tmpKey1")
 
-globalVariables(unique(c(usedVars, moreUsedVars)))
+evenMoreUsedVars <- c("Weightg", "Lengthmm", "Group", "WeightIndexSum",
+                      "WeightIndex", "H8ExampleEE1", "suLevels", "LengthTotal",
+                      "WeightMeasured", "LengthClass", "TotCount",
+                      "BVNumbersAtLength", "SAauxVarValue", "ISid",
+                      "ISrecType", "..x")
+
+globalVariables(unique(c(usedVars, moreUsedVars, evenMoreUsedVars)))
 
 
 #' as.integer.or.dbl

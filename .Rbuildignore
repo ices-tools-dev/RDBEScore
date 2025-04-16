@@ -10,6 +10,7 @@
 ^\.github$
 ^.DS_Store$
 ^docs$
+^doc$
 ^Meta$
 package_overview.Rmd
 ^.pptx$
