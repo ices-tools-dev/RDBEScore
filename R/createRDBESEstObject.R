@@ -81,8 +81,12 @@ createRDBESEstObject <- function(rdbesPrepObject,
 
   # See if the user has specified a table to stop at
   #take out the optional as this messes up est object creation
-  targetTables <-
-    RDBEScore::getTablesInRDBESHierarchy(hierarchyToUse, includeOptTables = F)
+  if (hierarchyToUse == '9'){ #temporary fix
+    targetTables <-c("DE", "SD", "LO", "TE", "SS", "SA" ,"LE" ,"FM", "BV")
+  }else{
+    targetTables <-
+      RDBEScore::getTablesInRDBESHierarchy(hierarchyToUse, includeOptTables = F)
+  }
   if (length(is.null(stopTable)) == 1 &&
     !is.null(stopTable)) {
     stopTableLoc <- which(targetTables == stopTable)
@@ -91,6 +95,7 @@ createRDBESEstObject <- function(rdbesPrepObject,
     }
   }
 
+  gc()
   # See if we need to process the lower hieriarchy tables - this
   # needs to be done before any changes required due to sub-sampling
   if (any(targetTables %in% c("FM", "BV"))) {
@@ -146,6 +151,7 @@ createRDBESEstObject <- function(rdbesPrepObject,
         valueToReturn
       })
       rdbesPrepObjectCopy[["SA"]]$SAparentID <- myResults
+      gc()
     }
 
     if (verbose) print("Sub-sampling: checking for SAid self-references")
@@ -382,7 +388,7 @@ createRDBESEstObject <- function(rdbesPrepObject,
 procRDBESEstObjLowHier <- function(rdbesPrepObject,
                                    verbose = FALSE) {
 
-
+gc()
   # Check if we have any SA data - if not we'll just stop now
   if (length(is.null(rdbesPrepObject[["SA"]])) == 1 &&
     is.null(rdbesPrepObject[["SA"]])) {
@@ -426,6 +432,7 @@ procRDBESEstObjLowHier <- function(rdbesPrepObject,
     # Just BV is null
     fMBV <- rdbesPrepObject[["FM"]]
   } else {
+    gc()
     # if we have both FM and BV data - join them together
     fMBV <-
       dplyr::left_join(rdbesPrepObject[["FM"]],
@@ -433,6 +440,7 @@ procRDBESEstObjLowHier <- function(rdbesPrepObject,
         by = "FMid",
         multiple = "all"
       )
+    gc()
     # sort out the wrong SAid column name after the join
     names(fMBV)[names(fMBV) == "SAid.x"] <- "SAid"
     fMBV[, "SAid.y" := NULL]
@@ -465,7 +473,7 @@ procRDBESEstObjLowHier <- function(rdbesPrepObject,
     # Just FM is null
     bVFM <- rdbesPrepObject[["BV"]]
   } else {
-
+gc()
     # if we have both FM and BV data - join them together
     bVFM <- dplyr::right_join(rdbesPrepObject[["FM"]],
       rdbesPrepObject[["BV"]],
@@ -528,7 +536,7 @@ procRDBESEstObjUppHier <- function(myRDBESEstObj = NULL,
                                    targetTables,
                                    verbose = FALSE) {
   thisTable <- targetTables[i]
-
+gc()
   if (thisTable %in% c("FM", "BV") || (i > length(targetTables))) {
     # if we've got to FM or BV, or we've reached the end of the target tables
     # we're done so lets stop
@@ -553,7 +561,11 @@ procRDBESEstObjUppHier <- function(myRDBESEstObj = NULL,
       grepl("^SA.+$", "SA2")
 
       if (i > 1) {
-        joinField <- paste0(targetTables[i - 1], "id")
+        if (hierarchyToUse == 7 && thisTable == 'SA') {
+          joinField <- paste0(targetTables[i - 2], "id")
+        } else{
+          joinField <- paste0(targetTables[i - 1], "id")
+        }
       } else {
         joinField <- NA
       }
@@ -607,7 +619,7 @@ procRDBESEstObjUppHier <- function(myRDBESEstObj = NULL,
         suTable <- paste0(suLevel, "table")
         rdbesPrepObject[[thisTable]][, suTable] <- thisTable
       }
-
+      gc()
       # Join this new table to the existing data
       myRDBESEstObj <-
         dplyr::left_join(myRDBESEstObj,
@@ -616,7 +628,7 @@ procRDBESEstObjUppHier <- function(myRDBESEstObj = NULL,
           , multiple = "all"
         )
     }
-
+    gc()
     # recursively call this function
     procRDBESEstObjUppHier(myRDBESEstObj,
       rdbesPrepObject = rdbesPrepObject,
