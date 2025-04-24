@@ -283,10 +283,10 @@ createRDBESEstObject <- function(rdbesPrepObject,
       # Use a left join on the deepest level of sampling so that we
       # get all the upper hierarchy rows
       if (j == numberOfSampleLevels) {
-        tempRDBESEstObj <- dplyr::left_join(tempUpper,
+        tempRDBESEstObj <- merge(tempUpper,
           tempLower,
           by = saJoinField,
-          multiple = "all"
+          all.x = TRUE
 
         )
       } else {
@@ -319,10 +319,9 @@ createRDBESEstObject <- function(rdbesPrepObject,
 
         # Use an inner join on the
         # currnt SA level so that we just get the matching rows
-        tempRDBESEstObj <- dplyr::inner_join(tempUpper,
+        tempRDBESEstObj <- merge(tempUpper,
           tempLower,
-          by = saJoinField,
-          multiple = "all"
+          by = saJoinField
         )
       }
       if (verbose) {
@@ -435,10 +434,10 @@ gc()
     gc()
     # if we have both FM and BV data - join them together
     fMBV <-
-      dplyr::left_join(rdbesPrepObject[["FM"]],
+      merge(rdbesPrepObject[["FM"]],
         rdbesPrepObject[["BV"]],
         by = "FMid",
-        multiple = "all"
+        all.x = TRUE
       )
     gc()
     # sort out the wrong SAid column name after the join
@@ -475,10 +474,10 @@ gc()
   } else {
 gc()
     # if we have both FM and BV data - join them together
-    bVFM <- dplyr::right_join(rdbesPrepObject[["FM"]],
+    bVFM <- merge(rdbesPrepObject[["FM"]],
       rdbesPrepObject[["BV"]],
       by = "FMid",
-      multiple = "all"
+      all.y = TRUE
     )
     # sort out the wrong SAid column name after the join
     names(bVFM)[names(bVFM) == "SAid.y"] <- "SAid"
