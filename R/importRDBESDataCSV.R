@@ -74,11 +74,19 @@ importRDBESDataCSV <- function(rdbesExtractPath = NULL,
 
       # Read the files which exist
       for (myFile in filesWhichExist) {
+        # define R data types. Nessesary is to present fields whith characters
+        #longer than 20. Use colClasses to define the data types. If you don't
+        #use colClasses BVfishId is convert to scientific format and present as
+        #character, when whole information about BVfishId is cutting.
+        fieldsFormat <- RDBEScore::mapColNamesFieldR[
+          RDBEScore::mapColNamesFieldR$Table.Prefix == myFile, "RDataType"]
+
         # Read the file
         myList[[myFile]] <-
           utils::read.csv(
             paste(rdbesExtractPath, "/", fileNames[myFile],  sep = ""),
-            header = TRUE, sep = ",", quote = "", stringsAsFactors = FALSE
+            header = TRUE, sep = ",", quote = "", stringsAsFactors = FALSE,
+            colClasses = fieldsFormat
           )
 
         # Change each entry to a data table
