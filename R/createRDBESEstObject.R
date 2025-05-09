@@ -48,7 +48,7 @@ createRDBESEstObject <- function(rdbesPrepObject,
                                  verbose = FALSE,
                                  strict = TRUE) {
 
-   DEhierarchy <- summary(rdbesPrepObject)$hierarchy
+  DEhierarchy <- summary(rdbesPrepObject)$hierarchy
   if(is.null(hierarchyToUse)){
     hierarchyToUse <- DEhierarchy
     if(length(hierarchyToUse) > 1){
@@ -163,11 +163,15 @@ createRDBESEstObject <- function(rdbesPrepObject,
       "SAparentID"
     ] <- NA
 
-    subSampleLevels <- lapply(rdbesPrepObjectCopy[["SA"]][, SAid],
-      getSubSampleLevel,
-      SAdata = rdbesPrepObjectCopy[["SA"]]
-    )
-    subSampleLevels <- do.call(rbind, subSampleLevels)
+    # Find the top level SAid and sampling level for each SAid
+    SAdata <- rdbesPrepObjectCopy[["SA"]]
+    # Calculate the lookup table which contains the top level SAid and sampling level for each SAid
+    # (much faster than the recursive "getSubSampleLevel()" function it was using before)
+    lookupDT <- prepareSubSampleLevelLookup(SAdata)
+    # Apply it
+    subSampleLevels <- dplyr::left_join(SAdata, lookupDT, by = "SAid")
+    subSampleLevels <- subSampleLevels[,c("SAid","topLevelSAid","subSampleLevel")]
+
     rdbesPrepObjectCopy[["SA"]][, "SAtopLevelSAid"] <-
       subSampleLevels$topLevelSAid
     rdbesPrepObjectCopy[["SA"]][, "SAsubSampleLevel"] <-
@@ -644,40 +648,53 @@ gc()
 #' Private function to get sub-sample level and top-level SAid for SA data
 #'
 #' @param SAdata The SA data to check
-#' @param SAidToCheck The SAid to check
-#' @param subSampleLevel The currrent level of sampling
 #'
-#' @return Whoever revises this function please specify what it returns here
+#' @returns A data.table with SAid, topLevelSAid and subSampleLevel
 #'
-getSubSampleLevel <- function(SAdata, SAidToCheck, subSampleLevel = 1) {
+prepareSubSampleLevelLookup <- function(SAdata) {
 
-  # Fix in case the parentID is not numeric - this can be the case if it was
-  # empty when it was imported
-  if (!is.numeric(SAdata$SAparentID)) {
-    SAdata$SAparentID <- as.numeric(SAdata$SAparentID)
+  # Make a shallow copy to avoid modifying the original
+  SA <- data.table::copy(SAdata)
+
+  # Ensure SAparentID is numeric
+  if (!is.numeric(SA$SAparentID)) {
+    SA[, SAparentID := as.numeric(SAparentID)]
   }
 
-  dataToCheck <- SAdata[SAdata$SAid == SAidToCheck, ]
+  # Get rid of uneeded columns
+  SA <- SA[,SAid, SAparentID]
 
-  # If we have mutiple matches we probably don't have unique SAid values
-  if (nrow(dataToCheck) > 1) {
-    warning("There is a problem with non-unique SAid values- check your data")
-    # Just use the first match
-    dataToCheck <- dataToCheck[1, ]
+  # Build an index for fast lookup
+  #setkey(SA, SAid)
+
+  # Set inital values
+  SA$subSampleLevel <- 1L
+  SA$topLevelSAid <- SA$SAid
+
+  # Initially, unresolved rows (those with non-NA parent)
+  unresolved <- SA[!is.na(SA$SAparentID),]
+
+  while (nrow(unresolved) > 0) {
+
+    SA_tmp <- dplyr::inner_join(unresolved, SA, by = c("SAparentID" = "SAid"))
+    SA_tmp$subSampleLevel <- SA_tmp$subSampleLevel.x + 1L
+    SA_tmp$topLevelSAid <- SA_tmp$SAparentID
+    SA_tmp$SAparentID <- SA_tmp$SAparentID.y
+    SA_tmp <- SA_tmp[, c("SAid", "SAparentID", "subSampleLevel", "topLevelSAid")]
+
+    if (nrow(SA_tmp) == 0) break
+
+    # Update main table
+    SA[SA_tmp, `:=`(
+      subSampleLevel = i.subSampleLevel,
+      topLevelSAid = i.topLevelSAid
+    ), on = .(SAid)]
+
+    # Prepare next set of unresolved rows (moving up one level)
+    unresolved <- SA_tmp[!is.na(SA_tmp$SAparentID),]
   }
 
-  if (nrow(dataToCheck) == 0) {
-    return(NA)
-  } else if (is.na(dataToCheck$SAparentID)) {
-    return(data.frame(
-      "topLevelSAid" = SAidToCheck,
-      "subSampleLevel" = subSampleLevel
-    ))
-  } else {
-    return(getSubSampleLevel(
-      SAdata = SAdata,
-      SAidToCheck = dataToCheck$SAparentID,
-      subSampleLevel = subSampleLevel + 1
-    ))
-  }
+  return(SA[, .(SAid, topLevelSAid, subSampleLevel)])
 }
+
+
