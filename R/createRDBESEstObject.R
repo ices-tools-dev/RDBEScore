@@ -676,10 +676,26 @@ prepareSubSampleLevelLookup <- function(SAdata) {
 
   while (nrow(unresolved) > 0) {
 
-    SA_tmp <- dplyr::inner_join(unresolved, SA, by = c("SAparentID" = "SAid"))
-    SA_tmp$subSampleLevel <- SA_tmp$subSampleLevel.x + 1L
-    SA_tmp$topLevelSAid <- SA_tmp$SAparentID
-    SA_tmp$SAparentID <- SA_tmp$SAparentID.y
+    #SA_tmp <- dplyr::inner_join(unresolved, SA, by = c("SAparentID" = "SAid"))
+    #SA_tmp$subSampleLevel <- SA_tmp$subSampleLevel.x + 1L
+    #SA_tmp$topLevelSAid <- SA_tmp$SAparentID
+    #SA_tmp$SAparentID <- SA_tmp$SAparentID.y
+    # Do an inner join using data.table
+    SA_tmp <- SA[unresolved, on = .(SAid = SAparentID), nomatch = 0,
+                 .(
+                   unresolved_SAparentID = i.SAparentID,  # from unresolved
+                   unresolved_SAid = i.SAid,
+                   unresolved_subSampleLevel = i.subSampleLevel,
+                   unresolved_topLevelSAid = i.topLevelSAid,
+                   SA_SAparentID = SAparentID, # from SA
+                   SA_SAid = SAid, # I'm not sure this value appears correctly - I don't actually use it anyway
+                   SA_subSampleLevel = subSampleLevel,
+                   SA_topLevelSAid = topLevelSAid
+                 )]
+    SA_tmp$SAid <- SA_tmp$unresolved_SAid
+    SA_tmp$subSampleLevel <- SA_tmp$unresolved_subSampleLevel + 1L
+    SA_tmp$topLevelSAid <- SA_tmp$SA_topLevelSAid
+    SA_tmp$SAparentID <- SA_tmp$SA_SAparentID
     SA_tmp <- SA_tmp[, c("SAid", "SAparentID", "subSampleLevel", "topLevelSAid")]
 
     if (nrow(SA_tmp) == 0) break
