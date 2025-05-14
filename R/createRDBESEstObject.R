@@ -77,6 +77,18 @@ createRDBESEstObject <- function(rdbesPrepObject,
   # Copy the input data table so we don't change the original data
   rdbesPrepObjectCopy <- data.table::copy(rdbesPrepObject)
 
+  # Change text columns to factors to try and reduce final RDBESEstObject size
+  # Loop over each table in the list
+  for (tableName in names(rdbesPrepObjectCopy)) {
+    dt <- rdbesPrepObjectCopy[[tableName]]
+    if (is.data.table(dt)) {
+      char_cols <- names(dt)[sapply(dt, is.character)]
+      if (length(char_cols) > 0) {
+        dt[, (char_cols) := lapply(.SD, as.factor), .SDcols = char_cols]
+      }
+      rdbesPrepObjectCopy[[tableName]] <- dt
+    }
+  }
 
 
   # See if the user has specified a table to stop at
@@ -670,7 +682,9 @@ gc()
       #     , multiple = "all"
       #   )
       # use data.table to do a left join instead of dplyr
-      myRDBESEstObj <- rdbesPrepObject[[thisTable]][myRDBESEstObj, on = joinField]
+      # (the order of the tables is to ensure the columns are returned in the right order)
+      #myRDBESEstObj <- rdbesPrepObject[[thisTable]][myRDBESEstObj, on = joinField]
+      myRDBESEstObj <- myRDBESEstObj[rdbesPrepObject[[thisTable]],  on = joinField]
     }
     gc()
     # recursively call this function
