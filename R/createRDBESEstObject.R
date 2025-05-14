@@ -387,7 +387,7 @@ createRDBESEstObject <- function(rdbesPrepObject,
   }
 
   # Choose which VDid field to keep - to avoid confusion
-  vdIDFields <- names(myRDBESEstObj)[grepl("^VDid.*", names(myRDBESEstObj))]
+  vdIDFields <- names(myRDBESEstObj)[grepl("^.*VDid", names(myRDBESEstObj))]
   vdIDFieldToKeep <- NA
   if (length(vdIDFields) > 1) {
     # read through all the VDid fields and note the name of the first
