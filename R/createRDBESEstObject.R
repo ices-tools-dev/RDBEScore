@@ -134,23 +134,61 @@ createRDBESEstObject <- function(rdbesPrepObject,
     # using the SAparentSequenceNumber
     if (!"SAparentID" %in%  names(rdbesPrepObjectCopy[["SA"]])){
       # Find the SAid for a given value of SAparSequNum
-      myResults <- sapply(rdbesPrepObjectCopy[["SA"]]$SAparSequNum,function(x){
-        valueToReturn <- NA
-        if (!is.na(x)){
-          valueToReturn <-
-            rdbesPrepObjectCopy[["SA"]][rdbesPrepObjectCopy[["SA"]]$SAseqNum ==
-                                          x,]
-          if (nrow(valueToReturn) == 1){
-            valueToReturn <- valueToReturn$SAid
-          } else {
-            warning(paste0("Could not find unique matching parent sequence ",
-            "number - sub-sampling has not been processed correctly"))
-            valueToReturn <- NA
-          }
-        }
-        valueToReturn
-      })
-      rdbesPrepObjectCopy[["SA"]]$SAparentID <- myResults
+      # myResults <- sapply(rdbesPrepObjectCopy[["SA"]]$SAparSequNum,function(x){
+      #   valueToReturn <- NA
+      #   if (!is.na(x)){
+      #     # TODO - I don't think we can assume that SAparSequNum is unique
+      #     valueToReturn <-
+      #       rdbesPrepObjectCopy[["SA"]][rdbesPrepObjectCopy[["SA"]]$SAseqNum ==
+      #                                     x,]
+      #     if (nrow(valueToReturn) == 1){
+      #       valueToReturn <- valueToReturn$SAid
+      #     } else {
+      #       warning(paste0("Could not find unique matching parent sequence ",
+      #       "number - sub-sampling has not been processed correctly"))
+      #       valueToReturn <- NA
+      #     }
+      #   }
+      #   valueToReturn
+      # })
+      # For easier reference
+      SA <- rdbesPrepObjectCopy[["SA"]]
+
+      # Self-join: child.SAparSequNum matches parent.SAseqNum, and SSid matches
+      # The sequence number is not unique so we also use SSid to match the child rows to parent rows
+      SA_with_parent <- SA[
+        SA,
+        on = .(SAseqNum = SAparSequNum, SSid),
+        allow.cartesian = TRUE,
+        nomatch = NA
+      ]
+
+      # Count matches per child row (i.SAid = child row's SAid)
+      match_counts <- SA_with_parent[, .N, by = .(i.SAid)]
+
+      # Warn about no match
+      no_match_ids <- SA[!SAid %in% match_counts$i.SAid, SAid]
+      if (length(no_match_ids) > 0) {
+        warning(paste("No parent match found for SAid(s):", paste(no_match_ids, collapse = ", ")))
+      }
+
+      # Warn about non-unique matches
+      non_unique_ids <- match_counts[N > 1, i.SAid]
+      if (length(non_unique_ids) > 0) {
+        warning(paste("Multiple parent matches found for SAid(s):", paste(non_unique_ids, collapse = ", ")))
+      }
+
+      # Filter to only rows where there's exactly one match
+      unique_matches <- match_counts[N == 1]
+      unique_links <- SA_with_parent[i.SAid %in% unique_matches$i.SAid]
+
+      # Add the parent SAid to the child row as SAparentID
+      SA[unique_links, on = .(SAid = i.SAid), SAparentID := SAid]
+
+      # Save back
+      rdbesPrepObjectCopy[["SA"]] <- SA
+
+      #rdbesPrepObjectCopy[["SA"]]$SAparentID <- myResults
       gc()
     }
 
@@ -525,13 +563,13 @@ gc()
 #' the RDBESEstObject
 #'
 #' @param myRDBESEstObj An RDBESEstObj to add data to
-#' @param rdbesPrepObject A prepared RDBESRawObj
+#' @param rdbesPrepObject A prepared RDBESDataObject
 #' @param hierarchyToUse The hierarchy we are using
 #' @param targetTables The RDBES tables we are interested in
 #' @param i Integer to keep track of where we are in the list of tables
 #' @param verbose logical. Output messages to console.
 #'
-#' @return Whoever revises this function please specify what it returns here
+#' @return A partial RDBESEstObject with the data from the upper hierarchy
 #'
 procRDBESEstObjUppHier <- function(myRDBESEstObj = NULL,
                                    rdbesPrepObject,
@@ -625,12 +663,14 @@ gc()
       }
       gc()
       # Join this new table to the existing data
-      myRDBESEstObj <-
-        dplyr::left_join(myRDBESEstObj,
-          rdbesPrepObject[[thisTable]],
-          by = joinField
-          , multiple = "all"
-        )
+      # myRDBESEstObj <-
+      #   dplyr::left_join(myRDBESEstObj,
+      #     rdbesPrepObject[[thisTable]],
+      #     by = joinField
+      #     , multiple = "all"
+      #   )
+      # use data.table to do a left join instead of dplyr
+      myRDBESEstObj <- rdbesPrepObject[[thisTable]][myRDBESEstObj, on = joinField]
     }
     gc()
     # recursively call this function
