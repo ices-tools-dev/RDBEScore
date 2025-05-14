@@ -668,16 +668,16 @@ gc()
       }
       gc()
       # Join this new table to the existing data
-      # myRDBESEstObj <-
-      #   dplyr::left_join(myRDBESEstObj,
-      #     rdbesPrepObject[[thisTable]],
-      #     by = joinField
-      #     , multiple = "all"
-      #   )
+      myRDBESEstObj <-
+        dplyr::left_join(myRDBESEstObj,
+          rdbesPrepObject[[thisTable]],
+          by = joinField
+          , multiple = "all"
+        )
       # use data.table to do a left join instead of dplyr
       # (the order of the tables is to ensure the columns are returned in the right order)
       #myRDBESEstObj <- rdbesPrepObject[[thisTable]][myRDBESEstObj, on = joinField]
-      myRDBESEstObj <- myRDBESEstObj[rdbesPrepObject[[thisTable]],  on = joinField]
+      #myRDBESEstObj <- myRDBESEstObj[rdbesPrepObject[[thisTable]],  on = joinField]
     }
     gc()
     # recursively call this function
