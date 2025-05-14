@@ -1,9 +1,9 @@
-#' Creates an rdbesEStObject from prepared RDBES data
+#' Creates an RDBESEstObject from RDBES data
 #'
-#' @param rdbesPrepObject The prepared RDBES object that should be used to
+#'
+#' @param rdbesPrepObject The RDBES object that should be used to
 #' create an estimation object
-#' @param hierarchyToUse (Optional) The upper RDBES hierarchy to use. An integer value
-#' between 1 and 13. If NULL, the hierarchy will be determined from the DE table
+#' @param hierarchyToUse The upper RDBES hierarchy to use
 #'
 #' @param stopTable (Optional) The table to stop at in the RDBES hierarchy.
 #' If specified, only tables up to and including this table will be included in the
@@ -13,28 +13,8 @@
 #' out, or FALSE if you don't.  The default is FALSE.
 #' @param strict (Optional) This function validates its input data - should
 #' the validation be strict? The default is TRUE.
-#'
-#' @return An object of class RDBESEstObject ready for use in design based
-#' estimation
-#' @export
-#'
-#' @examples
-#' #Creates an rdbesEStObject from prepared RDBES data
-#' myH1EstObj <- createRDBESEstObject(H1Example, 1, "SA")
-#'
-#'
-#' @param rdbesPrepObject The prepared RDBES object that should be used to
-#' create an estimation object
-#' @param hierarchyToUse The upper RDBES hiearchy to use
-#'
-#' @param stopTable (Optional) The table to stop at in the RDBES hierarchy.
-#' If specified, only tables up to and including this table will be included in the
-#' resulting RDBESEstObject. The default is NULL, which means all tables in the hierarchy
-#' will be included.
-#' @param verbose (Optional) Set to TRUE if you want informative text printed
-#' out, or FALSE if you don't.  The default is FALSE.
-#' @param strict (Optional) This function validates its input data - should
-#' the validation be strict? The default is TRUE.
+#' @param incDesignVariables (Optional) Should the design variables be included?
+#' The default is TRUE.
 #'
 #' @return An object of class RDBESEstObject ready for use in design based
 #' estimation
@@ -46,7 +26,8 @@ createRDBESEstObject <- function(rdbesPrepObject,
                                  hierarchyToUse =NULL,
                                  stopTable = NULL,
                                  verbose = FALSE,
-                                 strict = TRUE) {
+                                 strict = TRUE,
+                                 incDesignVariables = TRUE) {
 
   DEhierarchy <- summary(rdbesPrepObject)$hierarchy
   if(is.null(hierarchyToUse)){
@@ -77,28 +58,40 @@ createRDBESEstObject <- function(rdbesPrepObject,
   # Copy the input data table so we don't change the original data
   rdbesPrepObjectCopy <- data.table::copy(rdbesPrepObject)
 
-  # Change text columns to factors to try and reduce final RDBESEstObject size
-  # Loop over each table in the list
+  # Try and make the data smaller by changing character columns to factors
+  # and removing the design variables if we don't need them
   for (tableName in names(rdbesPrepObjectCopy)) {
     dt <- rdbesPrepObjectCopy[[tableName]]
     if (is.data.table(dt)) {
+
+      # Change text columns to factors to try and reduce final RDBESEstObject size
       char_cols <- names(dt)[sapply(dt, is.character)]
       if (length(char_cols) > 0) {
         dt[, (char_cols) := lapply(.SD, as.factor), .SDcols = char_cols]
       }
+
+      # Get rid of design variables if we don't need them
+      if (!incDesignVariables){
+        # Check for columns that are in designVariables and remove them
+        columns_to_remove <-
+          intersect(names(dt), paste(tableName,RDBEScore::designVariables,sep=""))
+        if (length(columns_to_remove) > 0) {
+          dt[, (columns_to_remove) := NULL]
+        }
+      }
+
       rdbesPrepObjectCopy[[tableName]] <- dt
+
     }
   }
 
 
+  #take out the optional tables as this messes up est object creation
+  targetTables <-
+      RDBEScore::getTablesInRDBESHierarchy(hierarchyToUse,
+                                           includeOptTables = FALSE)
+
   # See if the user has specified a table to stop at
-  #take out the optional as this messes up est object creation
-  if (hierarchyToUse == '9'){ #temporary fix
-    targetTables <-c("DE", "SD", "LO", "TE", "SS", "SA" ,"LE" ,"FM", "BV")
-  }else{
-    targetTables <-
-      RDBEScore::getTablesInRDBESHierarchy(hierarchyToUse, includeOptTables = F)
-  }
   if (length(is.null(stopTable)) == 1 &&
     !is.null(stopTable)) {
     stopTableLoc <- which(targetTables == stopTable)
