@@ -674,9 +674,12 @@ gc()
           by = joinField
           , multiple = "all"
         )
-      # use data.table to do a left join instead of dplyr
-      # (the order of the tables is to ensure the columns are returned in the right order)
+      # TODO Should be able to use data.table to do a left join instead of dplyr
+      # but the two lines below were both wrong.  The first gives the columns back in the
+      # wrong order.  The second gives the columns in the right order but doesn't
+      # include all the rows :-(
       #myRDBESEstObj <- rdbesPrepObject[[thisTable]][myRDBESEstObj, on = joinField]
+      # (the order of the tables is to ensure the columns are returned in the right order)
       #myRDBESEstObj <- myRDBESEstObj[rdbesPrepObject[[thisTable]],  on = joinField]
     }
     gc()
