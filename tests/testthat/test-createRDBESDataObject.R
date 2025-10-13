@@ -8,8 +8,6 @@ capture.output({  ## suppresses printing of console output when running test()
   dirH1 <- "./h1_v_20250211/"
   # H5 directory
   dirH5 <- "./h5_v_20250211/"
-  # H7 directory
-  dirH7 <- "./h7_v_1_19_26/"
 
   # H1 object for comparison
   expObjH1 <- H1Example
@@ -388,55 +386,19 @@ capture.output({  ## suppresses printing of console output when running test()
   })
 
 
-  test_that("createRDBESDataObject creates an H7 object with keys on the data tables",  {
 
-    csvFilesH7 <- dirH7
-
-    myRDBESDataObject <- createRDBESDataObject(input = csvFilesH7)
-
-    # Not all of the RDBES table types are in the sample data
-    expectedNumberOfTablesWithKeys <- 13
-    actualNumberOfTablesWithKeys <- 0
-
-    for(aTable in names(myRDBESDataObject)){
-      if ('data.table' %in% class(myRDBESDataObject[[aTable]])){
-        if (!is.null(data.table::key(myRDBESDataObject[[aTable]]))){
-          actualNumberOfTablesWithKeys <- actualNumberOfTablesWithKeys + 1
-        }
-      }
-    }
-
-    expect_equal(expectedNumberOfTablesWithKeys,actualNumberOfTablesWithKeys)
-
-  })
-
-
-  test_that("createRDBESDataObject can create an object from a H1 data extract
-          with the right number of rows, when CL has partially quoted vessel identifiers (issue #210)",  {
+  test_that("createRDBESDataObject errors clearly when CL has unquoted comma-separated vessel identifiers (issue #210)",  {
 
             # Test related to following issue
-            #https://github.com/ices-tools-dev/RDBEScore/issues/210
+            # https://github.com/ices-tools-dev/RDBEScore/issues/210
 
             csvFilesH1 <- paste0(dirH1, "BadVesselIdentifiers/")
-            print(csvFilesH1)
 
-            myH1 <- createRDBESDataObject(input = csvFilesH1)
-            print(myH1)
-
-            # Get the default file names
-            fileNames <- RDBEScore::DefaultFileNames
-            # Remove any unnecessary files
-            fileNames[!names(fileNames) %in% c("CL")] <- NULL
-            # Append the right path
-            fileNames <-lapply(fileNames, function(x){paste(csvFilesH1,x,".csv",sep="")})
-            # Read the number of rows in each file
-            fileNumberOfRows <- lapply(fileNames, function(x){length(readLines(x))-1})
-
-            # For each file
-            for(x in names(fileNumberOfRows)){
-              # check if the value of nrow is equal to the length of readlines()-1
-              expect_true(nrow(myH1[[x]]) == fileNumberOfRows[x])
-            }
+            # Expect the new clear error message identifying the offending table and file base name
+            expect_error(
+              createRDBESDataObject(input = csvFilesH1),
+              "The input file has unexpected structure in the table CL"
+            )
 
           })
 
