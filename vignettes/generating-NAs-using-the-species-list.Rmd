@@ -1,8 +1,8 @@
 ---
-title: "Generating NAs using the Species List"
+title: "02c Generating NAs using the Species List"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Generating NAs using the Species List}
+  %\VignetteIndexEntry{02c Generating NAs using the Species List}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

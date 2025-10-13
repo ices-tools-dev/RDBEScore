@@ -1,8 +1,8 @@
 ---
-title: "Create IC format from doEstimationForAllStrata() output"
+title: "04 Create IC format from doEstimationForAllStrata() output"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Create IC format from doEstimationForAllStrata}
+  %\VignetteIndexEntry{04 Create IC format from doEstimationForAllStrata}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

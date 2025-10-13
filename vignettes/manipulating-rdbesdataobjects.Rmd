@@ -1,9 +1,9 @@
 ---
-title: "Manipulating RDBESDataObjects"
+title: "01b Manipulating RDBESDataObjects"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Manipulating RDBESDataObjects}
+  %\VignetteIndexEntry{01b Manipulating RDBESDataObjects}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

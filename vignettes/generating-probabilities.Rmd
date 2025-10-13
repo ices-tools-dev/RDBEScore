@@ -1,8 +1,8 @@
 ---
-title: "Generating probabilities"
+title: "02a Generating probabilities"
 output:  rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Generating probabilities}
+  %\VignetteIndexEntry{02a Generating probabilities}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
