@@ -127,7 +127,7 @@ See also other package vignettes:
 # note: vignettes are first compiled and only then html, R and Rmd are moved to folder doc
 vignettes <- data.frame(Rmd=dir()[grepl(dir(), pat=".Rmd")])
 # determines index of vignette being compiled
-thisVignetteRmd<-paste0(gsub(" ", "-",as.character(rmarkdown::metadata$title)),".Rmd")
+thisVignetteRmd<-paste0(gsub(":","",gsub(" ", "-",as.character(rmarkdown::metadata$title))),".Rmd")
 # prints list with links
 for (i in seq_along(vignettes$Rmd)) {
   if(tolower(vignettes$Rmd[i])!=tolower(thisVignetteRmd)){
