@@ -1,8 +1,8 @@
 ---
-title: "02b Generating Zeros using the Species List"
+title: "02b Generating zeros for species not observed"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{02b Generating Zeros using the Species List}
+  %\VignetteIndexEntry{02b Generating zeros for species not observed}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

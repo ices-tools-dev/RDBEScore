@@ -1,9 +1,9 @@
 ---
-title: "03b Ratio Estimation of Length Composition from RDBESDataObjects"
+title: "03b Estimating population parameters: ratio estimator"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{03b Ratio Estimation of Length Composition from RDBESDataObjects}
+  %\VignetteIndexEntry{03b Estimating population parameters: ratio estimator}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

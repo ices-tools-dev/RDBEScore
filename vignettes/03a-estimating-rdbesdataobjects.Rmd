@@ -1,9 +1,9 @@
 ---
-title: "03a Estimating Population parameters from RDBESDataObjects"
+title: "03a Estimating population parameters: unbiased estimator"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{03a Estimating Population parameters from RDBESDataObjects}
+  %\VignetteIndexEntry{03a Estimating population parameters: unbiased estimator}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

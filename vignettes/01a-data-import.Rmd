@@ -1,8 +1,8 @@
 ---
-title: "01a Data Import"
+title: "01a Data import"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{01a Data Import}
+  %\VignetteIndexEntry{01a Data import}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
