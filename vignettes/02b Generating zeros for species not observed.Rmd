@@ -90,8 +90,6 @@ print(myH1DataObject1updte[['SA']]$SAunitName)
 ```
 
 
-## ...
-
 See also other package vignettes:
 
 ```{r,echo=F, results='asis', eval=T}
