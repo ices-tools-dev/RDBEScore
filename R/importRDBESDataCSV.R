@@ -32,7 +32,8 @@
 
 importRDBESDataCSV <- function(rdbesExtractPath = NULL,
                                listOfFileNames = NULL,
-                               castToCorrectDataTypes = TRUE) {
+                               castToCorrectDataTypes = TRUE,
+                               ...) {
 
 
   # If we have not been passed a list of file names use a default
@@ -170,6 +171,11 @@ importRDBESDataCSV <- function(rdbesExtractPath = NULL,
       data.table::setkeyv(myRDBESDataObject[[aTable]],paste0(aTable,"id"))
     }
   }
+
+  #check the data
+  validateRDBESDataObject(myRDBESDataObject,
+                          checkDataTypes = castToCorrectDataTypes,
+                          ...)
 
   # Return the object
   myRDBESDataObject

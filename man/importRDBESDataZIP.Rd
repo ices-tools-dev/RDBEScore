@@ -4,7 +4,12 @@
 \alias{importRDBESDataZIP}
 \title{Import RDBES Downloaded Data}
 \usage{
-importRDBESDataZIP(filenames, castToCorrectDataTypes = TRUE, Hierarchy = NULL)
+importRDBESDataZIP(
+  filenames,
+  castToCorrectDataTypes = TRUE,
+  Hierarchy = NULL,
+  ...
+)
 }
 \arguments{
 \item{filenames}{\itemize{

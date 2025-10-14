@@ -106,7 +106,7 @@ createRDBESDataObject <- function(input = NULL,
 
   if(import.type == "csv") output <- importRDBESDataCSV(rdbesExtractPath = input,
                                                            listOfFileNames = listOfFileNames,
-                                                           castToCorrectDataTypes = castToCorrectDataTypes)
+                                                           castToCorrectDataTypes = castToCorrectDataTypes, ...)
 
 
   if(import.type == "list.of.dfs" || import.type == "list.of.dts") {
@@ -120,6 +120,7 @@ createRDBESDataObject <- function(input = NULL,
   if(import.type == "null") {
     output <- newRDBESDataObject()
   }
+
 
   return(output)
 }
