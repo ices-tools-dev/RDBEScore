@@ -106,8 +106,7 @@ Maintainer: Colin Millar <colin.millar@ices.dk>
 Description: The RDBEScore package provides functions to import and work with  
     fisheries data downloaded from the ICES RDBES database. It also contains 
     functions to perform estimation analysis using the resulting objects. 
-URL: https://github.com/ices-tools-dev/RDBEScore,
-     https://rdbes.ices.dk
+URL: https://github.com/ices-tools-dev/RDBEScore, https://rdbes.ices.dk, https://ices-tools-dev.github.io/RDBEScore/
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: true

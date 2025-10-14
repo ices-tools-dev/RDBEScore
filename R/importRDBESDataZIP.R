@@ -29,22 +29,30 @@
 importRDBESDataZIP <- function(filenames,
                                castToCorrectDataTypes = TRUE,
                                Hierarchy = NULL) {
-
+  
   # Generates random number for the temp import folder name
   randInt <- paste0(sample(1:100, 3), collapse = "")
   tmp <- paste0(tempdir(), "/downloadImport", randInt)
   dir.create(tmp)
   all_unzipped <- c()
   unzipFile <- function(x, tmp) {
-
+    
     if (!file.exists(x)) {
       warning(paste0("File ", x, " does not exist."))
       return()
     }
-
-    if (is.zip(x)) {
+    
+    if (RDBEScore:::is.zip(x)) {
       unzipped <- utils::unzip(x, exdir= tmp)
-      unzipped <- basename(unzipped)
+      if(as.character(Sys.info()["sysname"]) == "Linux"){
+        files <- list.files(tmp)
+        newNames <- sub(".*\\\\", "",  files)
+        file.rename(file.path(tmp, files), file.path(tmp, newNames))
+        unzipped <- list.files(tmp)
+      }
+      if(as.character(Sys.info()["sysname"]) != "Linux" ){
+        unzipped <- basename(unzipped)
+      }
       unzipped <- unzipped[grep("*.csv", unzipped)]
       intersected <- intersect(unzipped, all_unzipped)
       if(length(intersected) != 0) {
@@ -54,12 +62,12 @@ importRDBESDataZIP <- function(filenames,
       all_unzipped <<- c(all_unzipped, unzipped)
       return(unzipped)
     }
-
+    
   }
-
+  
   # the files are not used currently but can be if we want to
   files <- unique(unlist(sapply(filenames, unzipFile, tmp)))
-
+  
   dirs <- list.dirs(tmp, full.names = FALSE, recursive = FALSE)
   if(length(dirs) > 0) {
     hdirs <- dirs[grepl("H[0-9]+", dirs)]
@@ -76,7 +84,7 @@ importRDBESDataZIP <- function(filenames,
              "The options are: ", paste0(valid_hierarchies, collapse = ", "),
              "\nPlease provide a valid hierarchy as an argument. e.g like:\n",
              example)
-
+        
       }
       else {
         dirs <- c(setdiff(dirs, hdirs), paste0("H", Hierarchy))
@@ -87,14 +95,14 @@ importRDBESDataZIP <- function(filenames,
       files <- list.files(file.path(tmp, d), full.names = FALSE)
       file.rename(file.path(tmp, d, files), file.path(tmp, files))
     }
-
-
+    
+    
   }
-
-  res <- importRDBESDataCSV(tmp,
-                            castToCorrectDataTypes = castToCorrectDataTypes)
+  
+  res <- RDBEScore:::importRDBESDataCSV(tmp,
+                                        castToCorrectDataTypes = castToCorrectDataTypes)
   unlink(tmp, recursive = T)
-
+  
   return(res)
-
+  
 }

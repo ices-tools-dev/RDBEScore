@@ -82,6 +82,8 @@ validateRDBESDataObject <- function(objectToCheck,
                  paste(missingNames, collapse = ","),
                  sep = "" ))
   }
+  
+
 
   # STEP 2 OF CHECKS
 
@@ -135,6 +137,17 @@ validateRDBESDataObject <- function(objectToCheck,
 
         warningText <- ""
         validRDBESDataObject <- TRUE
+
+     # CHECK 5b if there is an SL table, is there also a non-empty IS table
+    if (!is.null(objectToCheck[['SL']]) && nrow(objectToCheck[['SL']]) > 0) {
+      if (is.null(objectToCheck[['IS']]) || nrow(objectToCheck[['IS']]) == 0) {
+        validRDBESDataObject <- FALSE
+        warningText <- paste0(
+          "objectToCheck contains a non-empty SL table but the IS table ",
+          "is either NULL or empty."
+        )
+      }
+    }
 
         # CHECK 6 Check that keys are set on the data tables
         for(aTable in names(nonNullEntries)){

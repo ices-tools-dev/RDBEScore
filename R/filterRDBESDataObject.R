@@ -65,14 +65,14 @@ filterRDBESDataObject <- function(RDBESDataObjectToFilter,
 
   tblNames <- names(RDBESDataObjectToFilter)
   alteredObject <- mapply(function(x, name) {
-    #do not search id columns that are not ids of this table
-    #see issue #183
+    # do not search id columns that are not ids of this table
+    # see issue #183
     idCols <- names(x)[grepl("id$", names(x))]
-    searchNames <- c(setdiff(names(x), idCols), paste0(name,"id"))
+    searchNames <- c(setdiff(names(x), idCols), paste0(name, "id"))
     foundNames <- searchNames[which(searchNames %in% fieldsToFilter)]
     if (length(foundNames) > 0) {
-      x <-
-        dplyr::filter(x, dplyr::if_all(all_of(foundNames), ~ .x %in% valuesToFilter))
+      keep <- x[, Reduce(`&`, lapply(.SD, function(col) col %in% valuesToFilter)), .SDcols = foundNames]
+      x <- x[keep]
     }
     x
   }, RDBESDataObjectToFilter, tblNames, SIMPLIFY = FALSE)

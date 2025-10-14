@@ -1,4 +1,0 @@
-DEid,DErecordType,DEsamplingScheme,DEsamplingSchemeType,DEyear,DEstratumName,DEhierarchyCorrect,DEhierarchy,DEsampled,DEreasonNotSampled,DEnonResponseCollected,DEauxiliaryVariableTotal,DEauxiliaryVariableValue,DEauxiliaryVariableName,DEauxiliaryVariableUnit
-5409,DE,National Routine,NatPilCF,1965,DE_stratum1_H5,Y,5,Y,,,,,,
-5410,DE,National Routine,NatPilCF,1965,DE_stratum2_H5,Y,5,Y,,,,,,
-5411,DE,National Routine,NatPilCF,1965,DE_stratum3_H5,Y,5,Y,,,,,,

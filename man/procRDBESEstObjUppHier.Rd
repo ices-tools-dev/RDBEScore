@@ -17,7 +17,7 @@ procRDBESEstObjUppHier(
 \arguments{
 \item{myRDBESEstObj}{An RDBESEstObj to add data to}
 
-\item{rdbesPrepObject}{A prepared RDBESRawObj}
+\item{rdbesPrepObject}{A prepared RDBESDataObject}
 
 \item{hierarchyToUse}{The hierarchy we are using}
 
@@ -28,7 +28,7 @@ procRDBESEstObjUppHier(
 \item{verbose}{logical. Output messages to console.}
 }
 \value{
-Whoever revises this function please specify what it returns here
+A partial RDBESEstObject with the data from the upper hierarchy
 }
 \description{
 Private function to process the upper hierarchies when creating

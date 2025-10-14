@@ -2,21 +2,22 @@
 % Please edit documentation in R/createRDBESEstObject.R
 \name{createRDBESEstObject}
 \alias{createRDBESEstObject}
-\title{Creates an rdbesEStObject from prepared RDBES data}
+\title{Creates an RDBESEstObject from RDBES data}
 \usage{
 createRDBESEstObject(
   rdbesPrepObject,
   hierarchyToUse = NULL,
   stopTable = NULL,
   verbose = FALSE,
-  strict = TRUE
+  strict = TRUE,
+  incDesignVariables = TRUE
 )
 }
 \arguments{
-\item{rdbesPrepObject}{The prepared RDBES object that should be used to
+\item{rdbesPrepObject}{The RDBES object that should be used to
 create an estimation object}
 
-\item{hierarchyToUse}{The upper RDBES hiearchy to use}
+\item{hierarchyToUse}{The upper RDBES hierarchy to use}
 
 \item{stopTable}{(Optional) The table to stop at in the RDBES hierarchy.
 If specified, only tables up to and including this table will be included in the
@@ -28,21 +29,17 @@ out, or FALSE if you don't.  The default is FALSE.}
 
 \item{strict}{(Optional) This function validates its input data - should
 the validation be strict? The default is TRUE.}
+
+\item{incDesignVariables}{(Optional) Should the design variables be included?
+The default is TRUE.}
 }
 \value{
 An object of class RDBESEstObject ready for use in design based
 estimation
-
-An object of class RDBESEstObject ready for use in design based
-estimation
 }
 \description{
-Creates an rdbesEStObject from prepared RDBES data
+Creates an RDBESEstObject from RDBES data
 }
 \examples{
-#Creates an rdbesEStObject from prepared RDBES data
-myH1EstObj <- createRDBESEstObject(H1Example, 1, "SA")
-
-
 myH1EstObj <- createRDBESEstObject(H1Example, 1, "SA")
 }

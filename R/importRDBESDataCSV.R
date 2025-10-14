@@ -72,8 +72,8 @@ importRDBESDataCSV <- function(rdbesExtractPath = NULL,
       " - an empty object will be created"))
     } else {
 
-      # Read the files which exist
-      for (myFile in filesWhichExist) {
+  # Read the files which exist
+  for (myFile in filesWhichExist) {
         # define R data types. Nessesary is to present fields whith characters
         #longer than 20. Use colClasses to define the data types. If you don't
         #use colClasses BVfishId is convert to scientific format and present as
@@ -81,16 +81,37 @@ importRDBESDataCSV <- function(rdbesExtractPath = NULL,
         fieldsFormat <- RDBEScore::mapColNamesFieldR[
           RDBEScore::mapColNamesFieldR$Table.Prefix == myFile, "RDataType"]
 
-        # Read the file
-        myList[[myFile]] <-
+        # Read the file with error handling so we can raise a clear message
+        filePath <- paste(rdbesExtractPath, "/", fileNames[myFile],  sep = "")
+        csvBaseName <- sub("\\.csv$", "", fileNames[myFile])
+        readResult <- try(
           utils::read.csv(
-            paste(rdbesExtractPath, "/", fileNames[myFile],  sep = ""),
-            header = TRUE, sep = ",", quote = "", stringsAsFactors = FALSE,
+            filePath,
+            header = TRUE,
+            sep = ",",
+            quote = "",
+            stringsAsFactors = FALSE,
             colClasses = fieldsFormat
-          )
+          ),
+          silent = TRUE
+        )
 
-        # Change each entry to a data table
-        #myList[[myFile]] <-
+        if (inherits(readResult, "try-error")) {
+          stop(
+            paste0(
+              "The input file has unexpected structure in the table ",
+              myFile,
+              " (",
+              csvBaseName,
+              ")"
+            ),
+            call. = FALSE
+          )
+        }
+
+        myList[[myFile]] <- readResult
+
+  # Change each entry to a data table
         data.table::setDT(myList[[myFile]])
 
         # Change database field names to R names where we can
