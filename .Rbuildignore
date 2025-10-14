@@ -14,3 +14,5 @@
 ^Meta$
 package_overview.Rmd
 ^.pptx$
+^_pkgdown\.yml$
+^pkgdown$
