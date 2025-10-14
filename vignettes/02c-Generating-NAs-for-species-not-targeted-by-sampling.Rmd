@@ -1,8 +1,8 @@
 ---
-title: "Generating NAs using the Species List"
+title: "02c Generating NAs for species not targeted by sampling"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Generating NAs using the Species List}
+  %\VignetteIndexEntry{02c Generating NAs for species not targeted by sampling}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -114,5 +114,19 @@ myH1DataObject1updte<-generateNAsUsingSL(myH1DataObject1,
                                          overwriteSampled=FALSE)
 myH1DataObject1updte$SA[,c(1:9,48:49)]
 ```
+See also other package vignettes:
 
+```{r,echo=F, results='asis', eval=T}
+# note: vignettes are first compiled and only then html, R and Rmd are moved to folder doc
+vignettes <- data.frame(Rmd=dir()[grepl(dir(), pat=".Rmd")])
+# determines index of vignette being compiled
+thisVignetteRmd<-paste0(gsub(":","",gsub(" ", "-",as.character(rmarkdown::metadata$title))),".Rmd")
+# prints list with links
+for (i in seq_along(vignettes$Rmd)) {
+  if(tolower(vignettes$Rmd[i])!=tolower(thisVignetteRmd)){
+  cat(sprintf("- [%s](%s)\n", gsub("-"," ",gsub(".Rmd","",vignettes$Rmd[i])), gsub(".Rmd",".html",vignettes$Rmd[i])))
+}
+}
+```
 
+#END
