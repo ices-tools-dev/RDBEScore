@@ -218,21 +218,21 @@ test_that("validateRDBESDataObject produces correct text output", {
 # Tests for CHECK 5b: SL non-empty requires non-empty IS
 test_that("validateRDBESDataObject errors when SL has rows and IS is NULL", {
   # Build minimal object: non-empty SL, NULL IS
-  myObject <- data.table::copy(H1Example)
+  myObject <- H1Example
 
-  myObject$IS <- NULL
+  myObject["IS"]<- list(NULL)
 
   expect_error(
     validateRDBESDataObject(objectToCheck = myObject, verbose = FALSE),
-    regexp = "objectToCheck is a list but does not contain all the required names. The missing table names are: IS"
+    regexp = "objectToCheck contains a non-empty SL table but the IS table is either NULL or empty."
   )
 })
 
 test_that("validateRDBESDataObject errors when SL has rows and IS is empty", {
   # Build minimal object: non-empty SL, empty IS
-  myObject <- data.table::copy(H1Example)
+  myObject <- H1Example
 
-  myObject$IS <- data.table::copy(myObject$IS[FALSE,])
+  myObject$IS <- myObject$IS[FALSE,]
 
   expect_error(
     validateRDBESDataObject(objectToCheck = myObject, verbose = FALSE),
