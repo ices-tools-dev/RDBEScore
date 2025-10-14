@@ -1,5 +1,6 @@
 # RDBEScore 0.3.4
 
+- Defaults: `createRDBESDataObject()`  now runs validation by default
 - Estimation object: added `incDesignVariables` to `createRDBESEstObject()` to optionally drop design variables; convert character columns to factors to reduce size.
 - SA sub-sampling: replaced recursive logic with a self-join + lookup (`prepareSubSampleLevelLookup`), with warnings for missing or non‑unique matches.
 - Memory: added frequent `gc()` calls across estimation/join steps for large data.

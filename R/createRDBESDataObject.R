@@ -57,7 +57,7 @@
 #' @param verbose (Optional) Set to TRUE if you want informative text printed
 #'  out, or FALSE if you don't.  The default is FALSE.
 #' @param ... parameters passed to validateRDBESDataObject
-#' if input is list of data frames e.g.`strict=FALSE`
+#'  e.g.`strict=FALSE`
 #' @importFrom utils file_test
 #'
 #' @return A RDBESDataObject
