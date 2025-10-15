@@ -28,7 +28,11 @@ evenMoreUsedVars <- c("Weightg", "Lengthmm", "Group", "WeightIndexSum",
                       "WeightIndex", "H8ExampleEE1", "suLevels", "LengthTotal",
                       "WeightMeasured", "LengthClass", "TotCount",
                       "BVNumbersAtLength", "SAauxVarValue", "ISid",
-                      "ISrecType", "..x")
+                      "ISrecType", "..x","n_matches",
+                      "SAparSequNum", "i.SAid", "SAparentID",
+                      "BVTotCount", "Age", "BVNumbersAtAge",
+                      "i.SAparentID", "i.subSampleLevel", "i.topLevelSAid",
+                      "subSampleLevel", "topLevelSAid")
 
 globalVariables(unique(c(usedVars, moreUsedVars, evenMoreUsedVars)))
 
