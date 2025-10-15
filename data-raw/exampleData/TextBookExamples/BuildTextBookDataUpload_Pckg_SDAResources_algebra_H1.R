@@ -45,10 +45,11 @@
 		baseDir <- ""
 		VD_base <- readRDS(paste0(baseDir,"aux_TextBookExamples/VD_base.rds"))
 		SL_base <- readRDS(paste0(baseDir,"aux_TextBookExamples/SL_base.rds"))
+		IS_base <- readRDS(paste0(baseDir,"aux_TextBookExamples/IS_base.rds"))
 
 		#nameof the directory where the outputs are saved currently
 		base_dir_outputs <- paste0(baseDir,"BuiltUploads")
-		if(!file.exists(base_dir_outputs)) dir.create(base_dir_outputs, recursive=T, showWarnings=FALSE)
+		dir.create(base_dir_outputs, recursive=T, showWarnings=FALSE)
 
 
 #========Outline of Hierarchy 1================
@@ -102,7 +103,7 @@ DE_df<-data.frame(
 		  DEauxiliaryVariableTotal = "",
 		  DEauxiliaryVariableValue = "",
 		  DEauxiliaryVariableName = "",
-		  DEauxiliaryVariableUnit = "", 
+		  DEauxiliaryVariableUnit = "",
 		  stringsAsFactors=FALSE
 			)
 
@@ -252,6 +253,7 @@ VS_df$VSinclusionProbCluster<-""
 # 21                      FTarrivalLocation [M] - Harbour_LOCODE
 # 22                                    FTarrivalDate [M] - Date
 # 23                   FTarrivalTime [M/O] - StringLength60
+#						FTdominantLandingDate
 # 24                                  FTnumberTotal [DV,O] - int
 # 25                                FTnumberSampled [DV,O] - int
 # 26                    FTselectionProb [DV,O] - Decimal0-1
@@ -338,6 +340,7 @@ FT_df <- data.frame(
 # 16                                                                FOendDate [M] - Date
 # 17                                                              FOendTime [M/O] - Time
 # 18                                                              FOduration [M/O] - int
+# FOfishingDurationDataBasis
 # 19                                               FOdurationSource [M] - DurationSource
 # 20                                                            FOhandlingTime [O] - int
 # 21                                        FOstartLat [O] - Decimal-90.000000-90.000000
@@ -405,6 +408,7 @@ FO_df <- data.frame(
 	FOendDate = as.Date(FT_df$FTdepartureDate, format='%Y-%m-%d'),#M
 	FOendTime ="",#M
 	FOduration = 60, #M ATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT!!!!
+	FOfishingDurationDataBasis ="", 
 	FOdurationSource = "Crew",
 	FOhandlingTime = "",
 	FOstartLat="", # ATT!
@@ -417,6 +421,8 @@ FO_df <- data.frame(
 	FOfisheriesManagementUnit = "",
 	FOgsaSubarea = "NotApplicable", #M
 	FOjurisdictionArea = "",
+	FOgeographicalDataBasis = "",
+	FOgeographicalSource = "",
 	FOfishingDepth = "",
 	FOwaterDepth = "",
 	FOnationalFishingActivity = "",

@@ -38,6 +38,7 @@
 		baseDir <- ""
 		VD_base <- readRDS(paste0(baseDir,"aux_TextBookExamples/VD_base.rds"))
 		SL_base <- readRDS(paste0(baseDir,"aux_TextBookExamples/SL_base.rds"))
+		IS_base <- readRDS(paste0(baseDir,"aux_TextBookExamples/IS_base.rds"))
 
 		#nameof the directory where the outputs are saved currently
 
@@ -234,6 +235,7 @@ VS_df$VSnumberTotal<-3078
 # 21                      FTarrivalLocation [M] - Harbour_LOCODE
 # 22                                    FTarrivalDate [M] - Date
 # 23                   FTarrivalTime [M/O] - StringLength60
+#						FTdominantLandingDate
 # 24                                  FTnumberTotal [DV,O] - int
 # 25                                FTnumberSampled [DV,O] - int
 # 26                    FTselectionProb [DV,O] - Decimal0-1
@@ -277,6 +279,7 @@ FT_df <- data.frame(
   FTarrivalLocation = "ZWHWN", #[M] - Harbour_LOCODE
   FTarrivalDate=seq(from = as.Date("1968-01-01", format='%Y-%m-%d'), by=1, length.out=nrow(dataset)), #[M] - date
   FTarrivalTime="", #[O] - time
+  FTdominantLandingDate= "", 
   FTnumberTotal= 1, #[DV,O] - int
   FTnumberSampled=1, #[DV,O] - int
   FTselectionProb=1, #[DV,O] - DecimalPrec10
@@ -320,6 +323,7 @@ FT_df <- data.frame(
 # 16                                                                FOendDate [M] - Date
 # 17                                                              FOendTime [M/O] - Time
 # 18                                                              FOduration [M/O] - int
+# FOfishingDurationDataBasis
 # 19                                               FOdurationSource [M] - DurationSource
 # 20                                                            FOhandlingTime [O] - int
 # 21                                        FOstartLat [O] - Decimal-90.000000-90.000000
@@ -387,6 +391,7 @@ FO_df <- data.frame(
 	FOendDate = as.Date(FT_df$FTdepartureDate, format='%Y-%m-%d'),#M
 	FOendTime ="",#M
 	FOduration = 60, #M ATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT!!!!
+	FOfishingDurationDataBasis = "Measured", 
 	FOdurationSource = "Crew",
 	FOhandlingTime = "",
 	FOstartLat="", # ATT!
@@ -399,12 +404,16 @@ FO_df <- data.frame(
 	FOfisheriesManagementUnit = "",
 	FOgsaSubarea = "NotApplicable", #M
 	FOjurisdictionArea = "",
+	FOgeographicalDataBasis = "Measured",
+	FOgeographicalSource = "",
 	FOfishingDepth = "",
 	FOwaterDepth = "",
 	FOnationalFishingActivity = "",
 	FOmetier5 = "",
 	FOmetier6 = "OTT_CRU_70-89_2_35",#M
 	FOgear = "OTT",#M
+	FOgearDataBasis = "Measured",
+	FOgearSource = "",
 	FOmeshSize = "",
 	FOselectionDevice = "",
 	FOselectionDeviceMeshSize = "",
@@ -500,8 +509,10 @@ SS_df<-data.frame(
 	SSspeciesListName = project_name_outputs, #M
 	SSuseForCalculateZero = "N", #M
 	SStimeTotal = "",
+	SStimeTotalDataBasis = "Measured",
 	SStimeSampled = "",
 	SSnumberTotal = 1,
+	SSnumberTotalDataBasis = "Measured",
 	SSnumberSampled = 1,
 	SSselectionProb = 1,
 	SSinclusionProb = 1,
@@ -604,10 +615,14 @@ SA_df<-data.frame(
 		SAfisheriesManagementUnit = "",
 		SAgsaSubarea = "NotApplicable", #M
 		SAjurisdictionArea = "",
+		SAgeographicalDataBasis = "Measured",
+		SAgeographicalSource = "",
 		SAnationalFishingActivity = "",
 		SAmetier5 = "",
 		SAmetier6 = "",
 		SAgear = "",
+		SAgearDataBasis = "Measured",
+		SAgearSource = "",
 		SAmeshSize = "",
 		SAselectionDevice = "",
 		SAselectionDeviceMeshSize = "",
@@ -628,6 +643,7 @@ SA_df<-data.frame(
 		SAreasonNotSampledFM = "",
 		SAreasonNotSampledBV = "",
 		SAtotalWeightMeasured = dataset[[target_var]],
+		SAtotalWeightMeasuredDataBasis = "Measured",
 		SAsampleWeightMeasured = dataset[[target_var]],
 		SAconversionFactorMeasLive = 1,
 		SAauxiliaryVariableTotal = "",
@@ -687,15 +703,14 @@ RDBESlist[[i]][which(grepl(colnames(RDBESlist[[i]]),pat="[A-Z]id"))]<-NULL
 
 #===Save============
 
-	dir_outputs<-paste0(base_dir_outputs,"/",
-	                    project_name_outputs,"/")
-  dir.create(dir_outputs, recursive=T, showWarnings=FALSE)
-	filename_output_CS <- paste0("H1.csv")
-	filename_output_SL <- paste0("HSL.csv")
-	filename_output_VD <- paste0("HVD.csv")
+	dir_outputs<-paste0(base_dir_outputs,"/", project_name_outputs,"/")
+	dir.create(dir_outputs, recursive=T, showWarnings=FALSE)
+	filename_output_CS <- paste0(dir_outputs,"H1.csv")
+	filename_output_SL <- paste0(dir_outputs,"HSL.csv")
+	filename_output_VD <- paste0(dir_outputs,"HVD.csv")
 
 
-lapply(RDBESlist, function(x, filename1 = paste0(dir_outputs,filename_output_CS)){
+lapply(RDBESlist, function(x, filename1 = filename_output_CS){
 if("DErecordType" %in% colnames(x)){
 	write.table(x, file = filename1, append = FALSE, quote = FALSE, sep = ",",
 				eol = "\n", na = "NA", dec = ".", row.names = FALSE,
@@ -707,7 +722,7 @@ write.table(x, file = filename1, append = TRUE, quote = FALSE, sep = ",",
 			}
 })
 
-b<-read.table(file=paste0(dir_outputs,filename_output_CS), header=F, sep=";")
+b<-read.table(file = filename_output_CS, header=F, sep=";")
 b<-cbind(key,b)
 b<-b[order(as.character(b$key), decreasing=FALSE),]
 b<-b[!is.na(key),]
@@ -715,24 +730,30 @@ b$key<-NULL
 b$V1<-as.character(b$V1)
 
 # saves CS output
-write.table(b$V1, file=paste0(dir_outputs,filename_output_CS), col.names=FALSE, row.names = FALSE, quote=FALSE,sep=",")
+write.table(b$V1, file = filename_output_CS, col.names=FALSE, row.names = FALSE, quote=FALSE,sep=",")
 
-# -----Builds and saves dummySL-----------------
+# -----Builds and saves dummySL and dummyIS-----------------
 
 
 	SL_base$SLspeciesListName<-project_name_outputs
 	SL_base$SLyear<-DEyear
 	SL_base$SLinstitute<-SDinstitution
-# saves SL output
-	write.table(SL_base,  file=paste0(dir_outputs,filename_output_SL), col.names=FALSE, row.names = FALSE, quote=FALSE,sep=",")
-
+	
+	# saves SL output
+	write.table(rbind(paste(SL_base, collapse=","), paste(IS_base, collapse=",")), file=filename_output_SL, col.names=FALSE, row.names = FALSE, quote=FALSE,sep=",")
 
 # -----Builds and saves dummyVD-----------------
 
-
 # saves VD output
 	VD_base$VDyear<-DEyear
-	write.table(VD_base, file=paste0(dir_outputs,filename_output_VD), col.names=FALSE, row.names = FALSE, quote=FALSE,sep=",")
+	write.table(VD_base, file=filename_output_VD, col.names=FALSE, row.names = FALSE, quote=FALSE,sep=",")
+
+
+
+
+
+# check - is this needed?
+if(1==2){
 
 
 
@@ -753,5 +774,5 @@ write.csv(tmp, file=paste0(dir_outputs,"tmp/SpeciesList.csv"), quote=F, row.name
 
 zip::zip(zipfile = paste0(project_name_outputs,".zip"), files =paste0(dir_outputs,"tmp/",dir(paste0(dir_outputs,"tmp"))), mode="cherry-pick")
 unlink(paste0(dir_outputs,"tmp"), force=T, recursive = T)
-
+}
 
