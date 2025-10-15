@@ -4,7 +4,7 @@
 \alias{fixSLids}
 \title{Fixes SLid in SL table (facilitating SS-SL joins).}
 \usage{
-fixSLids(RDBESDataObject, verbose = FALSE, strict = TRUE)
+fixSLids(RDBESDataObject, verbose = FALSE, validate = TRUE, strict = TRUE)
 }
 \arguments{
 \item{RDBESDataObject}{A valid RDBESDataObject}

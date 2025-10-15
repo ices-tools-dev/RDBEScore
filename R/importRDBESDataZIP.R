@@ -99,9 +99,9 @@ importRDBESDataZIP <- function(filenames,
 
   }
 
-  res <- RDBEScore:::importRDBESDataCSV(tmp,
-                                        castToCorrectDataTypes = castToCorrectDataTypes,
-                                        ...)
+  res <- importRDBESDataCSV(tmp,
+                            castToCorrectDataTypes = castToCorrectDataTypes,
+                            ...)
   unlink(tmp, recursive = T)
 
   return(res)

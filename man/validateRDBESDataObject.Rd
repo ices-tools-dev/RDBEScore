@@ -29,9 +29,9 @@ care. Default value is FALSE.}
 \item{verbose}{(Optional) Set to TRUE if you want informative text printed
 out, or FALSE if you don't.  The default is FALSE.}
 
-\item{strict}{(Optional) Set to TRUE if you want to be sure all columns
-are present in the data, set to FALSE if you only want to check that
-essential columns are present.  The default is TRUE.}
+\item{strict}{(Optional) Set to TRUE if you want an error if validation
+fails, set to FALSE if you want only a warning to be issued. The default
+is TRUE.}
 }
 \value{
 Returns objectToCheck
