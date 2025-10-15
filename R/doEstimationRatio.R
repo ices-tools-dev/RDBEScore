@@ -4,6 +4,7 @@
 #'
 #' @param RDBESDataObj A validated RDBESDataObject containing hierarchical sampling and biological data. Must include appropriate tables (e.g., CL, CE, SA, FM, or BV) depending on estimation requirements.
 #' @param targetValue A character string specifying the type of composition to estimate. Options are "LengthComp" or "AgeComp".
+#' @param raiseVar The variable used to construct the ratio.
 #' @param classUnits Units of the class intervals for length or age, typically "mm" for millimeters or "cm" for centimeters. Used in defining class intervals.
 #' @param classBreaks A numeric vector of three values: minimum value, maximum value, and class width (e.g., c(100, 300, 10)). Defines the class intervals for grouping lengths or ages.
 #' @param LWparam A numeric vector of length two specifying parameters (a, b) for the weight-length relationship (W = a * L^b). Used if no direct weights are available but lengths are provided.
@@ -38,7 +39,7 @@ doEstimationRatio <- function(RDBESDataObj,
                               lowerAux = NULL, # you can use a strongly correlated value present in your data for the estimation of the values of interest
                               verbose = FALSE){
 
-
+  raiseVar <- "Weight"
   RDBESDataObj <- H8ExampleEE1
   # Check we have a valid RDBESEstObject before doing anything else
   RDBEScore::validateRDBESDataObject(RDBESDataObj, verbose = FALSE)
@@ -47,16 +48,26 @@ doEstimationRatio <- function(RDBESDataObj,
   #                                       "./NLdata/HCL_2025_10_06_102840215.zip"))
   # validateRDBESDataObject(h1, verbose = TRUE)
 
-
-
+  # Check upper hierarchy
+  DEhierarchy <- unique(RDBESDataObj$DE$DEhierarchy)
+  if(length(unique(DEhierarchy )) > 1){
+    stop("Multiple upper hierarchies not yet implemented")}
+  # Check lower hierarchy
   if(length(unique(RDBESDataObj$SA$SAlowHierarchy)) > 1){
-    stop("Multiple lower hierarchies not allowed")}
+    stop("Multiple lower hierarchies not allowed")
+  }
 
+  RDBESEstRatioObj <- RDBESDataObj[c("CL", "CE",  RDBEScore::getTablesInRDBESHierarchy(DEhierarchy))]
+
+  # Filter out NULL tables
+  RDBESEstRatioObj <- Filter(Negate(is.null), RDBESEstRatioObj)
+
+#----------------------
   if(raiseVar == "Weight"){
-    if(unique(RDBESDataObj$SA$SAlowHierarchy) != c("A", "C")){
-      stop("Hierarchy B not yet implemented for weight")
+    if(unique(RDBESDataObj$SA$SAlowHierarchy) == "B" ){
+      stop("Lower hierarchy B not yet implemented for weight")
     }else{
-      weightVar <- grep("(?i)weight", unique(RDBESEstRatioObj$BV$BVtypeMeas), value = TRUE)
+      weightVar <- grep("(?i)weight", unique(RDBESDataObj$BV$BVtypeMeas), value = TRUE)
       # weightVar <- c("WeightLive", "WeightGutted", "WeightMeasured")
       if (interactive()) {
         if(length(unique(weightVar)) > 1) {
@@ -69,19 +80,8 @@ doEstimationRatio <- function(RDBESDataObj,
           message("Only one weight type present. Using: ", weightVar[1L])
           wcol <- weightVar[1L]
           weightName <- paste0("BV", wcol)
+        }
       }
-
-#
-#       weight_pref <- c("WeightLive", "WeightGutted", "WeightMeasured")  # set your priority
-#       wcol <- intersect(weight_pref, names(bv))
-#       if (length(wcol) == 0L) {
-#         # fall back to any column whose name contains 'weight' (case-insensitive)
-#         wcol <- grep("(?i)weight", names(bv), value = TRUE)
-#       }
-#       # pick the first in your priority (or the first match if using grep fallback)
-#       wcol <- wcol[1L]
-    }
-
     }
   }
 
@@ -92,16 +92,6 @@ doEstimationRatio <- function(RDBESDataObj,
   # if(!names(RDBESDataObj) %in% c("CL", "CE")){
   #   stop("The object does not have population data")
   # }
-
-# Order table based on hierarchy - it's a bottom up estimation
-  DEhierarchy <- unique(RDBESDataObj$DE$DEhierarchy)
-  if(length(unique(DEhierarchy )) > 1){
-    stop("Multiple upper hierarchies not yet implemented")} # TODO check - Should we accept that?
-
-  RDBESEstRatioObj <- RDBESDataObj[c("CL", "CE",  RDBEScore::getTablesInRDBESHierarchy(DEhierarchy))]
-
-# Filter out NULL tables
-  RDBESEstRatioObj <- Filter(Negate(is.null), RDBESEstRatioObj)
 
 # Check which tables exist after SA
 
