@@ -293,45 +293,6 @@
 
 ##------H1 Data from SDAResources package-------------------
 
-#' A RDBESDataObject converted from package SDAResources dataset agsrs
-#'
-#' This data set is derived from the data(agsrs) used in Lohr examples 2.6, 2.7
-#' and 2.11 of SDA book. Information required for example 4.8
-#' (domain estimation) is also added to SA (farmcat <=> SAarea).
-#' VSnumberSampled and VSnumberTotal set according to agsrs and book pop
-#' values. VSunitName is set to a combination of original agsrs$county,
-#' agsrs$state, agsrs$region and row numbers. Table SA contains the variable
-#' measured agsrs$acres92 in SAtotalWeightMeasured, SAsampleWeightMeasured and
-#' SAconversionFactorMeasLive set to 1. Table SA also contains the domain
-#' information, coded in SAarea. Table DE, SD, FT and FO are for the most
-#' dummy tables inserted to meet RDBES model requirements to be aggregated
-#' during estimation tests. Values of mandatory fields have dummy values with
-#' exception of Design-Variables in VS that match the book. BV, FM, CL, and CE
-#' are not provided. SL and VD are subset to the essential rows.
-#'
-#' @format A list containing entries required for H1 RDBES data:
-#' \describe{
-#'   \item{DE}{the Design data table. Contains dummy values with exception of
-#'   Design-Variables in VS that match the book}
-#'   \item{SD}{the Sampling Details data table. Contains dummy values}
-#'   \item{VS}{the Vessel Selection data table. Contains core information of
-#'   data(agsrs), VSnumberSampled and VSnumberTotal set according to agsrs
-#'   and book pop values, VSunitName is set to a combination of original
-#'   agsrs$county, agsrs$state, agsrs$region and row numbers}
-#'   \item{FT}{the Fishing Trip data table. Contains dummy values}
-#'   \item{FO}{the Fishing Operation data table. Contains dummy values}
-#'   \item{SS}{the Species Selection data table. Contains dummy values}
-#'   \item{SA}{the Sample data table. Contains the variable measured
-#'   agsrs$acres92 in SAtotalWeightMeasured, SAsampleWeightMeasured and
-#'   SAconversionFactorMeasLive set to 1, and the domain information,
-#'   coded in SAarea}
-#'   \item{FM}{the Frequency Measure data table. Not provided}
-#'   \item{BV}{the Biological Variable data table. Not provided}
-#'   \item{VD}{the Vessel Details data table. Subset to the essential rows}
-#'   \item{SL}{the Species List data table. Subset to the essential rows}
-#' }
-#' @source \url{https://CRAN.R-project.org/package=SDAResources}
-"Pckg_SDAResources_agsrs_H1"
 
 #' A RDBESDataObject converted from package SDAResources dataset agstrat
 #'
@@ -537,36 +498,6 @@
 #' @source \url{https://CRAN.R-project.org/package=SDAResources}
 "Pckg_SDAResources_schools_H1"
 
-##---------------Made Up data---------------
-
-#' A made-up dataset for testing manipulations of SA based on SL
-#'
-#' This data set is created for testing the idea of manipulating Sample data (SA)
-#' based on Species List (SL). It represents the simplest case for testing this
-#' idea. The data set contains two species in SL for the same SLcountry,
-#' SLinstitute, SLspeciesListName, SLyear, SLcatchFraction, SLcommercialTaxon,
-#' SLspeciesCode & SLcommercialTaxon == SLspeciesCode. There is one species in
-#' SA - one row in SS with keys equal to the SL keys.
-#'
-#' @format A list containing entries required for H1 RDBES data:
-#' \describe{
-#'   \item{DE}{the Design data table}
-#'   \item{SD}{the Sampling Details data table}
-#'   \item{VS}{the Vessel Selection data table}
-#'   \item{FT}{the Fishing Trip data table}
-#'   \item{FO}{the Fishing Operation data table}
-#'   \item{SS}{the Species Selection data table.
-#'   Contains one row with keys equal to the SL keys}
-#'   \item{SA}{the Sample data table. Contains one species}
-#'   \item{FM}{the Frequency Measure data table}
-#'   \item{BV}{the Biological Variable data table}
-#'   \item{VD}{the Vessel Details data table}
-#'   \item{SL}{the Species List data table.
-#'   Contains two species for the same SLcountry, SLinstitute,
-#'   SLspeciesListName, SLyear, SLcatchFraction, SLcommercialTaxon,
-#'   SLspeciesCode & SLcommercialTaxon == SLspeciesCode}
-#' }
-"MadeUpData_for_SL_SA_tests_v1"
 
 
 #-------Other example data----------
