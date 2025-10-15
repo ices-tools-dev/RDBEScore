@@ -8,6 +8,7 @@
 ^travis.yml$
 ^FishNCo$
 ^\.github$
+^\.vscode$
 ^.DS_Store$
 ^docs$
 ^doc$

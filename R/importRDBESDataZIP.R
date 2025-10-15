@@ -42,7 +42,7 @@ importRDBESDataZIP <- function(filenames,
       return()
     }
 
-    if (RDBEScore:::is.zip(x)) {
+    if (is.zip(x)) {
       unzipped <- utils::unzip(x, exdir= tmp)
       if(as.character(Sys.info()["sysname"]) == "Linux"){
         files <- list.files(tmp)

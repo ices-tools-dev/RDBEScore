@@ -20,6 +20,8 @@ doEstimationRatio(
 
 \item{targetValue}{A character string specifying the type of composition to estimate. Options are "LengthComp" or "AgeComp".}
 
+\item{raiseVar}{The variable used to construct the ratio.}
+
 \item{classUnits}{Units of the class intervals for length or age, typically "mm" for millimeters or "cm" for centimeters. Used in defining class intervals.}
 
 \item{classBreaks}{A numeric vector of three values: minimum value, maximum value, and class width (e.g., c(100, 300, 10)). Defines the class intervals for grouping lengths or ages.}
