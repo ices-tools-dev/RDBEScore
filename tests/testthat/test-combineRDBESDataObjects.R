@@ -66,4 +66,15 @@ test_that("combineRDBESDataObjects does not warn when combining objects from sam
                  NA)
 })
 
+test_that("combineRDBESDataObjects does not warn when one object has no DE table",  {
+
+  myObject1 <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
+  myObject2 <- createRDBESDataObject()  # Empty object with no DE
+
+  # Expect no warning because one object has no hierarchy
+  expect_warning(combineRDBESDataObjects(RDBESDataObject1=myObject1,
+                                        RDBESDataObject2=myObject2),
+                 NA)
+})
+
 }) ## end capture.output
