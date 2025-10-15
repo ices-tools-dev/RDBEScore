@@ -7,7 +7,8 @@
 importRDBESDataCSV(
   rdbesExtractPath = NULL,
   listOfFileNames = NULL,
-  castToCorrectDataTypes = TRUE
+  castToCorrectDataTypes = TRUE,
+  ...
 )
 }
 \arguments{

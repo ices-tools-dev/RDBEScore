@@ -57,7 +57,7 @@
 #' @param verbose (Optional) Set to TRUE if you want informative text printed
 #'  out, or FALSE if you don't.  The default is FALSE.
 #' @param ... parameters passed to validateRDBESDataObject
-#' if input is list of data frames e.g.`strict=FALSE`
+#'  e.g.`strict=FALSE`
 #' @importFrom utils file_test
 #'
 #' @return A RDBESDataObject
@@ -106,7 +106,7 @@ createRDBESDataObject <- function(input = NULL,
 
   if(import.type == "csv") output <- importRDBESDataCSV(rdbesExtractPath = input,
                                                            listOfFileNames = listOfFileNames,
-                                                           castToCorrectDataTypes = castToCorrectDataTypes)
+                                                           castToCorrectDataTypes = castToCorrectDataTypes, ...)
 
 
   if(import.type == "list.of.dfs" || import.type == "list.of.dts") {
@@ -120,6 +120,7 @@ createRDBESDataObject <- function(input = NULL,
   if(import.type == "null") {
     output <- newRDBESDataObject()
   }
+
 
   return(output)
 }

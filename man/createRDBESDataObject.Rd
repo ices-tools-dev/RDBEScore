@@ -34,7 +34,7 @@ in. Default is \code{TRUE}.}
 out, or FALSE if you don't.  The default is FALSE.}
 
 \item{...}{parameters passed to validateRDBESDataObject
-if input is list of data frames e.g.\code{strict=FALSE}}
+e.g.\code{strict=FALSE}}
 }
 \value{
 A RDBESDataObject

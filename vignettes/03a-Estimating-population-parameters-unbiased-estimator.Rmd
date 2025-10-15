@@ -1,9 +1,9 @@
 ---
-title: "Estimating Population parameters from RDBESDataObjects"
+title: "03a Estimating population parameters: unbiased estimator"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Estimating Population parameters from RDBESDataObjects}
+  %\VignetteIndexEntry{03a Estimating population parameters: unbiased estimator}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -189,20 +189,18 @@ How to interpret these results in the above example?
 
 See also other package vignettes:
 
-- [Raw Data Import](raw-data-import.html)
-- [Manipulating RDBESDataObjects](manipulating-rdbesdataobjects.html)
-- [Generating probabilities](generating-probabilities.html)
-- [Generating NAs using the Species List](generating-NAs-using-the-species-list.html)
-- [Generating Zeros using the Species List](generating-zeros-using-the-species-list.html)
-
-
-
-```{r eval=FALSE, include=FALSE, results='asis'}
-vignettes <- as.data.frame(browseVignettes(package = "RDBEScore")$RDBEScore)
-for (i in seq_along(vignettes$PDF)) {
-  cat(sprintf("- [%s](%s)\n", vignettes$Title[i], vignettes$PDF[i]))
+```{r,echo=F, results='asis', eval=T}
+# note: vignettes are first compiled and only then html, R and Rmd are moved to folder doc
+vignettes <- data.frame(Rmd=dir()[grepl(dir(), pat=".Rmd")])
+# determines index of vignette being compiled
+thisVignetteRmd<-paste0(gsub(":","",gsub(" ", "-",as.character(rmarkdown::metadata$title))),".Rmd")
+# prints list with links
+for (i in seq_along(vignettes$Rmd)) {
+  if(tolower(vignettes$Rmd[i])!=tolower(thisVignetteRmd)){
+  cat(sprintf("- [%s](%s)\n", gsub("-"," ",gsub(".Rmd","",vignettes$Rmd[i])), gsub(".Rmd",".html",vignettes$Rmd[i])))
 }
+}
+```
 
 #END
-```
 

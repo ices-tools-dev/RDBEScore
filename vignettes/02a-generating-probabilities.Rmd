@@ -1,8 +1,8 @@
 ---
-title: "Generating probabilities"
+title: "02a Generating probabilities"
 output:  rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Generating probabilities}
+  %\VignetteIndexEntry{02a Generating probabilities}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -187,3 +187,23 @@ We could use `probType = "selection"` to further complete the data with selectio
 ## The `overwrite` argument
 
 To be completed
+
+
+See also other package vignettes:
+
+```{r,echo=F, results='asis', eval=T}
+# note: vignettes are first compiled and only then html, R and Rmd are moved to folder doc
+vignettes <- data.frame(Rmd=dir()[grepl(dir(), pat=".Rmd")])
+# determines index of vignette being compiled
+thisVignetteRmd<-paste0(gsub(":","",gsub(" ", "-",as.character(rmarkdown::metadata$title))),".Rmd")
+# prints list with links
+for (i in seq_along(vignettes$Rmd)) {
+  if(tolower(vignettes$Rmd[i])!=tolower(thisVignetteRmd)){
+  cat(sprintf("- [%s](%s)\n", gsub("-"," ",gsub(".Rmd","",vignettes$Rmd[i])), gsub(".Rmd",".html",vignettes$Rmd[i])))
+}
+}
+```
+
+#END
+
+
