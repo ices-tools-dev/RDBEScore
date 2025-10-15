@@ -24,7 +24,7 @@ test_that("combineRDBESDataObjects returns invalid RDBESDataObject when
   expect_error(validateRDBESDataObject(myCombinedObject), "duplicate rows")
 })
 
-test_that("combineRDBESDataObjects returns valid RDBESDataObject when supplied
+test_that("combineRDBESDataObjects warns when supplied
           with valid, different RDBESDataObjects",  {
 
   myObject1 <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
@@ -34,13 +34,12 @@ test_that("combineRDBESDataObjects returns valid RDBESDataObject when supplied
   expect_error(validateRDBESDataObject(myObject1), NA)
   expect_error(validateRDBESDataObject(myObject2), NA)
 
-  myCombinedObject <- combineRDBESDataObjects(RDBESDataObject1=myObject1,
-                                             RDBESDataObject2=myObject2)
-
-  expect_error(validateRDBESDataObject(myCombinedObject), NA)
+  expect_warning(combineRDBESDataObjects(RDBESDataObject1=myObject1,
+                                             RDBESDataObject2=myObject2, strict = F),
+ "Combining RDBESDataObjects from different hierarchies")
 })
 
-test_that("combineRDBESDataObjects warns when combining objects from different hierarchies",  {
+test_that("combineRDBESDataObjects stops when combining objects from different hierarchies",  {
 
   myObject1 <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
   myObject2 <- importRDBESDataCSV(rdbesExtractPath = "./h5_v_20250211")
@@ -50,7 +49,7 @@ test_that("combineRDBESDataObjects warns when combining objects from different h
   expect_error(validateRDBESDataObject(myObject2), NA)
 
   # Expect a warning about different hierarchies
-  expect_warning(combineRDBESDataObjects(RDBESDataObject1=myObject1,
+  expect_error(combineRDBESDataObjects(RDBESDataObject1=myObject1,
                                         RDBESDataObject2=myObject2),
                  "Combining RDBESDataObjects from different hierarchies")
 })

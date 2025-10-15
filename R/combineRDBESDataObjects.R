@@ -9,7 +9,7 @@
 #' @param strict (Optional) This function validates its input data - should
 #' the validation be strict? The default is TRUE.
 #'
-#' @details 
+#' @details
 #' When combining RDBESDataObjects from different hierarchies (e.g., H1 and H5),
 #' a warning is issued. The resulting combined object will have a mixed hierarchy,
 #' which may be structurally and statistically invalid for some analyses. However,
@@ -38,32 +38,36 @@ combineRDBESDataObjects <- function(RDBESDataObject1,
 
   validateRDBESDataObject(RDBESDataObject1, verbose = verbose, strict = strict)
   validateRDBESDataObject(RDBESDataObject2, verbose = verbose, strict = strict)
-  
+
   # Check for multiple hierarchies
   hierarchy1 <- NULL
   hierarchy2 <- NULL
-  
+
   if (!is.null(RDBESDataObject1$DE) && nrow(RDBESDataObject1$DE) > 0) {
     hierarchy1 <- unique(RDBESDataObject1$DE$DEhierarchy)
   }
-  
+
   if (!is.null(RDBESDataObject2$DE) && nrow(RDBESDataObject2$DE) > 0) {
     hierarchy2 <- unique(RDBESDataObject2$DE$DEhierarchy)
   }
-  
+
   # Warn if combining different hierarchies
-  if (!is.null(hierarchy1) && !is.null(hierarchy2) && 
+  if (!is.null(hierarchy1) && !is.null(hierarchy2) &&
       length(hierarchy1) > 0 && length(hierarchy2) > 0) {
     if (!all(hierarchy1 %in% hierarchy2) || !all(hierarchy2 %in% hierarchy1)) {
-      warning("Combining RDBESDataObjects from different hierarchies (", 
-              paste(hierarchy1, collapse = ", "), " and ", 
-              paste(hierarchy2, collapse = ", "), 
+      warnMsg <- paste("Combining RDBESDataObjects from different hierarchies (",
+              paste(hierarchy1, collapse = ", "), " and ",
+              paste(hierarchy2, collapse = ", "),
               "). This creates a mixed hierarchy object that may be structurally ",
-              "and statistically invalid for some analyses.", 
-              call. = FALSE)
+              "and statistically invalid for some analyses.")
+      if(strict){
+        stop(warnMsg, call. = F)
+      } else{
+        warning(warnMsg, call. = F)
+      }
     }
   }
-  
+
   # Create an empty RDBESDataObject as the basis of what we will return
   myRDBESDataObject <- createRDBESDataObject()
 
