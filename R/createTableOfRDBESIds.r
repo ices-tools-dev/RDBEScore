@@ -18,7 +18,7 @@
 #'
 #' myTableOfIds<- createTableOfRDBESIds(myH1RawObject)
 #' }
-
+ 
 createTableOfRDBESIds<-function(x, addSAseqNums=TRUE){
   
   # note: needs developments for different lower hierarchies
