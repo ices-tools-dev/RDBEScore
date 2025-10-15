@@ -35,8 +35,8 @@ if(validate){
 	  # Take a copy of SA and SL since we'll change some column data types and
 	  # we don't want to update the original version
 	  tmpSS <- data.table::copy(RDBESDataObject[["SS"]])
-	  tmpSL <- data.table::copy(fixSLids(RDBESDataObject)$SL)
-	  tmpIS <- data.table::copy(fixSLids(RDBESDataObject)$IS)
+	  tmpSL <- data.table::copy(fixSLids(RDBESDataObject, validate = validate, strict = strict)$SL)
+	  tmpIS <- data.table::copy(fixSLids(RDBESDataObject, validate = validate, strict = strict)$IS)
 	  tmpSA <- data.table::copy(RDBESDataObject[["SA"]])
 
 		tmpSSwithSL<-merge(tmpSS, tmpSL, by="SLid", all.x=T)

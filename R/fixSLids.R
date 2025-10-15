@@ -21,13 +21,15 @@
 #' # To add
 
 
-fixSLids<-function(RDBESDataObject, verbose = FALSE, strict = TRUE){
+fixSLids<-function(RDBESDataObject, verbose = FALSE, validate = TRUE, strict = TRUE){
 
   # Check we have a valid RDBESDataObject before doing anything else
+  if(validate == T){
   validateRDBESDataObject(RDBESDataObject,
     verbose = verbose,
     strict = strict
   )
+  }
 
 # issues error if fixSLids already been run
 if("SLtaxaId" %in% colnames(RDBESDataObject[["SL"]])){
