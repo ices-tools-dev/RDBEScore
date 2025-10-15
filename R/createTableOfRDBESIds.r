@@ -71,7 +71,7 @@ createTableOfRDBESIds<-function(x, addSAseqNums=TRUE){
     
     if (i==1){
       
-      out<-merge(df_1,df_2, all.x=T) else out<-merge(out, df_2, all.x=T)
+      out<-merge(df_1,df_2, all.x=T) 
       
     }else{
       
@@ -109,15 +109,17 @@ createTableOfRDBESIds<-function(x, addSAseqNums=TRUE){
         out <- rbindlist(list(mergedA, mergedB, mergedC, mergedD), use.names = TRUE, fill = TRUE)
         
       }else{
-        
+
         out<-merge(out, df_2, all.x=T)
         
       }
       
     }
   }
-  
-  # reorders
+
+  out <- as.data.frame(out)
+
+    # reorders
   if(addSAseqNums==TRUE){
     
     out<-out[,c(paste0(CStableNames,"id"),"BVfishId","SAseqNum","SAparSequNum")]
@@ -129,11 +131,9 @@ createTableOfRDBESIds<-function(x, addSAseqNums=TRUE){
   }
   
   out
-  
+
 }
 
 # e.g.,
-## default adds "SAseqNum","SAparSequNum"
-#head(createTableOfRDBESIds(x = RDBESprepObj))
-## if addSAseqNums is set to FALSE, "SAseqNum" and "SAparSequNum" are not added to output
-# head(createTableOfRDBESIds(x = RDBESprepObj, addSAseqNums=FALSE))
+# check <- createTableOfRDBESIds(rdbesobj, addSAseqNums = T)
+# check
