@@ -18,6 +18,7 @@ A list containing entries required for H1 RDBES data:
 \item{BV}{the Biological Variable data table}
 \item{VD}{the Vessel Details data table}
 \item{SL}{the Species List data table}
+\item{IS}{the Individual Species table}
 }
 }
 \source{

@@ -1,4 +1,4 @@
-capture.output({  ## suppresses printing of console output when running test()
+  capture.output({  ## suppresses printing of console output when running test()
 
 test_that("validateRDBESobject does not produce errors or warnings",  {
 
@@ -213,6 +213,31 @@ test_that("validateRDBESDataObject produces correct text output", {
   }
 
 
+})
+
+# Tests for CHECK 5b: SL non-empty requires non-empty IS
+test_that("validateRDBESDataObject errors when SL has rows and IS is NULL", {
+  # Build minimal object: non-empty SL, NULL IS
+  myObject <- H1Example
+
+  myObject["IS"]<- list(NULL)
+
+  expect_error(
+    validateRDBESDataObject(objectToCheck = myObject, verbose = FALSE),
+    regexp = "objectToCheck contains a non-empty SL table but the IS table is either NULL or empty."
+  )
+})
+
+test_that("validateRDBESDataObject errors when SL has rows and IS is empty", {
+  # Build minimal object: non-empty SL, empty IS
+  myObject <- H1Example
+
+  myObject$IS <- myObject$IS[FALSE,]
+
+  expect_error(
+    validateRDBESDataObject(objectToCheck = myObject, verbose = FALSE),
+    regexp = "objectToCheck contains a non-empty SL table but the IS table is either NULL or empty."
+  )
 })
 
 

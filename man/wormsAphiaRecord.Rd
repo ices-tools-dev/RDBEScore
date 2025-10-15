@@ -25,7 +25,7 @@ A data frame
 \item{order}{E.g. "Spirularia" }
 \item{family}{E.g. "Cerianthidae"  }
 \item{genus}{E.g. NA "Cerianthus"}
-\item{citation }{E.g. "Molodtsova, T. (2023). World List of Ceriantharia.
+\item{citation}{E.g. "Molodtsova, T. (2023). World List of Ceriantharia.
 Cerianthidae Milne Edwards & Haime, 1851. Accessed through: "... }
 \item{lsid}{internal database identifier}
 \item{isMarine}{E.g. 1 }

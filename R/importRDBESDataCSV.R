@@ -32,7 +32,8 @@
 
 importRDBESDataCSV <- function(rdbesExtractPath = NULL,
                                listOfFileNames = NULL,
-                               castToCorrectDataTypes = TRUE) {
+                               castToCorrectDataTypes = TRUE,
+                               ...) {
 
 
   # If we have not been passed a list of file names use a default
@@ -72,17 +73,46 @@ importRDBESDataCSV <- function(rdbesExtractPath = NULL,
       " - an empty object will be created"))
     } else {
 
-      # Read the files which exist
-      for (myFile in filesWhichExist) {
-        # Read the file
-        myList[[myFile]] <-
-          utils::read.csv(
-            paste(rdbesExtractPath, "/", fileNames[myFile],  sep = ""),
-            header = TRUE, sep = ",", quote = "", stringsAsFactors = FALSE
-          )
+  # Read the files which exist
+  for (myFile in filesWhichExist) {
+        # define R data types. Nessesary is to present fields whith characters
+        #longer than 20. Use colClasses to define the data types. If you don't
+        #use colClasses BVfishId is convert to scientific format and present as
+        #character, when whole information about BVfishId is cutting.
+        fieldsFormat <- RDBEScore::mapColNamesFieldR[
+          RDBEScore::mapColNamesFieldR$Table.Prefix == myFile, "RDataType"]
 
-        # Change each entry to a data table
-        #myList[[myFile]] <-
+        # Read the file with error handling so we can raise a clear message
+        filePath <- paste(rdbesExtractPath, "/", fileNames[myFile],  sep = "")
+        csvBaseName <- sub("\\.csv$", "", fileNames[myFile])
+        readResult <- try(
+          utils::read.csv(
+            filePath,
+            header = TRUE,
+            sep = ",",
+            quote = "",
+            stringsAsFactors = FALSE,
+            colClasses = fieldsFormat
+          ),
+          silent = TRUE
+        )
+
+        if (inherits(readResult, "try-error")) {
+          stop(
+            paste0(
+              "The input file has unexpected structure in the table ",
+              myFile,
+              " (",
+              csvBaseName,
+              ")"
+            ),
+            call. = FALSE
+          )
+        }
+
+        myList[[myFile]] <- readResult
+
+  # Change each entry to a data table
         data.table::setDT(myList[[myFile]])
 
         # Change database field names to R names where we can
@@ -141,6 +171,11 @@ importRDBESDataCSV <- function(rdbesExtractPath = NULL,
       data.table::setkeyv(myRDBESDataObject[[aTable]],paste0(aTable,"id"))
     }
   }
+
+  #check the data
+  validateRDBESDataObject(myRDBESDataObject,
+                          checkDataTypes = castToCorrectDataTypes,
+                          ...)
 
   # Return the object
   myRDBESDataObject

@@ -63,7 +63,7 @@ browseVignettes(package = "RDBEScore")
 It can directly import the `.zip` archive from the RDBES download containing all mandatory hierarchy tables plus VD and SL:
 
 ```{r}
-importedH1 <- createRDBESDataObject(input = "./vignettes/vignetteData/H1_2023_10_16.zip")
+importedH1 <- createRDBESDataObject(input = "./data-raw/exampleData/H1_2025_02_11.zip")
 #print the not NULL table names
 names(importedH1[!unlist(lapply(importedH1, is.null))])
 ```
@@ -84,9 +84,9 @@ importedH1
 It can import the CL, CE, VD or SL tables `.zip` archives, but will include all other tables as `NULL`:
 
 ```{r}
-importedSL <- createRDBESDataObject(input = "./vignettes/vignetteData/HSL_2023_10_16.zip")
+importedH5 <- createRDBESDataObject(input = "./data-raw/exampleData/H5_2025_02_11.zip")
 #print the not NULL table names
-importedSL
+importedH5
 ```
 
 ## Importing a List of Data Frames
@@ -95,8 +95,10 @@ It can also import a `list` object containing data frames (or data.tables). Howe
 
 ```{r}
 #list of data frames 
-listOfDfsH1 <- readRDS("./vignettes/vignetteData/H1_2023_10_19.rds")
+listOfDfsH1 <- list(DE = as.data.frame(H1Example$DE),
+                  SD =  as.data.frame(H1Example$SD))
 importedList <- createRDBESDataObject(listOfDfsH1)
+
 ```
 
 ## Object class RDBESDataObject
@@ -125,12 +127,10 @@ myValues <- c("ZW","ZWBZH","ZWVFA" )
 
 myFilteredObject <- filterRDBESDataObject(H1Example,
                                          fieldsToFilter = myFields,
-                                         valuesToFilter = myValues )
+                                         valuesToFilter = myValues)
 
 # Number of rows in each non-null table
-unlist(summary(myFilteredObject)$rows)
-
-validateRDBESDataObject(myFilteredObject, verbose = FALSE)
+myFilteredObject
 ```
 
 ## Remowing Unlinked Data

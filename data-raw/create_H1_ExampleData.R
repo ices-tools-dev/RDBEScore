@@ -56,7 +56,7 @@ dir.create(paste0(tmp, "/HVD"))
 dir.create(paste0(tmp, "/HSL"))
 #put files to the folders
 hsl_file <- "SpeciesList.csv"
-his_file <- "IndividualSpecies.csv"
+his_file <- "IndividualSpeciesInSpeciesList.csv"
 hvd_file <- "VesselDetails.csv"
 file.copy(paste0(tmp, "/", hsl_file), paste0(tmp, "/HSL"), overwrite = TRUE)
 file.copy(paste0(tmp, "/", his_file), paste0(tmp, "/HSL"), overwrite = TRUE)

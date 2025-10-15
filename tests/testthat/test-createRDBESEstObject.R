@@ -79,7 +79,9 @@ test_that("createRDBESEstObject can create an object from an H1 data extract wit
   #myRawObject[["SA"]][, SAparentID:= NULL]
   # Generate some new parent ids
   myRawObject[["SA"]][51:100,"SAparSequNum"] <- myRawObject[["SA"]][1:50,"SAseqNum"]
+  myRawObject[["SA"]][51:100,"SSid"] <- myRawObject[["SA"]][1:50,"SSid"]
   myRawObject[["SA"]][101:125,"SAparSequNum"] <- myRawObject[["SA"]][51:75,"SAseqNum"]
+  myRawObject[["SA"]][101:125,"SSid"] <- myRawObject[["SA"]][51:75,"SSid"]
   # Fix the column order
   #setcolorder(myRawObject[["SA"]],
   #            c("SAid","SAparentID", setdiff(names(myRawObject[["SA"]]), c("SAid","SAparentID"))   )

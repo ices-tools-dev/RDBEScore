@@ -25,6 +25,7 @@ SAconversionFactorMeasLive set to 1}
 \item{BV}{the Biological Variable data table. Not provided}
 \item{VD}{the Vessel Details data table. Subset to the essential rows}
 \item{SL}{the Species List data table. Subset to the essential rows}
+\item{IS}{the Individual Species table}
 }
 }
 \source{

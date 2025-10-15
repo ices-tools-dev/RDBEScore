@@ -4,7 +4,7 @@
 \alias{fixSLids}
 \title{Fixes SLid in SL table (facilitating SS-SL joins).}
 \usage{
-fixSLids(RDBESDataObject, verbose = FALSE, strict = TRUE)
+fixSLids(RDBESDataObject, verbose = FALSE, validate = TRUE, strict = TRUE)
 }
 \arguments{
 \item{RDBESDataObject}{A valid RDBESDataObject}
@@ -12,7 +12,10 @@ fixSLids(RDBESDataObject, verbose = FALSE, strict = TRUE)
 \item{verbose}{(Optional) Set to TRUE if you want informative text printed
 out, or FALSE if you don't.  The default is FALSE.}
 
-\item{strict}{(Optional) This function validates its input data - should
+\item{validate}{(Optional) Should the function validate its input data?
+The default is TRUE.}
+
+\item{strict}{(Optional) If the function validates its input data - should
 the validation be strict? The default is TRUE.}
 }
 \value{

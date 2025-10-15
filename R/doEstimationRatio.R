@@ -4,6 +4,7 @@
 #'
 #' @param RDBESDataObj A validated RDBESDataObject containing hierarchical sampling and biological data. Must include appropriate tables (e.g., CL, CE, SA, FM, or BV) depending on estimation requirements.
 #' @param targetValue A character string specifying the type of composition to estimate. Options are "LengthComp" or "AgeComp".
+#' @param raiseVar The variable used to construct the ratio.
 #' @param classUnits Units of the class intervals for length or age, typically "mm" for millimeters or "cm" for centimeters. Used in defining class intervals.
 #' @param classBreaks A numeric vector of three values: minimum value, maximum value, and class width (e.g., c(100, 300, 10)). Defines the class intervals for grouping lengths or ages.
 #' @param LWparam A numeric vector of length two specifying parameters (a, b) for the weight-length relationship (W = a * L^b). Used if no direct weights are available but lengths are provided.
@@ -27,27 +28,62 @@
 # TODO add check for unique sampling scheme
 # TODO add an argument to toggle stratification in estimation on/off
 # TODO need to implement the BV conversion from typeMeas to typeAssess
+# TODO add info about the strata (species, area, season, metier/gear/fleet)
 #' @importFrom utils tail
 doEstimationRatio <- function(RDBESDataObj,
                               targetValue = "LengthComp",
+                              raiseVar = "Weight",
                               classUnits = "mm",
                               classBreaks = c(100, 300, 10), # cut
                               LWparam = NULL, # vector of two values
                               lowerAux = NULL, # you can use a strongly correlated value present in your data for the estimation of the values of interest
                               verbose = FALSE){
 
-
+  raiseVar <- "Weight"
   RDBESDataObj <- H8ExampleEE1
   # Check we have a valid RDBESEstObject before doing anything else
   RDBEScore::validateRDBESDataObject(RDBESDataObj, verbose = FALSE)
 
+  # RDBESDataObj <- createRDBESDataObject(input = c("./NLdata/2025_10_14_093927.zip",
+  #                                       "./NLdata/HCL_2025_10_06_102840215.zip"))
+  # validateRDBESDataObject(h1, verbose = TRUE)
 
-
-# TODO implement for a combination of lower hierarchies
-# For now only works on one lower hierarchy at a time
-
+  # Check upper hierarchy
+  DEhierarchy <- unique(RDBESDataObj$DE$DEhierarchy)
+  if(length(unique(DEhierarchy )) > 1){
+    stop("Multiple upper hierarchies not yet implemented")}
+  # Check lower hierarchy
   if(length(unique(RDBESDataObj$SA$SAlowHierarchy)) > 1){
-    stop("Multiple lower hierarchies not yet implemented")}
+    stop("Multiple lower hierarchies not allowed")
+  }
+
+  RDBESEstRatioObj <- RDBESDataObj[c("CL", "CE",  RDBEScore::getTablesInRDBESHierarchy(DEhierarchy))]
+
+  # Filter out NULL tables
+  RDBESEstRatioObj <- Filter(Negate(is.null), RDBESEstRatioObj)
+
+#----------------------
+  if(raiseVar == "Weight"){
+    if(unique(RDBESDataObj$SA$SAlowHierarchy) == "B" ){
+      stop("Lower hierarchy B not yet implemented for weight")
+    }else{
+      weightVar <- grep("(?i)weight", unique(RDBESDataObj$BV$BVtypeMeas), value = TRUE)
+      # weightVar <- c("WeightLive", "WeightGutted", "WeightMeasured")
+      if (interactive()) {
+        if(length(unique(weightVar)) > 1) {
+          # Print a numbered menu and get user's selection
+          idx <- utils::menu(weightVar, title = "Select the BV weight type to use:")
+          if (idx == 0L) stop("Selection cancelled.")
+          wcol <- weightVar[idx]
+          weightName <- paste0("BV", wcol)
+        } else {
+          message("Only one weight type present. Using: ", weightVar[1L])
+          wcol <- weightVar[1L]
+          weightName <- paste0("BV", wcol)
+        }
+      }
+    }
+  }
 
 # Do we need both CL and CE? Allow the user to define the population (i.e. effort or landings or both)?
 
@@ -56,16 +92,6 @@ doEstimationRatio <- function(RDBESDataObj,
   # if(!names(RDBESDataObj) %in% c("CL", "CE")){
   #   stop("The object does not have population data")
   # }
-
-# Order table based on hierarchy - it's a bottom up estimation
-  DEhierarchy <- unique(RDBESDataObj$DE$DEhierarchy)
-  if(length(unique(DEhierarchy )) > 1){
-    stop("Multiple upper hierarchies not yet implemented")}
-
-  RDBESEstRatioObj <- RDBESDataObj[c("CL", "CE",  RDBEScore::getTablesInRDBESHierarchy(DEhierarchy))]
-
-# Filter out NULL tables
-  RDBESEstRatioObj <- Filter(Negate(is.null), RDBESEstRatioObj)
 
 # Check which tables exist after SA
 
@@ -84,6 +110,11 @@ doEstimationRatio <- function(RDBESDataObj,
 # LH A & B ----------------------------------------------------------------
     if(unique(RDBESEstRatioObj$SA$SAlowHierarchy) %in% c("A", "B")){
 
+      # bv <- setDT(RDBESEstRatioObj$BV)
+      # fm <- setDT(RDBESEstRatioObj$FM)
+      # bv <- bv[, unique(.SD), .SDcols = c( "FMid","BVfishId", "BVtypeMeas", "BVvalueMeas")]
+      # bv <- dcast(bv, ... ~ BVtypeMeas , value.var = c("BVvalueMeas"), drop = TRUE)
+      # bv[, `:=`(LengthTotal = as.numeric(LengthTotal), WeightMeasured = as.numeric(WeightMeasured))]
 
       # Select only FM data for now - BV possibly used for ALK
       warning("Only FM table used. BV is not yet implemented")
@@ -95,22 +126,15 @@ doEstimationRatio <- function(RDBESDataObj,
 
 
 
-        # if aux exist use aux
-        if(all(!is.na(RDBESDataObj[[paste0(substr(tail(suLevels, n = 1), 1, 3), "auxVarValue")]]))){
+      if(!is.null(LWparam)){
+
+        stop("Not yet implemented")
 
 
-
-
-          # else LW relationship: give a, b parameters
-        }else if(!is.null(LWparam)){
-
-            stop("Not yet implemented")
-
-
-        }else{
-          # else stop
-          stop("Nor an auxiliary variable nor lw params are provided. Not possible to produce the mean weight at length ")
-        }
+      }else{
+        # else stop
+        stop("Nor an auxiliary variable nor lw params are provided. Not possible to produce the mean weight at length")
+      }
 
         # otherwise check if you can calculate it
         # otherwise stop
@@ -127,51 +151,82 @@ doEstimationRatio <- function(RDBESDataObj,
       bv <- setDT(RDBESEstRatioObj$BV)
       bv <- bv[, unique(.SD), .SDcols = c("SAid", "BVfishId", "BVtypeMeas", "BVvalueMeas")]
       bv <- dcast(bv, ... ~ BVtypeMeas , value.var = c("BVvalueMeas"), drop = TRUE)
-      bv[, `:=`(LengthTotal = as.numeric(LengthTotal), WeightMeasured = as.numeric(WeightMeasured))]
+      bv[, (weightName) := as.numeric(get(wcol))]
       # TODO this probably needs to be an argument
       # or needs to be defined later on?
-      bv$LengthClass <- floor(bv$LengthTotal/10) # or ceiling option? Half cm?
+      bv$LengthClass <- floor(bv$LengthTotal/10) # TODO This needs to be defined by the user
 
-      bv1 <- bv[, .(BVMeanWeight = mean(WeightMeasured, na.rm = TRUE),
-                    BVNumbersAtLength = .N),
-                by = .(SAid, LengthClass)][, TotCount := sum(BVNumbersAtLength), by = SAid]
-      bv1$BVLengthClassProp <- bv1$BVNumbersAtLength/bv1$TotCount
+      bv1 <- bv[
+        , .(BVMeanWeight = mean(get(wcol), na.rm = TRUE),
+            BVNumbersAtLength = .N),
+        by = .(SAid, LengthClass)
+      ][
+        # add total count per SAid
+        , BVTotCount := sum(BVNumbersAtLength), by = SAid
+      ][
+        # add total weight per SAid
+        bv[, .(BVTotWeight = sum(get(wcol), na.rm = TRUE)), by = SAid],
+        on = "SAid"
+      ]
+
+      # bv1$BVLengthClassProp <- bv1$BVNumbersAtLength/bv1$TotCount
 
 
       sa <- setDT(RDBESEstRatioObj$SA)
-      sa <- sa[, unique(.SD), .SDcols = c("SSid","SAid", "SAspeCode","SAlowHierarchy", "SAauxVarValue")]
-
+      sa <- sa[, unique(.SD), .SDcols = c("SAid", "SAlowHierarchy", "SAtotalWtMes" , "SAsampWtMes",  "SAnumTotal", "SAnumSamp", "SAauxVarValue", "SAauxVarUnit" )] # Do not need the
+      # species, the filtering of the "strata" variables will be done before the estimation
       # To test
       sa[, SAauxVarValue  := as.numeric(SAauxVarValue )]
       sa$SAauxVarValue <- 10
 
-      # TODO add check for subsampling STOP it does not work
+      # TODO add check for subsampling
 
       su <- merge(bv1, sa, by = c("SAid"))
 
-      su$SANumbersAtLength <- su$BVNumbersAtLength * su$SAauxVarValue
+      if(raiseVar == "Weight"){
+
+        su$raiseFactor <- su$SAtotalWtMes/su$SAsampWtMes
+        su$NumbersAtLength <- su$raiseFactor*su$BVNumbersAtLength
+
+      }else if(raiseVar == "Count"){
+
+        su$raiseFactor <- su$SAnumTotal/su$SAnumSamp
+        su$NumbersAtLength <- su$raiseFactor*su$BVNumbersAtLength
+
+      }else{
+
+        su$NumbersAtLength <- su$SAauxVarValue*su$BVNumbersAtLength
+
+      }
+
+      return(su)
+
+
+
+      # su$SANumbersAtLength <- su$BVNumbersAtLength * su$SAauxVarValue
 
       # From here onwards need the column names
 
-      s <- RDBEScore::getTablesInRDBESHierarchy(DEhierarchy)
-      keywords <- c("SA|FM|BV")
-      hierarchyTabs <-s[!is.na(gsub(keywords, NA, s))]
-      # Get the table before the SA (most likely SS)
-      nextTab <- tail(hierarchyTabs, n = 1)
-      # Get table SA - 2
-      nextTab1 <- tail(hierarchyTabs, n = )
-
-
-      upperHier1 <- setDT(RDBESEstRatioObj[[nextTab]])
-      cnames1 <- paste0(nextTab, "year")
-      upperHier1 <- upperHier1[, unique(.SD), .SDcols = c("SAid", "SAspeCode","SAlowHierarchy", "SAauxVarValue")]
+      # s <- RDBEScore::getTablesInRDBESHierarchy(DEhierarchy)
+      # keywords <- c("SA|FM|BV")
+      # hierarchyTabs <-s[!is.na(gsub(keywords, NA, s))]
+      # # Get the table before the SA (most likely SS)
+      # nextTab <- tail(hierarchyTabs, n = 1)
+      # # Get table SA - 2
+      # nextTab1 <- tail(hierarchyTabs, n = )
+      #
+      #
+      # upperHier1 <- setDT(RDBESEstRatioObj[[nextTab]])
+      # cnames1 <- paste0(nextTab, "year")
+      # upperHier1 <- upperHier1[, unique(.SD), .SDcols = c("SAid", "SAspeCode","SAlowHierarchy", "SAauxVarValue")]
 
 
 
       # if both lengths and weight exist
       # if(isTRUE(any(grepl("Length", RDBESEstRatioObj$BV$BVtypeAssess)) & any(grepl("Weight", RDBESEstRatioObj$BV$BVtypeAssess)))){
       #
-      #
+      # su$Wratio <- su$SAtotalWtMes/su$SAsampWtMes
+      # su$SANumbersAtLength <- su$BVNumbersAtLength * su$Wratio
       #
       # }else{
       #   stop("Not yet implemented")
@@ -185,10 +240,63 @@ doEstimationRatio <- function(RDBESDataObj,
   }else if(targetValue == "AgeComp"){
 
 
+
 # LH C --------------------------------------------------------------------
 
 
     if(unique(RDBESDataObj$SA$SAlowHierarchy) == "C"){
+
+      bv <- setDT(RDBESEstRatioObj$BV)
+      bv <- bv[, unique(.SD), .SDcols = c("SAid", "BVfishId", "BVtypeMeas", "BVvalueMeas")]
+      bv <- dcast(bv, ... ~ BVtypeMeas , value.var = c("BVvalueMeas"), drop = TRUE)
+      bv[, `:=`( WeightMeasured = as.numeric(get(wcol)))]
+      # TODO this probably needs to be an argument
+      # or needs to be defined later on?
+
+      bv1 <- bv[
+        , .(BVMeanWeight = mean(get(wcol), na.rm = TRUE),
+            BVNumbersAtAge = .N),
+        by = .(SAid, Age)
+      ][
+        # add total count per SAid
+        , BVTotCount := sum(BVNumbersAtAge), by = SAid
+      ][
+        # add total weight per SAid
+        bv[, .(BVTotWeight = sum(get(wcol), na.rm = TRUE)), by = SAid],
+        on = "SAid"
+      ]
+
+      # bv1$BVLengthClassProp <- bv1$BVNumbersAtLength/bv1$TotCount
+
+
+      sa <- setDT(RDBESEstRatioObj$SA)
+      sa <- sa[, unique(.SD), .SDcols = c("SAid", "SAlowHierarchy", "SAtotalWtMes" , "SAsampWtMes",  "SAnumTotal", "SAnumSamp", "SAauxVarValue", "SAauxVarUnit" )] # Do not need the
+      # species, the filtering of the "strata" variables will be done before the estimation
+      # To test
+      sa[, SAauxVarValue  := as.numeric(SAauxVarValue )]
+      sa$SAauxVarValue <- 10
+
+      # TODO add check for subsampling
+
+      su <- merge(bv1, sa, by = c("SAid"))
+
+      if(raiseVar == "Weight"){
+
+        su$raiseFactor <- su$SAtotalWtMes/su$SAsampWtMes
+        su$NumbersAtAge <- su$raiseFactor*su$BVNumbersAtAge
+
+      }else if(raiseVar == "Count"){
+
+        su$raiseFactor <- su$SAnumTotal/su$SAnumSamp
+        su$NumbersAtAge <- su$raiseFactor*su$BVNumbersAtAge
+
+      }else{
+
+        su$NumbersAtAge <- su$SAauxVarValue*su$BVNumbersAtAge
+
+      }
+
+      return(su)
       # Check which biol data are present
 
       # if age exists
@@ -211,7 +319,11 @@ doEstimationRatio <- function(RDBESDataObj,
 
     }else if(unique(RDBESDataObj$SA$SAlowHierarchy) == "A"){
 
-
+      bv <- setDT(RDBESEstRatioObj$BV)
+      fm <- setDT(RDBESEstRatioObj$FM)
+      bv <- bv[, unique(.SD), .SDcols = c( "FMid","BVfishId", "BVtypeMeas", "BVvalueMeas")]
+      bv <- dcast(bv, ... ~ BVtypeMeas , value.var = c("BVvalueMeas"), drop = TRUE)
+      bv[, `:=`(wcol = as.numeric(wcol ))]
 
       # if age exists
 

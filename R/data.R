@@ -48,20 +48,23 @@
 #' @source \url{https://sboxrdbes.ices.dk}
 "designVariables"
 
-#' A dataset containing a copy of the icesSpecWoRMS code list. The latest
-#' code list data can be downloaded from https://vocab.ices.dk/
+#' ICES Species (WoRMS) code list snapshot
 #'
-#' @format A data frame
+#' A dataset containing a copy of the ICES 'Species (WoRMS)' code list.
+#' The latest code list can be downloaded from https://vocab.ices.dk/.
+#'
+#' @format A data frame with the following columns:
 #' \describe{
-#'   \item{GUID}{Globally unique identifier assigned by ICES}
-#'   \item{Key}{AphiaID}
-#'   \item{Description}{Scientific name}
-#'   \item{LongDescription}{Ignore}
-#'   \item{Modified}{Date when the code was last updated}
-#'   \item{Deprecated}{IS this still a valid code.  If FALSE the code is
-#'   no longer valid within ICES.}
-#'   \item{DateDownloaded}{E.g. "2023-10-18" }
-#'   ...
+#'   \item{CodeTypeGUID}{GUID of the code type in ICES Vocabulary (e.g. the 'Species (WoRMS)' list).}
+#'   \item{CodeTypeID}{Numeric ID of the code type.}
+#'   \item{Guid}{GUID identifying this code record.}
+#'   \item{Id}{Numeric ID of this code record.}
+#'   \item{Key}{AphiaID (numeric key from WoRMS).}
+#'   \item{Description}{Scientific name.}
+#'   \item{LongDescription}{(If present) additional description; often not used.}
+#'   \item{Modified}{Datetime the record was last modified at ICES.}
+#'   \item{Deprecated}{Logical; whether this code is deprecated at ICES.}
+#'   \item{DateDownloaded}{Date the snapshot was downloaded, e.g. "2023-10-18".}
 #' }
 #' @source \url{https://vocab.ices.dk/}
 "icesSpecWoRMS"
@@ -88,7 +91,7 @@
 #'   \item{order}{E.g. "Spirularia" }
 #'   \item{family}{E.g. "Cerianthidae"  }
 #'   \item{genus}{E.g. NA "Cerianthus"}
-#'   \item{citation }{E.g. "Molodtsova, T. (2023). World List of Ceriantharia.
+#'   \item{citation}{E.g. "Molodtsova, T. (2023). World List of Ceriantharia.
 #' Cerianthidae Milne Edwards & Haime, 1851. Accessed through: "... }
 #'   \item{lsid}{internal database identifier}
 #'   \item{isMarine}{E.g. 1 }
@@ -130,8 +133,31 @@
 #'   \item{BV}{the Biological Variable data table}
 #'   \item{VD}{the Vessel Details data table}
 #'   \item{SL}{the Species List data table}
+#'   \item{IS}{the Individual Species table}
 #' }
 "H1Example"
+
+#' A dataset containing test RDBES data for H7 in the RDBESDataObject structure
+#'
+#' This dataset does not have passed the RDBES upload checks,
+#'  hence the object might be somewhat invalid, however it resembles real data
+#'  from the Estonian Market Sampling for 2022 for 2 species
+#'
+#' @format A list containing entries required for H7 RDBES data:
+#' \describe{
+#'   \item{DE}{the Design data table}
+#'   \item{SD}{the Sampling Details data table}
+#'   \item{OS}{the Onshore Sample data table}
+#'   \item{LE}{the Landing Event data table}
+#'   \item{SS}{the Species Selection data table}
+#'   \item{SA}{the Sample data table}
+#'   \item{BV}{the Biological Variable data table}
+#'   \item{SL}{the Species List data table}
+#'   \item{IS}{the Individual Species table}
+
+#' }
+#' #' @source Richard Meitern @ Estonian Marine Institute, 2025
+"H7Example"
 
 #' A dataset containing test RDBES data for H8 in the RDBESDataObject structure
 #'
@@ -152,10 +178,11 @@
 #'   \item{BV}{the Biological Variable data table}
 #'   \item{VD}{the Vessel Details data table}
 #'   \item{SL}{the Species List data table}
+#'   \item{IS}{the Individual Species}
 #'   \item{CL}{the Commertial Landing data table}
 #'   \item{CE}{the Commertial Effort data table}
 #' }
-#' #' @source Richard Meitern @ Estonian Marine Institute, 2023
+#' #' @source Richard Meitern @ Estonian Marine Institute, 2025
 "H8ExampleEE1"
 
 #' A dataset containing test RDBES data for H5 in the RDBESDataObject structure
@@ -173,6 +200,7 @@
 #'   \item{BV}{the Biological Variable data table}
 #'   \item{VD}{the Vessel Details data table}
 #'   \item{SL}{the Species List data table}
+#'   \item{IS}{the Individual Species table}
 #' }
 "H5Example"
 
@@ -201,64 +229,12 @@
 #'   \item{BV}{the Biological Variable data table}
 #'   \item{VD}{the Vessel Details data table}
 #'   \item{SL}{the Species List data table}
+#'   \item{IS}{the Individual Species table}
 #' }
 #' @source \url{https://CRAN.R-project.org/package=survey}
 "Pckg_survey_apiclus2_H1"
 
-#' A RDBESDataObject converted from package survey dataset apiclus1
-#'
-#' This data set is derived from the Academic Performance Index computed for all
-#' California schools based on standardized testing of students. The original
-#' data sets contain information for all schools with at least 100 students and
-#' for various probability samples of the data. The design is 1-stage cluster
-#' sampling with clusters of unequal sizes. An SRS of 15 districts is selected
-#' (psus) from the 757 districts in the population. All schools within district
-#' are selected (ssus). The weights (pw) do not match 757/15 probably because
-#' they have been calibrated. The target variable is enroll.
-#'
-#' @format A list containing entries required for H1 RDBES data:
-#' \describe{
-#'   \item{DE}{the Design data table. Contains 1 DE row with DEstratumName == "Pckg_SDAResources_apiclus1_v2_H1"}
-#'   \item{SD}{the Sampling Details data table. Contains 1 child SD row}
-#'   \item{VS}{the Vessel Selection data table. Contains 183 child rows (the 186 schools finally observed), each associated to its cluster (dname), VSnumberTotalClusters is 757, VSnumberTotal is the number of schools in the cluster (census), calibrated weights are provided as 1/pw in VSinclusionProbCluster}
-#'   \item{FT}{the Fishing Trip data table. Just 1:1 links to the final data (in SA)}
-#'   \item{FO}{the Fishing Operation data table. Just 1:1 links to the final data (in SA)}
-#'   \item{SS}{the Species Selection data table. Just 1:1 links to the final data (in SA)}
-#'   \item{SA}{the Sample data table. SAsampleWeightMeasured is enroll}
-#'   \item{FM}{the Frequency Measure data table}
-#'   \item{BV}{the Biological Variable data table}
-#'   \item{VD}{the Vessel Details data table}
-#'   \item{SL}{the Species List data table}
-#' }
-#' @source \url{https://CRAN.R-project.org/package=survey}
-"Pckg_survey_apiclus1_v2_H1"
 
-#' A Clustered RDBESDataObject converted from package survey dataset apiclus2
-#'
-#' This data set is derived from the Academic Performance Index computed for all
-#' California schools based on standardized testing of students. The original
-#' data sets contain information for all schools with at least 100 students and
-#' for various probability samples of the data. The design is 2-stage cluster
-#' sampling with clusters of unequal sizes. An SRS of 40 districts is selected
-#' (psus) from the 757 districts in the population and then up to 5 schools (min
-#' 1) were selected from each district (ssus). The target variable is enroll - note that it contains 4 NA values.
-#'
-#' @format A list containing entries required for H1 RDBES data:
-#' \describe{
-#'   \item{DE}{the Design data table. Contains 1 DE row with DEstratumName == "Pckg_SDAResources_apiclus2_v2_H1"}
-#'   \item{SD}{the Sampling Details data table. Contains 1 child SD row}
-#'   \item{VS}{the Vessel Selection data table. Contains 126 child rows (the 126 schools finally observed), each associated to its cluster (dname), VSnumberTotalClusters is 757, VSnumberTotal is 1...5 schools sampled}
-#'   \item{FT}{the Fishing Trip data table. Just 1:1 links to the final data (in SA)}
-#'   \item{FO}{the Fishing Operation data table. Just 1:1 links to the final data (in SA)}
-#'   \item{SS}{the Species Selection data table. Just 1:1 links to the final data (in SA)}
-#'   \item{SA}{the Sample data table. SAsampleWeightMeasured is enroll (note the 4 NAs)}
-#'   \item{FM}{the Frequency Measure data table}
-#'   \item{BV}{the Biological Variable data table}
-#'   \item{VD}{the Vessel Details data table}
-#'   \item{SL}{the Species List data table}
-#' }
-#' @source \url{https://CRAN.R-project.org/package=survey}
-"Pckg_survey_apiclus2_v2_H1"
 
 #' A RDBESDataObject converted from package survey dataset apistrat
 #'
@@ -284,6 +260,7 @@
 #'   \item{BV}{the Biological Variable data table}
 #'   \item{VD}{the Vessel Details data table. Contains 311 child rows}
 #'   \item{SL}{the Species List data table. Contains 1 child row}
+#'   \item{IS}{the Individual Species table}
 #' }
 #' @source \url{https://CRAN.R-project.org/package=survey}
 "Pckg_survey_apistrat_H1"
@@ -293,45 +270,6 @@
 
 ##------H1 Data from SDAResources package-------------------
 
-#' A RDBESDataObject converted from package SDAResources dataset agsrs
-#'
-#' This data set is derived from the data(agsrs) used in Lohr examples 2.6, 2.7
-#' and 2.11 of SDA book. Information required for example 4.8
-#' (domain estimation) is also added to SA (farmcat <=> SAarea).
-#' VSnumberSampled and VSnumberTotal set according to agsrs and book pop
-#' values. VSunitName is set to a combination of original agsrs$county,
-#' agsrs$state, agsrs$region and row numbers. Table SA contains the variable
-#' measured agsrs$acres92 in SAtotalWeightMeasured, SAsampleWeightMeasured and
-#' SAconversionFactorMeasLive set to 1. Table SA also contains the domain
-#' information, coded in SAarea. Table DE, SD, FT and FO are for the most
-#' dummy tables inserted to meet RDBES model requirements to be aggregated
-#' during estimation tests. Values of mandatory fields have dummy values with
-#' exception of Design-Variables in VS that match the book. BV, FM, CL, and CE
-#' are not provided. SL and VD are subset to the essential rows.
-#'
-#' @format A list containing entries required for H1 RDBES data:
-#' \describe{
-#'   \item{DE}{the Design data table. Contains dummy values with exception of
-#'   Design-Variables in VS that match the book}
-#'   \item{SD}{the Sampling Details data table. Contains dummy values}
-#'   \item{VS}{the Vessel Selection data table. Contains core information of
-#'   data(agsrs), VSnumberSampled and VSnumberTotal set according to agsrs
-#'   and book pop values, VSunitName is set to a combination of original
-#'   agsrs$county, agsrs$state, agsrs$region and row numbers}
-#'   \item{FT}{the Fishing Trip data table. Contains dummy values}
-#'   \item{FO}{the Fishing Operation data table. Contains dummy values}
-#'   \item{SS}{the Species Selection data table. Contains dummy values}
-#'   \item{SA}{the Sample data table. Contains the variable measured
-#'   agsrs$acres92 in SAtotalWeightMeasured, SAsampleWeightMeasured and
-#'   SAconversionFactorMeasLive set to 1, and the domain information,
-#'   coded in SAarea}
-#'   \item{FM}{the Frequency Measure data table. Not provided}
-#'   \item{BV}{the Biological Variable data table. Not provided}
-#'   \item{VD}{the Vessel Details data table. Subset to the essential rows}
-#'   \item{SL}{the Species List data table. Subset to the essential rows}
-#' }
-#' @source \url{https://CRAN.R-project.org/package=SDAResources}
-"Pckg_SDAResources_agsrs_H1"
 
 #' A RDBESDataObject converted from package SDAResources dataset agstrat
 #'
@@ -368,205 +306,12 @@
 #'   \item{BV}{the Biological Variable data table. Not provided}
 #'   \item{VD}{the Vessel Details data table. Subset to the essential rows}
 #'   \item{SL}{the Species List data table. Subset to the essential rows}
+#'   \item{IS}{the Individual Species table}
 #' }
 #' @source \url{https://CRAN.R-project.org/package=SDAResources}
 "Pckg_SDAResources_agstrat_H1"
 
-#' A RDBESDataObject converted from package SDAResources dataset algebra
-#'
-#' This data set is derived from a fictional data for an SRS of 12 algebra
-#' classes in a city, from a population of 187 classes. The design is 1-stage
-#' cluster sampling with clusters of unequal sizes. Clusters are classes (class).
-#' Clusters (psu) are unequal sized (Mi). In each cluster, all students are
-#' selected (ssus, nrows). The total number of psus is known (187). The target
-#' variable is score.
-#'
-#' @format A list containing entries required for H1 RDBES data:
-#' \describe{
-#'   \item{DE}{the Design data table. Contains 1 DE row with
-#'   DEstratumName == "Pckg_SDAResources_algebra_H1"}
-#'   \item{SD}{the Sampling Details data table. Contains 1 child SD row}
-#'   \item{VS}{the Vessel Selection data table. Contains 299 child rows
-#'   (the 299 students observed), each associated to its cluster (class),
-#'   VSnumberTotalClusters is 187, VSnumberSampledClusters is 12,
-#'   VSnumberTotal is Missing}
-#'   \item{FT}{the Fishing Trip data table. Just 1:1 links to the final
-#'   data (in SA)}
-#'   \item{FO}{the Fishing Operation data table. Just 1:1 links to the final
-#'    data (in SA)}
-#'   \item{SS}{the Species Selection data table. Just 1:1 links to the final
-#'    data (in SA)}
-#'   \item{SA}{the Sample data table. Each score is a SAsampleWeightMeasured}
-#'   \item{FM}{the Frequency Measure data table}
-#'   \item{BV}{the Biological Variable data table}
-#'   \item{VD}{the Vessel Details data table}
-#'   \item{SL}{the Species List data table}
-#' }
-#' @source \url{https://CRAN.R-project.org/package=SDAResources}
-"Pckg_SDAResources_algebra_H1"
 
-#' A RDBESDataObject converted from package SDAResources dataset coots
-#'
-#' This data set is derived from the data(coots). The design is 2-stage cluster
-#' sampling with clusters of unequal sizes and Npsu not known. Clusters are
-#' clutches of eggs (nests) with at least 2 eggs. In each cluster, the volume
-#' of two eggs is measured. Clusters (psu) are unequal sized. In each cluster,
-#' 2 eggs are selected (ssus) and measured. The total number of psus is not
-#' known (a drawback in this example). It is assumed very large (fpc negligible).
-#' The target variable is volume (others are available).
-#'
-#' @format A list containing entries required for H1 RDBES data:
-#' \describe{
-#'   \item{DE}{the Design data table. Contains 1 DE row with
-#'   DEstratumName == "Pckg_SDAResources_coots_H1"}
-#'   \item{SD}{the Sampling Details data table. Contains 1 child SD row}
-#'   \item{VS}{the Vessel Selection data table. Contains 368 child rows
-#'   (the 368 eggs/psus observed), each associated to its cluster (clutch),
-#'   VSnumberTotalClusters is not known, VSnumberTotal is csize}
-#'   \item{FT}{the Fishing Trip data table. Just 1:1 links to the final data
-#'   (in SA)}
-#'   \item{FO}{the Fishing Operation data table. Just 1:1 links to the final
-#'   data (in SA)}
-#'   \item{SS}{the Species Selection data table. Just 1:1 links to the
-#'   final data (in SA)}
-#'   \item{SA}{the Sample data table. Each volume is a SAsampleWeightMeasured.
-#'   ATT volumes are *100000000 to meet type requirement (integer)}
-#'   \item{FM}{the Frequency Measure data table}
-#'   \item{BV}{the Biological Variable data table}
-#'   \item{VD}{the Vessel Details data table}
-#'   \item{SL}{the Species List data table}
-#' }
-#' @source \url{https://CRAN.R-project.org/package=SDAResources}
-"Pckg_SDAResources_coots_H1"
-
-#' A Multi-stage RDBESDataObject from package SDAResources dataset coots
-#'
-#' This data set is derived from the data(coots). The design is 2-stage cluster
-#' sampling with clusters of unequal sizes and Npsu not known. Clusters are
-#' clutches of eggs (nests) with at least 2 eggs. In each cluster, the volume
-#' of two eggs is measured. Clusters (psu) are unequal sized. In each cluster,
-#' 2 eggs are selected (ssus) and measured. The total number of psus is not
-#' known (a drawback in this example). It is assumed very large (fpc negligible).
-#' The target variable is volume.
-#'
-#' @format A list containing entries required for H1 RDBES data:
-#' \describe{
-#'   \item{DE}{the Design data table. Contains 1 DE row with
-#'   DEstratumName == "Pckg_SDAResources_coots_H1"}
-#'   \item{SD}{the Sampling Details data table. Contains 1 child SD row}
-#'   \item{VS}{the Vessel Selection data table. Contains 184 child rows
-#'   (the 184 clutches/psus observed), each associated to its cluster (clutch),
-#'   VSnumberTotal is not known, VSnumberSampled is 184}
-#'   \item{FT}{the Fishing Trip data table. Contains 368 child rows
-#'   (the 368 eggs/ssus measured), each associated to its vessel (clutch),
-#'   FTnumbersampled is 2, FTnumberTotal is csize}
-#'   \item{FO}{the Fishing Operation data table. Just 1:1 links to the final
-#'   data (in SA)}
-#'   \item{SS}{the Species Selection data table. Just 1:1 links to the final
-#'   data (in SA)}
-#'   \item{SA}{the Sample data table. Each volume is a SAsampleWeightMeasured.
-#'   ATT volumes are *100000000 to meet type requirement (integer)}
-#'   \item{FM}{the Frequency Measure data table}
-#'   \item{BV}{the Biological Variable data table}
-#'   \item{VD}{the Vessel Details data table}
-#'   \item{SL}{the Species List data table}
-#' }
-#' @source \url{https://CRAN.R-project.org/package=SDAResources}
-"Pckg_SDAResources_coots_multistage_H1"
-
-#' A RDBESDataObject converted from package SDAResources dataset gpa
-#'
-#' This data set is derived from the data(gpa). The design is 1-stage cluster
-#' sampling with clusters of equal sizes. Each cluster (suite) has 4 elements
-#' with the same weight. The target variable is gpa.
-#'
-#' @format A list containing entries required for H1 RDBES data:
-#' \describe{
-#'   \item{DE}{the Design data table. Contains 1 DE row with
-#'   DEstratumName == "Pckg_SDAResources_gpa_H1"}
-#'   \item{SD}{the Sampling Details data table. Contains 1 child SD row}
-#'   \item{VS}{the Vessel Selection data table. Contains 20 child rows
-#'   (the 20 observations), each associated to its cluster (suite),
-#'   VSnumberTotalClusters is 100, VSnumberTotal is 4 because all elements in
-#'   cluster are sampled}
-#'   \item{FT}{the Fishing Trip data table. Just 1:1 links to the final data
-#'   (in SA)}
-#'   \item{FO}{the Fishing Operation data table. Just 1:1 links to the final
-#'   data (in SA)}
-#'   \item{SS}{the Species Selection data table. Just 1:1 links to the final
-#'   data (in SA)}
-#'   \item{SA}{the Sample data table. Each gpa score is a
-#'   SAsampleWeightMeasured. ATT gpa scores are *100 to meet type requirement
-#'   (integer)}
-#'   \item{FM}{the Frequency Measure data table}
-#'   \item{BV}{the Biological Variable data table}
-#'   \item{VD}{the Vessel Details data table}
-#'   \item{SL}{the Species List data table}
-#' }
-#' @source \url{https://CRAN.R-project.org/package=SDAResources}
-"Pckg_SDAResources_gpa_H1"
-
-#' A RDBESDataObject converted from package SDAResources dataset schools
-#'
-#' This data set is derived from the data(schools). The design is 2-stage cluster
-#' sampling with clusters of unequal sizes and Npsu not known. Clusters are
-#' schools (schoolid). Clusters (psu) are unequal sized (Mi). In each cluster,
-#' 20 students are selected (ssus) and measured (nrows). The total number of
-#' psus is known (75). The target variable is mathlevel.
-#'
-#' @format A list containing entries required for H1 RDBES data:
-#' \describe{
-#'   \item{DE}{the Design data table. Contains 1 DE row with
-#'   DEstratumName == "Pckg_SDAResources_schools_H1"}
-#'   \item{SD}{the Sampling Details data table. Contains 1 child SD row}
-#'   \item{VS}{the Vessel Selection data table. Contains 200 child rows
-#'   (the 200 students observed), each associated to its cluster (schoolid),
-#'   VSnumberTotalClusters is 100, VSnumberTotal is Mi}
-#'   \item{FT}{the Fishing Trip data table. Just 1:1 links to the final data
-#'   (in SA)}
-#'   \item{FO}{the Fishing Operation data table. Just 1:1 links to the
-#'   final data (in SA)}
-#'   \item{SS}{the Species Selection data table. Just 1:1 links to the
-#'   final data (in SA)}
-#'   \item{SA}{the Sample data table. Each volume is a SAsampleWeightMeasured}
-#'   \item{FM}{the Frequency Measure data table}
-#'   \item{BV}{the Biological Variable data table}
-#'   \item{VD}{the Vessel Details data table}
-#'   \item{SL}{the Species List data table}
-#' }
-#' @source \url{https://CRAN.R-project.org/package=SDAResources}
-"Pckg_SDAResources_schools_H1"
-
-##---------------Made Up data---------------
-
-#' A made-up dataset for testing manipulations of SA based on SL
-#'
-#' This data set is created for testing the idea of manipulating Sample data (SA)
-#' based on Species List (SL). It represents the simplest case for testing this
-#' idea. The data set contains two species in SL for the same SLcountry,
-#' SLinstitute, SLspeciesListName, SLyear, SLcatchFraction, SLcommercialTaxon,
-#' SLspeciesCode & SLcommercialTaxon == SLspeciesCode. There is one species in
-#' SA - one row in SS with keys equal to the SL keys.
-#'
-#' @format A list containing entries required for H1 RDBES data:
-#' \describe{
-#'   \item{DE}{the Design data table}
-#'   \item{SD}{the Sampling Details data table}
-#'   \item{VS}{the Vessel Selection data table}
-#'   \item{FT}{the Fishing Trip data table}
-#'   \item{FO}{the Fishing Operation data table}
-#'   \item{SS}{the Species Selection data table.
-#'   Contains one row with keys equal to the SL keys}
-#'   \item{SA}{the Sample data table. Contains one species}
-#'   \item{FM}{the Frequency Measure data table}
-#'   \item{BV}{the Biological Variable data table}
-#'   \item{VD}{the Vessel Details data table}
-#'   \item{SL}{the Species List data table.
-#'   Contains two species for the same SLcountry, SLinstitute,
-#'   SLspeciesListName, SLyear, SLcatchFraction, SLcommercialTaxon,
-#'   SLspeciesCode & SLcommercialTaxon == SLspeciesCode}
-#' }
-"MadeUpData_for_SL_SA_tests_v1"
 
 
 #-------Other example data----------

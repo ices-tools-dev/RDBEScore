@@ -1,0 +1,209 @@
+---
+title: "02a Generating probabilities"
+output:  rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{02a Generating probabilities}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Introduction 
+
+The aim of this document is to illustrate how to automatically generate some types of sample probabilities using functions `runChecksOnSelectionAndProbs` and `applyGenerateProbs` of the `RDBEScore` package.
+
+## Load the package
+
+```{r}
+library(RDBEScore)
+```
+
+## main data requirements to generate probabilities
+
+`RDBEScore` currently only provides probability generation for selection method "SRSWR","SRSWOR" and "CENSUS". Also, to automatically generate probabilities, it is necessary that `numTotal` and `numSamp` are declared in every sampling table. Functions are also only configured to handle for cases where "clustering=="N". If that is not the case, changes need to be made to the data before running the functions. Such changes configure significant assumptions that should be left well visible in the data preparation section of any estimation script.
+
+## Load and validate some example data
+
+First we'll load some example data from the RDBES and check it's valid.  It's a good tip to check your RDBESDataObjects are valid after any manipulations you perform. See how to import your own data in the vignette [Import RDBES data](raw-data-import.html) In this vignette package example data pre-loaded with `RDBEScore` is used.
+
+```{r}
+
+# load some H1 test data
+myH1DataObject <- H1Example
+     
+# filter data for DEstratumName==DE_stratum1_H1 to make object smaller and easier to handle
+myH1DataObject <- filterAndTidyRDBESDataObject(myH1DataObject,c("DEstratumName"), c("DE_stratum1_H1"),
+                                               killOrphans=TRUE)
+```
+
+The functions that generate probabilities do not yet deal with lower hierarchies A and B so we rework a bit the data so it looks like lower hierarchy C. 
+
+```{r}
+# Temp fixes to change data to lower hierarchy C - function won't deal with A, or B yet
+myH1DataObject[["BV"]] <- dplyr::distinct(myH1DataObject[["BV"]], FMid, .keep_all = TRUE)
+temp <- dplyr::left_join(myH1DataObject[["BV"]][,c("BVid","FMid")], 
+                         myH1DataObject[["FM"]][,c("FMid","SAid")], 
+                         by="FMid")
+myH1DataObject[["BV"]]$SAid <- temp$SAid
+myH1DataObject[["BV"]]$FMid <- NA
+myH1DataObject[["SA"]]$SAlowHierarchy <- "C"
+myH1DataObject[["BV"]]$BVnumTotal <- 10
+myH1DataObject[["BV"]]$BVnumSamp <- 10
+
+# reworking stratification of VS table
+myH1DataObject[["VS"]][VSencrVessCode %in% c("VDcode_5","VDcode_8","VDcode_9")]$VSstratumName <- 
+  "VS_stratum1"
+myH1DataObject[["VS"]][VSencrVessCode %in% c("VDcode_5","VDcode_8","VDcode_9")]$VSnumTotal <- 30
+myH1DataObject[["VS"]][VSencrVessCode %in% c("VDcode_6","VDcode_7","VDcode_10")]$VSstratumName <- 
+  "VS_stratum2"
+myH1DataObject[["VS"]][VSstratumName %in% "VS_stratum1",]$VSnumSamp <- 5
+myH1DataObject[["VS"]][VSstratumName %in% "VS_stratum2",]$VSnumSamp <- 4
+
+# reworking FT table
+myH1DataObject[["FT"]]$FTselectMeth <- "SRSWOR"
+
+tmp<-myH1DataObject[["FT"]]
+tmp$VSencrVessCode<-myH1DataObject[["VS"]]$VSencrVessCode[match(myH1DataObject[["FT"]]$VSid,
+                                                                myH1DataObject[["VS"]]$VSid)]
+
+tmp$FTnumSamp<-as.integer(table(tmp$VSencrVessCode))[match(tmp$VSencrVessCode, 
+                                                           names(table(tmp$VSencrVessCode)))]
+
+tmp[tmp$VSencrVessCode %in% c("VDcode_5"),]$FTnumTotal<-100
+tmp[tmp$VSencrVessCode %in% c("VDcode_6"),]$FTnumTotal<-50
+tmp[tmp$VSencrVessCode %in% c("VDcode_7"),]$FTnumTotal<-25
+tmp[tmp$VSencrVessCode %in% c("VDcode_8"),]$FTnumTotal<-80
+tmp[tmp$VSencrVessCode %in% c("VDcode_9"),]$FTnumTotal<-70
+tmp[tmp$VSencrVessCode %in% c("VDcode_10"),]$FTnumTotal<-60
+
+tmp$VSencrVessCode<-NULL
+
+tmp$FTstratumName<-"U"
+tmp$FTstratification<-"N"
+
+myH1DataObject[["FT"]]<-tmp
+myH1DataObject[["FO"]]$FOselectMeth<-"SRSWOR"
+myH1DataObject$SA$SAselectMeth<-"SRSWOR"
+myH1DataObject$SS$SSselectMeth<-"SRSWOR"
+myH1DataObject$BV$BVselectMeth<-"SRSWOR"
+
+# confirm validity
+validateRDBESDataObject(myH1DataObject)
+```
+
+## A closer look at the example data
+
+The final data contains 10 ages in each of 243 hauls sampled from 81 trips done by 9 selected vessels. 
+
+Examining the selection methods used in the VS table it is visible that the 9 vessels were selected with replacement (SRSWR) out of two strata, one strata with a total of 30 vessels (VS_stratum1) and one with a total of 60 vessels (VS_stratum2). It is also noticeable that selection and inclusion probabilities were not declared during upload.
+
+```{r}
+unique(myH1DataObject[["VS"]][,c("VSstratification","VSstratumName","VSselectMeth",
+                                 "VSnumTotal","VSnumSamp","VSselProb","VSincProb")])
+```
+
+With regards to trips these were selected without replacement (SRSWOR). either 9 or 18 trips were selected from each vessel. Individual vessels registered total number of trips between 25 and 100 trips. We also see that selection and inclusion probabilities were not declared.
+
+```{r}
+unique(myH1DataObject[["FT"]][,c("VSid","FTstratification","FTstratumName","FTselectMeth",
+                                 "FTnumTotal","FTnumSamp","FTselProb","FTincProb")])
+```
+
+With regards to hauls the example data indicates that 20 were done in every trip(!) from which 3 were sampled. Not very likely data, but good enough for demonstration purposes. Also here we see that selection and inclusion probabilities were not declared.
+
+```{r}
+table(myH1DataObject[["FO"]]$FTid)
+unique(myH1DataObject[["FO"]][,c("FOid","FOstratification","FOstratumName","FOselectMeth",
+                                 "FOnumTotal","FOnumSamp","FOselProb","FOincProb")])
+
+```
+
+
+
+## generating probabilities for only one table: `generateProbs`
+
+To generate probabilities for one of the tables choose what type of probabilities you want to generate ("selection" or "inclusion") and run `generateProbs`.
+
+note: To check the data for some issues related to selection methods and probabilities, you can run function `runChecksOnSelectionAndProbs`. But in general this is not necessary because when you run `applyGenerateProbs` with defaults a call to `runChecksOnSelectionAndProbs` is included.
+
+```{r generateProbs}
+myH1DataObject_uptde<-myH1DataObject
+myH1DataObject_uptde[["VS"]] <- generateProbs(myH1DataObject[["VS"]], 
+                                              probType="inclusion")
+# display changes
+myH1DataObject_uptde[["VS"]][,c("VSstratification","VSstratumName","VSselectMeth",
+                                "VSnumTotal","VSnumSamp","VSselProb","VSincProb")]
+
+myH1DataObject_uptde[["VS"]] <- generateProbs(myH1DataObject_uptde[["VS"]], 
+                                              probType="selection")
+# display changes
+myH1DataObject_uptde[["VS"]][,c("VSstratification","VSstratumName","VSselectMeth",
+                                "VSnumTotal","VSnumSamp","VSselProb","VSincProb")]
+```
+
+## generating probabilities for an entire RDBES data object: `applyGenerateProbs`
+
+The function `applyGenerateProbs` generates selection or inclusion probabilities for all selection tables of an RDBES data object in one go. Here, we avoid running the checks by setting `runInitialProbChecks` to FALSE.
+
+```{r applyGenerateProbs, results='hide'}
+  myH1DataObject_uptde<-applyGenerateProbs (x = myH1DataObject
+                                      , probType = "inclusion"
+                                      , overwrite=T
+                                      , runInitialProbChecks = FALSE)
+
+validateRDBESDataObject(myH1DataObject_uptde)
+
+# display changes
+myH1DataObject_uptde[["VS"]][,c("VSstratification","VSstratumName","VSselectMeth",
+                                "VSnumTotal","VSnumSamp","VSselProb","VSincProb")]
+
+unique(myH1DataObject_uptde[["FT"]][,c("VSid","FTstratification","FTstratumName",
+                                       "FTselectMeth","FTnumTotal","FTnumSamp","FTselProb","FTincProb")])
+
+unique(myH1DataObject_uptde[["FO"]][,c("FOid","FOstratification","FOstratumName",
+                                       "FOselectMeth","FOnumTotal","FOnumSamp","FOselProb","FOincProb")])
+
+unique(myH1DataObject_uptde[["BV"]][,c("BVid","BVfishId","BVselectMeth","BVnumTotal",
+                                       "BVnumSamp","BVselProb","BVincProb")])
+
+
+```
+
+We could use `probType = "selection"` to further complete the data with selection probabilities. However, selection method in table FT is SRSWOR and so the `applyGenerateProbs` issues an error (see ?applyGenerateProbs for more details)
+
+```{r applyGenerateProbs2, error=TRUE}
+  myH1DataObject_uptde<-applyGenerateProbs (x = myH1DataObject_uptde
+                                      , probType = "selection"
+                                      , overwrite=T
+                                      , runInitialProbChecks = FALSE)
+```
+
+## The `overwrite` argument
+
+To be completed
+
+
+See also other package vignettes:
+
+```{r,echo=F, results='asis', eval=T}
+# note: vignettes are first compiled and only then html, R and Rmd are moved to folder doc
+vignettes <- data.frame(Rmd=dir()[grepl(dir(), pat=".Rmd")])
+# determines index of vignette being compiled
+thisVignetteRmd<-paste0(gsub(":","",gsub(" ", "-",as.character(rmarkdown::metadata$title))),".Rmd")
+# prints list with links
+for (i in seq_along(vignettes$Rmd)) {
+  if(tolower(vignettes$Rmd[i])!=tolower(thisVignetteRmd)){
+  cat(sprintf("- [%s](%s)\n", gsub("-"," ",gsub(".Rmd","",vignettes$Rmd[i])), gsub(".Rmd",".html",vignettes$Rmd[i])))
+}
+}
+```
+
+#END
+
+

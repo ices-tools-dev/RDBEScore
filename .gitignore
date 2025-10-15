@@ -47,3 +47,11 @@ FishNCo/testData/RegionalTestData/*
 
 /doc/
 /Meta/
+<<<<<<< Updated upstream
+.vscode/
+docs
+=======
+
+# Data to develop fun
+/NLdata/
+>>>>>>> Stashed changes

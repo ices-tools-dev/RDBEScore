@@ -17,10 +17,11 @@ A list containing entries required for H8 RDBES data:
 \item{BV}{the Biological Variable data table}
 \item{VD}{the Vessel Details data table}
 \item{SL}{the Species List data table}
+\item{IS}{the Individual Species}
 \item{CL}{the Commertial Landing data table}
 \item{CE}{the Commertial Effort data table}
 }
-#' @source Richard Meitern @ Estonian Marine Institute, 2023
+#' @source Richard Meitern @ Estonian Marine Institute, 2025
 }
 \usage{
 H8ExampleEE1

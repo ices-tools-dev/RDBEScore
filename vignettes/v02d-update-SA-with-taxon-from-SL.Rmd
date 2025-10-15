@@ -1,0 +1,139 @@
+---
+title: "02d Update SA with taxon from SL"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{02d Update SA with taxon from SL}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Introduction
+The aim of this document is to show how to rename the species code from the Sample (SA) table
+based on the Species list (SL) table  using the function `updateSAwithTaxonFromSL()` in the `RDBEScore` package.
+
+## Load the package
+
+```{r setup}
+library(RDBEScore)
+```
+
+## Prerequisit
+In the first step you need to load some example data.
+Good practice is to check that the RDBESDataObjects are valid. 
+
+```{r}
+# load an example dataset
+
+# H1 directory
+dirH1 <- "../tests/testthat/h1_v_20250211/"
+
+myObject <- createRDBESDataObject(input = dirH1)
+myObject <- filterAndTidyRDBESDataObject(myObject,
+                        fieldsToFilter =c("DEsampScheme"),
+                        valuesToFilter = c("National Routine"))
+
+numOfRows <- 5
+myObject[["SA"]] <- head(myObject[["SA"]],numOfRows)
+myObject <- findAndKillOrphans(myObject)
+
+# Change SA species codes to Sprat(126425) 
+numOfRows <- nrow(myObject[["SA"]])
+myObject[["SA"]]$SAspeCode[1:numOfRows] <- rep("126425", numOfRows)
+
+# Just keep the first row of the SL data
+myObject[["SL"]] <- head( myObject[["SL"]][myObject[["SL"]]$SLspeclistName=="ZW_1965_SpeciesList1" &
+                 myObject[["SL"]]$SLcatchFrac=="Lan",],1)
+
+# Just keep the first row of the IS data that matches the remaining SLid
+mySLid = myObject[["SL"]]$SLid
+myObject[["IS"]] <- head(myObject[["IS"]][myObject[["IS"]]$SLid == mySLid,],1)
+
+# Change IS species codes to Clupeidae(125464) 
+myObject[["IS"]][,"ISsppCode"] <- as.integer(125464)
+myObject[["IS"]][,"IScommTaxon"] <- as.integer(125464)
+
+# check it is a valid RDBESobject
+validateRDBESDataObject(myObject, checkDataTypes = TRUE)
+```
+
+## A closer look into the example data and its characteristics
+
+The example is from data in hierarchy 1. It contains a single trip with a single 
+haul. For simplicity, we restrict our analysis to the tables SL, IS, SS and SA which 
+are the ones handled by the functions which behaviour we want to demonstrate. 
+
+Examining a print of the Species List table (SL) and part where SLspeclistName is 
+*ZW_1965_SpeciesList* we can conclude that what was targeted for the sampling was only landings of *Clupeidae* (aphiaId 125464).
+
+```{r}
+myObject$SL[SLspeclistName=='ZW_1965_SpeciesList1'&SLcatchFrac=='Lan',]
+
+```
+
+Here is the single IS row that is part of this species list.
+
+```{r}
+myObject[["IS"]]
+
+```
+The Species Selection Table where species list is *ZW_1965_SpeciesList1* and catch category *Lan*
+
+```{r}
+myObject$SS[SSspecListName=='ZW_1965_SpeciesList1' & SScatchFra=='Lan',c(1,3,6,8,15,18)]
+```
+
+The part of the SA table which corresponds to SS table is
+
+```{r}
+myObject$SA[,c(1,2,9,14,48,49)]
+```
+
+What was looked for is 125464 - `Clupeidae`.
+
+In the sample we recorded 126425 - `Clupea harengus` which is part of the `Clupeidae` family. In this point it will be helpful to use `renameSA` function.
+
+## Rename species code in SA table using SL table.
+We looked for the fish from `Clupeidae` family but we had a more precise reading 
+than we expected because we read fish in the species level which is a more accurate 
+rank than family.
+
+
+```{r}
+myObjectnew<-updateSAwithTaxonFromSL(RDBESDataObject=myObject,
+                            validate=TRUE,
+                            verbose=TRUE,
+                            strict=TRUE)
+```
+
+Function is checking the rank of aphia id in both of tables SA and SL. If aphia 
+id in SA table is more accurate than in SL table and aphia ids are from the 
+same family then aphia id in SA table is renaming to aphia id from SL table. If aphia Ids are from diffrent families then the function is leaving the primary value. If we have the opposite situation, so when in the SL table there is more accurate rank than in the SA table, the function is leaving the primary value too.
+
+In the SA results we can see that 126425 - `Clupea harengus` has been changed to 125464 - `Clupeidae`.
+```{r}
+myObjectnew$SA[,c(1,2,9,14,48,49)]
+```
+
+See also other package vignettes:
+
+```{r,echo=F, results='asis', eval=T}
+# note: vignettes are first compiled and only then html, R and Rmd are moved to folder doc
+vignettes <- data.frame(Rmd=dir()[grepl(dir(), pat=".Rmd")])
+# determines index of vignette being compiled
+thisVignetteRmd<-paste0(gsub(":","",gsub(" ", "-",as.character(rmarkdown::metadata$title))),".Rmd")
+# prints list with links
+for (i in seq_along(vignettes$Rmd)) {
+  if(tolower(vignettes$Rmd[i])!=tolower(thisVignetteRmd)){
+  cat(sprintf("- [%s](%s)\n", gsub("-"," ",gsub(".Rmd","",vignettes$Rmd[i])), gsub(".Rmd",".html",vignettes$Rmd[i])))
+}
+}
+```
+
+#END

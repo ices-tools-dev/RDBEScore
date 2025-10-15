@@ -22,7 +22,6 @@
 #'  provided values for the specified field.
 #'
 #' @examples
-#'
 #' # it is important to run these functions only on sorted RDBESDataObject
 #' RDBEScore:::upperTblData("SAid", c(1), sort(H8ExampleEE1), "DE", verbose = TRUE)
 #' DE <- data.table::data.table(DEid = c(1, 2))

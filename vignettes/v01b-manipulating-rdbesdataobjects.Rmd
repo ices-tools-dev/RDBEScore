@@ -1,0 +1,235 @@
+---
+title: "01b Manipulating RDBESDataObjects"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{01b Manipulating RDBESDataObjects}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Introduction 
+
+The aim of this document is to illustrate some of the ways of manipulating RDBESDataObjects.
+
+```{r}
+library(RDBEScore)
+```
+
+## Prerequisites
+
+First we'll load some example data from the RDBES and check it's valid.  It's a good idea to check your RDBESDataObjects are valid after any manipulations you perform. See how to import your own data in the vignette [Import RDBES data](raw-data-import.html) In this vignette package example data is used.
+
+```{r load H1}
+# load Hierarchy 1 demo data
+myH1RawObject <- H1Example
+
+validateRDBESDataObject(myH1RawObject, verbose = FALSE)
+```
+
+
+### Print, sort and summary of RDBESDataObject
+
+The print method gives list of non-null tables in the RDBESDataObject. The structure of the output for each table is:
+
+ - Table name (DE, TE, LE, etc.)
+ - Number of rows 
+ - Sampling method (if applicable, SWRWR, NPJS, CENSUS, etc.)
+ - Range of number sampled (if applicable)
+ - Range of number total (if applicable)
+ 
+If there is a single hierarchy present the output is ordered by RDBES hierarchy structure.
+
+```{r}
+print(myH1RawObject)
+```
+
+Underling the print function there is a summary function that retains only unique rows for some columns used in print.
+```{r}
+h1summary <- summary(myH1RawObject)
+#get the hierarchy
+h1summary$hierarchy
+#extract the number of rows in tables from the summary
+sapply(h1summary$data, function(x){x$rows})
+```
+
+
+To get the **number of rows** in each non-null table you can simply call the object:
+```{r}
+myH1RawObject #equivalent to print(summary(myH1RawObject))
+```
+
+To get an example Hierarchy 5 data:
+
+```{r}
+# Hierarchy 5 demo data
+myH5RawObject <- H5Example
+
+validateRDBESDataObject(myH5RawObject, verbose = FALSE)
+
+# Number of rows in each non-null table and hierarchy
+print(myH5RawObject)
+
+
+```
+
+### Sorting RDBESDataObject
+
+If the data has a single hierarchy in the DE table a correct sort order is defined for it. You can use the **sort()** method for it. Printing the object sorts it automatically if possible.
+
+```{r}
+#before sorting
+names(H8ExampleEE1)
+```
+
+```{r}
+#after sorting
+names(sort(H8ExampleEE1))
+```
+
+```{r}
+#printing the summary
+H8ExampleEE1
+```
+
+
+
+## Combining RDBESDataObjects
+
+RDBESDataObjects can be combined using the **combineRDBESDataObjects()** function. This might be required when different sampling schemes are used to collect on-shore and at-sea samples - it will often be required to combine all the data together before further analysis.
+
+```{r combine}
+myCombinedRawObject <- combineRDBESDataObjects(myH1RawObject,
+                                               myH5RawObject)
+
+# Number of rows in each non-null table and hierarchies
+print(myCombinedRawObject)
+
+validateRDBESDataObject(myCombinedRawObject, verbose = FALSE)
+```
+
+## Filtering RDBESDataObjects
+
+RDBESDataObjects can be filtered using the **filterRDBESDataObject()** function - this allows the RDBESDataObject to be filtered by any field.  A typical use of filtering might be to extract all data collected in a particular ICES division.  
+
+
+```{r filter}
+myH1RawObject <- H1Example
+
+# Number of rows in each non-null table
+print(myH1RawObject)
+
+myFields <- c("SDctry","VDctry","VDflgCtry","FTarvLoc")
+myValues <- c("ZW","ZWBZH","ZWVFA" )
+
+myFilteredObject <- filterRDBESDataObject(myH1RawObject,
+                                         fieldsToFilter = myFields,
+                                         valuesToFilter = myValues )
+
+# Number of rows in each non-null table
+print(myFilteredObject)
+
+validateRDBESDataObject(myFilteredObject, verbose = FALSE)
+```
+It is important to note that filtering is likely to result in "orphan" rows being produced so it is usual to also apply the **findAndKillOrphans()** function to the filtered data to remove these records.
+
+```{r clean1}
+
+myFilteredObjectNoOrphans <- 
+  findAndKillOrphans(objectToCheck = myFilteredObject, verbose = FALSE)
+
+validateRDBESDataObject(myFilteredObjectNoOrphans, verbose = FALSE)
+
+
+```
+
+You can also remove any records that are not linking to a row in the VesselDetails (VD) table using the **removeBrokenVesselLinks()** function.
+
+```{r clean2}
+
+myFields <- c("VDlenCat")
+myValues <- c("18-<24" )
+myFilteredObject <- filterRDBESDataObject(myFilteredObjectNoOrphans,
+                                         fieldsToFilter = myFields,
+                                         valuesToFilter = myValues )
+
+myFilteredObjectValidVesselLinks <- removeBrokenVesselLinks(
+                                  objectToCheck = myFilteredObject,
+                                  verbose = FALSE)
+
+validateRDBESDataObject(myFilteredObjectValidVesselLinks, verbose = FALSE)
+
+```
+
+Finally you can also remove any records that are not linking to an entry in the SpeciesListDetails (SL) table using the **removeBrokenSpeciesListLinks()** function.
+
+```{r clean3}
+
+myFields <- c("SLspeclistName")
+myValues <- c("ZW_1965_SpeciesList" )
+myFilteredObjectValidSpeciesLinks <- filterRDBESDataObject(myFilteredObjectValidVesselLinks,
+                                         fieldsToFilter = myFields,
+                                         valuesToFilter = myValues )
+
+myFilteredObjectValidSpeciesLinks <- removeBrokenSpeciesListLinks(
+                                  objectToCheck = myFilteredObjectValidSpeciesLinks,
+                                  verbose = FALSE)
+
+validateRDBESDataObject(myFilteredObjectValidSpeciesLinks, verbose = FALSE)
+
+```
+
+## Getting Subsets of RDBESDataObject Tables
+
+Sometimes it we want to see how a field or values in the **RDBESDataObject** are connected to otther tables.
+One use case would be e.g. to see when a specific Landing Event (LE) occured.For this we can use the **getLinkedDataFromLevel()** function. 
+
+```{r}
+#get the TE table corresponding to the first LEid in the H8ExampleEE1 object
+getLinkedDataFromLevel("LEid", c(1), H8ExampleEE1, "TE", verbose = TRUE)
+```
+Similarly we can get the subset of the LE table corresponding to a specific value in the TE table. This does not have to be the *id* field, but can be any field in the table.
+
+```{r}
+#get the TE table corresponding to the first LEid in the H8ExampleEE1 object
+getLinkedDataFromLevel("TEstratumName", c("November"), H8ExampleEE1, "LE", verbose = TRUE)
+```
+Several values can be used to get a subset of the table. 
+
+```{r}
+#get the SA table corresponding to the first 2 TEids in the H8ExampleEE1 object
+getLinkedDataFromLevel("TEid", c(1,2), H8ExampleEE1, "SA", verbose = TRUE)
+```
+Also lower hierarchy tables can be used to get the subset of the higher hierarchy tables.
+
+```{r}
+#which vessel caught those fish?
+getLinkedDataFromLevel("BVfishId", c("410472143", "410472144"), H8ExampleEE1, "VS", TRUE)
+```
+
+If some table is missing it is skipped if possible. If it is not possible to skip it, the function will return an error.
+
+See also other package vignettes:
+
+```{r,echo=F, results='asis', eval=T}
+# note: vignettes are first compiled and only then html, R and Rmd are moved to folder doc
+vignettes <- data.frame(Rmd=dir()[grepl(dir(), pat=".Rmd")])
+# determines index of vignette being compiled
+thisVignetteRmd<-paste0(gsub(":","",gsub(" ", "-",as.character(rmarkdown::metadata$title))),".Rmd")
+# prints list with links
+for (i in seq_along(vignettes$Rmd)) {
+  if(tolower(vignettes$Rmd[i])!=tolower(thisVignetteRmd)){
+  cat(sprintf("- [%s](%s)\n", gsub("-"," ",gsub(".Rmd","",vignettes$Rmd[i])), gsub(".Rmd",".html",vignettes$Rmd[i])))
+}
+}
+```
+
+#END
+

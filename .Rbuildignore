@@ -8,9 +8,12 @@
 ^travis.yml$
 ^FishNCo$
 ^\.github$
+^\.vscode$
 ^.DS_Store$
 ^docs$
 ^doc$
 ^Meta$
 package_overview.Rmd
 ^.pptx$
+^_pkgdown\.yml$
+^pkgdown$

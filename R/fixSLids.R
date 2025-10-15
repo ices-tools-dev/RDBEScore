@@ -11,7 +11,9 @@
 #' @param RDBESDataObject A valid RDBESDataObject
 #' @param verbose (Optional) Set to TRUE if you want informative text printed
 #' out, or FALSE if you don't.  The default is FALSE.
-#' @param strict (Optional) This function validates its input data - should
+#' @param validate (Optional) Should the function validate its input data?
+#' The default is TRUE.
+#' @param strict (Optional) If the function validates its input data - should
 #' the validation be strict? The default is TRUE.
 #'
 #' @return an RDBESDataObject with SL ids reworked
@@ -21,13 +23,15 @@
 #' # To add
 
 
-fixSLids<-function(RDBESDataObject, verbose = FALSE, strict = TRUE){
+fixSLids<-function(RDBESDataObject, verbose = FALSE, validate = TRUE, strict = TRUE){
 
   # Check we have a valid RDBESDataObject before doing anything else
+  if(validate == T){
   validateRDBESDataObject(RDBESDataObject,
     verbose = verbose,
     strict = strict
   )
+  }
 
 # issues error if fixSLids already been run
 if("SLtaxaId" %in% colnames(RDBESDataObject[["SL"]])){

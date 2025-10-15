@@ -19,9 +19,9 @@
 #' care. Default value is FALSE.
 #' @param verbose (Optional) Set to TRUE if you want informative text printed
 #' out, or FALSE if you don't.  The default is FALSE.
-#' @param strict (Optional) Set to TRUE if you want to be sure all columns
-#' are present in the data, set to FALSE if you only want to check that
-#' essential columns are present.  The default is TRUE.
+#' @param strict (Optional) Set to TRUE if you want an error if validation
+#' fails, set to FALSE if you want only a warning to be issued. The default
+#' is TRUE.
 #'
 #' @return Returns objectToCheck
 #' @md
@@ -63,14 +63,16 @@ validateRDBESDataObject <- function(objectToCheck,
   }
 
   # CHECK 4 Does this list have any names that aren't required?
-  # (this is now only an error if we being strict)
+  # (this is now only an error if we are being strict)
   if (!all(names(objectToCheck) %in% allowedNamesInList)) {
     if (strict){
       stop(paste("objectToCheck is a list but has extra names ",
                  paste(names(objectToCheck), collapse = ","),
                  sep = ""
       ))
-    }
+    } else paste("warning: objectToCheck is a list but has extra names ",
+                 paste(names(objectToCheck), collapse = ","),
+                 sep = "")
   }
 
   # CHECK 5 Does the list have an entry for all the required names?
@@ -82,6 +84,8 @@ validateRDBESDataObject <- function(objectToCheck,
                  paste(missingNames, collapse = ","),
                  sep = "" ))
   }
+
+
 
   # STEP 2 OF CHECKS
 
@@ -135,6 +139,17 @@ validateRDBESDataObject <- function(objectToCheck,
 
         warningText <- ""
         validRDBESDataObject <- TRUE
+
+     # CHECK 5b if there is an SL table, is there also a non-empty IS table
+    if (!is.null(objectToCheck[['SL']]) && nrow(objectToCheck[['SL']]) > 0) {
+      if (is.null(objectToCheck[['IS']]) || nrow(objectToCheck[['IS']]) == 0) {
+        validRDBESDataObject <- FALSE
+        warningText <- paste0(
+          "objectToCheck contains a non-empty SL table but the IS table ",
+          "is either NULL or empty."
+        )
+      }
+    }
 
         # CHECK 6 Check that keys are set on the data tables
         for(aTable in names(nonNullEntries)){

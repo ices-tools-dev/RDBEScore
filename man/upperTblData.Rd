@@ -35,7 +35,6 @@ NB! running on the RDBESDataObject will work properly if it is sorted by default
 in the correct order for a spesific hierarchy.
 }
 \examples{
-
 # it is important to run these functions only on sorted RDBESDataObject
 RDBEScore:::upperTblData("SAid", c(1), sort(H8ExampleEE1), "DE", verbose = TRUE)
 DE <- data.table::data.table(DEid = c(1, 2))

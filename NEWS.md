@@ -1,3 +1,14 @@
+# RDBEScore 0.3.4
+
+- Defaults: `createRDBESDataObject()`  now runs validation by default
+- Estimation object: added `incDesignVariables` to `createRDBESEstObject()` to optionally drop design variables; convert character columns to factors to reduce size.
+- SA sub-sampling: replaced recursive logic with a self-join + lookup (`prepareSubSampleLevelLookup`), with warnings for missing or non‑unique matches.
+- Memory: added frequent `gc()` calls across estimation/join steps for large data.
+- Joins: improved field selection for hierarchy 7 in `procRDBESEstObjUppHier()`; clarified logic for selecting `VDid` fields.
+- Docs/CI: added pkgdown GitHub Actions workflow; improved function docs (params/returns); updated `.Rbuildignore` and package URLs.
+- Vignettes: updated estimation workflow and sub-sampling sections; added memory tips, minimal examples, and brief benchmarking notes.
+- Performance: `filterRDBESDataObject()` now uses `data.table` for faster filtering.
+
 # RDBEScore 0.3.3 
 
 * Update to work with with the 2025 RDBES data call format

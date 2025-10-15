@@ -28,7 +28,7 @@
 
 importRDBESDataZIP <- function(filenames,
                                castToCorrectDataTypes = TRUE,
-                               Hierarchy = NULL) {
+                               Hierarchy = NULL, ...) {
 
   # Generates random number for the temp import folder name
   randInt <- paste0(sample(1:100, 3), collapse = "")
@@ -44,7 +44,15 @@ importRDBESDataZIP <- function(filenames,
 
     if (is.zip(x)) {
       unzipped <- utils::unzip(x, exdir= tmp)
-      unzipped <- basename(unzipped)
+      if(as.character(Sys.info()["sysname"]) == "Linux"){
+        files <- list.files(tmp)
+        newNames <- sub(".*\\\\", "",  files)
+        file.rename(file.path(tmp, files), file.path(tmp, newNames))
+        unzipped <- list.files(tmp)
+      }
+      if(as.character(Sys.info()["sysname"]) != "Linux" ){
+        unzipped <- basename(unzipped)
+      }
       unzipped <- unzipped[grep("*.csv", unzipped)]
       intersected <- intersect(unzipped, all_unzipped)
       if(length(intersected) != 0) {
@@ -92,7 +100,8 @@ importRDBESDataZIP <- function(filenames,
   }
 
   res <- importRDBESDataCSV(tmp,
-                            castToCorrectDataTypes = castToCorrectDataTypes)
+                            castToCorrectDataTypes = castToCorrectDataTypes,
+                            ...)
   unlink(tmp, recursive = T)
 
   return(res)
