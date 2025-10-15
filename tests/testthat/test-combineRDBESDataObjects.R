@@ -40,4 +40,30 @@ test_that("combineRDBESDataObjects returns valid RDBESDataObject when supplied
   expect_error(validateRDBESDataObject(myCombinedObject), NA)
 })
 
+test_that("combineRDBESDataObjects warns when combining objects from different hierarchies",  {
+
+  myObject1 <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
+  myObject2 <- importRDBESDataCSV(rdbesExtractPath = "./h5_v_20250211")
+
+  # Check these are valid objects before we try and combine them
+  expect_error(validateRDBESDataObject(myObject1), NA)
+  expect_error(validateRDBESDataObject(myObject2), NA)
+
+  # Expect a warning about different hierarchies
+  expect_warning(combineRDBESDataObjects(RDBESDataObject1=myObject1,
+                                        RDBESDataObject2=myObject2),
+                 "Combining RDBESDataObjects from different hierarchies")
+})
+
+test_that("combineRDBESDataObjects does not warn when combining objects from same hierarchy",  {
+
+  myObject1 <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
+  myObject2 <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
+
+  # Expect no warning about different hierarchies (but will have duplicate rows error later)
+  expect_warning(combineRDBESDataObjects(RDBESDataObject1=myObject1,
+                                        RDBESDataObject2=myObject2),
+                 NA)
+})
+
 }) ## end capture.output
