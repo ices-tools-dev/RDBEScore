@@ -23,7 +23,7 @@ createTableOfRDBESIds<-function(x, addSAseqNums=TRUE){
   
   # note: needs developments for different lower hierarchies
   
-  # x is RDBESobj
+  # x is x
   # hierarchy is hierarchy (integer)
   # outputs a table with ids for matching
   
@@ -58,7 +58,7 @@ createTableOfRDBESIds<-function(x, addSAseqNums=TRUE){
         cat("Using", id_1, " from ", CStableNames[i], "table and", id_2, "and BVfishId from ", CStableNames[i+1], "table. \n")
         df_2<-data.frame(x[[CStableNames[i+1]]][,list(get(id_1), get(id_2), get("BVfishId"))]); colnames(df_2)<-c(id_1,id_2,"BVfishId")
         # We also need a reference reporting the SAid, for when the lower hierarchy is C, see below. 
-        df_2C<-data.frame(rdbesobj[[CStableNames[i+1]]][,list(get("SAid"), get(id_1), get(id_2))]); colnames(df_2C)<-c("SAid", id_1,id_2)
+        df_2C<-data.frame(x[[CStableNames[i+1]]][,list(get("SAid"), get(id_1), get(id_2))]); colnames(df_2C)<-c("SAid", id_1,id_2)
         
       }
       
@@ -79,7 +79,7 @@ createTableOfRDBESIds<-function(x, addSAseqNums=TRUE){
         
         # The lower hierarchy (A:D) implies that FM is used or not. 
         # Due to this, we need to do a conditional merging by either FMid (where present) or SAid. 
-        outTmp = merge(out, rdbesobj$SA[,c("SAid","SAlowHierarchy")])
+        outTmp = merge(out, x$SA[,c("SAid","SAlowHierarchy")])
         
         # Convert to data.table if not already
         setDT(outTmp)
@@ -135,5 +135,5 @@ createTableOfRDBESIds<-function(x, addSAseqNums=TRUE){
 }
 
 # e.g.,
-# check <- createTableOfRDBESIds(rdbesobj, addSAseqNums = T)
+# check <- createTableOfRDBESIds(x, addSAseqNums = T)
 # check
