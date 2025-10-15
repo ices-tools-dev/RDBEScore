@@ -1,0 +1,17 @@
+pandoc: 3.1.11
+pkgdown: 2.1.3
+pkgdown_sha: ~
+articles:
+  v01a-data-import: v01a-data-import.html
+  v01b-manipulating-rdbesdataobjects: v01b-manipulating-rdbesdataobjects.html
+  v02a-generating-probabilities: v02a-generating-probabilities.html
+  v02b-Generating-zeros-for-species-not-observed: v02b-Generating-zeros-for-species-not-observed.html
+  v02c-Generating-NAs-for-species-not-targeted-by-sampling: v02c-Generating-NAs-for-species-not-targeted-by-sampling.html
+  v02d-update-SA-with-taxon-from-SL: v02d-update-SA-with-taxon-from-SL.html
+  v03a-Estimating-population-parameters-unbiased-estimator: v03a-Estimating-population-parameters-unbiased-estimator.html
+  v03b-Estimating-population-parameters-ratio-estimator: v03b-Estimating-population-parameters-ratio-estimator.html
+  v04-Create-IC-format-from-estimation-results: v04-Create-IC-format-from-estimation-results.html
+last_built: 2025-10-15T14:02Z
+urls:
+  reference: https://ices-tools-dev.github.io/RDBEScore/reference
+  article: https://ices-tools-dev.github.io/RDBEScore/articles
