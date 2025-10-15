@@ -25,6 +25,7 @@ final data (in SA)}
 \item{BV}{the Biological Variable data table}
 \item{VD}{the Vessel Details data table. Contains 311 child rows}
 \item{SL}{the Species List data table. Contains 1 child row}
+\item{IS}{the Individual Species table}
 }
 }
 \source{

@@ -7,6 +7,7 @@
 doEstimationRatio(
   RDBESDataObj,
   targetValue = "LengthComp",
+  raiseVar = "Weight",
   classUnits = "mm",
   classBreaks = c(100, 300, 10),
   LWparam = NULL,
