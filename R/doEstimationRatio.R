@@ -75,11 +75,9 @@ doEstimationRatio <- function(RDBESDataObj,
           idx <- utils::menu(weightVar, title = "Select the BV weight type to use:")
           if (idx == 0L) stop("Selection cancelled.")
           wcol <- weightVar[idx]
-          weightName <- paste0("BV", wcol)
         } else {
           message("Only one weight type present. Using: ", weightVar[1L])
           wcol <- weightVar[1L]
-          weightName <- paste0("BV", wcol)
         }
       }
     }
@@ -151,13 +149,14 @@ doEstimationRatio <- function(RDBESDataObj,
       bv <- setDT(RDBESEstRatioObj$BV)
       bv <- bv[, unique(.SD), .SDcols = c("SAid", "BVfishId", "BVtypeMeas", "BVvalueMeas")]
       bv <- dcast(bv, ... ~ BVtypeMeas , value.var = c("BVvalueMeas"), drop = TRUE)
-      bv[, (weightName) := as.numeric(get(wcol))]
+      bv[, BVweight := as.numeric(get(wcol))]
+      bv[, LengthTotal := as.numeric(LengthTotal)]
       # TODO this probably needs to be an argument
       # or needs to be defined later on?
       bv$LengthClass <- floor(bv$LengthTotal/10) # TODO This needs to be defined by the user
 
       bv1 <- bv[
-        , .(BVMeanWeight = mean(get(wcol), na.rm = TRUE),
+        , .(BVMeanWeight = mean(BVweight, na.rm = TRUE),
             BVNumbersAtLength = .N),
         by = .(SAid, LengthClass)
       ][
@@ -165,7 +164,7 @@ doEstimationRatio <- function(RDBESDataObj,
         , BVTotCount := sum(BVNumbersAtLength), by = SAid
       ][
         # add total weight per SAid
-        bv[, .(BVTotWeight = sum(get(wcol), na.rm = TRUE)), by = SAid],
+        bv[, .(BVTotWeight = sum(BVweight, na.rm = TRUE)), by = SAid],
         on = "SAid"
       ]
 
@@ -249,12 +248,12 @@ doEstimationRatio <- function(RDBESDataObj,
       bv <- setDT(RDBESEstRatioObj$BV)
       bv <- bv[, unique(.SD), .SDcols = c("SAid", "BVfishId", "BVtypeMeas", "BVvalueMeas")]
       bv <- dcast(bv, ... ~ BVtypeMeas , value.var = c("BVvalueMeas"), drop = TRUE)
-      bv[, `:=`( WeightMeasured = as.numeric(get(wcol)))]
+      bv[, BVweight := as.numeric(get(wcol))]
       # TODO this probably needs to be an argument
       # or needs to be defined later on?
 
       bv1 <- bv[
-        , .(BVMeanWeight = mean(get(wcol), na.rm = TRUE),
+        , .(BVMeanWeight = mean(BVweight, na.rm = TRUE),
             BVNumbersAtAge = .N),
         by = .(SAid, Age)
       ][
@@ -262,7 +261,7 @@ doEstimationRatio <- function(RDBESDataObj,
         , BVTotCount := sum(BVNumbersAtAge), by = SAid
       ][
         # add total weight per SAid
-        bv[, .(BVTotWeight = sum(get(wcol), na.rm = TRUE)), by = SAid],
+        bv[, .(BVTotWeight = sum(BVweight, na.rm = TRUE)), by = SAid],
         on = "SAid"
       ]
 
@@ -324,6 +323,8 @@ doEstimationRatio <- function(RDBESDataObj,
       bv <- bv[, unique(.SD), .SDcols = c( "FMid","BVfishId", "BVtypeMeas", "BVvalueMeas")]
       bv <- dcast(bv, ... ~ BVtypeMeas , value.var = c("BVvalueMeas"), drop = TRUE)
       bv[, `:=`(wcol = as.numeric(wcol ))]
+
+      # subsample -> sample weights -> weight from where the sample came from
 
       # if age exists
 
