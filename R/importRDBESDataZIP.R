@@ -73,7 +73,7 @@ importRDBESDataZIP <- function(filenames,
     hdirs <- dirs[grepl("H[0-9]+", dirs)]
     if(length(hdirs) > 1) {
       valid_hierarchies <- as.numeric(gsub("H", "", hdirs))
-      example  <- paste0("Hierachy = ", valid_hierarchies[1])
+      example  <- paste0("Hierarchy = ", valid_hierarchies[1])
       if(is.null(Hierarchy)) {
         stop("The zip file contains multiple hierarchies.\n",
              "To import a selected hierarchy, please provide the hierarchy ",
