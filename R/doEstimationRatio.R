@@ -38,76 +38,97 @@ doEstimationRatio <- function(RDBESDataObj,
                               LWparam = NULL, # vector of two values
                               lowerAux = NULL, # you can use a strongly correlated value present in your data for the estimation of the values of interest
                               verbose = FALSE){
-
+RDBESDataObj <- myFilteredObject
+targetValue <- "AgeComp"
   raiseVar <- "Weight"
-  RDBESDataObj <- H8ExampleEE1
+  # H1 <- H1Example
+  #
+  # myFields <- c("SAlowHierarchy")
+  # myValues <- c("A")
+  # RDBESDataObj <- filterRDBESDataObject(H1,
+  #                                           fieldsToFilter = myFields,
+  #                                           valuesToFilter = myValues,
+  #                                           strict = FALSE, # this is to skip the validation function
+  #                                           killOrphans = TRUE)
   # Check we have a valid RDBESEstObject before doing anything else
+
+  classUnits = "mm"
+  classBreaks = c(100, 300, 10)
+
+
+# Checks ------------------------------------------------------------------
+
   RDBEScore::validateRDBESDataObject(RDBESDataObj, verbose = FALSE)
 
-  # RDBESDataObj <- createRDBESDataObject(input = c("./NLdata/2025_10_14_093927.zip",
-  #                                       "./NLdata/HCL_2025_10_06_102840215.zip"))
-  # validateRDBESDataObject(h1, verbose = TRUE)
-
-  # Check upper hierarchy
-  DEhierarchy <- unique(RDBESDataObj$DE$DEhierarchy)
-  if(length(unique(DEhierarchy )) > 1){
-    stop("Multiple upper hierarchies not yet implemented")}
-  # Check lower hierarchy
+  # Unique upper hierarchy
+  if(length(unique(RDBESDataObj$DE$DEhierarchy)) > 1){
+    stop("Multiple upper hierarchies not implemented")}
+  # Unique lower hierarchy
   if(length(unique(RDBESDataObj$SA$SAlowHierarchy)) > 1){
     stop("Multiple lower hierarchies not allowed")
   }
 
-  RDBESEstRatioObj <- RDBESDataObj[c("CL", "CE",  RDBEScore::getTablesInRDBESHierarchy(DEhierarchy))]
-
   # Filter out NULL tables
-  RDBESEstRatioObj <- Filter(Negate(is.null), RDBESEstRatioObj)
+  RDBESEstRatioObj <- Filter(Negate(is.null),RDBESDataObj)
 
-  # If raiseVar == possible
+  # If no individual weight of fish in BV, then can't run raiseVar = Weight
+  # because we don't have the weight of the subsample
+  if(unique(RDBESEstRatioObj$SA$SAlowHierarchy) == "A") {
+    weightVar <- grep("(?i)weight", unique(RDBESEstRatioObj$BV$BVtypeMeas), value = TRUE)
+    if (is.null(    weightVar) || length(weightVar) == 0 || all(is.na(weightVar))){
+      stop("no individual weight measured")
+    }
+  }
+
+  # Does anything exist after SA?
+  # Do we need that?
+
+  if(length(unique(names(RDBESEstRatioObj))) > 1){
+    if(!tail(names(RDBESEstRatioObj), n = 1) %in% c("FM", "BV")){
+      stop("No FM or BV tables provided")
+    }
+  }
+
+  # TODO (to be developed) match with pop (Landings or Effort)
+  # RDBESEstRatioObj <- RDBESDataObj[c("CL", "CE",  RDBEScore::getTablesInRDBESHierarchy(DEhierarchy))]
+
+
+
+
+
+# raiseVar options --------------------------------------------------------
+
+  # Can have multiple types of weight measured for the same individual
+  # If the user defined in the raiseVar argument one of the options in the ICES vocab for
+  # the weight codes in the field BVtypeMeas
+  # If there is only one present, this is used by default
+  # If more than one are present, allow the user to choose
   possibleValues  <- unique(RDBESDataObj$BV$BVtypeMeas)
-
   if(!raiseVar %in% possibleValues){
-
-#----------------------
-  if(raiseVar == "Weight"){
-    if(unique(RDBESDataObj$SA$SAlowHierarchy) == "B" ){
-      stop("Lower hierarchy B not yet implemented for weight")
-    }else{
-      weightVar <- grep("(?i)weight", unique(RDBESDataObj$BV$BVtypeMeas), value = TRUE)
-      # weightVar <- c("WeightLive", "WeightGutted", "WeightMeasured")
-      if (interactive()) {
-        if(length(unique(weightVar)) > 1) {
-          # Print a numbered menu and get user's selection
-          idx <- utils::menu(weightVar, title = "Select the BV weight type to use:")
-          if (idx == 0L) stop("Selection cancelled.")
-          wcol <- weightVar[idx]
-        } else {
-          message("Only one weight type present. Using: ", weightVar[1L])
-          wcol <- weightVar[1L]
+    if(raiseVar == "Weight"){
+      if(unique(RDBESDataObj$SA$SAlowHierarchy) == "B" ){
+        stop("Lower hierarchy B not implemented for weight")
+      }else{
+        weightVar <- grep("(?i)weight", unique(RDBESDataObj$BV$BVtypeMeas), value = TRUE)
+        if (interactive()) {
+          if(length(unique(weightVar)) > 1) {
+            # Print a numbered menu and get user's selection
+            idx <- utils::menu(weightVar, title = "Select the BV weight type to use:")
+            if (idx == 0L) stop("Selection cancelled.")
+            wcol <- weightVar[idx]
+          } else {
+            message("Only one weight type present. Using: ", weightVar[1L])
+            wcol <- weightVar[1L]
+          }
         }
       }
     }
   }
-  }
 
 
 
-# Do we need both CL and CE? Allow the user to define the population (i.e. effort or landings or both)?
 
-  # Not working check
 
-  # if(!names(RDBESDataObj) %in% c("CL", "CE")){
-  #   stop("The object does not have population data")
-  # }
-
-# Check which tables exist after SA
-
-# Does anything exist after SA?
-
- if(length(unique(names(RDBESEstRatioObj))) > 1){
-   if(!tail(names(RDBESEstRatioObj), n = 1) %in% c("FM", "BV")){
-     stop("No FM or BV tables provided")
-   }
- }
 
 # Length composition ------------------------------------------------------
   if(targetValue == "LengthComp"){
@@ -136,7 +157,22 @@ doEstimationRatio <- function(RDBESDataObj,
       sa <- data.table::setDT(RDBESEstRatioObj$SA)
       fm <- fm[fm, unique(.SD), .SDcols = c("SAid", "FMid", "FMclassMeas", "FMnumAtUnit")]
       sa <- sa[, unique(.SD), .SDcols = c("SAid", "SAlowHierarchy", "SAtotalWtMes" , "SAsampWtMes",  "SAnumTotal", "SAnumSamp", "SAauxVarValue", "SAauxVarUnit" )]
-      bv$LengthClass <- floor(bv$LengthTotal/10) # TODO This needs to be defined by the user
+
+      # need to identify current units and
+      u2mm <- c(mm = 1, cm = 10, m = 1000)
+      conv <- u2mm[[classUnits]]
+      vals <- fm$FMclassMeas / conv
+
+      brks <- seq(classBreaks[1], classBreaks[2], by = classBreaks[3])
+
+      fm[, LengthClass := cut(
+        vals,
+        breaks = brks,
+        right = FALSE,             # [)
+        include.lowest = TRUE,
+        labels = head(brks, -1)
+      )]
+
       fm1 <- fm[
         , .(FMNumbersAtLength = .N),
         by = .(SAid, LengthClass)
@@ -364,6 +400,7 @@ doEstimationRatio <- function(RDBESDataObj,
         bv[, .(BVTotWeight = sum(BVweight, na.rm = TRUE)), by = FMid],
         on = "SAid"
       ]
+
 
 
       fm <- fm[fm, unique(.SD), .SDcols = c("SAid", "FMid", "FMclassMeas", "FMnumAtUnit")]
