@@ -60,7 +60,7 @@ createTableOfRDBESIds<-function(x, addSAseqNums=TRUE){
         cat("Using", id_1, " from ", CStableNames[i], "table and", id_2, "and BVfishId from ", CStableNames[i+1], "table. \n")
         df_2<-data.frame(x[[CStableNames[i+1]]][,list(get(id_1), get(id_2), get("BVfishId"))]); colnames(df_2)<-c(id_1,id_2,"BVfishId")
         # We also need a reference reporting the SAid, for when the lower hierarchy is C, see below.
-        df_2C<-data.frame(x[[CStableNames[i+1]]][,list(get("SAid"), get(id_1), get(id_2))]); colnames(df_2C)<-c("SAid", id_1,id_2)
+        df_2C<-data.frame(x[[CStableNames[i+1]]][,list(get("SAid"), get(id_1), get(id_2),get("BVfishId"))]); colnames(df_2C)<-c("SAid", id_1,id_2,"BVfishId")
 
       }
 
@@ -104,7 +104,7 @@ createTableOfRDBESIds<-function(x, addSAseqNums=TRUE){
         # Conditional merges
         mergedA <- df_2[toMergeA, on = "FMid"]              # left join equivalent (all.x = TRUE)
         mergedB <- df_2[toMergeB, on = "FMid"]              # same for group B
-        mergedC <- df_2C[toMergeC, on = "SAid", nomatch = 0][, .SD, .SDcols = c(names(toMergeC), "BVid")]
+        mergedC <- df_2C[toMergeC, on = "SAid", nomatch = 0][, .SD, .SDcols = c(names(toMergeC), "BVid","BVfishId")]
         mergedD <- toMergeD                                 # unchanged group D
 
         # Combine back
