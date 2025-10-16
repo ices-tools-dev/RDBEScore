@@ -218,9 +218,9 @@ test_that("validateRDBESDataObject produces correct text output", {
 # Tests for CHECK 5b: SL non-empty requires non-empty IS
 test_that("validateRDBESDataObject errors when SL has rows and IS is NULL", {
   # Build minimal object: non-empty SL, NULL IS
-  myObject <- H1Example
+  myObject <- data.table::copy(H1Example)
 
-  myObject["IS"]<- list(NULL)
+  myObject["IS"] <- list(NULL)
 
   expect_error(
     validateRDBESDataObject(objectToCheck = myObject, verbose = FALSE),

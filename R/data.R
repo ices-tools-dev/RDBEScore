@@ -48,20 +48,23 @@
 #' @source \url{https://sboxrdbes.ices.dk}
 "designVariables"
 
-#' A dataset containing a copy of the icesSpecWoRMS code list. The latest
-#' code list data can be downloaded from https://vocab.ices.dk/
+#' ICES Species (WoRMS) code list snapshot
 #'
-#' @format A data frame
+#' A dataset containing a copy of the ICES 'Species (WoRMS)' code list.
+#' The latest code list can be downloaded from https://vocab.ices.dk/.
+#'
+#' @format A data frame with the following columns:
 #' \describe{
-#'   \item{GUID}{Globally unique identifier assigned by ICES}
-#'   \item{Key}{AphiaID}
-#'   \item{Description}{Scientific name}
-#'   \item{LongDescription}{Ignore}
-#'   \item{Modified}{Date when the code was last updated}
-#'   \item{Deprecated}{IS this still a valid code.  If FALSE the code is
-#'   no longer valid within ICES.}
-#'   \item{DateDownloaded}{E.g. "2023-10-18" }
-#'   ...
+#'   \item{CodeTypeGUID}{GUID of the code type in ICES Vocabulary (e.g. the 'Species (WoRMS)' list).}
+#'   \item{CodeTypeID}{Numeric ID of the code type.}
+#'   \item{Guid}{GUID identifying this code record.}
+#'   \item{Id}{Numeric ID of this code record.}
+#'   \item{Key}{AphiaID (numeric key from WoRMS).}
+#'   \item{Description}{Scientific name.}
+#'   \item{LongDescription}{(If present) additional description; often not used.}
+#'   \item{Modified}{Datetime the record was last modified at ICES.}
+#'   \item{Deprecated}{Logical; whether this code is deprecated at ICES.}
+#'   \item{DateDownloaded}{Date the snapshot was downloaded, e.g. "2023-10-18".}
 #' }
 #' @source \url{https://vocab.ices.dk/}
 "icesSpecWoRMS"
@@ -88,7 +91,7 @@
 #'   \item{order}{E.g. "Spirularia" }
 #'   \item{family}{E.g. "Cerianthidae"  }
 #'   \item{genus}{E.g. NA "Cerianthus"}
-#'   \item{citation }{E.g. "Molodtsova, T. (2023). World List of Ceriantharia.
+#'   \item{citation}{E.g. "Molodtsova, T. (2023). World List of Ceriantharia.
 #' Cerianthidae Milne Edwards & Haime, 1851. Accessed through: "... }
 #'   \item{lsid}{internal database identifier}
 #'   \item{isMarine}{E.g. 1 }

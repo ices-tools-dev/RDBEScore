@@ -169,7 +169,7 @@ createRDBESEstObject <- function(rdbesPrepObject,
       ]
 
       # Count matches per child row (i.SAid = child row's SAid)
-      match_counts <- SA_with_parent[, .N, by = .(i.SAid)]
+      match_counts <- SA_with_parent[, .(n_matches=.N), by = .(i.SAid)]
 
       # Warn about no match
       no_match_ids <- SA[!SAid %in% match_counts$i.SAid, SAid]
@@ -178,13 +178,13 @@ createRDBESEstObject <- function(rdbesPrepObject,
       }
 
       # Warn about non-unique matches
-      non_unique_ids <- match_counts[N > 1, i.SAid]
+      non_unique_ids <- match_counts[n_matches  > 1, i.SAid]
       if (length(non_unique_ids) > 0) {
         warning(paste("Multiple parent matches found for SAid(s):", paste(non_unique_ids, collapse = ", ")))
       }
 
       # Filter to only rows where there's exactly one match
-      unique_matches <- match_counts[N == 1]
+      unique_matches <- match_counts[n_matches  == 1]
       unique_links <- SA_with_parent[i.SAid %in% unique_matches$i.SAid]
 
       # Add the parent SAid to the child row as SAparentID

@@ -20,6 +20,11 @@
 #' given. You should not input different hierarchy files; this function will not
 #' combine them.
 #'
+#' If the zip contains multiple hierarchies (e.g., H1 and H5 within the same
+#' archive), you can select which one to import by passing `Hierarchy` via
+#' `...`, for example: `Hierarchy = 1`. If `Hierarchy` is not specified and the
+#' zip contains multiple hierarchies, an error is raised prompting you to set it.
+#'
 #' ***CSV file inputs***
 #' This `input` should be a path to a folder of `csv` files. These can be the
 #' `csv` files downloaded from RDBES (e.g. an unzipped hierarchy), or *any* set
@@ -56,8 +61,17 @@
 #'   in. Default is `TRUE`.
 #' @param verbose (Optional) Set to TRUE if you want informative text printed
 #'  out, or FALSE if you don't.  The default is FALSE.
-#' @param ... parameters passed to validateRDBESDataObject
-#'  e.g.`strict=FALSE`
+#' @param ... Additional parameters forwarded to helper functions used by this
+#'   function. Most commonly these are forwarded to
+#'   `validateRDBESDataObject()` during the validation step. Common options:
+#'   - `strict` (logical, default `TRUE`): if `FALSE`, validation issues result
+#'     in warnings instead of stopping with an error.
+#'   - `verbose` (logical, default `FALSE`): request extra informational output
+#'     from validation.
+#'   - `Hierarchy` (integer, e.g. `1`, optional; zip inputs only): when the zip
+#'     file contains multiple hierarchies, selects which hierarchy to import.
+#'   Note: `checkDataTypes` is controlled by the `castToCorrectDataTypes`
+#'   argument of this function and should not be supplied via `...`.
 #' @importFrom utils file_test
 #'
 #' @return A RDBESDataObject
@@ -65,6 +79,7 @@
 #' @md
 #'
 #' @examples
+#' # Create an empty object
 #' myEmptyRDBESObject <- createRDBESDataObject(input = NULL)
 
 createRDBESDataObject <- function(input = NULL,

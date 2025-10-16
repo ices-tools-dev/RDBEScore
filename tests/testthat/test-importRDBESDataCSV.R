@@ -48,6 +48,40 @@ capture.output({  ## suppresses printing of console output when running test()
   })
 
 
+  test_that("importRDBESDataCSV keeps extra long BVfishId if character",  {
+    #make a temporary BV table from the package data
+    BV <- H1Example$BV[1,]
+    #make a 40 char length  dummy ID this is the max length in RDBES
+    id <- paste0(rep("A", 40), collapse = "")
+    BV$BVfishId <- id
+    tempBVfNname <- tempfile(fileext = ".csv")
+    write.csv(BV, file=tempBVfNname, quote=F, row.names = F)
+    fname <- basename(tempBVfNname)
+    dirname <- dirname(tempBVfNname)
+    BV <- importRDBESDataCSV(rdbesExtractPath = dirname, listOfFileNames = list("BV"=fname))$BV
+    file.remove(tempBVfNname)
+    expect_equal(BV$BVfishId[1],id)
+  })
+
+  test_that("importRDBESDataCSV keeps extra long BVfishId if int",  {
+    #make a temporary BV table from the package data
+    BV <- H1Example$BV[1,]
+    #make a 40 char length  dummy ID this is the max length in RDBES
+    id <- paste0(rep("1", 40), collapse = "")
+    #its not possible to get the exact number if we save as numeric
+    id <- format(as.numeric(id), scientific = FALSE, trim = TRUE)
+    #the thing we want to test is if we have a long numeric string in there
+    #do we get the same string back in when importing
+    BV$BVfishId <- id
+    tempBVfNname <- tempfile(fileext = ".csv")
+    write.csv(BV, file=tempBVfNname, quote=F, row.names = F)
+    fname <- basename(tempBVfNname)
+    dirname <- dirname(tempBVfNname)
+    BV <- importRDBESDataCSV(rdbesExtractPath = dirname, listOfFileNames = list("BV"=fname))$BV
+    file.remove(tempBVfNname)
+    expect_equal(BV$BVfishId[1],id)
+  })
+
 
 
 

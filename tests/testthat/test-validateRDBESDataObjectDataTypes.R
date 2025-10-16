@@ -46,4 +46,29 @@ test_that("checkRDBESDataObjectDataTypes returns 2 differences for an object wit
   expect_equal(numberOfDifferences,2)
 })
 
+test_that("checkRDBESDataObjectDataTypes treats expected integer vs actual numeric as compatible (issue #251)",  {
+
+  # Here DEid, DEyear and DEhierarchy are provided as numeric (double)
+  # while the mapping expects integer. We want this to be considered OK.
+  myDE <- data.frame("DEid" = c(1,2),              # numeric (not 1L, 2L)
+                     "DErecType" = c("DE","DE"),
+                     "DEsampScheme" = c("WGRDBES-EST TEST","WGRDBES-EST TEST"),
+                     "DEsampSchemeType" = c("NatPilCF","NatPilCF"),
+                     "DEyear" = c(1965,1965),      # numeric
+                     "DEstratumName" = c("1","2"),
+                     "DEhierarchyCor" = c("Y","N"),
+                     "DEhierarchy" = c(1,1),       # numeric
+                     "DEsamp" = c("Y","N"),
+                     "DEnoSampReason" = c ("",""),
+                     stringsAsFactors = FALSE
+  )
+
+  myObject <- list()
+  myObject[["DE"]] <- myDE
+
+  myDiffs <- validateRDBESDataObjectDataTypes(myObject)
+  numberOfDifferences <- nrow(myDiffs)
+  expect_equal(numberOfDifferences,0)
+})
+
 }) ## end capture.output
