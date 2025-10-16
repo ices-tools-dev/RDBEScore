@@ -4,7 +4,7 @@
 \alias{lowerTblData}
 \title{Get lower table data from upper table id}
 \usage{
-lowerTblData(field, values, tbls, level, verbose = FALSE)
+lowerTblData(field, values, tbls, level, verbose = FALSE, path_order = NULL)
 }
 \arguments{
 \item{field}{A character string specifying the name of the upper table field.}
