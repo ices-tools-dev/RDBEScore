@@ -61,10 +61,11 @@ validateRDBESDataObjectDataTypes <- function(objectToCheck){
   names(myDiffs)[which(names(myDiffs) == "RDataType.x")] <- "RDataType_expected"
   names(myDiffs)[which(names(myDiffs) == "RDataType.y")] <- "RDataType_actual"
 
-  # Let's say that if we were expecting a numeric but got an intger that it's ok
-  myDiffs <-
-    myDiffs[!(myDiffs$RDataType_expected == "numeric" &
-            myDiffs$RDataType_actual == "integer"),]
+  # Treat integer and numeric as compatible in both directions (issue #251)
+  myDiffs <- myDiffs[!
+    ((myDiffs$RDataType_expected == "numeric" & myDiffs$RDataType_actual == "integer") |
+     (myDiffs$RDataType_expected == "integer" & myDiffs$RDataType_actual == "numeric"))
+  ,]
 
   # Return the differences
   myDiffs
