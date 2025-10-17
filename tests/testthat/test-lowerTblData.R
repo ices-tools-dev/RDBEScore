@@ -10,21 +10,21 @@ tblsSprat <- list(DE = DE, SD = SD, TE = TE, VS = VS, LE = LE)
 # Begin test cases
 test_that("Function returns correct data for valid inputs", {
   result <- lowerTblData("TEid", c(1), tblsSprat, "LE", FALSE)
-  expected <- data.table(VSid = 1,LEid=1, value = 10)
+  expected <- data.table(TEid = 1, VSid = 1, LEid=1, value = 10)
 
   expect_equal(result, expected)
 })
 
 test_that("Function handles multiple values correctly", {
   result <- lowerTblData("TEid", c(1, 4), tblsSprat, "LE", FALSE)
-  expected <- data.table(VSid = c(1, 4),LEid=c(1,4) , value = c(10, 4))
+  expected <- data.table(TEid=c(1,4) ,VSid = c(1, 4),LEid=c(1,4) , value = c(10, 4))
 
   expect_equal(result, expected)
 })
 
 test_that("Function handles non-existent field gracefully", {
   result <- lowerTblData("TEid", c(99), tblsSprat, "LE", FALSE)
-  expected <- data.table(VSid = integer(),LEid=integer() , value = integer())
+  expected <- data.table(TEid = integer(),VSid = integer(), LEid=integer() , value = integer())
 
   expect_equal(result, expected)
 })
@@ -35,7 +35,7 @@ test_that("Function works with printLevels = TRUE", {
 
 test_that("Recursive functionality works", {
   result <- lowerTblData("SDid", c(1), tblsSprat, "LE", FALSE)
-  expected <- data.table(VSid = 1, LEid=1, value = 10)
+  expected <- data.table(SDid = 1, TEid = 1,  VSid = 1, LEid=1, value = 10)
 
   expect_equal(result, expected)
 })

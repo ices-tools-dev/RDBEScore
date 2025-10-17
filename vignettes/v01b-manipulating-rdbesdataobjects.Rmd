@@ -107,7 +107,8 @@ RDBESDataObjects can be combined using the **combineRDBESDataObjects()** functio
 
 ```{r combine}
 myCombinedRawObject <- combineRDBESDataObjects(myH1RawObject,
-                                               myH5RawObject)
+                                               myH5RawObject,
+                                               strict = FALSE)
 
 # Number of rows in each non-null table and hierarchies
 print(myCombinedRawObject)
@@ -128,7 +129,7 @@ print(myH1RawObject)
 ```
 
 
-```{r filter}
+```{r filter2}
 myFields <- c("SDctry","VDctry","VDflgCtry","FTarvLoc")
 myValues <- c("ZW","ZWBZH","ZWVFA" )
 

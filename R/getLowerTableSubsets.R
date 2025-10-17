@@ -47,7 +47,7 @@ getLowerTableSubsets <- function(subsets, tblName, rdbesTables, combineStrata = 
   }
 
   # Bind the data together and filter based on intersected IDs
-  res <- data.table::rbindlist(res)
+  res <- data.table::rbindlist(res, fill = TRUE)
   res <- res[get(paste0(tblName, "id")) %in% ids]
   res <- unique(res, by = paste0(tblName, "id"))
 
