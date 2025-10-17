@@ -129,7 +129,7 @@ print(myH1RawObject)
 ```
 
 
-```{r filter}
+```{r filter2}
 myFields <- c("SDctry","VDctry","VDflgCtry","FTarvLoc")
 myValues <- c("ZW","ZWBZH","ZWVFA" )
 
