@@ -31,11 +31,14 @@ for(dname in datasetNames){
   datasetName <- gsub("[[:punct:]]|[[:space:]]", "_",
                       paste0(dname))
   deData <-  RDBEScore::filterRDBESDataObject(data,
-                                              fieldsToFilter = "DEstratumName",
-                                              valuesToFilter = dname,
+                                              fieldsToFilter = c("DEstratumName","SLspeclistName"),
+                                              valuesToFilter = c(dname,paste0("WGRDBES-EST_TEST_1_",datasetName)),
                                               killOrphans = T)
+  # the following should be deleted when #253 issue solved
+  deData$IS<-deData$IS[SLid %in% deData$SL$SLid,]
+
   # restricts species list
-  deData$SL<-deData$SL[grepl(deData$SL$SLspeclistName, pat=dname)]
+  #deData$SL<-deData$SL[grepl(deData$SL$SLspeclistName, pat=dname)]
 
   assign(datasetName, deData)
   do.call(eval(parse(text="usethis::use_data")),
