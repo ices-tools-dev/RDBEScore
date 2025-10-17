@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">RDBEScore</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -66,7 +66,7 @@
 
       <h1>01b Manipulating RDBESDataObjects</h1>
             
-            <h4 data-toc-skip class="date">2025-10-15</h4>
+            <h4 data-toc-skip class="date">2025-10-17</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/ices-tools-dev/RDBEScore/blob/main/vignettes/v01b-manipulating-rdbesdataobjects.Rmd" class="external-link"><code>vignettes/v01b-manipulating-rdbesdataobjects.Rmd</code></a></small>
       <div class="d-none name"><code>v01b-manipulating-rdbesdataobjects.Rmd</code></div>
@@ -222,7 +222,11 @@ and at-sea samples - it will often be required to combine all the data
 together before further analysis.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">myCombinedRawObject</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/combineRDBESDataObjects.html">combineRDBESDataObjects</a></span><span class="op">(</span><span class="va">myH1RawObject</span>,</span>
-<span>                                               <span class="va">myH5RawObject</span><span class="op">)</span></span>
+<span>                                               <span class="va">myH5RawObject</span>,</span>
+<span>                                               strict <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: Combining RDBESDataObjects from different hierarchies ( 1 and 5 ).</span></span>
+<span><span class="co">#&gt; This creates a mixed hierarchy object that may be structurally and</span></span>
+<span><span class="co">#&gt; statistically invalid for some analyses.</span></span>
 <span></span>
 <span><span class="co"># Number of rows in each non-null table and hierarchies</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">myCombinedRawObject</span><span class="op">)</span></span>
@@ -274,9 +278,9 @@ division.</p>
 <span><span class="co">#&gt;  BV: 14580 (SRSWR: 2/2)</span></span>
 <span><span class="co">#&gt;  VD: 311</span></span>
 <span><span class="co">#&gt;  SL: 6</span></span>
-<span><span class="co">#&gt;  IS: 25</span></span>
-<span></span>
-<span><span class="va">myFields</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SDctry"</span>,<span class="st">"VDctry"</span>,<span class="st">"VDflgCtry"</span>,<span class="st">"FTarvLoc"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;  IS: 25</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">myFields</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SDctry"</span>,<span class="st">"VDctry"</span>,<span class="st">"VDflgCtry"</span>,<span class="st">"FTarvLoc"</span><span class="op">)</span></span>
 <span><span class="va">myValues</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ZW"</span>,<span class="st">"ZWBZH"</span>,<span class="st">"ZWVFA"</span> <span class="op">)</span></span>
 <span></span>
 <span><span class="va">myFilteredObject</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/filterRDBESDataObject.html">filterRDBESDataObject</a></span><span class="op">(</span><span class="va">myH1RawObject</span>,</span>
@@ -304,16 +308,88 @@ division.</p>
 “orphan” rows being produced so it is usual to also apply the
 <strong>findAndKillOrphans()</strong> function to the filtered data to
 remove these records.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">myFilteredObjectNoOrphans</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="fu"><a href="../reference/findAndKillOrphans.html">findAndKillOrphans</a></span><span class="op">(</span>objectToCheck <span class="op">=</span> <span class="va">myFilteredObject</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/validateRDBESDataObject.html">validateRDBESDataObject</a></span><span class="op">(</span><span class="va">myFilteredObjectNoOrphans</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/validateRDBESDataObject.html">validateRDBESDataObject</a></span><span class="op">(</span><span class="va">myFilteredObjectNoOrphans</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">myFilteredObjectNoOrphans</span></span>
+<span><span class="co">#&gt; Hierarchy 1 RDBESdataObject:</span></span>
+<span><span class="co">#&gt;  DE: 8</span></span>
+<span><span class="co">#&gt;  SD: 8</span></span>
+<span><span class="co">#&gt;  VS: 1214 (SRSWOR,CENSUS,SRSWR: 2-135/4-1382)</span></span>
+<span><span class="co">#&gt;  FT: 36 (SRSWR: 3/100)</span></span>
+<span><span class="co">#&gt;  FO: 108 (SRSWR: 3/20)</span></span>
+<span><span class="co">#&gt;  SS: 108 (SRSWR: 1/4)</span></span>
+<span><span class="co">#&gt;  SA: 108 (SRSWR: 1/2)</span></span>
+<span><span class="co">#&gt;  FM: 1080</span></span>
+<span><span class="co">#&gt;  BV: 2160 (SRSWR: 2/2)</span></span>
+<span><span class="co">#&gt;  VD: 310</span></span>
+<span><span class="co">#&gt;  SL: 6</span></span>
+<span><span class="co">#&gt;  IS: 25</span></span></code></pre></div>
+<p><strong>NB!</strong> Currently filtering happens to all fields
+together i.e it is not possible to filter same codelist differently in
+the same filter call. Imagine a situation where you want to filter on
+both “SDCtry” and “VDflgCtry” ie vessels from EH country sampled by ZW
+institution. Ie two calls are needed</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">myFilteredObject</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/filterRDBESDataObject.html">filterRDBESDataObject</a></span><span class="op">(</span><span class="va">myH1RawObject</span>,</span>
+<span>                                         fieldsToFilter <span class="op">=</span> <span class="st">"SDctry"</span>,</span>
+<span>                                         valuesToFilter <span class="op">=</span> <span class="st">"ZW"</span>,</span>
+<span>                                         killOrphans <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/filterRDBESDataObject.html">filterRDBESDataObject</a></span><span class="op">(</span><span class="va">myFilteredObject</span>,</span>
+<span>                                         fieldsToFilter <span class="op">=</span> <span class="st">"VDflgCtry"</span>,</span>
+<span>                                         valuesToFilter <span class="op">=</span> <span class="st">"EH"</span>,</span>
+<span>                                         killOrphans <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Hierarchy 1 RDBESdataObject:</span></span>
+<span><span class="co">#&gt;  DE: 8</span></span>
+<span><span class="co">#&gt;  SD: 8</span></span>
+<span><span class="co">#&gt;  VS: 1214 (SRSWOR,CENSUS,SRSWR: 2-135/4-1382)</span></span>
+<span><span class="co">#&gt;  FT: 1430 (CENSUS,SRSWR: 1-3/1-100)</span></span>
+<span><span class="co">#&gt;  FO: 1916 (CENSUS,SRSWR: 1-3/1-20)</span></span>
+<span><span class="co">#&gt;  SS: 1916 (CENSUS,SRSWR: 1/1-4)</span></span>
+<span><span class="co">#&gt;  SA: 1916 (CENSUS,SRSWR: 1/1-2)</span></span>
+<span><span class="co">#&gt;  FM: 7290</span></span>
+<span><span class="co">#&gt;  BV: 14580 (SRSWR: 2/2)</span></span>
+<span><span class="co">#&gt;  VD: 1</span></span>
+<span><span class="co">#&gt;  SL: 6</span></span>
+<span><span class="co">#&gt;  IS: 25</span></span></code></pre></div>
+<p>Sometimes you might want to do the inverse filter eg exclude
+something. You can do this by selecting the complement set of values
+using <code>setdiff</code>.</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Exclude specific DEid values by selecting all others</span></span>
+<span><span class="va">allValues</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">myH1RawObject</span><span class="op">$</span><span class="va">DE</span><span class="op">$</span><span class="va">DEid</span><span class="op">)</span></span>
+<span><span class="va">excludedValues</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5351</span><span class="op">)</span></span>
+<span><span class="va">myInverseFiltered</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/filterRDBESDataObject.html">filterRDBESDataObject</a></span><span class="op">(</span></span>
+<span>  <span class="va">myH1RawObject</span>,</span>
+<span>  fieldsToFilter <span class="op">=</span> <span class="st">"DEid"</span>,</span>
+<span>  valuesToFilter <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sets.html" class="external-link">setdiff</a></span><span class="op">(</span><span class="va">allValues</span>, <span class="va">excludedValues</span><span class="op">)</span>,</span>
+<span>  killOrphans <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/validateRDBESDataObject.html">validateRDBESDataObject</a></span><span class="op">(</span><span class="va">myInverseFiltered</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">myInverseFiltered</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Hierarchy 1 RDBESdataObject:</span></span>
+<span><span class="co">#&gt;  DE: 7</span></span>
+<span><span class="co">#&gt;  SD: 7</span></span>
+<span><span class="co">#&gt;  VS: 914 (CENSUS,SRSWOR,SRSWR: 2-34/4-367)</span></span>
+<span><span class="co">#&gt;  FT: 1130 (CENSUS,SRSWR: 1-3/1-100)</span></span>
+<span><span class="co">#&gt;  FO: 1616 (CENSUS,SRSWR: 1-3/1-20)</span></span>
+<span><span class="co">#&gt;  SS: 1616 (CENSUS,SRSWR: 1/1-4)</span></span>
+<span><span class="co">#&gt;  SA: 1616 (CENSUS,SRSWR: 1/1-2)</span></span>
+<span><span class="co">#&gt;  FM: 7290</span></span>
+<span><span class="co">#&gt;  BV: 14580 (SRSWR: 2/2)</span></span>
+<span><span class="co">#&gt;  VD: 311</span></span>
+<span><span class="co">#&gt;  SL: 6</span></span>
+<span><span class="co">#&gt;  IS: 25</span></span></code></pre></div>
 <p>You can also remove any records that are not linking to a row in the
 VesselDetails (VD) table using the
 <strong>removeBrokenVesselLinks()</strong> function.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">myFields</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"VDlenCat"</span><span class="op">)</span></span>
 <span><span class="va">myValues</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"18-&lt;24"</span> <span class="op">)</span></span>
@@ -329,7 +405,7 @@ VesselDetails (VD) table using the
 <p>Finally you can also remove any records that are not linking to an
 entry in the SpeciesListDetails (SL) table using the
 <strong>removeBrokenSpeciesListLinks()</strong> function.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">myFields</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SLspeclistName"</span><span class="op">)</span></span>
 <span><span class="va">myValues</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ZW_1965_SpeciesList"</span> <span class="op">)</span></span>
@@ -347,11 +423,11 @@ entry in the SpeciesListDetails (SL) table using the
 <h2 id="getting-subsets-of-rdbesdataobject-tables">Getting Subsets of RDBESDataObject Tables<a class="anchor" aria-label="anchor" href="#getting-subsets-of-rdbesdataobject-tables"></a>
 </h2>
 <p>Sometimes it we want to see how a field or values in the
-<strong>RDBESDataObject</strong> are connected to otther tables. One use
+<strong>RDBESDataObject</strong> are connected to other tables. One use
 case would be e.g. to see when a specific Landing Event (LE) occured.For
 this we can use the <strong>getLinkedDataFromLevel()</strong>
 function.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#get the TE table corresponding to the first LEid in the H8ExampleEE1 object</span></span>
 <span><span class="fu"><a href="../reference/getLinkedDataFromLevel.html">getLinkedDataFromLevel</a></span><span class="op">(</span><span class="st">"LEid"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>, <span class="va">H8ExampleEE1</span>, <span class="st">"TE"</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Traversing upwards in the table hierarchy from LE to TE </span></span>
@@ -380,18 +456,17 @@ function.</p>
 <p>Similarly we can get the subset of the LE table corresponding to a
 specific value in the TE table. This does not have to be the <em>id</em>
 field, but can be any field in the table.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#get the TE table corresponding to the first LEid in the H8ExampleEE1 object</span></span>
 <span><span class="fu"><a href="../reference/getLinkedDataFromLevel.html">getLinkedDataFromLevel</a></span><span class="op">(</span><span class="st">"TEstratumName"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"November"</span><span class="op">)</span>, <span class="va">H8ExampleEE1</span>, <span class="st">"LE"</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Traversing downwards in the table hierarchy from TE to LE </span></span>
 <span><span class="co">#&gt; TEstratumName: November</span></span>
 <span><span class="co">#&gt; VSid: 1, 2, 11</span></span>
-<span><span class="co">#&gt; Key: &lt;LEid&gt;</span></span>
-<span><span class="co">#&gt;     LEid  FOid   OSid   FTid  VSid  VDid  TEid   SSid   SAid LErecType</span></span>
-<span><span class="co">#&gt;    &lt;num&gt; &lt;num&gt; &lt;lgcl&gt; &lt;lgcl&gt; &lt;num&gt; &lt;num&gt; &lt;num&gt; &lt;lgcl&gt; &lt;lgcl&gt;    &lt;char&gt;</span></span>
-<span><span class="co">#&gt; 1:     1    NA     NA     NA     1     6     1     NA     NA        LE</span></span>
-<span><span class="co">#&gt; 2:     2    NA     NA     NA     2     6     1     NA     NA        LE</span></span>
-<span><span class="co">#&gt; 3:    11    NA     NA     NA    11  1255     8     NA     NA        LE</span></span>
+<span><span class="co">#&gt;     TEid  VSid  LEid  FOid   OSid   FTid  VDid   SSid   SAid LErecType</span></span>
+<span><span class="co">#&gt;    &lt;num&gt; &lt;num&gt; &lt;num&gt; &lt;num&gt; &lt;lgcl&gt; &lt;lgcl&gt; &lt;num&gt; &lt;lgcl&gt; &lt;lgcl&gt;    &lt;char&gt;</span></span>
+<span><span class="co">#&gt; 1:     1     1     1    NA     NA     NA     6     NA     NA        LE</span></span>
+<span><span class="co">#&gt; 2:     1     2     2    NA     NA     NA     6     NA     NA        LE</span></span>
+<span><span class="co">#&gt; 3:     8    11    11    NA     NA     NA  1255     NA     NA        LE</span></span>
 <span><span class="co">#&gt;    LEstratification LEseqNum LEhaulNum LEstratumName LEclustering LEclusterName</span></span>
 <span><span class="co">#&gt;              &lt;char&gt;    &lt;num&gt;    &lt;lgcl&gt;        &lt;char&gt;       &lt;char&gt;        &lt;char&gt;</span></span>
 <span><span class="co">#&gt; 1:                N        1        NA             U            N             U</span></span>
@@ -443,7 +518,7 @@ field, but can be any field in the table.</p>
 <span><span class="co">#&gt; 2:           NA            NA</span></span>
 <span><span class="co">#&gt; 3:           NA            NA</span></span></code></pre></div>
 <p>Several values can be used to get a subset of the table.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#get the SA table corresponding to the first 2 TEids in the H8ExampleEE1 object</span></span>
 <span><span class="fu"><a href="../reference/getLinkedDataFromLevel.html">getLinkedDataFromLevel</a></span><span class="op">(</span><span class="st">"TEid"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span>, <span class="va">H8ExampleEE1</span>, <span class="st">"SA"</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Traversing downwards in the table hierarchy from TE to SA </span></span>
@@ -451,60 +526,64 @@ field, but can be any field in the table.</p>
 <span><span class="co">#&gt; VSid: 1, 2, 3</span></span>
 <span><span class="co">#&gt; LEid: 1, 2, 3</span></span>
 <span><span class="co">#&gt; SSid: 1, 2, 3</span></span>
-<span><span class="co">#&gt; Key: &lt;SAid&gt;</span></span>
-<span><span class="co">#&gt;     SAid SAparSequNum  SSid SArecType SAseqNum SAstratification SAstratumName</span></span>
-<span><span class="co">#&gt;    &lt;num&gt;       &lt;lgcl&gt; &lt;num&gt;    &lt;char&gt;    &lt;num&gt;           &lt;char&gt;        &lt;char&gt;</span></span>
-<span><span class="co">#&gt; 1:     1           NA     1        SA        1                N             U</span></span>
-<span><span class="co">#&gt; 2:     2           NA     2        SA        2                N             U</span></span>
-<span><span class="co">#&gt; 3:     3           NA     3        SA        3                N             U</span></span>
-<span><span class="co">#&gt;    SAspeCode SAspeCodeFAO SApres SAstateOfProc SAcatchCat SAlandCat</span></span>
-<span><span class="co">#&gt;        &lt;num&gt;       &lt;char&gt; &lt;char&gt;        &lt;char&gt;     &lt;char&gt;    &lt;char&gt;</span></span>
-<span><span class="co">#&gt; 1:    126425          SPR    WHL           FRE        Lan       HuC</span></span>
-<span><span class="co">#&gt; 2:    126425          SPR    WHL           FRE        Lan       HuC</span></span>
-<span><span class="co">#&gt; 3:    126425          SPR    WHL           FRE        Lan       HuC</span></span>
-<span><span class="co">#&gt;    SAcommCatScl SAcommCat  SAsex SAunitName SAunitType SAtotalWtLive</span></span>
-<span><span class="co">#&gt;          &lt;lgcl&gt;    &lt;lgcl&gt; &lt;char&gt;     &lt;char&gt;     &lt;char&gt;        &lt;lgcl&gt;</span></span>
-<span><span class="co">#&gt; 1:           NA        NA      U     202201        Box            NA</span></span>
-<span><span class="co">#&gt; 2:           NA        NA      U     202202        Box            NA</span></span>
-<span><span class="co">#&gt; 3:           NA        NA      U     202203        Box            NA</span></span>
-<span><span class="co">#&gt;    SAsampWtLive SAnumTotal SAnumSamp SAselProb SAselectMeth SAlowHierarchy</span></span>
-<span><span class="co">#&gt;          &lt;lgcl&gt;      &lt;num&gt;     &lt;int&gt;    &lt;lgcl&gt;       &lt;char&gt;         &lt;char&gt;</span></span>
-<span><span class="co">#&gt; 1:           NA       1279         1        NA       SRSWOR              C</span></span>
-<span><span class="co">#&gt; 2:           NA       2034         1        NA       SRSWOR              C</span></span>
-<span><span class="co">#&gt; 3:           NA       6666         1        NA       SRSWOR              C</span></span>
-<span><span class="co">#&gt;       SAsampler SAnoSampReasonFM SAnoSampReasonBV SAtotalWtMes SAtotWtMeaDatBas</span></span>
-<span><span class="co">#&gt;          &lt;char&gt;           &lt;lgcl&gt;           &lt;lgcl&gt;        &lt;num&gt;           &lt;char&gt;</span></span>
-<span><span class="co">#&gt; 1: SelfSampling               NA               NA       750000         Official</span></span>
-<span><span class="co">#&gt; 2: SelfSampling               NA               NA       700000         Official</span></span>
-<span><span class="co">#&gt; 3: SelfSampling               NA               NA      1500000         Official</span></span>
-<span><span class="co">#&gt;    SAsampWtMes            SAspecState  SAgsaSubarea SAarea SAstatRect</span></span>
-<span><span class="co">#&gt;          &lt;num&gt;                 &lt;char&gt;        &lt;char&gt; &lt;lgcl&gt;     &lt;lgcl&gt;</span></span>
-<span><span class="co">#&gt; 1:         586 DeadOrZeroProbSurvival NotApplicable     NA         NA</span></span>
-<span><span class="co">#&gt; 2:         344 DeadOrZeroProbSurvival NotApplicable     NA         NA</span></span>
-<span><span class="co">#&gt; 3:         225 DeadOrZeroProbSurvival NotApplicable     NA         NA</span></span>
-<span><span class="co">#&gt;    SAeconZoneIndi SAjurisdArea SAgeoDatBas SAgeoSou SAnatFishAct SAmetier5</span></span>
-<span><span class="co">#&gt;            &lt;lgcl&gt;       &lt;lgcl&gt;      &lt;char&gt;   &lt;char&gt;       &lt;lgcl&gt;    &lt;lgcl&gt;</span></span>
-<span><span class="co">#&gt; 1:             NA           NA        &lt;NA&gt;     &lt;NA&gt;           NA        NA</span></span>
-<span><span class="co">#&gt; 2:             NA           NA        &lt;NA&gt;     &lt;NA&gt;           NA        NA</span></span>
-<span><span class="co">#&gt; 3:             NA           NA        &lt;NA&gt;     &lt;NA&gt;           NA        NA</span></span>
-<span><span class="co">#&gt;    SAmetier6 SAgear SAgeaDatBas SAgearSou SAmeshSize SAselDev SAselDevMeshSize</span></span>
-<span><span class="co">#&gt;       &lt;lgcl&gt; &lt;lgcl&gt;      &lt;char&gt;    &lt;char&gt;     &lt;lgcl&gt;   &lt;lgcl&gt;           &lt;lgcl&gt;</span></span>
-<span><span class="co">#&gt; 1:        NA     NA        &lt;NA&gt;      &lt;NA&gt;         NA       NA               NA</span></span>
-<span><span class="co">#&gt; 2:        NA     NA        &lt;NA&gt;      &lt;NA&gt;         NA       NA               NA</span></span>
-<span><span class="co">#&gt; 3:        NA     NA        &lt;NA&gt;      &lt;NA&gt;         NA       NA               NA</span></span>
-<span><span class="co">#&gt;    SAincProb SAsamp SAconFacMeasLive SAnoSampReason SAnonRespCol SAauxVarTot</span></span>
-<span><span class="co">#&gt;       &lt;lgcl&gt; &lt;char&gt;           &lt;lgcl&gt;         &lt;lgcl&gt;       &lt;char&gt;      &lt;lgcl&gt;</span></span>
-<span><span class="co">#&gt; 1:        NA      Y               NA             NA            N          NA</span></span>
-<span><span class="co">#&gt; 2:        NA      Y               NA             NA            N          NA</span></span>
-<span><span class="co">#&gt; 3:        NA      Y               NA             NA            N          NA</span></span>
-<span><span class="co">#&gt;    SAauxVarValue SAauxVarName SAauxVarUnit SAfishManUnit  LEid</span></span>
-<span><span class="co">#&gt;           &lt;lgcl&gt;       &lt;lgcl&gt;       &lt;lgcl&gt;        &lt;lgcl&gt; &lt;num&gt;</span></span>
-<span><span class="co">#&gt; 1:            NA           NA           NA            NA    NA</span></span>
-<span><span class="co">#&gt; 2:            NA           NA           NA            NA    NA</span></span>
-<span><span class="co">#&gt; 3:            NA           NA           NA            NA    NA</span></span></code></pre></div>
+<span><span class="co">#&gt;     TEid  VSid  LEid  SSid  SAid SAparSequNum SArecType SAseqNum</span></span>
+<span><span class="co">#&gt;    &lt;num&gt; &lt;num&gt; &lt;num&gt; &lt;num&gt; &lt;num&gt;       &lt;lgcl&gt;    &lt;char&gt;    &lt;num&gt;</span></span>
+<span><span class="co">#&gt; 1:     1     1     1     1     1           NA        SA        1</span></span>
+<span><span class="co">#&gt; 2:     1     2     2     2     2           NA        SA        2</span></span>
+<span><span class="co">#&gt; 3:     2     3     3     3     3           NA        SA        3</span></span>
+<span><span class="co">#&gt;    SAstratification SAstratumName SAspeCode SAspeCodeFAO SApres SAstateOfProc</span></span>
+<span><span class="co">#&gt;              &lt;char&gt;        &lt;char&gt;     &lt;num&gt;       &lt;char&gt; &lt;char&gt;        &lt;char&gt;</span></span>
+<span><span class="co">#&gt; 1:                N             U    126425          SPR    WHL           FRE</span></span>
+<span><span class="co">#&gt; 2:                N             U    126425          SPR    WHL           FRE</span></span>
+<span><span class="co">#&gt; 3:                N             U    126425          SPR    WHL           FRE</span></span>
+<span><span class="co">#&gt;    SAcatchCat SAlandCat SAcommCatScl SAcommCat  SAsex SAunitName SAunitType</span></span>
+<span><span class="co">#&gt;        &lt;char&gt;    &lt;char&gt;       &lt;lgcl&gt;    &lt;lgcl&gt; &lt;char&gt;     &lt;char&gt;     &lt;char&gt;</span></span>
+<span><span class="co">#&gt; 1:        Lan       HuC           NA        NA      U     202201        Box</span></span>
+<span><span class="co">#&gt; 2:        Lan       HuC           NA        NA      U     202202        Box</span></span>
+<span><span class="co">#&gt; 3:        Lan       HuC           NA        NA      U     202203        Box</span></span>
+<span><span class="co">#&gt;    SAtotalWtLive SAsampWtLive SAnumTotal SAnumSamp SAselProb SAselectMeth</span></span>
+<span><span class="co">#&gt;           &lt;lgcl&gt;       &lt;lgcl&gt;      &lt;num&gt;     &lt;int&gt;    &lt;lgcl&gt;       &lt;char&gt;</span></span>
+<span><span class="co">#&gt; 1:            NA           NA       1279         1        NA       SRSWOR</span></span>
+<span><span class="co">#&gt; 2:            NA           NA       2034         1        NA       SRSWOR</span></span>
+<span><span class="co">#&gt; 3:            NA           NA       6666         1        NA       SRSWOR</span></span>
+<span><span class="co">#&gt;    SAlowHierarchy    SAsampler SAnoSampReasonFM SAnoSampReasonBV SAtotalWtMes</span></span>
+<span><span class="co">#&gt;            &lt;char&gt;       &lt;char&gt;           &lt;lgcl&gt;           &lt;lgcl&gt;        &lt;num&gt;</span></span>
+<span><span class="co">#&gt; 1:              C SelfSampling               NA               NA       750000</span></span>
+<span><span class="co">#&gt; 2:              C SelfSampling               NA               NA       700000</span></span>
+<span><span class="co">#&gt; 3:              C SelfSampling               NA               NA      1500000</span></span>
+<span><span class="co">#&gt;    SAtotWtMeaDatBas SAsampWtMes            SAspecState  SAgsaSubarea SAarea</span></span>
+<span><span class="co">#&gt;              &lt;char&gt;       &lt;num&gt;                 &lt;char&gt;        &lt;char&gt; &lt;lgcl&gt;</span></span>
+<span><span class="co">#&gt; 1:         Official         586 DeadOrZeroProbSurvival NotApplicable     NA</span></span>
+<span><span class="co">#&gt; 2:         Official         344 DeadOrZeroProbSurvival NotApplicable     NA</span></span>
+<span><span class="co">#&gt; 3:         Official         225 DeadOrZeroProbSurvival NotApplicable     NA</span></span>
+<span><span class="co">#&gt;    SAstatRect SAeconZoneIndi SAjurisdArea SAgeoDatBas SAgeoSou SAnatFishAct</span></span>
+<span><span class="co">#&gt;        &lt;lgcl&gt;         &lt;lgcl&gt;       &lt;lgcl&gt;      &lt;char&gt;   &lt;char&gt;       &lt;lgcl&gt;</span></span>
+<span><span class="co">#&gt; 1:         NA             NA           NA        &lt;NA&gt;     &lt;NA&gt;           NA</span></span>
+<span><span class="co">#&gt; 2:         NA             NA           NA        &lt;NA&gt;     &lt;NA&gt;           NA</span></span>
+<span><span class="co">#&gt; 3:         NA             NA           NA        &lt;NA&gt;     &lt;NA&gt;           NA</span></span>
+<span><span class="co">#&gt;    SAmetier5 SAmetier6 SAgear SAgeaDatBas SAgearSou SAmeshSize SAselDev</span></span>
+<span><span class="co">#&gt;       &lt;lgcl&gt;    &lt;lgcl&gt; &lt;lgcl&gt;      &lt;char&gt;    &lt;char&gt;     &lt;lgcl&gt;   &lt;lgcl&gt;</span></span>
+<span><span class="co">#&gt; 1:        NA        NA     NA        &lt;NA&gt;      &lt;NA&gt;         NA       NA</span></span>
+<span><span class="co">#&gt; 2:        NA        NA     NA        &lt;NA&gt;      &lt;NA&gt;         NA       NA</span></span>
+<span><span class="co">#&gt; 3:        NA        NA     NA        &lt;NA&gt;      &lt;NA&gt;         NA       NA</span></span>
+<span><span class="co">#&gt;    SAselDevMeshSize SAincProb SAsamp SAconFacMeasLive SAnoSampReason</span></span>
+<span><span class="co">#&gt;              &lt;lgcl&gt;    &lt;lgcl&gt; &lt;char&gt;           &lt;lgcl&gt;         &lt;lgcl&gt;</span></span>
+<span><span class="co">#&gt; 1:               NA        NA      Y               NA             NA</span></span>
+<span><span class="co">#&gt; 2:               NA        NA      Y               NA             NA</span></span>
+<span><span class="co">#&gt; 3:               NA        NA      Y               NA             NA</span></span>
+<span><span class="co">#&gt;    SAnonRespCol SAauxVarTot SAauxVarValue SAauxVarName SAauxVarUnit</span></span>
+<span><span class="co">#&gt;          &lt;char&gt;      &lt;lgcl&gt;        &lt;lgcl&gt;       &lt;lgcl&gt;       &lt;lgcl&gt;</span></span>
+<span><span class="co">#&gt; 1:            N          NA            NA           NA           NA</span></span>
+<span><span class="co">#&gt; 2:            N          NA            NA           NA           NA</span></span>
+<span><span class="co">#&gt; 3:            N          NA            NA           NA           NA</span></span>
+<span><span class="co">#&gt;    SAfishManUnit</span></span>
+<span><span class="co">#&gt;           &lt;lgcl&gt;</span></span>
+<span><span class="co">#&gt; 1:            NA</span></span>
+<span><span class="co">#&gt; 2:            NA</span></span>
+<span><span class="co">#&gt; 3:            NA</span></span></code></pre></div>
 <p>Also lower hierarchy tables can be used to get the subset of the
 higher hierarchy tables.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#which vessel caught those fish?</span></span>
 <span><span class="fu"><a href="../reference/getLinkedDataFromLevel.html">getLinkedDataFromLevel</a></span><span class="op">(</span><span class="st">"BVfishId"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"410472143"</span>, <span class="st">"410472144"</span><span class="op">)</span>, <span class="va">H8ExampleEE1</span>, <span class="st">"VS"</span>, <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Traversing upwards in the table hierarchy from BV to VS </span></span>

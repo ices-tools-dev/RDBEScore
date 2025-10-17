@@ -9,7 +9,7 @@ environment."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">RDBEScore</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -96,8 +96,17 @@ out, or FALSE if you don't.  The default is FALSE.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>parameters passed to validateRDBESDataObject
-e.g.<code>strict=FALSE</code></p></dd>
+<dd><p>Additional parameters forwarded to helper functions used by this
+function. Most commonly these are forwarded to
+<code><a href="validateRDBESDataObject.html">validateRDBESDataObject()</a></code> during the validation step. Common options:</p><ul><li><p><code>strict</code> (logical, default <code>TRUE</code>): if <code>FALSE</code>, validation issues result
+in warnings instead of stopping with an error.</p></li>
+<li><p><code>verbose</code> (logical, default <code>FALSE</code>): request extra informational output
+from validation.</p></li>
+<li><p><code>Hierarchy</code> (integer, e.g. <code>1</code>, optional; zip inputs only): when the zip
+file contains multiple hierarchies, selects which hierarchy to import.
+Note: <code>checkDataTypes</code> is controlled by the <code>castToCorrectDataTypes</code>
+argument of this function and should not be supplied via <code>...</code>.</p></li>
+</ul></dd>
 
 </dl></div>
     <div class="section level2">
@@ -118,6 +127,10 @@ example CL and CE. E.g. `input = c("path/to/H1.zip", "path/to/CL.zip"). If
 any tables in the first input are overwritten by other inputs a warning is
 given. You should not input different hierarchy files; this function will not
 combine them.</p>
+<p>If the zip contains multiple hierarchies (e.g., H1 and H5 within the same
+archive), you can select which one to import by passing <code>Hierarchy</code> via
+<code>...</code>, for example: <code>Hierarchy = 1</code>. If <code>Hierarchy</code> is not specified and the
+zip contains multiple hierarchies, an error is raised prompting you to set it.</p>
 <p><em><strong>CSV file inputs</strong></em>
 This <code>input</code> should be a path to a folder of <code>csv</code> files. These can be the
 <code>csv</code> files downloaded from RDBES (e.g. an unzipped hierarchy), or <em>any</em> set
@@ -138,7 +151,8 @@ correct data classes but the tables will be empty.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">myEmptyRDBESObject</span> <span class="op">&lt;-</span> <span class="fu">createRDBESDataObject</span><span class="op">(</span>input <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Create an empty object</span></span></span>
+<span class="r-in"><span><span class="va">myEmptyRDBESObject</span> <span class="op">&lt;-</span> <span class="fu">createRDBESDataObject</span><span class="op">(</span>input <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

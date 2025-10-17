@@ -11,7 +11,7 @@ articles:
   v03a-Estimating-population-parameters-unbiased-estimator: v03a-Estimating-population-parameters-unbiased-estimator.html
   v03b-Estimating-population-parameters-ratio-estimator: v03b-Estimating-population-parameters-ratio-estimator.html
   v04-Create-IC-format-from-estimation-results: v04-Create-IC-format-from-estimation-results.html
-last_built: 2025-10-15T14:02Z
+last_built: 2025-10-17T12:54Z
 urls:
   reference: https://ices-tools-dev.github.io/RDBEScore/reference
   article: https://ices-tools-dev.github.io/RDBEScore/articles
