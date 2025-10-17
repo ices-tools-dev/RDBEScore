@@ -1,3 +1,5 @@
+# RDBEScore 0.3.5
+
 # RDBEScore 0.3.4
 
 - Defaults: `createRDBESDataObject()`  now runs validation by default
