@@ -153,7 +153,7 @@ validateRDBESDataObject(myFilteredObjectNoOrphans, verbose = FALSE)
 
 myFilteredObjectNoOrphans
 ```
-**NB!** Currently filtering happens to all fields together i.e it is not possible to filter same codelist differently in the same filter call. Imagine a situation where you want to filter on both "SDCtry" and "VDflgCtry" ie vessels from EH country sampled by ZW institution. Ie tow calls are needed
+**NB!** Currently filtering happens to all fields together i.e it is not possible to filter same codelist differently in the same filter call. Imagine a situation where you want to filter on both "SDCtry" and "VDflgCtry" ie vessels from EH country sampled by ZW institution. Ie two calls are needed
 
 ```{r}
 myFilteredObject <- filterRDBESDataObject(myH1RawObject,
@@ -169,7 +169,7 @@ filterRDBESDataObject(myFilteredObject,
 
 ```
 
-Sometimes you might to do the inverse filter eg exclude something. You can do this by selecting the complement set of values using `setdiff`.
+Sometimes you might want to do the inverse filter eg exclude something. You can do this by selecting the complement set of values using `setdiff`.
 
 ```{r}
 # Exclude specific DEid values by selecting all others

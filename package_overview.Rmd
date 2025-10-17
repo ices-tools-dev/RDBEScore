@@ -19,7 +19,7 @@ The aim of this document is to outline the basic workflow of importing data down
 
 The function **createRDBESDataObject** is intended to directly import Commercial Landing (CL), Commercial Effort (CE) and Commercial Sampling (CS) tables downloaded from [RDBES](https://rdbes.ices.dk/#/).
 
-## Introducton
+## Introduction
 2
 RDBEScore is an R package developed to facilitate the analysis of data from the ICES Regional Database and Estimation System (RDBES). The package provides functions to:
 
