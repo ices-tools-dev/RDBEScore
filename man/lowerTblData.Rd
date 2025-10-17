@@ -16,6 +16,10 @@ lowerTblData(field, values, tbls, level, verbose = FALSE, path_order = NULL)
 \item{level}{A character string specifying the name of the target lower level table.}
 
 \item{verbose}{A logical value indicating whether to print intermediate levels during recursion.}
+
+\item{path_order}{Internal: character vector tracking the traversal path of IDs during
+recursion to preserve a stable column order in the returned result. Users should not
+normally set this; it is maintained by recursive calls (default NULL).}
 }
 \value{
 A data frame containing the rows of the target lower level table that are associated with
