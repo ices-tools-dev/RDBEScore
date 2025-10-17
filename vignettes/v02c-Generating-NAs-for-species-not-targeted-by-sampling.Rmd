@@ -33,7 +33,7 @@ data(Pckg_survey_apistrat_H1)
 myH1DataObject1 <- Pckg_survey_apistrat_H1
 myH1DataObject1$SL<-myH1DataObject1$SL[grepl(myH1DataObject1$SL$SLspeclistName, pat="Pckg_survey_apistrat_H1"),]
 #myH1DataObject1<-filterAndTidyRDBESDataObject(myH1DataObject1, fieldsToFilter="FOid",valuesToFilter=70849, killOrphans = TRUE)
-myH1DataObject1<-filterRDBESDataObject(myH1DataObject1, fieldsToFilter="SSid",valuesToFilter=227694, killOrphans = TRUE)
+myH1DataObject1<-filterRDBESDataObject(myH1DataObject1, fieldsToFilter="SSid",valuesToFilter=myH1DataObject1$SS$SSid[1], killOrphans = TRUE)
 # check it is a valid RDBESobject
 validateRDBESDataObject(myH1DataObject1)
 ```

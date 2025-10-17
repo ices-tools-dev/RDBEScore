@@ -38,13 +38,13 @@
 		target_var<-"enroll"
 
 	# name your project (will be used in filenames for CS, SL and VD)
-		project_name_outputs <- "WGRDBES-EST_TEST_1_Pckg_survey_apiclus1_v2_H1"
+		project_name_outputs <- "WGRDBES-EST_TEST_1_Pckg_survey_apiclus1_H1"
 
 	# select a year for upload
 		DEyear<-1965
 		SDinstitution <- 4484
-		DEsamplingScheme<-"WGRDBES-EST TEST 1"
-		DEstratumName <- "Pckg_SDAResources_apiclus1_v2_H1"
+		DEsamplingScheme <- "WGRDBES-EST TEST 1"
+		DEstratumName <- "Pckg_survey_apiclus1_H1"
 		project_name_outputs <- gsub(" ","_", paste0(DEsamplingScheme,"_", DEstratumName))
 		baseDir <- "./data-raw/exampleData/TextBookExamples/"
 		baseDir <- ""
