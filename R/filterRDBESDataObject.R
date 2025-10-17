@@ -39,6 +39,17 @@
 #'   fieldsToFilter = myFields,
 #'   valuesToFilter = myValues
 #' )
+#'
+#' # Inverse filtering (exclude certain values)
+#' # Example: keep all DE rows except those with DEid in `excludedValues`
+#' # Compute the complement of the excluded set using setdiff
+#' allValues <- unique(myH1RawObject$DE$DEid)
+#' excludedValues <- c(5351)
+#' myInverseFiltered <- filterRDBESDataObject(
+#'   myH1RawObject,
+#'   fieldsToFilter = "DEid",
+#'   valuesToFilter = setdiff(allValues, excludedValues)
+#' )
 #' }
 filterRDBESDataObject <- function(RDBESDataObjectToFilter,
                                  fieldsToFilter,

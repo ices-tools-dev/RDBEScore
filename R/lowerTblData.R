@@ -11,6 +11,9 @@
 #' @param tbls A named list of data frames representing the tables.
 #' @param level A character string specifying the name of the target lower level table.
 #' @param verbose A logical value indicating whether to print intermediate levels during recursion.
+#' @param path_order Internal: character vector tracking the traversal path of IDs during
+#'   recursion to preserve a stable column order in the returned result. Users should not
+#'   normally set this; it is maintained by recursive calls (default NULL).
 #'
 #' @return A data frame containing the rows of the target lower level table that are associated with
 #'   the given values of the upper table field.
@@ -28,8 +31,7 @@
 #'
 #' RDBEScore:::lowerTblData("TEid", c(4), tblsSprat, "LE", TRUE)
 #' @keywords internal
-lowerTblData <- function(field, values, tbls, level, verbose = FALSE) {
-  #check if tables are of correct type
+lowerTblData <- function(field, values, tbls, level, verbose = FALSE, path_order = NULL) {
   if(!is.list(tbls)) stop("tbls must be a list")
 
   start <- substr(field, start = 1, stop = 2)
@@ -39,10 +41,9 @@ lowerTblData <- function(field, values, tbls, level, verbose = FALSE) {
   }
   currTbl <- which(start == names(tbls))
 
-  #this assumes that the tables are in the correct order and no empty tables
+  # assumes tables are in correct order and no empty tables
   tc <- 1
   nextTbl <- tbls[[currTbl + tc]]
-  #skip tables that are NULL
   while (is.null(nextTbl)) {
     tc <- tc + 1
     if(currTbl + tc > length(tbls)) stop("No more lower tables found")
@@ -59,6 +60,44 @@ lowerTblData <- function(field, values, tbls, level, verbose = FALSE) {
     values <- tbl[get(field) %in% values, get(curTblId)]
     field <- curTblId
   }
+
+  # Initialize and update path order to ensure the original search field stays first
+  if (is.null(path_order)) path_order <- field
+  path_order <- unique(c(path_order, nextTblField))
+
+  # values in next table for recursion
   nextTblValues <- nextTbl[get(field) %in% values, get(nextTblField)]
-  lowerTblData(nextTblField, nextTblValues, tbls, level, verbose)
+
+  # NEW: build link (current id -> next id) so we can keep intermediate IDs
+  linkDT <- unique(nextTbl[get(field) %in% values,
+                           .(from = get(field), to = get(nextTblField))])
+  data.table::setnames(linkDT, c("from","to"), c(field, nextTblField))
+
+  # recurse
+  res <- lowerTblData(nextTblField, nextTblValues, tbls, level, verbose, path_order)
+
+  # NEW: merge link back so the current level's ID is preserved
+  # Always attach the authoritative parent id from the link.
+  # If a column with the same name already exists (from another variant), drop it first,
+  # then merge in the value derived from the current hierarchy.
+  if (field %in% names(res)) {
+    res[, (field) := NULL]
+  }
+  res <- merge(
+    linkDT[, c(nextTblField, field), with = FALSE],
+    res,
+    by = nextTblField,
+    all.y = TRUE,
+    allow.cartesian = TRUE
+  )
+
+  #keep path columns toward the front with stable overall path order
+  path_cols <- intersect(path_order, names(res))
+  other_cols <- setdiff(names(res), path_cols)
+  if (length(path_cols) > 0) data.table::setcolorder(res, c(path_cols, other_cols))
+
+  # Ensure no data.table key is set on the result
+  data.table::setkeyv(res, NULL)
+
+  res
 }

@@ -1,3 +1,10 @@
+# RDBEScore 0.3.5
+
+- Bug fix: addressed [#251](https://github.com/ices-tools-dev/RDBEScore/issues/251).
+- Docs/params: expanded docs for `combineRDBESDataObjects()` and `createRDBESDataObject()`; clarified hierarchy behavior and `...` options (strict, verbose, hierarchy).
+- Mixed hierarchies: `combineRDBESDataObjects()` now warns/errors when objects use different hierarchies (`strict=TRUE` for error).
+- ID tables: `createTableOfRDBESIds()` merging more robust by hierarchy; clearer BV handling and console output.
+
 # RDBEScore 0.3.4
 
 - Defaults: `createRDBESDataObject()`  now runs validation by default

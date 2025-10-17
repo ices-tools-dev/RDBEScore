@@ -1,10 +1,15 @@
 ---
-title: "RDBEScore: Using R for ICES Regional Database & Estimation System (RDBES) Data"
+title: 'RDBEScore: Using R for ICES Regional Database & Estimation System (RDBES)
+  Data'
 output:
-  powerpoint_presentation: 
+  ioslides_presentation:
+    incremental: true
+  powerpoint_presentation:
     reference_doc: "./data-raw/styles.pptx"
     slide_level: 2
     keep_md: true
+    incremental: true
+  beamer_presentation:
     incremental: true
 ---
 
@@ -14,8 +19,8 @@ The aim of this document is to outline the basic workflow of importing data down
 
 The function **createRDBESDataObject** is intended to directly import Commercial Landing (CL), Commercial Effort (CE) and Commercial Sampling (CS) tables downloaded from [RDBES](https://rdbes.ices.dk/#/).
 
-## Introducton
-
+## Introduction
+2
 RDBEScore is an R package developed to facilitate the analysis of data from the ICES Regional Database and Estimation System (RDBES). The package provides functions to:
 
 - import functions like `createRDBESDataObject` and `validateRDBESDataObject` 
@@ -52,7 +57,7 @@ library(RDBEScore)
 
 
 To see the complete list of vignettes available in the package use the following command:
-```{rm echo=TRUE, eval=FALSE}
+```{r echo=TRUE, eval=FALSE}
 browseVignettes(package = "RDBEScore")
 ```
 
@@ -84,9 +89,9 @@ importedH1
 It can import the CL, CE, VD or SL tables `.zip` archives, but will include all other tables as `NULL`:
 
 ```{r}
-importedH5 <- createRDBESDataObject(input = "./data-raw/exampleData/H5_2025_02_11.zip")
+importedHSL <- createRDBESDataObject(input = "./inst/extdata/HSL_Example.zip")
 #print the not NULL table names
-importedH5
+importedHSL
 ```
 
 ## Importing a List of Data Frames
@@ -103,7 +108,7 @@ importedList <- createRDBESDataObject(listOfDfsH1)
 
 ## Object class RDBESDataObject
 
-It should be noted that the objects created are of the S3 class "**RDBESDataObject**". The class has defined **print()**, **summary()** and **sort()** methods. For more info on these see vignette [Manipulating RDBESDataObjects](https://ices-tools-dev.github.io/RDBEScore/articles/manipulating-rdbesdataobjects.html). 
+It should be noted that the objects created are of the S3 class "**RDBESDataObject**". The class has defined **print()**, **summary()** and **sort()** methods. For more info on these see vignettes 
 
 
 
@@ -147,7 +152,7 @@ validateRDBESDataObject(myFilteredObjectNoOrphans, verbose = FALSE)
 
 ```
 
-Again to see more details on the functions see the vignette [Manipulating RDBESDataObjects](https://ices-tools-dev.github.io/RDBEScore/articles/manipulating-rdbesdataobjects.html).
+Again to see more details on the functions see the vignettes.
 
 
 ## Getting Subsets of RDBESDataObject Tables
@@ -208,7 +213,7 @@ Right now estimation actually  is done on a *RDBESEstObject* that is generate fr
 
 In the next sections we will use data from R packages [survey](https://CRAN.R-project.org/package=survey) and [SDAResources](https://CRAN.R-project.org/package=SDAResources) that are converted into the *RDBESDataObject* to demonstrate the estimation procedure.
 
-For more detailed information on the estimation functions see the vignette [Estimating Population parameters from RDBESDataObjects](https://ices-tools-dev.github.io/RDBEScore/articles/estimating-rdbesdataobjects.html).
+For more detailed information on the estimation functions see the vignettes 
 
 
 ```{r}
@@ -274,6 +279,7 @@ strataListCL <- list(CLarea="27.3.d.28.1",
 
 There is a function in development **addCLtoLowerCS(...)** that can be used to add the CL data to the lower hierarchy.
 
+
 ```{r}
 #we are using the lower hierarchy C meaning that we are extracting the BV data
 #as the biological data
@@ -293,7 +299,7 @@ lenCANUMQ1 <- doBVestimCANUM(biolCLQ1, c("sumCLoffWeight"),
              classBreaks = seq(70,130,10),
              verbose = FALSE)
 
-knitr::kable(lenCANUMQ1[, c("Group", "WeightgMean", "LengthmmMean", "totNum")],
+knitr::kable(lenCANUMQ1[order(lenCANUMQ1$LengthmmMean), c("Group", "WeightgMean", "LengthmmMean", "totNum")],
              digits = 2)
 ```
 

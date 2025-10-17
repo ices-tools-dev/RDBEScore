@@ -32,6 +32,13 @@ Combine Two RDBES Raw Objects
 combines 2 RDBESDataObjects into a single RDBESDataObject by merging individual
 tables one by one
 }
+\details{
+When combining RDBESDataObjects from different hierarchies (e.g., H1 and H5),
+a warning is issued. The resulting combined object will have a mixed hierarchy,
+which may be structurally and statistically invalid for some analyses. However,
+such combinations can be useful for fisheries overviews, annual reports, or
+countries performing broader estimations.
+}
 \examples{
 \dontrun{
 

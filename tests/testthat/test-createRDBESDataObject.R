@@ -75,7 +75,7 @@ capture.output({  ## suppresses printing of console output when running test()
     genObj <- expect_error(
       createRDBESDataObject(paste0(dirH1, zipFiles),
                             castToCorrectDataTypes = TRUE),
-      "The zip file contains multiple hierarchies.\nTo import a selected hierarchy, please provide the hierarchy as an argument e.g like:\nHierachy = 1"
+      "The zip file contains multiple hierarchies.\nTo import a selected hierarchy, please provide the hierarchy as an argument e.g like:\nHierarchy = 1"
     )
 
   })
@@ -102,7 +102,7 @@ capture.output({  ## suppresses printing of console output when running test()
       createRDBESDataObject(paste0(dirH1, zipFiles),
                             castToCorrectDataTypes = TRUE,
                             Hierarchy = "H1"),
-      "The zip file does not contain the hierarchy specified. The options are: 1, 2\nPlease provide a valid hierarchy as an argument. e.g like:\nHierachy = 1"
+      "The zip file does not contain the hierarchy specified. The options are: 1, 2\nPlease provide a valid hierarchy as an argument. e.g like:\nHierarchy = 1"
     )
 
   })

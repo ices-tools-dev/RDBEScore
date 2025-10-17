@@ -33,8 +33,19 @@ in. Default is \code{TRUE}.}
 \item{verbose}{(Optional) Set to TRUE if you want informative text printed
 out, or FALSE if you don't.  The default is FALSE.}
 
-\item{...}{parameters passed to validateRDBESDataObject
-e.g.\code{strict=FALSE}}
+\item{...}{Additional parameters forwarded to helper functions used by this
+function. Most commonly these are forwarded to
+\code{validateRDBESDataObject()} during the validation step. Common options:
+\itemize{
+\item \code{strict} (logical, default \code{TRUE}): if \code{FALSE}, validation issues result
+in warnings instead of stopping with an error.
+\item \code{verbose} (logical, default \code{FALSE}): request extra informational output
+from validation.
+\item \code{Hierarchy} (integer, e.g. \code{1}, optional; zip inputs only): when the zip
+file contains multiple hierarchies, selects which hierarchy to import.
+Note: \code{checkDataTypes} is controlled by the \code{castToCorrectDataTypes}
+argument of this function and should not be supplied via \code{...}.
+}}
 }
 \value{
 A RDBESDataObject
@@ -61,6 +72,11 @@ any tables in the first input are overwritten by other inputs a warning is
 given. You should not input different hierarchy files; this function will not
 combine them.
 
+If the zip contains multiple hierarchies (e.g., H1 and H5 within the same
+archive), you can select which one to import by passing \code{Hierarchy} via
+\code{...}, for example: \code{Hierarchy = 1}. If \code{Hierarchy} is not specified and the
+zip contains multiple hierarchies, an error is raised prompting you to set it.
+
 \emph{\strong{CSV file inputs}}
 This \code{input} should be a path to a folder of \code{csv} files. These can be the
 \code{csv} files downloaded from RDBES (e.g. an unzipped hierarchy), or \emph{any} set
@@ -81,5 +97,6 @@ This \code{input} produces an empty \code{RDBESDataObject}, i.e. all tables with
 correct data classes but the tables will be empty.
 }
 \examples{
+# Create an empty object
 myEmptyRDBESObject <- createRDBESDataObject(input = NULL)
 }

@@ -107,7 +107,8 @@ RDBESDataObjects can be combined using the **combineRDBESDataObjects()** functio
 
 ```{r combine}
 myCombinedRawObject <- combineRDBESDataObjects(myH1RawObject,
-                                               myH5RawObject)
+                                               myH5RawObject,
+                                               strict = FALSE)
 
 # Number of rows in each non-null table and hierarchies
 print(myCombinedRawObject)
@@ -125,7 +126,10 @@ myH1RawObject <- H1Example
 
 # Number of rows in each non-null table
 print(myH1RawObject)
+```
 
+
+```{r filter2}
 myFields <- c("SDctry","VDctry","VDflgCtry","FTarvLoc")
 myValues <- c("ZW","ZWBZH","ZWVFA" )
 
@@ -147,8 +151,43 @@ myFilteredObjectNoOrphans <-
 
 validateRDBESDataObject(myFilteredObjectNoOrphans, verbose = FALSE)
 
+myFilteredObjectNoOrphans
+```
+**NB!** Currently filtering happens to all fields together i.e it is not possible to filter same codelist differently in the same filter call. Imagine a situation where you want to filter on both "SDCtry" and "VDflgCtry" ie vessels from EH country sampled by ZW institution. Ie two calls are needed
+
+```{r}
+myFilteredObject <- filterRDBESDataObject(myH1RawObject,
+                                         fieldsToFilter = "SDctry",
+                                         valuesToFilter = "ZW",
+                                         killOrphans = T)
+
+filterRDBESDataObject(myFilteredObject,
+                                         fieldsToFilter = "VDflgCtry",
+                                         valuesToFilter = "EH",
+                                         killOrphans = T)
+
 
 ```
+
+Sometimes you might want to do the inverse filter eg exclude something. You can do this by selecting the complement set of values using `setdiff`.
+
+```{r}
+# Exclude specific DEid values by selecting all others
+allValues <- unique(myH1RawObject$DE$DEid)
+excludedValues <- c(5351)
+myInverseFiltered <- filterRDBESDataObject(
+  myH1RawObject,
+  fieldsToFilter = "DEid",
+  valuesToFilter = setdiff(allValues, excludedValues),
+  killOrphans = TRUE
+)
+
+validateRDBESDataObject(myInverseFiltered, verbose = FALSE)
+print(myInverseFiltered)
+```
+
+
+
 
 You can also remove any records that are not linking to a row in the VesselDetails (VD) table using the **removeBrokenVesselLinks()** function.
 
@@ -188,7 +227,7 @@ validateRDBESDataObject(myFilteredObjectValidSpeciesLinks, verbose = FALSE)
 
 ## Getting Subsets of RDBESDataObject Tables
 
-Sometimes it we want to see how a field or values in the **RDBESDataObject** are connected to otther tables.
+Sometimes it we want to see how a field or values in the **RDBESDataObject** are connected to other tables.
 One use case would be e.g. to see when a specific Landing Event (LE) occured.For this we can use the **getLinkedDataFromLevel()** function. 
 
 ```{r}
@@ -202,6 +241,7 @@ Similarly we can get the subset of the LE table corresponding to a specific valu
 getLinkedDataFromLevel("TEstratumName", c("November"), H8ExampleEE1, "LE", verbose = TRUE)
 ```
 Several values can be used to get a subset of the table. 
+
 
 ```{r}
 #get the SA table corresponding to the first 2 TEids in the H8ExampleEE1 object
