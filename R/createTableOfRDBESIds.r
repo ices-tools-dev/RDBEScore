@@ -21,14 +21,16 @@
 
 createTableOfRDBESIds<-function(x, addSAseqNums=TRUE){
 
+  # Avoid R CMD check notes for data.table's NSE column references
+  SAlowHierarchy <- SAid <- NULL
+
   # note: needs developments for different lower hierarchies
 
   # x is x
   # hierarchy is hierarchy (integer)
   # outputs a table with ids for matching
 
-  #libraries
-  require(data.table)
+  # data.table is listed in Imports and loaded via NAMESPACE; avoid require/library in package code
 
   CStableNames<- getTablesInRDBESHierarchy(hierarchy = x$DE$DEhierarchy[1],
                                            includeOptTables = FALSE,
@@ -46,7 +48,7 @@ createTableOfRDBESIds<-function(x, addSAseqNums=TRUE){
       df_1<-data.frame(x[[CStableNames[i]]][,list(get(id_1))]); colnames(df_1)<-id_1
     }
 
-    if((CStableNames[i+1] == "SA" & addSAseqNums == TRUE) | CStableNames[i+1] %in% c("BV")){
+  if(((CStableNames[i+1] == "SA" && addSAseqNums == TRUE) || CStableNames[i+1] %in% c("BV"))){
 
       if(CStableNames[i+1]=="SA"){
 
@@ -84,10 +86,10 @@ createTableOfRDBESIds<-function(x, addSAseqNums=TRUE){
         outTmp = merge(out, x$SA[,c("SAid","SAlowHierarchy")])
 
         # Convert to data.table if not already
-        setDT(outTmp)
-        setDT(out)
-        setDT(df_2)
-        setDT(df_2C)
+        data.table::setDT(outTmp)
+        data.table::setDT(out)
+        data.table::setDT(df_2)
+        data.table::setDT(df_2C)
 
         # Filter and get SAid groups
         keepA <- outTmp[SAlowHierarchy == "A", SAid]
@@ -108,7 +110,7 @@ createTableOfRDBESIds<-function(x, addSAseqNums=TRUE){
         mergedD <- toMergeD                                 # unchanged group D
 
         # Combine back
-        out <- rbindlist(list(mergedA, mergedB, mergedC, mergedD), use.names = TRUE, fill = TRUE)
+        out <- data.table::rbindlist(list(mergedA, mergedB, mergedC, mergedD), use.names = TRUE, fill = TRUE)
 
       }else{
 
