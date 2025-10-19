@@ -5,8 +5,8 @@
 #' @param RDBESDataObj A validated RDBESDataObject containing hierarchical sampling and biological data. Must include appropriate tables (e.g., CL, CE, SA, FM, or BV) depending on estimation requirements.
 #' @param targetValue A character string specifying the type of composition to estimate. Options are "LengthComp" or "AgeComp".
 #' @param raiseVar The variable used to construct the ratio.
-#' @param classUnits Units of the class intervals for length or age, typically "mm" for millimeters or "cm" for centimeters. Used in defining class intervals.
-#' @param classBreaks A numeric vector of three values: minimum value, maximum value, and class width (e.g., c(100, 300, 10)). Defines the class intervals for grouping lengths or ages.
+#' @param classUnits Units of the class intervals for length or age, typically "mm" for millimeters or "cm" for centimeters. Used in defining class intervals. In lower hierarchy A, the argument is used to check if that the length classes provided. For lower hierarchy B, it transforms the lengths. Codes: https://vocab.ices.dk/?ref=1608
+#' @param classBreaks A numeric vector of three values: minimum value, maximum value, and class width (e.g., c(100, 300, 10)). Defines the class intervals for grouping lengths. In lower hierarchy A, the argument is used to check if that the length classes provided. For lower hierarchy B, it transforms the lengths.
 #' @param LWparam A numeric vector of length two specifying parameters (a, b) for the weight-length relationship (W = a * L^b). Used if no direct weights are available but lengths are provided.
 #' @param lowerAux A numeric or character vector referencing a variable in the SA table used as an auxiliary variable for ratio estimation (e.g., sample weights, sub-sample expansion factors).
 #' @param verbose Logical; if TRUE, detailed messages are printed during processing.
@@ -36,7 +36,7 @@ doEstimationRatio <- function(RDBESDataObj,
                               classUnits = "mm",
                               classBreaks = c(100, 300, 10), # cut
                               LWparam = NULL, # vector of two values
-                              lowerAux = NULL, # you can use a strongly correlated value present in your data for the estimation of the values of interest
+                              lowerAux = NULL, # should we keep this ?The aux var is now included as a field in the RDBES
                               verbose = FALSE){
 RDBESDataObj <- myFilteredObject
 targetValue <- "AgeComp"
@@ -50,14 +50,15 @@ targetValue <- "AgeComp"
   #                                           valuesToFilter = myValues,
   #                                           strict = FALSE, # this is to skip the validation function
   #                                           killOrphans = TRUE)
-  # Check we have a valid RDBESEstObject before doing anything else
+
 
   classUnits = "mm"
-  classBreaks = c(100, 300, 10)
+  classBreaks = c(10, 100, 10)
 
 
 # Checks ------------------------------------------------------------------
-
+  # Check we have a valid RDBESEstObject before doing anything else
+  # Need that because the selection is by column name
   RDBEScore::validateRDBESDataObject(RDBESDataObj, verbose = FALSE)
 
   # Unique upper hierarchy
@@ -89,11 +90,51 @@ targetValue <- "AgeComp"
     }
   }
 
+  # Add if object has only one species
+
+  # if(length(unique(myFilteredObject$SA$SAspeCode)) > 1){
+  #     stop("Multiple species raising not yet implemented")
+  # }
+
+  # Function to check consistency between the user input and the FM table for
+  # length raising
+  # TODO Should this be moved to utils?
+
+  checkLC <- function(fm, classUnits, classBreaks) {
+    # https://vocab.ices.dk/?ref=1608
+    vocabUnits <-   c("mm", "25mm", "cm", "5cm", "scm", "smm")
+    fmUnits <- unique(fm$FMaccuracy)
+    # Check user input validity
+    if (!classUnits %in% vocabUnits) {
+      stop(paste("Invalid classUnits:", classUnits,
+                 "\nMust be one of:", paste(vocabUnits, collapse = ", ")))
+    }
+
+    if (length(fmUnits) > 1) {
+      # Needs to break here
+      stop("Multiple class units found in data: ", paste(fmUnits, collapse = ", "))
+    }
+
+    # Compare user input with data
+    if (!classUnits %in% fmUnits) {
+      stop(paste("Mismatch between user-specified classUnits (", classUnits,
+                 ") and data units (", paste(fmUnits, collapse = ", "), ")."))
+    }
+
+    # Check classBreaks consistency
+    fmBreaks <- range(fm$FMclassMeas, na.rm = TRUE)
+    userRange <- range(seq(classBreaks[1], classBreaks[2], classBreaks[3]))
+
+    if (any(userRange != fmBreaks)) {
+      stop("classBreaks (", paste(userRange, collapse = "-"),
+              ") differ from observed data range (", paste(fmBreaks, collapse = "-"), ").")
+    }
+
+    message("Length class checks passed: Units and breaks are consistent.")
+  }
+
   # TODO (to be developed) match with pop (Landings or Effort)
   # RDBESEstRatioObj <- RDBESDataObj[c("CL", "CE",  RDBEScore::getTablesInRDBESHierarchy(DEhierarchy))]
-
-
-
 
 
 # raiseVar options --------------------------------------------------------
@@ -148,25 +189,30 @@ targetValue <- "AgeComp"
         # else stop
         stop("Nor an auxiliary variable nor lw params are provided. Not possible to produce the mean weight at length")
       }
-
-
       # Select only FM data for now - BV possibly used for ALK
       warning("If lower hierarchy A, only the FM table is used to calculate the numbers at length.")
 
       fm <- data.table::setDT(RDBESEstRatioObj$FM)
       sa <- data.table::setDT(RDBESEstRatioObj$SA)
-      fm <- fm[fm, unique(.SD), .SDcols = c("SAid", "FMid", "FMclassMeas", "FMnumAtUnit")]
+
+      # Need to check uniqueness of FM length type assess
+      if(length(unique(fm$FMtypeAssess)) > 1){
+        stop("The measurement type of the class needed for assessment (FMtypeAssess) needs to be unique")
+      }
+
+      # It should break here if there is no match
+      checkLC(
+        fm = fm,
+        classUnits = classUnits,
+        classBreaks = classBreaks
+      )
+
+      fm <- fm[fm, unique(.SD), .SDcols = c("SAid", "FMid", "FMclassMeas", "FMnumAtUnit", "FMaccuracy", "FMtypeAssess")]
       sa <- sa[, unique(.SD), .SDcols = c("SAid", "SAlowHierarchy", "SAtotalWtMes" , "SAsampWtMes",  "SAnumTotal", "SAnumSamp", "SAauxVarValue", "SAauxVarUnit" )]
 
-      # need to identify current units and
-      u2mm <- c(mm = 1, cm = 10, m = 1000)
-      conv <- u2mm[[classUnits]]
-      vals <- fm$FMclassMeas / conv
-
       brks <- seq(classBreaks[1], classBreaks[2], by = classBreaks[3])
-
       fm[, LengthClass := cut(
-        vals,
+        FMclassMeas,
         breaks = brks,
         right = FALSE,             # [)
         include.lowest = TRUE,
@@ -298,12 +344,12 @@ targetValue <- "AgeComp"
 
 
 
-# Age composition ---------------------------------------------------------
+    # Age composition ---------------------------------------------------------
   }else if(targetValue == "AgeComp"){
 
 
 
-# LH C --------------------------------------------------------------------
+    # LH C --------------------------------------------------------------------
 
 
     if(unique(RDBESDataObj$SA$SAlowHierarchy) == "C"){
@@ -376,7 +422,7 @@ targetValue <- "AgeComp"
       # else stop
 
 
-# LH A --------------------------------------------------------------------
+      # LH A --------------------------------------------------------------------
 
 
     }else if(unique(RDBESDataObj$SA$SAlowHierarchy) == "A"){
