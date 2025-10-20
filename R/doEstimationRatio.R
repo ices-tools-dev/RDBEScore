@@ -184,11 +184,12 @@ targetValue <- "AgeComp"
 
         stop("Not yet implemented")
 
-
       }else{
         # else stop
         stop("Nor an auxiliary variable nor lw params are provided. Not possible to produce the mean weight at length")
       }
+
+
       # Select only FM data for now - BV possibly used for ALK
       warning("If lower hierarchy A, only the FM table is used to calculate the numbers at length.")
 
@@ -220,11 +221,11 @@ targetValue <- "AgeComp"
       )]
 
       fm1 <- fm[
-        , .(FMNumbersAtLength = .N),
+        , .(FMNumbersAtLength = sum(FMnumAtUnit, na.rm = TRUE)),
         by = .(SAid, LengthClass)
       ][
-        # add total count per SAid
-        , FMTotCount := sum(FMNumbersAtLength), by = SAid
+        , FMTotCount := sum(FMNumbersAtLength, na.rm = TRUE),
+        by = SAid
       ]
 
       su <- merge(fm1, sa, by = c("SAid"))
@@ -256,10 +257,23 @@ targetValue <- "AgeComp"
 
 
       bv <- data.table::setDT(RDBESEstRatioObj$BV)
-      bv <- bv[, unique(.SD), .SDcols = c("SAid", "BVfishId", "BVtypeMeas", "BVvalueMeas")]
-      bv <- dcast(bv, ... ~ BVtypeMeas , value.var = c("BVvalueMeas"), drop = TRUE)
+      # bv <- bv[BVtypeMeas %in% "LengthTotal"]
+
+      lengthVar <- grep("(?i)length", unique(bv$BVtypeMeas), value = TRUE)
+
+      if(length(unique(lengthVar)) > 1){
+        stop("The length measurement type of the class needed for assessment (BVtypeAssess) needs to be unique")
+      }
+
+      sa <- data.table::setDT(RDBESEstRatioObj$SA)
+      sa <- sa[, unique(.SD), .SDcols = c("SAid", "SAlowHierarchy", "SAtotalWtMes" , "SAsampWtMes",  "SAnumTotal", "SAnumSamp", "SAauxVarValue", "SAauxVarUnit" )]
+      bv <- bv[, unique(.SD), .SDcols = c("SAid", "BVfishId", "BVtypeMeas", "BVvalueMeas", "BVtypeAssess")]
+
+      # bv[, BVLength := as.numeric(LengthTotal)]
+      bv_assess <- bv[BVtypeMeas %in% c(lengthVar, wcol),
+                      data.table::dcast(.SD, SAid + BVfishId ~ BVtypeMeas, value.var = "BVvalueMeas", drop = TRUE)
+      ]
       bv[, BVweight := as.numeric(get(wcol))]
-      bv[, LengthTotal := as.numeric(LengthTotal)]
       # TODO this probably needs to be an argument
       # or needs to be defined later on?
       bv$LengthClass <- floor(bv$LengthTotal/10) # TODO This needs to be defined by the user
@@ -280,14 +294,13 @@ targetValue <- "AgeComp"
       # bv1$BVLengthClassProp <- bv1$BVNumbersAtLength/bv1$TotCount
 
 
-      sa <- data.table::setDT(RDBESEstRatioObj$SA)
-      sa <- sa[, unique(.SD), .SDcols = c("SAid", "SAlowHierarchy", "SAtotalWtMes" , "SAsampWtMes",  "SAnumTotal", "SAnumSamp", "SAauxVarValue", "SAauxVarUnit" )] # Do not need the
+   # Do not need the
       # species, the filtering of the "strata" variables will be done before the estimation
       # To test
       sa[, SAauxVarValue  := as.numeric(SAauxVarValue )]
-      sa$SAauxVarValue <- 10
 
-      # TODO add check for subsampling
+
+
 
       su <- merge(bv1, sa, by = c("SAid"))
 
