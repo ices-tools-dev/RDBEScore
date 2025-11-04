@@ -38,22 +38,6 @@ doEstimationRatio <- function(RDBESDataObj,
                               LWparam = NULL, # vector of two values
                               lowerAux = NULL, # should we keep this ?The aux var is now included as a field in the RDBES
                               verbose = FALSE){
-RDBESDataObj <- myFilteredObject
-targetValue <- "AgeComp"
-  raiseVar <- "Weight"
-  # H1 <- H1Example
-  #
-  # myFields <- c("SAlowHierarchy")
-  # myValues <- c("A")
-  # RDBESDataObj <- filterRDBESDataObject(H1,
-  #                                           fieldsToFilter = myFields,
-  #                                           valuesToFilter = myValues,
-  #                                           strict = FALSE, # this is to skip the validation function
-  #                                           killOrphans = TRUE)
-
-
-  classUnits = "mm"
-  classBreaks = c(10, 100, 10)
 
 
 # Checks ------------------------------------------------------------------
@@ -70,13 +54,15 @@ targetValue <- "AgeComp"
   }
 
   # Filter out NULL tables
-  RDBESEstRatioObj <- Filter(Negate(is.null),RDBESDataObj)
+  # RDBESEstRatioObj <- Filter(Negate(is.null),RDBESDataObj)
+  RDBESEstRatioObj <- Filter(Negate(is.null),myFilteredObject)
+
 
   # If no individual weight of fish in BV, then can't run raiseVar = Weight
   # because we don't have the weight of the subsample
   if(unique(RDBESEstRatioObj$SA$SAlowHierarchy) == "A") {
     weightVar <- grep("(?i)weight", unique(RDBESEstRatioObj$BV$BVtypeMeas), value = TRUE)
-    if (is.null(    weightVar) || length(weightVar) == 0 || all(is.na(weightVar))){
+    if (is.null(weightVar) || length(weightVar) == 0 || all(is.na(weightVar))){
       stop("no individual weight measured")
     }
   }
@@ -84,11 +70,11 @@ targetValue <- "AgeComp"
   # Does anything exist after SA?
   # Do we need that?
 
-  if(length(unique(names(RDBESEstRatioObj))) > 1){
-    if(!tail(names(RDBESEstRatioObj), n = 1) %in% c("FM", "BV")){
-      stop("No FM or BV tables provided")
-    }
-  }
+  # if(length(unique(names(RDBESEstRatioObj))) > 1){
+  #   if(!tail(names(RDBESEstRatioObj), n = 1) %in% c("FM", "BV")){
+  #     stop("No FM or BV tables provided")
+  #   }
+  # }
 
   # Add if object has only one species
 
@@ -144,13 +130,13 @@ targetValue <- "AgeComp"
   # the weight codes in the field BVtypeMeas
   # If there is only one present, this is used by default
   # If more than one are present, allow the user to choose
-  possibleValues  <- unique(RDBESDataObj$BV$BVtypeMeas)
+  possibleValues  <- unique(RDBESEstRatioObj$BV$BVtypeMeas)
   if(!raiseVar %in% possibleValues){
     if(raiseVar == "Weight"){
-      if(unique(RDBESDataObj$SA$SAlowHierarchy) == "B" ){
+      if(unique(RDBESEstRatioObj$SA$SAlowHierarchy) == "B" ){
         stop("Lower hierarchy B not implemented for weight")
       }else{
-        weightVar <- grep("(?i)weight", unique(RDBESDataObj$BV$BVtypeMeas), value = TRUE)
+        weightVar <- grep("(?i)weight", unique(RDBESEstRatioObj$BV$BVtypeMeas), value = TRUE)
         if (interactive()) {
           if(length(unique(weightVar)) > 1) {
             # Print a numbered menu and get user's selection
@@ -179,6 +165,7 @@ targetValue <- "AgeComp"
     if(unique(RDBESEstRatioObj$SA$SAlowHierarchy) %in% c("A", "B")){
 
       # TODO mean weight at length
+      # TODO this should not break if only the len comp is required
 
       if(!is.null(LWparam)){
 
@@ -188,6 +175,8 @@ targetValue <- "AgeComp"
         # else stop
         stop("Nor an auxiliary variable nor lw params are provided. Not possible to produce the mean weight at length")
       }
+
+
 
 
       # Select only FM data for now - BV possibly used for ALK
@@ -457,7 +446,7 @@ targetValue <- "AgeComp"
       ][
         # add total weight per SAid
         bv[, .(BVTotWeight = sum(BVweight, na.rm = TRUE)), by = FMid],
-        on = "SAid"
+        on = "FMid"
       ]
 
 
@@ -470,7 +459,7 @@ targetValue <- "AgeComp"
            .(FMid, SAid, FMnumAtUnit)]
       )
 
-      bv1 <- fm_len[bv1, on = "FMid"][,
+      bv1 <- fm1[bv1, on = "FMid"][,
                                       num_raise := fifelse(BVTotCount > 0, FMnumAtUnit / BVTotCount, NA_real_)
       ][
         , N_at_age := BVNumbersAtAge * num_raise
