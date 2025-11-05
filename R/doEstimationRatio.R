@@ -130,6 +130,8 @@ doEstimationRatio <- function(RDBESDataObj,
   # the weight codes in the field BVtypeMeas
   # If there is only one present, this is used by default
   # If more than one are present, allow the user to choose
+
+
   possibleValues  <- unique(RDBESEstRatioObj$BV$BVtypeMeas)
   if(!raiseVar %in% possibleValues){
     if(raiseVar == "Weight"){
@@ -167,14 +169,14 @@ doEstimationRatio <- function(RDBESDataObj,
       # TODO mean weight at length
       # TODO this should not break if only the len comp is required
 
-      if(!is.null(LWparam)){
-
-        stop("Not yet implemented")
-
-      }else{
-        # else stop
-        stop("Nor an auxiliary variable nor lw params are provided. Not possible to produce the mean weight at length")
-      }
+      # if(!is.null(LWparam)){
+      #
+      #   stop("Not yet implemented")
+      #
+      # }else{
+      #   # else stop
+      #   stop("Nor an auxiliary variable nor lw params are provided. Not possible to produce the mean weight at length")
+      # }
 
 
 
@@ -186,9 +188,9 @@ doEstimationRatio <- function(RDBESDataObj,
       sa <- data.table::setDT(RDBESEstRatioObj$SA)
 
       # Need to check uniqueness of FM length type assess
-      if(length(unique(fm$FMtypeAssess)) > 1){
-        stop("The measurement type of the class needed for assessment (FMtypeAssess) needs to be unique")
-      }
+      # if(length(unique(fm$FMtypeAssess)) > 1){
+      #   stop("The measurement type of the class needed for assessment (FMtypeAssess) needs to be unique")
+      # }
 
       # It should break here if there is no match
       checkLC(
@@ -262,12 +264,9 @@ doEstimationRatio <- function(RDBESDataObj,
       bv_assess <- bv[BVtypeMeas %in% c(lengthVar, wcol),
                       data.table::dcast(.SD, SAid + BVfishId ~ BVtypeMeas, value.var = "BVvalueMeas", drop = TRUE)
       ]
-      bv[, BVweight := as.numeric(get(wcol))]
-      # TODO this probably needs to be an argument
-      # or needs to be defined later on?
-      bv$LengthClass <- floor(bv$LengthTotal/10) # TODO This needs to be defined by the user
+     bv_assess[, BVweight := as.numeric(get(wcol))]
 
-      bv1 <- bv[
+      bv1 <- bv_assess[
         , .(BVMeanWeight = mean(BVweight, na.rm = TRUE),
             BVNumbersAtLength = .N),
         by = .(SAid, LengthClass)
@@ -429,61 +428,43 @@ doEstimationRatio <- function(RDBESDataObj,
 
     }else if(unique(RDBESDataObj$SA$SAlowHierarchy) == "A"){
 
-      bv <- data.table::setDT(RDBESEstRatioObj$BV)
-      fm <- data.table::setDT(RDBESEstRatioObj$FM)
-      sa <- data.table::setDT(RDBESEstRatioObj$SA)
-      bv <- bv[, unique(.SD), .SDcols = c( "FMid","BVfishId", "BVtypeMeas", "BVvalueMeas")]
-      bv <- dcast(bv, ... ~ BVtypeMeas , value.var = c("BVvalueMeas"), drop = TRUE)
-      bv[, BVweight := as.numeric(get(wcol))]
+      # bv <- data.table::setDT(RDBESEstRatioObj$BV)
+      # fm <- data.table::setDT(RDBESEstRatioObj$FM)
+      # sa <- data.table::setDT(RDBESEstRatioObj$SA)
+      # bv <- bv[, unique(.SD), .SDcols = c( "FMid","BVfishId", "BVtypeMeas", "BVvalueMeas")]
+      # bv <- dcast(bv, ... ~ BVtypeMeas , value.var = c("BVvalueMeas"), drop = TRUE)
+      # bv[, BVweight := as.numeric(get(wcol))]
+      #
+      # bv1 <- bv[
+      #   , .(BVMeanWeight = mean(BVweight, na.rm = TRUE),
+      #       BVNumbersAtAge = .N),
+      #   by = .(FMid, Age)
+      # ][
+      #   # add total count per SAid
+      #   , BVTotCount := sum(BVNumbersAtAge), by = FMid
+      # ][
+      #   # add total weight per SAid
+      #   bv[, .(BVTotWeight = sum(BVweight, na.rm = TRUE)), by = FMid],
+      #   on = "FMid"
+      # ]
+      #
+      #
+      #
+      # fm <- fm[fm, unique(.SD), .SDcols = c("SAid", "FMid", "FMclassMeas", "FMnumAtUnit")]
+      # sa <- sa[, unique(.SD), .SDcols = c("SAid", "SAlowHierarchy", "SAtotalWtMes" , "SAsampWtMes",  "SAnumTotal", "SAnumSamp", "SAauxVarValue", "SAauxVarUnit" )]
+      #
+      # fm1 <- unique(
+      #   fm[FMclassMeas %chin% c("LengthTotal","LengthMeasured","Length"),
+      #      .(FMid, SAid, FMnumAtUnit)]
+      # )
+      #
+      # bv1 <- fm1[bv1, on = "FMid"][,
+      #                                 num_raise := fifelse(BVTotCount > 0, FMnumAtUnit / BVTotCount, NA_real_)
+      # ][
+      #   , N_at_age := BVNumbersAtAge * num_raise
+      # ]
 
-      bv1 <- bv[
-        , .(BVMeanWeight = mean(BVweight, na.rm = TRUE),
-            BVNumbersAtAge = .N),
-        by = .(FMid, Age)
-      ][
-        # add total count per SAid
-        , BVTotCount := sum(BVNumbersAtAge), by = FMid
-      ][
-        # add total weight per SAid
-        bv[, .(BVTotWeight = sum(BVweight, na.rm = TRUE)), by = FMid],
-        on = "FMid"
-      ]
-
-
-
-      fm <- fm[fm, unique(.SD), .SDcols = c("SAid", "FMid", "FMclassMeas", "FMnumAtUnit")]
-      sa <- sa[, unique(.SD), .SDcols = c("SAid", "SAlowHierarchy", "SAtotalWtMes" , "SAsampWtMes",  "SAnumTotal", "SAnumSamp", "SAauxVarValue", "SAauxVarUnit" )]
-
-      fm1 <- unique(
-        fm[FMclassMeas %chin% c("LengthTotal","LengthMeasured","Length"),
-           .(FMid, SAid, FMnumAtUnit)]
-      )
-
-      bv1 <- fm1[bv1, on = "FMid"][,
-                                      num_raise := fifelse(BVTotCount > 0, FMnumAtUnit / BVTotCount, NA_real_)
-      ][
-        , N_at_age := BVNumbersAtAge * num_raise
-      ]
-
-
-
-      # subsample -> sample weights -> weight from where the sample came from
-
-      # if age exists
-
-      # if indv weights + lengths  exist
-
-      # then Full data set back
-
-      # if only indv weights
-      # then you don't have the mean length at age unless you use the inverse LW relationship :provide a, b parameters or model them (Future work)
-      # if only lengths
-      # the you don't have the mean weight at age unless LW: a, b or model (Future work)
-      # else stop you don't sufficient data
-
-      # else stop
-
-      # TODO include FM. For now the FM is not yet implemented
+      stop("Not yet implemented")
     }else{
       stop("Age composition can't be calculated with lower hierachy B.")
     }
