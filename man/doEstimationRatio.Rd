@@ -22,9 +22,9 @@ doEstimationRatio(
 
 \item{raiseVar}{The variable used to construct the ratio.}
 
-\item{classUnits}{Units of the class intervals for length or age, typically "mm" for millimeters or "cm" for centimeters. Used in defining class intervals.}
+\item{classUnits}{Units of the class intervals for length or age, typically "mm" for millimeters or "cm" for centimeters. Used in defining class intervals. In lower hierarchy A, the argument is used to check if that the length classes provided. For lower hierarchy B, it transforms the lengths. Codes: https://vocab.ices.dk/?ref=1608}
 
-\item{classBreaks}{A numeric vector of three values: minimum value, maximum value, and class width (e.g., c(100, 300, 10)). Defines the class intervals for grouping lengths or ages.}
+\item{classBreaks}{A numeric vector of three values: minimum value, maximum value, and class width (e.g., c(100, 300, 10)). Defines the class intervals for grouping lengths. In lower hierarchy A, the argument is used to check if that the length classes provided. For lower hierarchy B, it transforms the lengths.}
 
 \item{LWparam}{A numeric vector of length two specifying parameters (a, b) for the weight-length relationship (W = a * L^b). Used if no direct weights are available but lengths are provided.}
 

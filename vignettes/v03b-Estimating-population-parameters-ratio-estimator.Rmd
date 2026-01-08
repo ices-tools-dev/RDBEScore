@@ -128,11 +128,64 @@ ageCANUM <- doBVestimCANUM(biolCL, addCols,
              verbose = FALSE)
 
 ageCANUM
-             
 ```
 
+## Exporting results to InterCatch
 
-The output table should be enough to populate a classic Intercatch data call table. 
+The results can be formatted for the InterCatch data call using **exportEstimationResultsToInterCatchFormat()**. 
+To do this we need to map the columns in our calculated `ageCANUM` object to the column names expected by the export function.
+
+```{r}
+# Map the results to InterCatch format
+dataToExport <- data.frame(
+    # HI columns
+    Country = "EE",
+    Year = "2022",
+    SeasonType = "Quarter",
+    Season = ageCANUM$CLquar,
+    Fleet = ageCANUM$CLmetier6,
+    AreaType = "Div",
+    FishingArea = ageCANUM$CLarea,
+    DepthRange = "NA", 
+    
+    # SI columns
+    Species = ageCANUM$SAspeCodeFAO, 
+    Stock = "Unknown",
+    CatchCategory = "L",
+    ReportingCategory = "R",
+    DataToFrom = "Data",
+    Usage = "Used",
+    SamplesOrigin = "U",
+    QualityFlag = "U",
+    UnitCATON = "kg",
+    CATON = ageCANUM$sumCLoffWeight,
+    OffLandings = ageCANUM$sumCLoffWeight,
+    
+    # SD columns
+    Sex = "N",
+    CANUMtype = "L",
+    AgeLength = as.integer(as.character(ageCANUM$Group)),
+    PlusGroup = ageCANUM$plusGroup,
+    #SampledCatch = ageCANUM$sumCLoffWeight,
+    #NumSamplesLngt = ageCANUM$lenMeas,
+    #NumLngtMeas = ageCANUM$lenMeas,
+    #NumSamplesAge = ageCANUM$lenMeas,
+    #NumAgeMeas = ageCANUM$lenMeas,
+    unitMeanWeight = "g", 
+    unitCANUM = "n",
+    UnitAgeOrLength = "Age", 
+    UnitMeanLength = "mm",
+    NumberCaught = ageCANUM$totNum,
+    MeanWeight = ageCANUM$WeightgMean,
+    MeanLength = ageCANUM$LengthmmMean
+)
+
+# Generate the InterCatch string
+ic_output <- exportEstimationResultsToInterCatchFormat(dataToExport)
+
+# Show the first few lines of the output
+head(ic_output)
+``` 
 
 
 See also other package vignettes:

@@ -2,51 +2,54 @@
 title: 'RDBEScore: Using R for ICES Regional Database & Estimation System (RDBES)
   Data'
 output:
-  ioslides_presentation:
-    incremental: true
   powerpoint_presentation:
     reference_doc: "./data-raw/styles.pptx"
     slide_level: 2
     keep_md: true
     incremental: true
+  ioslides_presentation:
+    incremental: true
   beamer_presentation:
     incremental: true
 ---
 
-## Importing RDBES Data
-
-The aim of this document is to outline the basic workflow of importing data downloaded from the [ICES Regional Database & Estimation System (RDBES)](https://rdbes.ices.dk/#/) or a `list` object containing data frames (or data.tables) into `R` using the `RDBEScore` package.
-
-The function **createRDBESDataObject** is intended to directly import Commercial Landing (CL), Commercial Effort (CE) and Commercial Sampling (CS) tables downloaded from [RDBES](https://rdbes.ices.dk/#/).
-
 ## Introduction
-2
-RDBEScore is an R package developed to facilitate the analysis of data from the ICES Regional Database and Estimation System (RDBES). The package provides functions to:
 
-- import functions like `createRDBESDataObject` and `validateRDBESDataObject` 
-- manipulate functions like `filterAndTidyRDBESDataObject`, `combineRDBESDataObjects` and `removeBrokenVesselLinks`
-- analyse functions like 
+**RDBEScore** is an R package developed to facilitate the analysis of data from the ICES Regional Database and Estimation System (RDBES).  The package provides functions to:
 
-data from the RDBES. The package is designed to work with data from the RDBES, which is a relational database system used by ICES to store data from regional sampling programmes. The `RDBEScore` package is intended to be used by national data coordinators, data analysts, and scientists working with data from the RDBES.
+- import functions like `createRDBESDataObject` and `validateRDBESDataObject`
+- manipulate functions such as `filterAndTidyRDBESDataObject`, `combineRDBESDataObjects` and `removeBrokenVesselLinks`
+- analysis functions including `createRDBESEstObject`, `doEstimationForAllStrata`, `doBVestimCANUM` and `exportEstimationResultsToInterCatchFormat` to generate estimates and export them to InterCatch format.
 
+These functions support the entire workflow from data import through cleaning to estimation and reporting.  The package is designed to work with data from the RDBES, which is a relational database system used by ICES to store data from regional sampling programmes. The `RDBEScore` package is intended to be used by national data coordinators, data analysts, and scientists working with data from the RDBES.
+
+The aim of this document is to outline the basic workflow of importing and processing data downloaded from the [ICES Regional Database & Estimation System (RDBES)](https://rdbes.ices.dk/#/)
 
 
 ## RDBEScore package
 
-The package can be found on [RDBEScore GitHub](https://github.com/ices-tools-dev/RDBEScore/tree/dev)
+The package can be found on [RDBEScore GitHub](https://github.com/ices-tools-dev/RDBEScore).
 
-The best way to get started is to read the package documentation and the vignettes. The package documentation can be found on the [RDBEScore GitHub pages](https://ices-tools-dev.github.io/RDBEScore/).
+The best way to get started is to read the package documentation and the vignettes. The package documentation can be found on the [RDBEScore GitHub pages](https://ices-tools-dev.github.io/RDBEScore/), which describe the installation methods and provide worked examples for the available functions under **articles** section.
 
-These resources provide information on how to install the package, how to use the functions, and how to contribute to the development of the package. The following will now demonstrate some of the functionality of the package that is available now at the **dev** branch.
+These resources provide information on how to install the package, how to use the functions, and how to contribute to the development of the package.  The following will now demonstrate some of the functionality of the package using the current **main** version.
 
 
-## Load RDBEScore Development Version
+## Installation
 
-The suggested way to install the   package is from the `main` or development (`dev`) branch on GitHub using the `remotes` package.
+The most recent production version of **RDBEScore** can be installed using the ICES tools production repository:
+
+```{r eval=FALSE, echo=TRUE}
+install.packages("RDBEScore",
+  repos = c("https://ices-tools-prod.r-universe.dev",
+            "https://cloud.r-project.org"))
+```
+
+A more recent development version is available from GitHub:
 
 ```{r eval=FALSE, echo=TRUE}
 install.packages("remotes")
-remotes::install_github("ices-tools-dev/RDBEScore@dev", build_vignettes = TRUE)
+remotes::install_github("ices-tools-dev/RDBEScore/dev", build_vignettes = TRUE)
 ```
 
 Then you can load the package using:
@@ -138,7 +141,7 @@ myFilteredObject <- filterRDBESDataObject(H1Example,
 myFilteredObject
 ```
 
-## Remowing Unlinked Data
+## Removing Unlinked Data
 
 It is important to note that filtering is likely to result in "orphan" rows being produced so it is usual to also apply the **findAndKillOrphans()** function to the filtered data to remove these records.
 
@@ -166,8 +169,6 @@ ld <- getLinkedDataFromLevel("LEid", c(1), H8ExampleEE1, "TE", verbose = TRUE)
 knitr::kable(ld[,c(1:2,5:8 )])
 ```
 
-## Getting Subsets of RDBESDataObject Tables
-
 Similarly we can get the subset of the LE table corresponding to a specific value in the TE table. This does not have to be the *id* field, but can be any field in the table.
 
 ```{r}
@@ -184,6 +185,14 @@ ld <- getLinkedDataFromLevel("BVfishId", c("410472143", "410472144"), H8ExampleE
 knitr::kable(ld[,1:5])
 ```
 
+## Data Preparation: Handling Zeros and NAs
+
+Before estimation, it is often necessary to ensure the data is complete, particularly regarding species that were looked for but not found (zeros) or not targeted (NAs). **RDBEScore** provides functions to handle this using the Species List (SL) table.
+
+- `generateZerosUsingSL()`: Adds explicit zero records for species recorded in the species list but missing from the sample.
+- `generateNAsUsingSL()`: Populates NA values for species not targeted by the sampling scheme.
+
+See the vignettes *Generating zeros for species not observed* and *Generating NAs for species not targeted by sampling* for more details.
 
 ## Estimating
 
@@ -211,7 +220,7 @@ estimMC(as.numeric(BV$BVvalueMeas),
 
 Right now estimation actually  is done on a *RDBESEstObject* that is generate from *RDBESDataObject* using **createRDBESEstObject(...)**. 
 
-In the next sections we will use data from R packages [survey](https://CRAN.R-project.org/package=survey) and [SDAResources](https://CRAN.R-project.org/package=SDAResources) that are converted into the *RDBESDataObject* to demonstrate the estimation procedure.
+In the next sections we will use example data derived from the [survey](https://CRAN.R-project.org/package=survey) and [SDAResources](https://CRAN.R-project.org/package=SDAResources) packages. This data is included in **RDBEScore** and converted into the *RDBESDataObject* format to demonstrate the estimation procedure.
 
 For more detailed information on the estimation functions see the vignettes 
 
@@ -243,7 +252,7 @@ How to interpret these results in the above example?
 
 In practice the data submitters have to prepare Intercatch data call tables. In the future the estimation functions should be made so that they estimate the values for these tables. 
 
-in the **dev** branch there is a function **doBVestimCANUM(...)** that can be used for a very basic estimation of the total catch at number (CANUM) for a specified biological variable, such as age or length. 
+The package includes a function **doBVestimCANUM(...)** that can be used for a basic estimation of the total catch at number (CANUM) for a specified biological variable, such as age or length. 
 
 
 ### Simple Estimation Example
@@ -252,7 +261,7 @@ in the **dev** branch there is a function **doBVestimCANUM(...)** that can be us
 For the simplest case of estimation we need the **RDBESDataObject** with CS tables and a CL table. In the following example we will estimate the total number of sprat caught in the area *27.3.d.28.1* with the gear *OTM_SPF_16-31_0_0* for the first quarter of the year.
 
 ```{r}
-#From the commertial landings table we need to get the total weight of the catches
+#From the commercial landings table we need to get the total weight of the catches
 CLfieldstoSum <- c("CLoffWeight")
 ```
 
@@ -276,8 +285,7 @@ strataListCL <- list(CLarea="27.3.d.28.1",
 
 
 ## Adding CL data to the lower hierarchy
-
-There is a function in development **addCLtoLowerCS(...)** that can be used to add the CL data to the lower hierarchy.
+The function **addCLtoLowerCS(...)** can be used to add the commercial landings (CL) data to the lower hierarchy, enabling estimation of biological variables using corresponding landing weights.
 
 
 ```{r}
@@ -289,8 +297,7 @@ biolCLQ1 <- addCLtoLowerCS(H8ExampleEE1, strataListCS, strataListCL,
 ```
 
 ## Estimation based on CL and BV
-
-To estimate the total number of sprat caught in the area 27.3.d.28.1 with the gear OTM_SPF_16-31_0_0 for the first quarter of the year we need to use the function **doBVestimCANUM(...)**. For more details on the function see the vignette in the **dev** branch.
+To estimate the total number of sprat caught in the area 27.3.d.28.1 with the gear OTM_SPF_16-31_0_0 for the first quarter of the year we need to use the function **doBVestimCANUM(...)**.  Details on this function and the overall estimation workflow are provided in the vignettes. 
 The output table should be enough to populate a classic InterCatch data call table. 
 
 ```{r canNum}
@@ -302,6 +309,72 @@ lenCANUMQ1 <- doBVestimCANUM(biolCLQ1, c("sumCLoffWeight"),
 knitr::kable(lenCANUMQ1[order(lenCANUMQ1$LengthmmMean), c("Group", "WeightgMean", "LengthmmMean", "totNum")],
              digits = 2)
 ```
+
+
+## Exporting Results
+
+The results can be formatted for the InterCatch data call using **exportEstimationResultsToInterCatchFormat()**. 
+To do this we need to map the columns in our calculated object to the column names expected by the export function.
+
+```{r}
+# Add extra columns to the final result 
+addCols <- c(names(strataListCS),
+             names(strataListCL),
+             paste0('sum', CLfieldstoSum))
+
+ageCANUM <- doBVestimCANUM(biolCLQ1, addCols,
+             classUnits = "Ageyear",
+             classBreaks = 1:8,
+             verbose = FALSE)
+
+# Map the results to InterCatch format
+dataToExport <- data.frame(
+    # HI columns
+    Country = "EE",
+    Year = "2022",
+    SeasonType = "Quarter",
+    Season = ageCANUM$CLquar,
+    Fleet = ageCANUM$CLmetier6,
+    AreaType = "Div",
+    FishingArea = ageCANUM$CLarea,
+    DepthRange = "NA", 
+    
+    # SI columns
+    Species = ageCANUM$SAspeCodeFAO, 
+    Stock = "Unknown",
+    CatchCategory = "L",
+    ReportingCategory = "R",
+    DataToFrom = "Data",
+    Usage = "Used",
+    SamplesOrigin = "U",
+    QualityFlag = "U",
+    UnitCATON = "kg",
+    CATON = ageCANUM$sumCLoffWeight,
+    OffLandings = ageCANUM$sumCLoffWeight,
+    
+    # SD columns
+    Sex = "N",
+    CANUMtype = "L",
+    AgeLength = as.integer(as.character(ageCANUM$Group)),
+    PlusGroup = ageCANUM$plusGroup,
+    unitMeanWeight = "g", 
+    unitCANUM = "n",
+    UnitAgeOrLength = "Age", 
+    UnitMeanLength = "mm",
+    NumberCaught = ageCANUM$totNum,
+    MeanWeight = ageCANUM$WeightgMean,
+    MeanLength = ageCANUM$LengthmmMean
+)
+
+# Generate the InterCatch string
+ic_output <- exportEstimationResultsToInterCatchFormat(dataToExport)
+
+# Show the first few lines of the output
+head(ic_output)
+``` 
+
+See the vignettes 03b (ratio estimation) or 04b (stratified estimation) for more detailed examples and explanations of the estimation workflow and exporting results to InterCatch format.
+
 
 
 ## Issues Reporting
