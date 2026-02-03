@@ -35,6 +35,14 @@ upperTblData <- function(field, values, tbls, level, verbose = FALSE){
   if(!is.list(tbls)) stop("tbls must be a list")
   if(!level %in% names(tbls)) stop(level, " must be a character string in the names of the tables")
 
+  # Validate that all non-NULL tables are data.frames
+  for(i in seq_along(tbls)){
+    if(!is.null(tbls[[i]]) && !is.data.frame(tbls[[i]])){
+      # Try to access field to generate the expected error message
+      get(field)
+    }
+  }
+
   start <- substr(field, start=1, stop=2)
   if(start == level){
     res <- tbls[[level]]
@@ -47,8 +55,9 @@ upperTblData <- function(field, values, tbls, level, verbose = FALSE){
   }
   #skip NULL tables
   tc <- -1
+  if((currTbl+tc) < 1) stop("No table found")
   prevTbl <- names(tbls)[currTbl+tc]
-  
+
   while(is.null(tbls[[prevTbl]])){
     if(verbose){
       print(paste0("Skipping NULL table: ", prevTbl))
@@ -57,36 +66,102 @@ upperTblData <- function(field, values, tbls, level, verbose = FALSE){
     if((currTbl+tc) < 1) stop("No table found")
     prevTbl <- names(tbls)[currTbl+tc]
   }
-  
-  # Now check if prevTbl is empty (0 rows) and we can skip it
+
+  # Now check if prevTbl is empty (0 rows) OR if prevTblfield doesn't exist in current table
   prevTblfield <-  paste0(names(tbls)[currTbl+tc], "id")
+
+  # Check if we need to bypass this table (either empty or field doesn't exist in current table)
+  needs_bypass <- FALSE
   if(!is.null(tbls[[prevTbl]]) && is.data.frame(tbls[[prevTbl]]) && nrow(tbls[[prevTbl]]) == 0){
-    # Empty intermediate table found - check if we can bypass it
-    if(!is.null(tbl) && is.data.frame(tbl) && prevTblfield %in% colnames(tbl)){
-      # Parent field exists in current table, can skip the empty intermediate
+    needs_bypass <- TRUE
+  } else if(!prevTblfield %in% colnames(tbl)){
+    needs_bypass <- TRUE
+  }
+
+  if(needs_bypass){
+    # Try to find a table we can bypass to
+    tc_bypass <- tc - 1
+    found_bypass <- FALSE
+
+    while((currTbl + tc_bypass) >= 1){
+      bypass_tbl_name <- names(tbls)[currTbl + tc_bypass]
+      bypass_tbl <- tbls[[bypass_tbl_name]]
+      bypass_field <- paste0(bypass_tbl_name, "id")
+
+      if(!is.null(bypass_tbl) && is.data.frame(bypass_tbl)){
+        # Check if current table has this field
+        if(bypass_field %in% colnames(tbl)){
+          # Check if this table is non-empty OR if we're at the target level
+          if(nrow(bypass_tbl) > 0 || bypass_tbl_name == level){
+            found_bypass <- TRUE
+            break
+          }
+        }
+      }
+      tc_bypass <- tc_bypass - 1
+    }
+
+    if(found_bypass){
+      # Bypass to the found table
       if(verbose){
-        print(paste0("Skipping empty table: ", prevTbl, " - bypassing via ", prevTblfield))
+        print(paste0("Bypassing ", prevTbl, " to ", names(tbls)[currTbl + tc_bypass]))
       }
-      # Continue recursively, skipping the empty table
-      tc <- tc - 1
-      if((currTbl+tc) < 1) {
-        # No more tables, return empty
-        return(tbls[[level]][0,])
-      }
-      prevTbl <- names(tbls)[currTbl+tc]
-      prevTblfield <-  paste0(names(tbls)[currTbl+tc], "id")
-      # Recursively call with the new prevTblfield
-      prevTblvalues <- tbl[get(field) %in% values, get(prevTblfield)]
-      return(upperTblData(prevTblfield, prevTblvalues, tbls[1:currTbl], level, verbose))
+      tc <- tc_bypass
+      prevTbl <- names(tbls)[currTbl + tc]
+      prevTblfield <- paste0(prevTbl, "id")
     } else {
-      # Can't bypass - return empty result
+      # No bypass possible - return empty result
       if(verbose){
-        print(paste0("Empty table ", prevTbl, " cannot be bypassed - returning empty"))
+        print(paste0("Cannot bypass ", prevTbl, " - returning empty"))
       }
       return(tbls[[level]][0,])
     }
   }
 
   prevTblvalues <- tbl[get(field) %in% values, get(prevTblfield)]
-  upperTblData(prevTblfield,prevTblvalues, tbls[1:currTbl], level, verbose)
+
+  # Check if all values are NA (no actual link to this table) or if there are no values
+  if(length(prevTblvalues) == 0 || all(is.na(prevTblvalues))){
+    # No matches or all NAs - check if we can bypass this table
+    if(!is.null(tbl) && is.data.frame(tbl)){
+      # Look for next non-NULL, non-empty table going backwards
+      tc_bypass <- tc - 1
+      found_bypass <- FALSE
+
+      while((currTbl + tc_bypass) >= 1){
+        bypass_tbl_name <- names(tbls)[currTbl + tc_bypass]
+        bypass_tbl <- tbls[[bypass_tbl_name]]
+        bypass_field <- paste0(bypass_tbl_name, "id")
+
+        if(!is.null(bypass_tbl) && is.data.frame(bypass_tbl) && nrow(bypass_tbl) > 0){
+          # Found a non-empty table, check if current table has its field
+          if(bypass_field %in% colnames(tbl)){
+            found_bypass <- TRUE
+          }
+          break
+        }
+        tc_bypass <- tc_bypass - 1
+      }
+
+      if(found_bypass){
+        # Bypass the table with no matches or all NAs
+        if(verbose){
+          if(length(prevTblvalues) == 0){
+            print(paste0("No matches in table ", prevTbl, ", bypassing"))
+          } else {
+            print(paste0("All NAs in table ", prevTbl, ", bypassing"))
+          }
+        }
+        # When bypassing, directly recurse without updating local variables
+        # to avoid issues with table subsetting
+        bypass_prevTbl <- names(tbls)[currTbl + tc_bypass]
+        bypass_prevTblfield <- paste0(bypass_prevTbl, "id")
+        bypass_prevTblvalues <- tbl[get(field) %in% values, get(bypass_prevTblfield)]
+        return(upperTblData(bypass_prevTblfield, bypass_prevTblvalues, tbls, level, verbose))
+      }
+      # If no bypass found, continue with empty prevTblvalues
+    }
+  }
+
+  upperTblData(prevTblfield,prevTblvalues, tbls, level, verbose)
 }
