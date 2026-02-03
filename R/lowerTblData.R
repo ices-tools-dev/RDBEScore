@@ -41,13 +41,43 @@ lowerTblData <- function(field, values, tbls, level, verbose = FALSE, path_order
   }
   currTbl <- which(start == names(tbls))
 
-  # assumes tables are in correct order and no empty tables
+  # assumes tables are in correct order; skip NULL and empty tables if bypassing is possible
   tc <- 1
   nextTbl <- tbls[[currTbl + tc]]
-  while (is.null(nextTbl)) {
-    tc <- tc + 1
-    if(currTbl + tc > length(tbls)) stop("No more lower tables found")
-    nextTbl <- tbls[[currTbl + tc]]
+  nextTblField <- paste0(names(tbls)[currTbl + tc], "id")
+
+  while (is.null(nextTbl) || (is.data.frame(nextTbl) && nrow(nextTbl) == 0)) {
+    # Look ahead to the next non-empty table to check if it has the parent ID field
+    tc_lookahead <- tc + 1
+    found_bypass <- FALSE
+
+    while(tc_lookahead + currTbl <= length(tbls)){
+      lookahead_tbl <- tbls[[currTbl + tc_lookahead]]
+      if(!is.null(lookahead_tbl) && is.data.frame(lookahead_tbl) && nrow(lookahead_tbl) > 0){
+        # Found next non-empty table, check if it has parent field
+        if(field %in% colnames(lookahead_tbl)){
+          found_bypass <- TRUE
+        }
+        break
+      }
+      tc_lookahead <- tc_lookahead + 1
+    }
+
+    if(found_bypass){
+      if(verbose) {
+        cat(paste0("Skipping empty or NULL table: ", names(tbls)[currTbl + tc], "\n"))
+      }
+      tc <- tc + 1
+      if(currTbl + tc > length(tbls)) stop("No more lower tables found")
+      nextTbl <- tbls[[currTbl + tc]]
+      nextTblField <- paste0(names(tbls)[currTbl + tc], "id")
+    } else {
+      # No bypass possible - this is a true empty result
+      if(verbose) {
+        cat(paste0("Empty table ", names(tbls)[currTbl + tc], " with no bypass - returning empty result\n"))
+      }
+      return(tbls[[level]][0,])
+    }
   }
 
   nextTblField <- paste0(names(tbls)[currTbl + tc], "id")

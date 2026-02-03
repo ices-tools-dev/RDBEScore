@@ -48,16 +48,45 @@ upperTblData <- function(field, values, tbls, level, verbose = FALSE){
   #skip NULL tables
   tc <- -1
   prevTbl <- names(tbls)[currTbl+tc]
+  
   while(is.null(tbls[[prevTbl]])){
     if(verbose){
-      print(paste0("Skipping: ", prevTbl))
+      print(paste0("Skipping NULL table: ", prevTbl))
     }
     tc <- tc - 1
     if((currTbl+tc) < 1) stop("No table found")
     prevTbl <- names(tbls)[currTbl+tc]
-
   }
+  
+  # Now check if prevTbl is empty (0 rows) and we can skip it
   prevTblfield <-  paste0(names(tbls)[currTbl+tc], "id")
+  if(!is.null(tbls[[prevTbl]]) && is.data.frame(tbls[[prevTbl]]) && nrow(tbls[[prevTbl]]) == 0){
+    # Empty intermediate table found - check if we can bypass it
+    if(!is.null(tbl) && is.data.frame(tbl) && prevTblfield %in% colnames(tbl)){
+      # Parent field exists in current table, can skip the empty intermediate
+      if(verbose){
+        print(paste0("Skipping empty table: ", prevTbl, " - bypassing via ", prevTblfield))
+      }
+      # Continue recursively, skipping the empty table
+      tc <- tc - 1
+      if((currTbl+tc) < 1) {
+        # No more tables, return empty
+        return(tbls[[level]][0,])
+      }
+      prevTbl <- names(tbls)[currTbl+tc]
+      prevTblfield <-  paste0(names(tbls)[currTbl+tc], "id")
+      # Recursively call with the new prevTblfield
+      prevTblvalues <- tbl[get(field) %in% values, get(prevTblfield)]
+      return(upperTblData(prevTblfield, prevTblvalues, tbls[1:currTbl], level, verbose))
+    } else {
+      # Can't bypass - return empty result
+      if(verbose){
+        print(paste0("Empty table ", prevTbl, " cannot be bypassed - returning empty"))
+      }
+      return(tbls[[level]][0,])
+    }
+  }
+
   prevTblvalues <- tbl[get(field) %in% values, get(prevTblfield)]
   upperTblData(prevTblfield,prevTblvalues, tbls[1:currTbl], level, verbose)
 }
