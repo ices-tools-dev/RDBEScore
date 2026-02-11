@@ -29,7 +29,7 @@
 # TODO add an argument to toggle stratification in estimation on/off
 # TODO need to implement the BV conversion from typeMeas to typeAssess
 # TODO add info about the strata (species, area, season, metier/gear/fleet)
-#' @importFrom utils tail
+#' @importFrom utils tail head
 doEstimationRatio <- function(RDBESDataObj,
                               targetValue = "LengthComp",
                               raiseVar = "Weight",
