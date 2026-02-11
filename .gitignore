@@ -41,3 +41,8 @@ package_overview.tex
 package_overview.html
 package_overview.pptx
 package_overview.md
+
+# add renv stuff
+/renv/
+.Rprofile
+renv.lock
