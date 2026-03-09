@@ -44,7 +44,7 @@ lowerTblData <- function(field, values, tbls, level, verbose = FALSE, path_order
   # assumes tables are in correct order and no empty tables
   tc <- 1
   nextTbl <- tbls[[currTbl + tc]]
-  while (is.null(nextTbl)) {
+  while (is.null(nextTbl) || nrow(nextTbl) == 0) {
     tc <- tc + 1
     if(currTbl + tc > length(tbls)) stop("No more lower tables found")
     nextTbl <- tbls[[currTbl + tc]]

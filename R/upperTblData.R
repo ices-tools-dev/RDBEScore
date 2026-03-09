@@ -48,15 +48,18 @@ upperTblData <- function(field, values, tbls, level, verbose = FALSE){
   #skip NULL tables
   tc <- -1
   prevTbl <- names(tbls)[currTbl+tc]
-  while(is.null(tbls[[prevTbl]])){
-    if(verbose){
-      print(paste0("Skipping: ", prevTbl))
+  tryCatch({
+    while(is.null(tbls[[prevTbl]]) || nrow(tbls[[prevTbl]]) == 0){
+      if(verbose){
+        print(paste0("Skipping: ", prevTbl))
+      }
+      tc <- tc - 1
+      if((currTbl+tc) < 1) stop("No table found")
+      prevTbl <- names(tbls)[currTbl+tc]
     }
-    tc <- tc - 1
-    if((currTbl+tc) < 1) stop("No table found")
-    prevTbl <- names(tbls)[currTbl+tc]
-
-  }
+  }, error = function(e) {
+    stop("Error in linking tables ", names(tbls)[currTbl], " and ",prevTbl)
+  })
   prevTblfield <-  paste0(names(tbls)[currTbl+tc], "id")
   prevTblvalues <- tbl[get(field) %in% values, get(prevTblfield)]
   upperTblData(prevTblfield,prevTblvalues, tbls[1:currTbl], level, verbose)

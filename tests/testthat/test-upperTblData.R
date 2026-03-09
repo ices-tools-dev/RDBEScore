@@ -44,7 +44,7 @@ test_that("upperTblData works with sorted RDBESDataObjects", {
 })
 
 test_that("upperTblData throws error for incorrect tbls type", {
-  expect_error(upperTblData("VSid", c(1), list(DE = 1, SD = 2, VS = 3), "DE"), "object 'VSid' not found")
+  expect_error(upperTblData("VSid", c(1), list(DE = 1, SD = 2, VS = 3), "DE"), "Error in linking tables VS and SD")
 })
 
 test_that("upperTblData throws error for incorrect level", {
