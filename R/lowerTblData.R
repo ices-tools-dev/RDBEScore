@@ -93,46 +93,10 @@ lowerTblData <- function(field, values, tbls, level, verbose = FALSE, path_order
 
   # Initialize and update path order to ensure the original search field stays first
   if (is.null(path_order)) path_order <- field
+  path_order <- unique(c(path_order, nextTblField))
 
   # values in next table for recursion
   nextTblValues <- nextTbl[get(field) %in% values, get(nextTblField)]
-
-  # Check if intermediate table has no matching data and if bypass is possible
-  if (length(nextTblValues) == 0 && length(values) > 0) {
-    # Look ahead to see if we can bypass this non-empty but non-matching table
-    # Only do this if values is non-empty (empty values can't match anything anyway)
-    tc_lookahead <- tc + 1
-    found_bypass <- FALSE
-
-    while(tc_lookahead + currTbl <= length(tbls)){
-      lookahead_tbl <- tbls[[currTbl + tc_lookahead]]
-      if(!is.null(lookahead_tbl) && is.data.frame(lookahead_tbl) && nrow(lookahead_tbl) > 0){
-        # Found next non-empty table, check if it has parent field
-        if(field %in% colnames(lookahead_tbl)){
-          found_bypass <- TRUE
-        }
-        break
-      }
-      tc_lookahead <- tc_lookahead + 1
-    }
-
-    if(found_bypass){
-      # Bypass this table with no matches and continue with the next table
-      if(verbose) {
-        cat(paste0("No matches in table ", names(tbls)[currTbl + tc], ", bypassing\n"))
-      }
-      tc <- tc + 1
-      nextTbl <- tbls[[currTbl + tc]]
-      nextTblField <- paste0(names(tbls)[currTbl + tc], "id")
-      # Recalculate nextTblValues with the new table
-      nextTblValues <- nextTbl[get(field) %in% values, get(nextTblField)]
-    }
-    # If no bypass found, continue with empty nextTblValues
-    # The recursion and merge logic will handle building the correct empty result
-  }
-
-  # Update path order after potential bypass
-  path_order <- unique(c(path_order, nextTblField))
 
   # NEW: build link (current id -> next id) so we can keep intermediate IDs
   linkDT <- unique(nextTbl[get(field) %in% values,

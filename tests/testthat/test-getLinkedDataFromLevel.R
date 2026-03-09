@@ -79,29 +79,6 @@ test_that("Retrieve data from VS based on BVfishId if There is an empty intermed
   expect_equal(nrow(res2), 3995)
 })
 
-test_that("Retrieve data from VS based on BVfishId if There is an non-empty intermedate FM table", {
-  h8 <- H8ExampleEE1
-
-  #add FM table to the rdbes object
-  h8[["FM"]] <- H1Example[["FM"]][1,]
-
-
-
-  result <- getLinkedDataFromLevel("BVfishId", c("410472143", "410472144"), h8, "VS")
-
-  # Check that the result is a data.table (or other expected data structure)
-  expect_s3_class(result, "data.table")
-
-  # Check that the result contains data (you can adjust this depending on known expected results)
-  expect_equal(nrow(result), 1)
-
-  #check also downwards direction
-  res2 <- getLinkedDataFromLevel("DEid", c(1), h8, "BV")
-
-  expect_s3_class(res2, "data.table")
-  expect_equal(nrow(res2), 3995)
-})
-
 
 
 
