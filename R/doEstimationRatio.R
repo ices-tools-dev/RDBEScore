@@ -20,7 +20,6 @@
 #' @param LWparam A numeric vector of length two \code{c(a, b)} specifying the
 #'   weight-length relationship (W = a * L^b). Used in LH A and B when
 #'   individual weights are absent from BV but lengths are available.
-#' @param lowerAux Not implemented.
 #' @param verbose Logical; if \code{TRUE}, informational messages are printed
 #'   during processing.
 #'
@@ -55,7 +54,6 @@ doEstimationRatio <- function(RDBESDataObj,
                               classUnits   = "mm",
                               classBreaks  = c(100, 300, 10),
                               LWparam      = NULL,
-                              lowerAux     = NULL,
                               verbose      = FALSE) {
 
 
