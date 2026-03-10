@@ -1,473 +1,504 @@
 #' Estimate Numbers and Mean Values by Length or Age Class
 #'
-#' The function is under development and does not work yet.
+#' @param RDBESDataObj A validated RDBESDataObject containing hierarchical
+#'   sampling and biological data. Must include relevant tables (SA, FM,
+#'   and/or BV) depending on the lower hierarchy.
+#' @param targetValue A character string specifying the type of composition to
+#'   estimate. Options are \code{"LengthComp"} or \code{"AgeComp"}.
+#' @param raiseVar The raising variable used to construct the ratio estimator.
+#'   Options are \code{"Weight"} (SAtotalWtMes / SAsampWtMes),
+#'   \code{"Count"} (SAnumTotal / SAnumSamp), or any other value which will
+#'   use \code{SAauxVarValue} directly as the raise factor.
+#' @param classUnits Units of the length class intervals, e.g. \code{"mm"} or
+#'   \code{"cm"}. Used only for \code{targetValue = "LengthComp"}: in LH A
+#'   and B, checks consistency with FM data; in LH C, used to interpret raw BV
+#'   lengths before class assignment.
+#'   Codes: \url{https://vocab.ices.dk/?ref=1608}
+#' @param classBreaks A numeric vector of three values:
+#'   \code{c(min, max, width)}. Defines the length class intervals. Used only
+#'   for \code{targetValue = "LengthComp"}.
+#' @param LWparam A numeric vector of length two \code{c(a, b)} specifying the
+#'   weight-length relationship (W = a * L^b). Used in LH A and B when
+#'   individual weights are absent from BV but lengths are available.
+#' @param lowerAux Not implemented.
+#' @param verbose Logical; if \code{TRUE}, informational messages are printed
+#'   during processing.
 #'
-#' @param RDBESDataObj A validated RDBESDataObject containing hierarchical sampling and biological data. Must include appropriate tables (e.g., CL, CE, SA, FM, or BV) depending on estimation requirements.
-#' @param targetValue A character string specifying the type of composition to estimate. Options are "LengthComp" or "AgeComp".
-#' @param raiseVar The variable used to construct the ratio.
-#' @param classUnits Units of the class intervals for length or age, typically "mm" for millimeters or "cm" for centimeters. Used in defining class intervals. In lower hierarchy A, the argument is used to check if that the length classes provided. For lower hierarchy B, it transforms the lengths. Codes: https://vocab.ices.dk/?ref=1608
-#' @param classBreaks A numeric vector of three values: minimum value, maximum value, and class width (e.g., c(100, 300, 10)). Defines the class intervals for grouping lengths. In lower hierarchy A, the argument is used to check if that the length classes provided. For lower hierarchy B, it transforms the lengths.
-#' @param LWparam A numeric vector of length two specifying parameters (a, b) for the weight-length relationship (W = a * L^b). Used if no direct weights are available but lengths are provided.
-#' @param lowerAux A numeric or character vector referencing a variable in the SA table used as an auxiliary variable for ratio estimation (e.g., sample weights, sub-sample expansion factors).
-#' @param verbose Logical; if TRUE, detailed messages are printed during processing.
+#' @return A \code{data.table} with estimated numbers at length or age and
+#'   associated mean values. Key output columns:
+#'   \itemize{
+#'     \item \code{LengthClass} or \code{Age} — the grouping variable
+#'     \item \code{NumbersAtLength} or \code{NumbersAtAge} — raised estimates
+#'     \item \code{MeanWeightAtLength} or \code{BVMeanWeight} — mean weight
+#'     \item \code{MeanLengthAtAge} — mean length at age (AgeComp only)
+#'     \item \code{raiseFactor} — the SA-level raise factor applied
+#'   }
 #'
-#' @return A list or data.table containing the estimated numbers at length or age and associated mean values such as weight and length, depending on input and target type.
-# InterCatch age composition data
-# Numbers at age
-# Mean weight at age
-# Mean length at age
-# Intercatch length composition data
-# Numbers at legth
-# Mean weight at length
-## Measure indv weight of fish
-## LW relationship: a, b parameters
-# For now assume we have all the data we need
-# Counts, indv weights, lengths (mm) and ages
-# TODO check differences if length classes are defined later
-# Unit conversion later step : for LC
-# TODO add check for unique sampling scheme
-# TODO add an argument to toggle stratification in estimation on/off
-# TODO need to implement the BV conversion from typeMeas to typeAssess
-# TODO add info about the strata (species, area, season, metier/gear/fleet)
-#' @importFrom utils tail head
+#' @details
+#' The three lower hierarchies differ in which tables are present:
+#' \itemize{
+#'   \item \strong{LH A}: \code{SA -> FM -> BV}. FM holds the length-frequency;
+#'     BV holds individual biological measurements for a subsample of
+#'     fish within each FM length class. Supports both LengthComp and AgeComp.
+#'   \item \strong{LH B}: \code{SA -> FM} only. FM holds the length-frequency;
+#'     no individual biological measurements (no BV). Supports
+#'     LengthComp only; AgeComp is not possible without BV.
+#'   \item \strong{LH C}: \code{SA -> BV} only. Individual biological
+#'     measurements link directly to SA; no FM length-frequency tally.
+#'     Supports both LengthComp and AgeComp.
+#' }
+#'
+#' @importFrom utils tail
 doEstimationRatio <- function(RDBESDataObj,
-                              targetValue = "LengthComp",
-                              raiseVar = "Weight",
-                              classUnits = "mm",
-                              classBreaks = c(100, 300, 10), # cut
-                              LWparam = NULL, # vector of two values
-                              lowerAux = NULL, # should we keep this ?The aux var is now included as a field in the RDBES
-                              verbose = FALSE){
+                              targetValue  = "LengthComp",
+                              raiseVar     = "Weight",
+                              classUnits   = "mm",
+                              classBreaks  = c(100, 300, 10),
+                              LWparam      = NULL,
+                              lowerAux     = NULL,
+                              verbose      = FALSE) {
 
 
-# Checks ------------------------------------------------------------------
-  # Check we have a valid RDBESEstObject before doing anything else
-  # Need that because the selection is by column name
+  # ---------------------------------------------------------------------------
+  # Checks
+  # ---------------------------------------------------------------------------
+
   RDBEScore::validateRDBESDataObject(RDBESDataObj, verbose = FALSE)
 
-  # Unique upper hierarchy
-  if(length(unique(RDBESDataObj$DE$DEhierarchy)) > 1){
-    stop("Multiple upper hierarchies not implemented")}
-  # Unique lower hierarchy
-  if(length(unique(RDBESDataObj$SA$SAlowHierarchy)) > 1){
+  if (length(unique(RDBESDataObj$DE$DEhierarchy)) > 1)
+    stop("Multiple upper hierarchies not implemented")
+
+  if (length(unique(RDBESDataObj$SA$SAlowHierarchy)) > 1)
     stop("Multiple lower hierarchies not allowed")
+
+  RDBESEstRatioObj <- Filter(Negate(is.null), RDBESDataObj)
+
+  lh <- unique(RDBESEstRatioObj$SA$SAlowHierarchy)
+
+  # Warn if length-class arguments are passed but irrelevant
+  if (targetValue == "AgeComp") {
+    if (!missing(classUnits))
+      warning("'classUnits' is ignored when targetValue = 'AgeComp'.")
+    if (!missing(classBreaks))
+      warning("'classBreaks' is ignored when targetValue = 'AgeComp'.")
   }
 
-  # Filter out NULL tables
-  # RDBESEstRatioObj <- Filter(Negate(is.null),RDBESDataObj)
-  RDBESEstRatioObj <- Filter(Negate(is.null),myFilteredObject)
+  # AgeComp is not possible without individual fish records
+  if (targetValue == "AgeComp" && lh == "B")
+    stop("AgeComp is not possible with lower hierarchy B: LH B has no individual ",
+         "fish records (no BV table). Use LH A or LH C for age composition.")
 
+  # ---------------------------------------------------------------------------
+  # Get the appropriate weight for raising
+  # ---------------------------------------------------------------------------
 
-  # If no individual weight of fish in BV, then can't run raiseVar = Weight
-  # because we don't have the weight of the subsample
-  if(unique(RDBESEstRatioObj$SA$SAlowHierarchy) == "A") {
-    weightVar <- grep("(?i)weight", unique(RDBESEstRatioObj$BV$BVtypeMeas), value = TRUE)
-    if (is.null(weightVar) || length(weightVar) == 0 || all(is.na(weightVar))){
-      stop("no individual weight measured")
-    }
-  }
+  wcol <- NULL
 
-  # Does anything exist after SA?
-  # Do we need that?
+  bv_present <- !is.null(RDBESEstRatioObj$BV)
 
-  # if(length(unique(names(RDBESEstRatioObj))) > 1){
-  #   if(!tail(names(RDBESEstRatioObj), n = 1) %in% c("FM", "BV")){
-  #     stop("No FM or BV tables provided")
-  #   }
-  # }
+  if (bv_present) {
 
-  # Add if object has only one species
+    weightVar <- grep("(?i)weight", unique(RDBESEstRatioObj$BV$BVtypeMeas),
+                      value = TRUE, perl = TRUE)
 
-  # if(length(unique(myFilteredObject$SA$SAspeCode)) > 1){
-  #     stop("Multiple species raising not yet implemented")
-  # }
+    if (lh == "A" && (length(weightVar) == 0 || all(is.na(weightVar))))
+      stop("No individual weight measured in BV (required for lower hierarchy A)")
 
-  # Function to check consistency between the user input and the FM table for
-  # length raising
-  # TODO Should this be moved to utils?
-
-  checkLC <- function(fm, classUnits, classBreaks) {
-    # https://vocab.ices.dk/?ref=1608
-    vocabUnits <-   c("mm", "25mm", "cm", "5cm", "scm", "smm")
-    fmUnits <- unique(fm$FMaccuracy)
-    # Check user input validity
-    if (!classUnits %in% vocabUnits) {
-      stop(paste("Invalid classUnits:", classUnits,
-                 "\nMust be one of:", paste(vocabUnits, collapse = ", ")))
-    }
-
-    if (length(fmUnits) > 1) {
-      # Needs to break here
-      stop("Multiple class units found in data: ", paste(fmUnits, collapse = ", "))
-    }
-
-    # Compare user input with data
-    if (!classUnits %in% fmUnits) {
-      stop(paste("Mismatch between user-specified classUnits (", classUnits,
-                 ") and data units (", paste(fmUnits, collapse = ", "), ")."))
-    }
-
-    # Check classBreaks consistency
-    fmBreaks <- range(fm$FMclassMeas, na.rm = TRUE)
-    userRange <- range(seq(classBreaks[1], classBreaks[2], classBreaks[3]))
-
-    if (any(userRange != fmBreaks)) {
-      stop("classBreaks (", paste(userRange, collapse = "-"),
-              ") differ from observed data range (", paste(fmBreaks, collapse = "-"), ").")
-    }
-
-    message("Length class checks passed: Units and breaks are consistent.")
-  }
-
-  # TODO (to be developed) match with pop (Landings or Effort)
-  # RDBESEstRatioObj <- RDBESDataObj[c("CL", "CE",  RDBEScore::getTablesInRDBESHierarchy(DEhierarchy))]
-
-
-# raiseVar options --------------------------------------------------------
-
-  # Can have multiple types of weight measured for the same individual
-  # If the user defined in the raiseVar argument one of the options in the ICES vocab for
-  # the weight codes in the field BVtypeMeas
-  # If there is only one present, this is used by default
-  # If more than one are present, allow the user to choose
-
-
-  possibleValues  <- unique(RDBESEstRatioObj$BV$BVtypeMeas)
-  if(!raiseVar %in% possibleValues){
-    if(raiseVar == "Weight"){
-      if(unique(RDBESEstRatioObj$SA$SAlowHierarchy) == "B" ){
-        stop("Lower hierarchy B not implemented for weight")
-      }else{
-        weightVar <- grep("(?i)weight", unique(RDBESEstRatioObj$BV$BVtypeMeas), value = TRUE)
-        if (interactive()) {
-          if(length(unique(weightVar)) > 1) {
-            # Print a numbered menu and get user's selection
-            idx <- utils::menu(weightVar, title = "Select the BV weight type to use:")
-            if (idx == 0L) stop("Selection cancelled.")
-            wcol <- weightVar[idx]
-          } else {
-            message("Only one weight type present. Using: ", weightVar[1L])
-            wcol <- weightVar[1L]
-          }
-        }
+    if (length(weightVar) > 0) {
+      if (interactive() && length(unique(weightVar)) > 1) {
+        idx <- utils::menu(weightVar, title = "Select the BV weight type to use:")
+        if (idx == 0L) stop("Selection cancelled.")
+        wcol <- weightVar[idx]
+      } else {
+        if (length(unique(weightVar)) > 1)
+          message("Multiple weight types found; using first: ", weightVar[1L])
+        else if (verbose)
+          message("Only one weight type present. Using: ", weightVar[1L])
+        wcol <- weightVar[1L]
       }
     }
   }
 
+  # ---------------------------------------------------------------------------
+  # Helpers - SHould be moved to utils?
+  # ---------------------------------------------------------------------------
+
+  # Check FM length-class consistency (LH A and B)
+  checkLC <- function(fm, classUnits, classBreaks) {
+    vocabUnits <- c("mm", "25mm", "cm", "5cm", "scm", "smm")
+    fmUnits    <- unique(fm$FMaccuracy)
+
+    if (!classUnits %in% vocabUnits)
+      stop(paste("Invalid classUnits:", classUnits,
+                 "\nMust be one of:", paste(vocabUnits, collapse = ", ")))
+    if (length(fmUnits) > 1)
+      stop("Multiple class units found in FM data: ", paste(fmUnits, collapse = ", "))
+    if (!classUnits %in% fmUnits)
+      stop(paste("Mismatch: user classUnits (", classUnits,
+                 ") vs FM data units (", paste(fmUnits, collapse = ", "), ")."))
+
+    fmBreaks  <- range(fm$FMclassMeas, na.rm = TRUE)
+    userRange <- range(seq(classBreaks[1], classBreaks[2], classBreaks[3]))
+    if (any(userRange != fmBreaks))
+      stop("classBreaks (", paste(userRange, collapse = "-"),
+           ") differ from FM data range (", paste(fmBreaks, collapse = "-"), ").")
+
+    message("Length class checks passed: units and breaks are consistent.")
+  }
+
+  brks <- seq(classBreaks[1], classBreaks[2], by = classBreaks[3])
+
+  assignLengthClass <- function(lengths) {
+    cut(lengths,
+        breaks         = brks,
+        right          = FALSE,
+        include.lowest = TRUE,
+        labels         = head(brks, -1))
+  }
+
+  # Unit conversion for individual BV lengths (LH C) - Should ICES vocab used directly here?
+  convertLength <- function(x, fromUnit, toUnit) {
+    toMM <- switch(fromUnit,
+      "mm"   = 1, "cm"   = 10, "25mm" = 25, "5cm"  = 50,
+      stop("Unknown fromUnit: ", fromUnit))
+    fromMM <- switch(toUnit,
+      "mm"   = 1, "cm"   = 10, "25mm" = 25, "5cm"  = 50,
+      stop("Unknown toUnit: ", toUnit))
+    x * toMM / fromMM
+  }
+
+  # Derive individual BV weights from wcol or LW relationship
+  addBVweight <- function(bv_wide, lengthVar = NULL) {
+    if (!is.null(wcol) && wcol %in% names(bv_wide)) {
+      bv_wide[, BVweight := as.numeric(bv_wide[[wcol]])]
+    } else if (!is.null(LWparam) && !is.null(lengthVar) && lengthVar %in% names(bv_wide)) {
+      bv_wide[, BVweight := LWparam[1] * as.numeric(bv_wide[[lengthVar]]) ^ LWparam[2]]
+    } else {
+      bv_wide[, BVweight := NA_real_]
+    }
+    bv_wide
+  }
+
+  # Apply SA-level raise factor
+  applySARaise <- function(su, numbersInCol, numbersOutCol) {
+    if (raiseVar == "Weight") {
+      su[, raiseFactor := SAtotalWtMes / SAsampWtMes]
+    } else if (raiseVar == "Count") {
+      su[, raiseFactor := SAnumTotal / SAnumSamp]
+    } else {
+      su[, raiseFactor := as.numeric(SAauxVarValue)]
+    }
+    su[, (numbersOutCol) := get(numbersInCol) * raiseFactor]
+    su
+  }
+
+  # SA columns used across branches
+  saCols <- c("SAid", "SAlowHierarchy", "SAtotalWtMes", "SAsampWtMes",
+              "SAnumTotal", "SAnumSamp", "SAauxVarValue", "SAauxVarUnit")
 
 
+  # ===========================================================================
+  # LENGTH COMPOSITION
+  # ===========================================================================
 
+  if (targetValue == "LengthComp") {
 
+    # -------------------------------------------------------------------------
+    # LH A: SA -> FM -> BV
+    # FM holds the length-frequency. BV (if present) provides individual
+    # weights for MeanWeightAtLength; otherwise LWparam is used.
+    # -------------------------------------------------------------------------
 
-# Length composition ------------------------------------------------------
-  if(targetValue == "LengthComp"){
+    if (lh == "A") {
 
-
-# LH A & B ----------------------------------------------------------------
-    if(unique(RDBESEstRatioObj$SA$SAlowHierarchy) %in% c("A", "B")){
-
-      # TODO mean weight at length
-      # TODO this should not break if only the len comp is required
-
-      # if(!is.null(LWparam)){
-      #
-      #   stop("Not yet implemented")
-      #
-      # }else{
-      #   # else stop
-      #   stop("Nor an auxiliary variable nor lw params are provided. Not possible to produce the mean weight at length")
-      # }
-
-
-
-
-      # Select only FM data for now - BV possibly used for ALK
-      warning("If lower hierarchy A, only the FM table is used to calculate the numbers at length.")
+      warning("Lower hierarchy A: only the FM table is used to calculate numbers at length.")
 
       fm <- data.table::setDT(RDBESEstRatioObj$FM)
       sa <- data.table::setDT(RDBESEstRatioObj$SA)
 
-      # Need to check uniqueness of FM length type assess
-      # if(length(unique(fm$FMtypeAssess)) > 1){
-      #   stop("The measurement type of the class needed for assessment (FMtypeAssess) needs to be unique")
-      # }
+      checkLC(fm = fm, classUnits = classUnits, classBreaks = classBreaks)
 
-      # It should break here if there is no match
-      checkLC(
-        fm = fm,
-        classUnits = classUnits,
-        classBreaks = classBreaks
-      )
+      fm <- fm[, unique(.SD), .SDcols = c("SAid", "FMid", "FMclassMeas",
+                                           "FMnumAtUnit", "FMaccuracy", "FMtypeAssess")]
+      sa <- sa[, unique(.SD), .SDcols = saCols]
+      sa[, SAauxVarValue := as.numeric(SAauxVarValue)]
 
-      fm <- fm[fm, unique(.SD), .SDcols = c("SAid", "FMid", "FMclassMeas", "FMnumAtUnit", "FMaccuracy", "FMtypeAssess")]
-      sa <- sa[, unique(.SD), .SDcols = c("SAid", "SAlowHierarchy", "SAtotalWtMes" , "SAsampWtMes",  "SAnumTotal", "SAnumSamp", "SAauxVarValue", "SAauxVarUnit" )]
-
-      brks <- seq(classBreaks[1], classBreaks[2], by = classBreaks[3])
-      fm[, LengthClass := cut(
-        FMclassMeas,
-        breaks = brks,
-        right = FALSE,             # [)
-        include.lowest = TRUE,
-        labels = head(brks, -1)
-      )]
+      fm[, LengthClass := assignLengthClass(FMclassMeas)]
 
       fm1 <- fm[
         , .(FMNumbersAtLength = sum(FMnumAtUnit, na.rm = TRUE)),
         by = .(SAid, LengthClass)
-      ][
-        , FMTotCount := sum(FMNumbersAtLength, na.rm = TRUE),
-        by = SAid
-      ]
+      ][, FMTotCount := sum(FMNumbersAtLength, na.rm = TRUE), by = SAid]
 
-      su <- merge(fm1, sa, by = c("SAid"))
+      su <- merge(fm1, sa, by = "SAid")
+      su <- applySARaise(su,
+                         numbersInCol  = "FMNumbersAtLength",
+                         numbersOutCol = "NumbersAtLength")
 
-      if(raiseVar == "Weight"){
-
-        su$raiseFactor <- su$SAtotalWtMes/su$SAsampWtMes
-        su$NumbersAtLength <- su$raiseFactor*su$FMNumbersAtLength
-
-      }else if(raiseVar == "Count"){
-
-        su$raiseFactor <- su$SAnumTotal/su$SAnumSamp
-        su$NumbersAtLength <- su$raiseFactor*su$FMNumbersAtLength
-
-      }else{
-
-        su$NumbersAtLength <- su$SAauxVarValue*su$FMNumbersAtLength
-
+      # Mean weight at length: from BV individual weights or LW relationship
+      if (bv_present && !is.null(wcol)) {
+        bv    <- data.table::setDT(RDBESEstRatioObj$BV)
+        bv_w  <- bv[BVtypeMeas == wcol,
+                    .(FMid, BVweight = as.numeric(BVvalueMeas))]
+        bv_lc <- merge(bv_w, fm[, .(FMid, SAid, LengthClass)], by = "FMid")
+        mean_w <- bv_lc[, .(MeanWeightAtLength = mean(BVweight, na.rm = TRUE)),
+                        by = .(SAid, LengthClass)]
+        su <- merge(su, mean_w, by = c("SAid", "LengthClass"), all.x = TRUE)
+      } else if (!is.null(LWparam)) {
+        fm_lw <- fm[, .(LengthClass, FMclassMeas)][, .SD[1], by = LengthClass]
+        fm_lw[, MeanWeightAtLength := LWparam[1] * FMclassMeas ^ LWparam[2]]
+        su <- merge(su, fm_lw[, .(LengthClass, MeanWeightAtLength)],
+                    by = "LengthClass", all.x = TRUE)
+      } else {
+        if (verbose)
+          message("No BV weights or LWparam supplied: MeanWeightAtLength set to NA.")
+        su[, MeanWeightAtLength := NA_real_]
       }
 
       return(su)
-
-
-
-
-
-# LH C --------------------------------------------------------------------
-    }else if(unique(RDBESEstRatioObj$SA$SAlowHierarchy) == "C"){
-
-
-      bv <- data.table::setDT(RDBESEstRatioObj$BV)
-      # bv <- bv[BVtypeMeas %in% "LengthTotal"]
-
-      lengthVar <- grep("(?i)length", unique(bv$BVtypeMeas), value = TRUE)
-
-      if(length(unique(lengthVar)) > 1){
-        stop("The length measurement type of the class needed for assessment (BVtypeAssess) needs to be unique")
-      }
-
-      sa <- data.table::setDT(RDBESEstRatioObj$SA)
-      sa <- sa[, unique(.SD), .SDcols = c("SAid", "SAlowHierarchy", "SAtotalWtMes" , "SAsampWtMes",  "SAnumTotal", "SAnumSamp", "SAauxVarValue", "SAauxVarUnit" )]
-      bv <- bv[, unique(.SD), .SDcols = c("SAid", "BVfishId", "BVtypeMeas", "BVvalueMeas", "BVtypeAssess")]
-
-      # bv[, BVLength := as.numeric(LengthTotal)]
-      bv_assess <- bv[BVtypeMeas %in% c(lengthVar, wcol),
-                      data.table::dcast(.SD, SAid + BVfishId ~ BVtypeMeas, value.var = "BVvalueMeas", drop = TRUE)
-      ]
-     bv_assess[, BVweight := as.numeric(get(wcol))]
-
-      bv1 <- bv_assess[
-        , .(BVMeanWeight = mean(BVweight, na.rm = TRUE),
-            BVNumbersAtLength = .N),
-        by = .(SAid, LengthClass)
-      ][
-        # add total count per SAid
-        , BVTotCount := sum(BVNumbersAtLength), by = SAid
-      ][
-        # add total weight per SAid
-        bv[, .(BVTotWeight = sum(BVweight, na.rm = TRUE)), by = SAid],
-        on = "SAid"
-      ]
-
-      # bv1$BVLengthClassProp <- bv1$BVNumbersAtLength/bv1$TotCount
-
-
-   # Do not need the
-      # species, the filtering of the "strata" variables will be done before the estimation
-      # To test
-      sa[, SAauxVarValue  := as.numeric(SAauxVarValue )]
-
-
-
-
-      su <- merge(bv1, sa, by = c("SAid"))
-
-      if(raiseVar == "Weight"){
-
-        su$raiseFactor <- su$SAtotalWtMes/su$SAsampWtMes
-        su$NumbersAtLength <- su$raiseFactor*su$BVNumbersAtLength
-
-      }else if(raiseVar == "Count"){
-
-        su$raiseFactor <- su$SAnumTotal/su$SAnumSamp
-        su$NumbersAtLength <- su$raiseFactor*su$BVNumbersAtLength
-
-      }else{
-
-        su$NumbersAtLength <- su$SAauxVarValue*su$BVNumbersAtLength
-
-      }
-
-      return(su)
-
-
-
-      # su$SANumbersAtLength <- su$BVNumbersAtLength * su$SAauxVarValue
-
-      # From here onwards need the column names
-
-      # s <- RDBEScore::getTablesInRDBESHierarchy(DEhierarchy)
-      # keywords <- c("SA|FM|BV")
-      # hierarchyTabs <-s[!is.na(gsub(keywords, NA, s))]
-      # # Get the table before the SA (most likely SS)
-      # nextTab <- tail(hierarchyTabs, n = 1)
-      # # Get table SA - 2
-      # nextTab1 <- tail(hierarchyTabs, n = )
-      #
-      #
-      # upperHier1 <- setDT(RDBESEstRatioObj[[nextTab]])
-      # cnames1 <- paste0(nextTab, "year")
-      # upperHier1 <- upperHier1[, unique(.SD), .SDcols = c("SAid", "SAspeCode","SAlowHierarchy", "SAauxVarValue")]
-
-
-
-      # if both lengths and weight exist
-      # if(isTRUE(any(grepl("Length", RDBESEstRatioObj$BV$BVtypeAssess)) & any(grepl("Weight", RDBESEstRatioObj$BV$BVtypeAssess)))){
-      #
-      # su$Wratio <- su$SAtotalWtMes/su$SAsampWtMes
-      # su$SANumbersAtLength <- su$BVNumbersAtLength * su$Wratio
-      #
-      # }else{
-      #   stop("Not yet implemented")
-      # }
-
     }
 
+    # -------------------------------------------------------------------------
+    # LH B: SA -> FM only
+    # FM holds the length-frequency; no BV table exists.
+    # MeanWeightAtLength can only be derived from LWparam.
+    # -------------------------------------------------------------------------
 
+    if (lh == "B") {
 
-    # Age composition ---------------------------------------------------------
-  }else if(targetValue == "AgeComp"){
-
-
-
-    # LH C --------------------------------------------------------------------
-
-
-    if(unique(RDBESDataObj$SA$SAlowHierarchy) == "C"){
-
-      bv <- data.table::setDT(RDBESEstRatioObj$BV)
-      bv <- bv[, unique(.SD), .SDcols = c("SAid", "BVfishId", "BVtypeMeas", "BVvalueMeas")]
-      bv <- dcast(bv, ... ~ BVtypeMeas , value.var = c("BVvalueMeas"), drop = TRUE)
-      bv[, BVweight := as.numeric(get(wcol))]
-      # TODO this probably needs to be an argument
-      # or needs to be defined later on?
-
-      bv1 <- bv[
-        , .(BVMeanWeight = mean(BVweight, na.rm = TRUE),
-            BVNumbersAtAge = .N),
-        by = .(SAid, Age)
-      ][
-        # add total count per SAid
-        , BVTotCount := sum(BVNumbersAtAge), by = SAid
-      ][
-        # add total weight per SAid
-        bv[, .(BVTotWeight = sum(BVweight, na.rm = TRUE)), by = SAid],
-        on = "SAid"
-      ]
-
-      # bv1$BVLengthClassProp <- bv1$BVNumbersAtLength/bv1$TotCount
-
-
+      fm <- data.table::setDT(RDBESEstRatioObj$FM)
       sa <- data.table::setDT(RDBESEstRatioObj$SA)
-      sa <- sa[, unique(.SD), .SDcols = c("SAid", "SAlowHierarchy", "SAtotalWtMes" , "SAsampWtMes",  "SAnumTotal", "SAnumSamp", "SAauxVarValue", "SAauxVarUnit" )] # Do not need the
-      # species, the filtering of the "strata" variables will be done before the estimation
-      # To test
-      sa[, SAauxVarValue  := as.numeric(SAauxVarValue )]
-      sa$SAauxVarValue <- 10
 
-      # TODO add check for subsampling
+      checkLC(fm = fm, classUnits = classUnits, classBreaks = classBreaks)
 
-      su <- merge(bv1, sa, by = c("SAid"))
+      fm <- fm[, unique(.SD), .SDcols = c("SAid", "FMid", "FMclassMeas",
+                                           "FMnumAtUnit", "FMaccuracy", "FMtypeAssess")]
+      sa <- sa[, unique(.SD), .SDcols = saCols]
+      sa[, SAauxVarValue := as.numeric(SAauxVarValue)]
 
-      if(raiseVar == "Weight"){
+      fm[, LengthClass := assignLengthClass(FMclassMeas)]
 
-        su$raiseFactor <- su$SAtotalWtMes/su$SAsampWtMes
-        su$NumbersAtAge <- su$raiseFactor*su$BVNumbersAtAge
+      fm1 <- fm[
+        , .(FMNumbersAtLength = sum(FMnumAtUnit, na.rm = TRUE)),
+        by = .(SAid, LengthClass)
+      ][, FMTotCount := sum(FMNumbersAtLength, na.rm = TRUE), by = SAid]
 
-      }else if(raiseVar == "Count"){
+      su <- merge(fm1, sa, by = "SAid")
+      su <- applySARaise(su,
+                         numbersInCol  = "FMNumbersAtLength",
+                         numbersOutCol = "NumbersAtLength")
 
-        su$raiseFactor <- su$SAnumTotal/su$SAnumSamp
-        su$NumbersAtAge <- su$raiseFactor*su$BVNumbersAtAge
-
-      }else{
-
-        su$NumbersAtAge <- su$SAauxVarValue*su$BVNumbersAtAge
-
+      # Mean weight at length: LWparam only (no BV in LH B)
+      if (!is.null(LWparam)) {
+        fm_lw <- fm[, .(LengthClass, FMclassMeas)][, .SD[1], by = LengthClass]
+        fm_lw[, MeanWeightAtLength := LWparam[1] * FMclassMeas ^ LWparam[2]]
+        su <- merge(su, fm_lw[, .(LengthClass, MeanWeightAtLength)],
+                    by = "LengthClass", all.x = TRUE)
+      } else {
+        if (verbose)
+          message("No LWparam supplied: MeanWeightAtLength set to NA.")
+        su[, MeanWeightAtLength := NA_real_]
       }
 
       return(su)
-      # Check which biol data are present
+    }
 
-      # if age exists
+    # -------------------------------------------------------------------------
+    # LH C: SA -> BV only
+    # No FM table. Individual fish measurements link directly to SA.
+    # -------------------------------------------------------------------------
 
-      # if indv weights + lengths  exist
+    if (lh == "C") {
 
-      # then Full data set back
+      if (!bv_present)
+        stop("Lower hierarchy C requires a BV table.")
 
-      # if only indv weights
-      # then you don't have the mean length at age unless you use the inverse LW relationship :provide a, b parameters or model them (Future work)
-      # if only lengths
-      # the you don't have the mean weight at age unless LW: a, b or model (Future work)
-      # else stop you don't sufficient data
+      bv <- data.table::setDT(RDBESEstRatioObj$BV)
+      sa <- data.table::setDT(RDBESEstRatioObj$SA)
+      sa <- sa[, unique(.SD), .SDcols = saCols]
+      sa[, SAauxVarValue := as.numeric(SAauxVarValue)]
 
-      # else stop
+      lengthVar <- grep("(?i)length", unique(bv$BVtypeMeas), value = TRUE, perl = TRUE)
+      if (length(unique(lengthVar)) > 1)
+        stop("Multiple length types in BV; filter to one before calling.")
 
+      bv <- bv[, unique(.SD), .SDcols = c("SAid", "BVfishId", "BVtypeMeas",
+                                           "BVvalueMeas", "BVtypeAssess")]
 
-      # LH A --------------------------------------------------------------------
+      measTypes <- if (!is.null(wcol)) c(lengthVar, wcol) else lengthVar
+      bv_wide <- bv[BVtypeMeas %in% measTypes,
+                    data.table::dcast(.SD,
+                                      SAid + BVfishId ~ BVtypeMeas,
+                                      value.var = "BVvalueMeas", drop = TRUE)]
 
+      bv_wide[, convertedLength := as.numeric(bv_wide[[lengthVar]])]
+      bv_wide[, LengthClass     := assignLengthClass(convertedLength)]
+      bv_wide <- addBVweight(bv_wide, lengthVar)
 
-    }else if(unique(RDBESDataObj$SA$SAlowHierarchy) == "A"){
+      bv1 <- bv_wide[
+        , .(BVNumbersAtLength  = .N,
+            MeanWeightAtLength = mean(BVweight, na.rm = TRUE)),
+        by = .(SAid, LengthClass)
+      ][
+        , BVTotCount := sum(BVNumbersAtLength), by = SAid
+      ][
+        bv_wide[, .(BVTotWeight = sum(BVweight, na.rm = TRUE)), by = SAid],
+        on = "SAid"
+      ]
 
-      # bv <- data.table::setDT(RDBESEstRatioObj$BV)
-      # fm <- data.table::setDT(RDBESEstRatioObj$FM)
-      # sa <- data.table::setDT(RDBESEstRatioObj$SA)
-      # bv <- bv[, unique(.SD), .SDcols = c( "FMid","BVfishId", "BVtypeMeas", "BVvalueMeas")]
-      # bv <- dcast(bv, ... ~ BVtypeMeas , value.var = c("BVvalueMeas"), drop = TRUE)
-      # bv[, BVweight := as.numeric(get(wcol))]
-      #
-      # bv1 <- bv[
-      #   , .(BVMeanWeight = mean(BVweight, na.rm = TRUE),
-      #       BVNumbersAtAge = .N),
-      #   by = .(FMid, Age)
-      # ][
-      #   # add total count per SAid
-      #   , BVTotCount := sum(BVNumbersAtAge), by = FMid
-      # ][
-      #   # add total weight per SAid
-      #   bv[, .(BVTotWeight = sum(BVweight, na.rm = TRUE)), by = FMid],
-      #   on = "FMid"
-      # ]
-      #
-      #
-      #
-      # fm <- fm[fm, unique(.SD), .SDcols = c("SAid", "FMid", "FMclassMeas", "FMnumAtUnit")]
-      # sa <- sa[, unique(.SD), .SDcols = c("SAid", "SAlowHierarchy", "SAtotalWtMes" , "SAsampWtMes",  "SAnumTotal", "SAnumSamp", "SAauxVarValue", "SAauxVarUnit" )]
-      #
-      # fm1 <- unique(
-      #   fm[FMclassMeas %chin% c("LengthTotal","LengthMeasured","Length"),
-      #      .(FMid, SAid, FMnumAtUnit)]
-      # )
-      #
-      # bv1 <- fm1[bv1, on = "FMid"][,
-      #                                 num_raise := fifelse(BVTotCount > 0, FMnumAtUnit / BVTotCount, NA_real_)
-      # ][
-      #   , N_at_age := BVNumbersAtAge * num_raise
-      # ]
+      su <- merge(bv1, sa, by = "SAid")
+      su <- applySARaise(su,
+                         numbersInCol  = "BVNumbersAtLength",
+                         numbersOutCol = "NumbersAtLength")
 
-      stop("Not yet implemented")
-    }else{
-      stop("Age composition can't be calculated with lower hierachy B.")
+      return(su)
     }
   }
 
+
+  # ===========================================================================
+  # AGE COMPOSITION
+  # ===========================================================================
+
+  if (targetValue == "AgeComp") {
+
+    # LH B is caught earlier with a clear error message.
+
+    # -------------------------------------------------------------------------
+    # LH A: SA -> FM -> BV
+    # FM length-frequency; BV individual ages stratified under FM
+    # length classes. Ages are first raised within each FM length class
+    # (BV subsample -> FM count), then the SA-level raise is applied.
+    # -------------------------------------------------------------------------
+
+    if (lh == "A") {
+
+      if (!bv_present)
+        stop("Lower hierarchy A age composition requires a BV table.")
+      if (is.null(wcol))
+        stop("A weight column in BV is required for age composition in lower hierarchy A.")
+
+      bv <- data.table::setDT(RDBESEstRatioObj$BV)
+      fm <- data.table::setDT(RDBESEstRatioObj$FM)
+      sa <- data.table::setDT(RDBESEstRatioObj$SA)
+
+      bv <- bv[, unique(.SD), .SDcols = c("FMid", "BVfishId", "BVtypeMeas", "BVvalueMeas")]
+      bv <- data.table::dcast(bv, ... ~ BVtypeMeas, value.var = "BVvalueMeas", drop = TRUE)
+      bv[, BVweight := as.numeric(bv[[wcol]])]
+
+      if (!"Age" %in% names(bv))
+        stop("No 'Age' measurement found in BV. Check BVtypeMeas values.")
+
+      fm <- fm[, unique(.SD), .SDcols = c("SAid", "FMid", "FMclassMeas", "FMnumAtUnit")]
+      sa <- sa[, unique(.SD), .SDcols = saCols]
+      sa[, SAauxVarValue := as.numeric(SAauxVarValue)]
+
+      fm_tot <- fm[, .(FMnumAtUnit = sum(FMnumAtUnit, na.rm = TRUE),
+                       SAid        = SAid[1]),
+                   by = FMid]
+
+      bv1 <- bv[
+        , .(BVMeanWeight   = mean(BVweight, na.rm = TRUE),
+            BVNumbersAtAge = .N),
+        by = .(FMid, Age)
+      ][, BVTotCount := sum(BVNumbersAtAge), by = FMid]
+
+      # Raise within FM length class: BV subsample -> FM tally
+      bv2 <- merge(bv1, fm_tot, by = "FMid")
+      bv2[, num_raise   := fifelse(BVTotCount > 0, FMnumAtUnit / BVTotCount, NA_real_)]
+      bv2[, N_at_age_FM := BVNumbersAtAge * num_raise]
+
+      # Mean length at age
+      lengthVar <- grep("(?i)length", names(bv), value = TRUE, perl = TRUE)
+      if (length(lengthVar) > 0) {
+        lv1 <- lengthVar[1]
+        mean_len <- bv[, .(MeanLengthAtAge = mean(as.numeric(bv[[lv1]]),
+                                               na.rm = TRUE)),
+                       by = .(FMid, Age)]
+        bv2 <- merge(bv2, mean_len, by = c("FMid", "Age"), all.x = TRUE)
+      } else {
+        bv2[, MeanLengthAtAge := NA_real_]
+      }
+
+      # Aggregate from FM level to SA level
+      bv3 <- bv2[
+        , .(N_at_age_SA     = sum(N_at_age_FM, na.rm = TRUE),
+            BVMeanWeight    = weighted.mean(BVMeanWeight,    BVNumbersAtAge, na.rm = TRUE),
+            MeanLengthAtAge = weighted.mean(MeanLengthAtAge, BVNumbersAtAge, na.rm = TRUE)),
+        by = .(SAid, Age)
+      ]
+
+      su <- merge(bv3, sa, by = "SAid")
+      su <- applySARaise(su,
+                         numbersInCol  = "N_at_age_SA",
+                         numbersOutCol = "NumbersAtAge")
+
+      return(su)
+    }
+
+    # -------------------------------------------------------------------------
+    # LH C: SA -> BV only
+    # No FM table. Individual fish measurements link directly to SA.
+    # -------------------------------------------------------------------------
+
+    if (lh == "C") {
+
+      bv <- data.table::setDT(RDBESEstRatioObj$BV)
+      sa <- data.table::setDT(RDBESEstRatioObj$SA)
+      sa <- sa[, unique(.SD), .SDcols = saCols]
+      sa[, SAauxVarValue := as.numeric(SAauxVarValue)]
+
+      bv <- bv[, unique(.SD), .SDcols = c("SAid", "BVfishId", "BVtypeMeas", "BVvalueMeas")]
+      bv <- data.table::dcast(bv, ... ~ BVtypeMeas, value.var = "BVvalueMeas", drop = TRUE)
+
+      if (!"Age" %in% names(bv))
+        stop("No 'Age' measurement found in BV. Check BVtypeMeas values.")
+
+      # Resolve weight outside data.table to avoid get() scoping issues in j
+      if (!is.null(wcol) && wcol %in% names(bv)) {
+        bv[, BVweight := as.numeric(bv[[wcol]])]
+      } else if (!is.null(LWparam)) {
+        lengthVar_age <- grep("(?i)length", names(bv), value = TRUE, perl = TRUE)
+        if (length(lengthVar_age) == 0)
+          stop("LWparam supplied but no length column found in BV.")
+        bv[, BVweight := LWparam[1] * as.numeric(bv[[lengthVar_age[1]]]) ^ LWparam[2]]
+      } else {
+        if (verbose) message("No weight column or LWparam supplied: BVweight set to NA.")
+        bv[, BVweight := NA_real_]
+      }
+
+      bv1 <- bv[
+        , .(BVMeanWeight   = mean(BVweight, na.rm = TRUE),
+            BVNumbersAtAge = .N),
+        by = .(SAid, Age)
+      ][
+        , BVTotCount := sum(BVNumbersAtAge), by = SAid
+      ][
+        bv[, .(BVTotWeight = sum(BVweight, na.rm = TRUE)), by = SAid],
+        on = "SAid"
+      ]
+
+      # Mean length at age
+      lengthVar <- grep("(?i)length", names(bv), value = TRUE, perl = TRUE)
+      if (length(lengthVar) > 0) {
+        lv1 <- lengthVar[1]
+        mean_len <- bv[, .(MeanLengthAtAge = mean(as.numeric(bv[[lv1]]),
+                                               na.rm = TRUE)),
+                       by = .(SAid, Age)]
+        bv1 <- merge(bv1, mean_len, by = c("SAid", "Age"), all.x = TRUE)
+      } else {
+        bv1[, MeanLengthAtAge := NA_real_]
+      }
+
+      su <- merge(bv1, sa, by = "SAid")
+      su <- applySARaise(su,
+                         numbersInCol  = "BVNumbersAtAge",
+                         numbersOutCol = "NumbersAtAge")
+
+      return(su)
+    }
+  }
+
+  stop("Unrecognised combination of targetValue ('", targetValue,
+       "') and lower hierarchy ('", lh, "').")
 }
