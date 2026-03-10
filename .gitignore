@@ -33,14 +33,16 @@ FishNCo/testData/RegionalTestData/*
 ~$*
 /doc/
 /Meta/
-<<<<<<< Updated upstream
 .vscode/
 docs
-=======
 # Data to develop fun
 /NLdata/
->>>>>>> Stashed changes
 package_overview.tex
 package_overview.html
 package_overview.pptx
 package_overview.md
+
+# add renv stuff
+/renv/
+.Rprofile
+renv.lock
