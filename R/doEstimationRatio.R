@@ -11,7 +11,7 @@
 #'   use \code{SAauxVarValue} directly as the raise factor.
 #' @param classUnits Units of the length class intervals, e.g. \code{"mm"} or
 #'   \code{"cm"}. Used only for \code{targetValue = "LengthComp"}: in LH A
-#'   and B, checks consistency with FM data; in LH C, used to interpret raw BV
+#'   and B, checks consistency with FM data; in LH C, used to transform raw BV
 #'   lengths before class assignment.
 #'   Codes: \url{https://vocab.ices.dk/?ref=1608}
 #' @param classBreaks A numeric vector of three values:
@@ -48,6 +48,7 @@
 #' }
 #'
 #' @importFrom utils tail
+#' @export
 doEstimationRatio <- function(RDBESDataObj,
                               targetValue  = "LengthComp",
                               raiseVar     = "Weight",
@@ -56,6 +57,10 @@ doEstimationRatio <- function(RDBESDataObj,
                               LWparam      = NULL,
                               verbose      = FALSE) {
 
+
+  #TODO stratification
+  #TODO add here the upper h?
+  #TODO build tests
 
   # ---------------------------------------------------------------------------
   # Checks
