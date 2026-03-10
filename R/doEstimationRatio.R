@@ -58,9 +58,10 @@ doEstimationRatio <- function(RDBESDataObj,
                               verbose      = FALSE) {
 
 
-  #TODO stratification
+  #TODO stratification SA, BV
   #TODO add here the upper h?
   #TODO build tests
+  #TODO mean weight at age and length, Check.
 
   # ---------------------------------------------------------------------------
   # Checks
