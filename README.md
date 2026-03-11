@@ -94,6 +94,26 @@ If the installation fails due to R CMD, this alternative option can be used
 library(remotes)
 install_github("ices-tools-dev/RDBEScore@dev", build = FALSE)
 ```
+
+## How to Start developing
+
+A good starting setup is a recent version of R, RStudio, and the packages commonly used for package development. `RDBEScore` currently requires R 4.1 or newer. In practice, most contributors will also want `remotes`, `devtools`, `roxygen2` and `testthat` installed locally. 
+
+Use **camelCase** for new function names so they match the existing package style. A good function for a new contributor to take as an example is [createRDBESDataObject](https://github.com/ices-tools-dev/RDBEScore/blob/dev/R/createRDBESDataObject.R) but if you prefer something even more compact [getTablesInRDBESHierarchy](https://github.com/ices-tools-dev/RDBEScore/blob/dev/R/getTablesInRDBESHierarchy.R) is another good candidate. 
+
+Development work should start from the `dev` branch. Before making changes, pull the latest `dev`, create or claim an issue, and make the changes locally. New package code should be added to the core package directories so that it is available to other contributors and can be built and checked in the normal package workflow. In most cases this means placing function code in `R/`, packaged data in `data/`, data-preparation scripts in `data-raw/`, tests in `tests/`, and user-facing examples or longer documentation in `vignettes/`. The repository also contains `WGRDBES-EST` directory for extra documentation.
+
+When adding a new function, **aim to commit a complete unit of work rather than an unfinished fragment**. A typical contribution includes the function itself, roxygen2 documentation, any supporting example data, and tests for the new behaviour. If a change affects user workflows, add or update a vignette example when possible. This is more helpful to new users than adding code alone, and it makes review easier for maintainers.
+
+Before pushing changes, run local checks. At a minimum, regenerate documentation if needed, run tests, and **run a package check**. A common local workflow is:
+
+```r
+devtools::document()
+devtools::test()
+#optionally do a full check as well
+devtools::check()
+```
+
 ## On `data.table` usage
 
 Objects of type `data.table` passed as parameters should be copied before modification. As an example:
