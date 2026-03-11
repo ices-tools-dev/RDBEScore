@@ -53,4 +53,56 @@ test_that("findAndKillOrphans removes orphans on an filtered RDBESDataObject",  
 
 })
 
+test_that("findAndKillOrphans does not remove upstream rows when lower-level rows are removed", {
+
+  myH1RawObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
+
+  # Keep a small stable subset first
+  myH1RawObject <- filterRDBESDataObject(
+    myH1RawObject,
+    fieldsToFilter = c("DEstratumName"),
+    valuesToFilter = c("DE_stratum1_H1", "DE_stratum2_H1", "DE_stratum3_H1")
+  )
+
+  # Start from an object without pre-existing orphans
+  myH1RawObject <- findAndKillOrphans(myH1RawObject, verbose = FALSE)
+
+  # Record the upstream state that should remain unchanged
+  expectedDEids <- sort(myH1RawObject$DE$DEid)
+  expectedSDids <- sort(myH1RawObject$SD$SDid)
+  expectedSDtoDE <- myH1RawObject$SD[order(SDid), .(SDid, DEid)]
+
+  # Remove all VS rows only
+  myFilteredObject <- filterRDBESDataObject(
+    myH1RawObject,
+    fieldsToFilter = "VSunitName",
+    valuesToFilter = "blah"
+  )
+
+  expect_equal(nrow(myFilteredObject[["VS"]]), 0)
+
+  # Kill downstream orphans created by removing VS
+  myObjectNoOrphans <- findAndKillOrphans(
+    objectToCheck = myFilteredObject,
+    verbose = FALSE
+  )
+
+  # Upstream tables must be unchanged
+  expect_equal(sort(myObjectNoOrphans$DE$DEid), expectedDEids)
+  expect_equal(sort(myObjectNoOrphans$SD$SDid), expectedSDids)
+  expect_equal(
+    myObjectNoOrphans$SD[order(SDid), .(SDid, DEid)],
+    expectedSDtoDE
+  )
+
+  # Downstream tables should be removed
+  expect_equal(nrow(myObjectNoOrphans[["VS"]]), 0)
+  expect_equal(nrow(myObjectNoOrphans[["FT"]]), 0)
+  expect_equal(nrow(myObjectNoOrphans[["FO"]]), 0)
+  expect_equal(nrow(myObjectNoOrphans[["SS"]]), 0)
+  expect_equal(nrow(myObjectNoOrphans[["SA"]]), 0)
+  expect_equal(nrow(myObjectNoOrphans[["FM"]]), 0)
+  expect_equal(nrow(myObjectNoOrphans[["BV"]]), 0)
+})
+
 }) ## end capture.output
