@@ -64,6 +64,15 @@ To see the complete list of vignettes available in the package use the following
 browseVignettes(package = "RDBEScore")
 ```
 
+## Downloading RDBES data (dev)
+
+The data can be downloaded from the [RDBES](https://rdbes.ices.dk/#/) or using the package function **downloadRDBESDataZip()**. This function allows you to download the data for a specific country and year directly from RDBES into a folder of your choice. The CS data is downloaded as a `.zip` file containing all the mandatory hierarchy tables plus VD and SL.
+
+```{r}
+downloadRDBESDataZip(datatype = "CS", year = 1965, country = "ZW",
+                     hierarchy = 1, dir = "./data-raw/exampleData")
+```
+
 
 
 ## Importing zipped files
@@ -76,7 +85,8 @@ importedH1 <- createRDBESDataObject(input = "./data-raw/exampleData/H1_2025_02_1
 names(importedH1[!unlist(lapply(importedH1, is.null))])
 ```
 
-For this to work the zip file should contain these tables in the root of the zip file.
+You can only read in one hierarchy at a time. If the zip file contains multiple hierarchies you need to read them separately.
+
 
 ## Data Object Structure
 
