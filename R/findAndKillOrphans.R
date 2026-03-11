@@ -1,7 +1,11 @@
+#' Find and kill orphans in an RDBESDataObject
+#'
 #' This function finds and removed any orphan records in an
 #' RDBESDataObject.  Normally data that has been downloaded from the RDBES
 #' will not contain orphan records - however if the data is subsequently
 #' filtered it is possible to introduce orphan records.
+#' The direction of the cleanup is effectively downstream.
+#' The function does not remove parent rows because a child disappeared.
 #'
 #' @param objectToCheck an RDBESDataObject.
 #' @param verbose (Optional) If set to TRUE more detailed text will be printed
