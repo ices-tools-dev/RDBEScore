@@ -22,7 +22,7 @@ downloadRDBESDataZip(
 
 \item{country}{2 letter code for country (e.g. "DK", "FR", "DE", etc.)}
 
-\item{hierarchy}{numeric value for hierarchy (e.g. 1, 2, etc.).
+\item{hierarchy}{numeric value for hierarchy in the range 1-13.
 Only required if \code{datatype} is "CS". If \code{datatype} is "CS" and \code{hierarchy}
 is not provided, the function will attempt to download the data without
 the hierarchy parameter.}

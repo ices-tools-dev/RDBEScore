@@ -32,7 +32,7 @@ downloadRDBESDataZip <- function(datatype, year, country,
                                  file_name=NULL,
                                  verbose = TRUE) {
   # Authenticate and get token
-  az <- get_azure_token(
+  az <- AzureAuth::get_azure_token(
     resource   = "api://18ab5ebb-1794-4e83-83f1-8fbd3dd5b152/rdbes.api.access",
     tenant     = "e0b220ce-5735-4468-91df-05cae5ff1fdc",
     app        = "b6347a7e-5f73-463a-81b1-3781d163de19",
@@ -42,7 +42,7 @@ downloadRDBESDataZip <- function(datatype, year, country,
   # Extract the access token
   access_token <- az$credentials$access_token
 
-  base_url <- "https://sboxrdbes.ices.dk/api/taf/export/data"
+  base_url <- "https://rdbes.ices.dk/api/taf/export/data"
 
   year_qry <- paste0("?year=", year)
   country_qry <- paste0("&country=", country)
@@ -58,20 +58,20 @@ downloadRDBESDataZip <- function(datatype, year, country,
     url <- paste0(base_url, mandatory_params, hierarchy_qry)
   }
 
-  response <- GET(
+  response <- httr::GET(
     url = url,
-    add_headers(Authorization = paste("Bearer", access_token))
+    httr::add_headers(Authorization = paste("Bearer", access_token))
   )
 
-  if (!status_code(response) == 200) {
+  if (!httr::status_code(response) == 200) {
     cat("Failed to download:\n")
-    cat("  Status code      :", status_code(response), "\n")
-    cat("  Http status      :", http_status(response)$reason, "\n")
-    cat("  Detailed message :", content(response, "text"), "\n")
+    cat("  Status code      :", httr::status_code(response), "\n")
+    cat("  Http status      :", httr::http_status(response)$reason, "\n")
+    cat("  Detailed message :", httr::content(response, "text"), "\n")
     return(FALSE)
   }
 
-  params_request <- parse_url(response$url)$query
+  params_request <- httr::parse_url(response$url)$query
   if (is.null(file_name)) {
     file_name <- paste0(params_request$datatype, "_", params_request$country, "_", params_request$year)
     if ("cshierarchy" %in% names(params_request)) {
@@ -81,12 +81,12 @@ downloadRDBESDataZip <- function(datatype, year, country,
 
   saving_file <- file.path(dir, paste0(file_name, ".zip"))
 
-  writeBin(content(response, "raw"), saving_file)
+  writeBin(httr::content(response, "raw"), saving_file)
 
   if (verbose) {
     cat("Downloaded:", saving_file, "\n")
-    cat("  Status code      :", status_code(response), "\n")
-    cat("  Http status      :", http_status(response)$reason, "\n")
+    cat("  Status code      :", httr::status_code(response), "\n")
+    cat("  Http status      :", httr::http_status(response)$reason, "\n")
   }
 
   return(TRUE)
