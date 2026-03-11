@@ -62,6 +62,8 @@ doEstimationRatio <- function(RDBESDataObj,
   #TODO add here the upper h?
   #TODO build tests
   #TODO mean weight at age and length, Check.
+  #TODO check the hierachies are checked properly
+  #TODO throw error when the raiseVar is NA
 
   # ---------------------------------------------------------------------------
   # Checks
