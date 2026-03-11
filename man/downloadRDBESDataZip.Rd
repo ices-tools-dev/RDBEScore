@@ -5,32 +5,40 @@
 \title{Title}
 \usage{
 downloadRDBESDataZip(
-  datatype = c("CE", "CL", "VD", "SL"),
+  datatype,
   year,
+  country,
   hierarchy = NULL,
-  country = "FR",
   export_format = "TableWithIdsFormat",
   dir = ".",
+  file_name = NULL,
   verbose = TRUE
 )
 }
 \arguments{
-\item{datatype}{description}
+\item{datatype}{one of CS, CL, CE, SL, VD?}
 
-\item{year}{description}
+\item{year}{numeric value for year of data to download (e.g. 2023)}
 
-\item{hierarchy}{description}
+\item{country}{2 letter code for country (e.g. "DK", "FR", "DE", etc.)}
 
-\item{country}{description}
+\item{hierarchy}{numeric value for hierarchy (e.g. 1, 2, etc.).
+Only required if \code{datatype} is "CS". If \code{datatype} is "CS" and \code{hierarchy}
+is not provided, the function will attempt to download the data without
+the hierarchy parameter.}
 
 \item{export_format}{description}
 
 \item{dir}{description}
 
+\item{file_name}{(Optional) String. The name to save the downloaded zip file
+as, without the .zip extension. If not provided, the file name will be
+generated based on the request parameters (e.g. "CS_DK_2023_H1.zip").}
+
 \item{verbose}{description}
 }
 \value{
-result
+boolean. \code{TRUE} if the download was successful, \code{FALSE} otherwise.
 }
 \description{
 need checks on argument format

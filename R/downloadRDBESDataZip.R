@@ -4,22 +4,33 @@
 #'
 #' it seems that datatype = "CS" require a hierarchy value
 #'
-#' @param datatype description
-#' @param year description
-#' @param hierarchy description
-#' @param country description
+#' @param datatype one of CS, CL, CE, SL, VD?
+#' @param year numeric value for year of data to download (e.g. 2023)
+#' @param country 2 letter code for country (e.g. "DK", "FR", "DE", etc.)
+#' @param hierarchy numeric value for hierarchy in the range 1-13.
+#'  Only required if `datatype` is "CS". If `datatype` is "CS" and `hierarchy`
+#'  is not provided, the function will attempt to download the data without
+#'  the hierarchy parameter.
 #' @param export_format description
 #' @param verbose description
 #' @param dir description
+#' @param file_name (Optional) String. The name to save the downloaded zip file
+#'  as, without the .zip extension. If not provided, the file name will be
+#'   generated based on the request parameters (e.g. "CS_DK_2023_H1.zip").
 #'
-#' @return result
+#' @return boolean. `TRUE` if the download was successful, `FALSE` otherwise.
 #'
 #' @importFrom AzureAuth get_azure_token
 #' @importFrom httr GET add_headers content status_code http_status parse_url
 #'
 #' @export
 #'
-downloadRDBESDataZip <- function(datatype = c("CE", "CL", "VD", "SL"), year, hierarchy = NULL, country = "FR", export_format = "TableWithIdsFormat", dir = ".", verbose = TRUE) {
+downloadRDBESDataZip <- function(datatype, year, country,
+                                 hierarchy = NULL,
+                                 export_format = "TableWithIdsFormat",
+                                 dir = ".",
+                                 file_name=NULL,
+                                 verbose = TRUE) {
   # Authenticate and get token
   az <- get_azure_token(
     resource   = "api://18ab5ebb-1794-4e83-83f1-8fbd3dd5b152/rdbes.api.access",
@@ -42,8 +53,8 @@ downloadRDBESDataZip <- function(datatype = c("CE", "CL", "VD", "SL"), year, hie
 
   url <- paste0(base_url, mandatory_params)
 
-  if (datatype == "CS" && !is.null(hierarchy) && hierarchy %in% paste0("H", seq(1, 13))) {
-    hierarchy_qry <- paste0("&cshierarchy=", hierarchy)
+  if (datatype == "CS" && !is.null(hierarchy) && hierarchy %in% seq(1, 13)) {
+    hierarchy_qry <- paste0("&cshierarchy=", paste0("H",hierarchy))
     url <- paste0(base_url, mandatory_params, hierarchy_qry)
   }
 
@@ -78,5 +89,5 @@ downloadRDBESDataZip <- function(datatype = c("CE", "CL", "VD", "SL"), year, hie
     cat("  Http status      :", http_status(response)$reason, "\n")
   }
 
-  return(saving_file)
+  return(TRUE)
 }
