@@ -47,7 +47,7 @@ addCLtoLowerCS <- function(rdbes, strataListCS, strataListCL, combineStrata =T, 
   # Function to subset data.table based on criteria list
   subset_dt <- function(dt, criteria) {
     for (field in names(criteria)) {
-      dt <- dt[get(field) == criteria[[field]], ]
+      dt <- dt[get(field) %in% criteria[[field]], ]
     }
     return(dt)
   }

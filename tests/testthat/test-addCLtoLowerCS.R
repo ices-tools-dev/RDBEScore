@@ -34,6 +34,33 @@ test_that("addCLtoLowerCS adds the correct sumCLoffWeight column with valid inpu
   expect_equal(result$sumCLoffWeight[1], 396210)
 })
 
+test_that("addCLtoLowerCS supports multiple CL values for a stratum", {
+  strataListCS_multiquarter <- list(
+    LEarea = "27.3.d.28.1",
+    LEmetier6 = "OTM_SPF_16-31_0_0",
+    TEstratumName = month.name[1:6],
+    SAspeCodeFAO = "SPR"
+  )
+  strataListCL_multiquarter <- list(
+    CLarea = "27.3.d.28.1",
+    CLquar = 1:2,
+    CLmetier6 = "OTM_SPF_16-31_0_0",
+    CLspecFAO = "SPR"
+  )
+
+  result <- expect_warning(addCLtoLowerCS(
+    mock_rdbes,
+    strataListCS_multiquarter,
+    strataListCL_multiquarter,
+    combineStrata = TRUE,
+    lowerHierarchy = "C",
+    CLfields = c("CLoffWeight")
+  ))
+
+  expect_true(nrow(result) > 0)
+  expect_equal(unique(result$sumCLoffWeight), 443832)
+})
+
 # Test 4: Check that the function handles unsupported lowerHierarchy correctly
 test_that("addCLtoLowerCS throws an error if lowerHierarchy is unsupported", {
   expect_error(
