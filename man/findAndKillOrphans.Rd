@@ -2,10 +2,7 @@
 % Please edit documentation in R/findAndKillOrphans.R
 \name{findAndKillOrphans}
 \alias{findAndKillOrphans}
-\title{This function finds and removed any orphan records in an
-RDBESDataObject.  Normally data that has been downloaded from the RDBES
-will not contain orphan records - however if the data is subsequently
-filtered it is possible to introduce orphan records.}
+\title{Find and kill orphans in an RDBESDataObject}
 \usage{
 findAndKillOrphans(objectToCheck, verbose = FALSE, strict = TRUE)
 }
@@ -26,6 +23,8 @@ This function finds and removed any orphan records in an
 RDBESDataObject.  Normally data that has been downloaded from the RDBES
 will not contain orphan records - however if the data is subsequently
 filtered it is possible to introduce orphan records.
+The direction of the cleanup is effectively downstream.
+The function does not remove parent rows because a child disappeared.
 }
 \examples{
 \dontrun{

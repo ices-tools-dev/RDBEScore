@@ -1,93 +1,152 @@
-#' Title
+#' Download RDBES data as a zip file
 #'
-#' need checks on argument format
+#' Downloads RDBES data through `icesRDBES::rdbes_download_data()`.
 #'
-#' it seems that datatype = "CS" require a hierarchy value
+#' @param datatype One of `"CS"`, `"CL"`, `"CE"`, `"SL"`, or `"VD"`.
+#' @param year Numeric value for year of data to download.
+#' @param country Two-letter country code.
+#' @param hierarchy Optional CS or CL hierarchy, for example `"H8"` or `8`.
+#' @param dir Directory where the zip file is saved.
+#' @param file_name Optional file name to save the downloaded zip file as. The
+#'  `.zip` suffix is added if omitted.
+#' @param verbose Passed to `icesRDBES::rdbes_download_data()`.
+#' @param payload Optional full RDBES download payload. If supplied, `datatype`,
+#'  `year`, `country` and `hierarchy` are ignored.
 #'
-#' @param datatype one of CS, CL, CE, SL, VD?
-#' @param year numeric value for year of data to download (e.g. 2023)
-#' @param country 2 letter code for country (e.g. "DK", "FR", "DE", etc.)
-#' @param hierarchy numeric value for hierarchy in the range 1-13.
-#'  Only required if `datatype` is "CS". If `datatype` is "CS" and `hierarchy`
-#'  is not provided, the function will attempt to download the data without
-#'  the hierarchy parameter.
-#' @param export_format description
-#' @param verbose description
-#' @param dir description
-#' @param file_name (Optional) String. The name to save the downloaded zip file
-#'  as, without the .zip extension. If not provided, the file name will be
-#'   generated based on the request parameters (e.g. "CS_DK_2023_H1.zip").
+#' @return Logical `TRUE` if the download completed.
 #'
-#' @return boolean. `TRUE` if the download was successful, `FALSE` otherwise.
-#'
-#' @importFrom AzureAuth get_azure_token
-#' @importFrom httr GET add_headers content status_code http_status parse_url
+#' @importFrom icesRDBES rdbes_download_data
 #'
 #' @export
 #'
-downloadRDBESDataZip <- function(datatype, year, country,
+downloadRDBESDataZip <- function(datatype = NULL, year = NULL, country = NULL,
                                  hierarchy = NULL,
-                                 export_format = "TableWithIdsFormat",
                                  dir = ".",
-                                 file_name=NULL,
-                                 verbose = TRUE) {
-  # Authenticate and get token
-  az <- AzureAuth::get_azure_token(
-    resource   = "api://18ab5ebb-1794-4e83-83f1-8fbd3dd5b152/rdbes.api.access",
-    tenant     = "e0b220ce-5735-4468-91df-05cae5ff1fdc",
-    app        = "b6347a7e-5f73-463a-81b1-3781d163de19",
-    version    = 2
-  )
-
-  # Extract the access token
-  access_token <- az$credentials$access_token
-
-  base_url <- "https://rdbes.ices.dk/api/taf/export/data"
-
-  year_qry <- paste0("?year=", year)
-  country_qry <- paste0("&country=", country)
-  export_format_qry <- paste0("&exportformat=", export_format)
-  datatype_qry <- paste0("&datatype=", datatype)
-
-  mandatory_params <- paste0(year_qry, country_qry, datatype_qry, export_format_qry)
-
-  url <- paste0(base_url, mandatory_params)
-
-  if (datatype == "CS" && !is.null(hierarchy) && hierarchy %in% seq(1, 13)) {
-    hierarchy_qry <- paste0("&cshierarchy=", paste0("H",hierarchy))
-    url <- paste0(base_url, mandatory_params, hierarchy_qry)
+                                 file_name = NULL,
+                                 verbose = TRUE,
+                                 payload = NULL) {
+  if (is.null(payload)) {
+    payload <- buildSimpleRDBESDownloadPayload(
+      datatype = datatype,
+      year = year,
+      country = country,
+      hierarchy = hierarchy,
+      export_format = "CsvFilePerTable"
+    )
   }
 
-  response <- httr::GET(
-    url = url,
-    httr::add_headers(Authorization = paste("Bearer", access_token))
+  dir.create(dir, recursive = TRUE, showWarnings = FALSE)
+
+  downloaded_file <- rdbes_download_data(
+    payload = payload,
+    dest_dir = dir,
+    production = getOption("rdbes.production", TRUE),
+    verbose = verbose
   )
 
-  if (!httr::status_code(response) == 200) {
-    cat("Failed to download:\n")
-    cat("  Status code      :", httr::status_code(response), "\n")
-    cat("  Http status      :", httr::http_status(response)$reason, "\n")
-    cat("  Detailed message :", httr::content(response, "text"), "\n")
-    return(FALSE)
-  }
-
-  params_request <- httr::parse_url(response$url)$query
-  if (is.null(file_name)) {
-    file_name <- paste0(params_request$datatype, "_", params_request$country, "_", params_request$year)
-    if ("cshierarchy" %in% names(params_request)) {
-      file_name <- paste0(file_name, "_", params_request$cshierarchy)
+  if (is.null(file_name) && !is.null(datatype) && !is.null(year) &&
+      !is.null(country)) {
+    file_name <- paste0(datatype, "_", country, "_", year)
+    if (!is.null(hierarchy)) {
+      file_name <- paste0(file_name, "_", normalizeRDBESHierarchy(hierarchy))
     }
   }
 
-  saving_file <- file.path(dir, paste0(file_name, ".zip"))
-
-  writeBin(httr::content(response, "raw"), saving_file)
-
-  if (verbose) {
-    cat("Downloaded:", saving_file, "\n")
-    cat("  Status code      :", httr::status_code(response), "\n")
-    cat("  Http status      :", httr::http_status(response)$reason, "\n")
+  if (!is.null(file_name)) {
+    target_file <- normalizeRDBESZipPath(dir, file_name)
+    moveRDBESDownload(downloaded_file, target_file)
   }
 
-  return(TRUE)
+  TRUE
+}
+
+buildSimpleRDBESDownloadPayload <- function(datatype, year, country, hierarchy,
+                                            export_format) {
+  if (is.null(datatype) || is.null(year) || is.null(country)) {
+    stop("Provide datatype, year, and country, or pass a full payload.")
+  }
+
+  datatype <- toupper(datatype)
+  filter_name <- switch(datatype,
+                        CS = "csFilters",
+                        CL = "clFilters",
+                        CE = "ceFilters",
+                        SL = "slFilters",
+                        VD = "vdFilters",
+                        NULL)
+  if (is.null(filter_name)) {
+    stop("Unsupported RDBES datatype: ", datatype)
+  }
+
+  payload <- list(dataType = datatype, format = export_format)
+
+  if (!is.null(hierarchy)) {
+    payload$hierarchies <- rdbesPayloadValues(
+      normalizeRDBESHierarchy(hierarchy)
+    )
+  } else if (datatype != "CS") {
+    payload$hierarchies <- rdbesPayloadValues(paste0("H", datatype))
+  }
+
+  year_field <- switch(datatype,
+                       CS = "deYear",
+                       CL = "clYear",
+                       CE = "ceYear",
+                       SL = "slYear",
+                       VD = "vdYear")
+  country_field <- switch(datatype,
+                          CS = "sdCountry",
+                          CL = "clVesselFlagCountry",
+                          CE = "ceVesselFlagCountry",
+                          SL = "slCountry",
+                          VD = "vdCountry")
+
+  payload[[filter_name]] <- list()
+  payload[[filter_name]][[year_field]] <- rdbesPayloadValues(year)
+  payload[[filter_name]][[country_field]] <- rdbesPayloadValues(country)
+
+  payload
+}
+
+rdbesPayloadValues <- function(values) {
+  as.list(as.character(values))
+}
+
+normalizeRDBESHierarchy <- function(hierarchy) {
+  hierarchy <- as.character(hierarchy)
+  ifelse(grepl("^H", hierarchy, ignore.case = TRUE),
+         toupper(hierarchy),
+         paste0("H", hierarchy))
+}
+
+normalizeRDBESZipPath <- function(dir, file_name) {
+  if (!grepl("\\.zip$", file_name, ignore.case = TRUE)) {
+    file_name <- paste0(file_name, ".zip")
+  }
+
+  file.path(dir, file_name)
+}
+
+moveRDBESDownload <- function(downloaded_file, target_file) {
+  if (normalizePath(downloaded_file, winslash = "/", mustWork = FALSE) ==
+      normalizePath(target_file, winslash = "/", mustWork = FALSE)) {
+    return(invisible(target_file))
+  }
+
+  if (file.exists(target_file)) {
+    unlink(target_file)
+  }
+
+  ok <- file.rename(downloaded_file, target_file)
+  if (!ok) {
+    ok <- file.copy(downloaded_file, target_file, overwrite = TRUE)
+    if (ok) {
+      unlink(downloaded_file)
+    }
+  }
+  if (!ok) {
+    stop("Could not move downloaded RDBES zip to ", target_file)
+  }
+
+  invisible(target_file)
 }

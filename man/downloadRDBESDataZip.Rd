@@ -2,47 +2,41 @@
 % Please edit documentation in R/downloadRDBESDataZip.R
 \name{downloadRDBESDataZip}
 \alias{downloadRDBESDataZip}
-\title{Title}
+\title{Download RDBES data as a zip file}
 \usage{
 downloadRDBESDataZip(
-  datatype,
-  year,
-  country,
+  datatype = NULL,
+  year = NULL,
+  country = NULL,
   hierarchy = NULL,
-  export_format = "TableWithIdsFormat",
   dir = ".",
   file_name = NULL,
-  verbose = TRUE
+  verbose = TRUE,
+  payload = NULL
 )
 }
 \arguments{
-\item{datatype}{one of CS, CL, CE, SL, VD?}
+\item{datatype}{One of \code{"CS"}, \code{"CL"}, \code{"CE"}, \code{"SL"}, or \code{"VD"}.}
 
-\item{year}{numeric value for year of data to download (e.g. 2023)}
+\item{year}{Numeric value for year of data to download.}
 
-\item{country}{2 letter code for country (e.g. "DK", "FR", "DE", etc.)}
+\item{country}{Two-letter country code.}
 
-\item{hierarchy}{numeric value for hierarchy in the range 1-13.
-Only required if \code{datatype} is "CS". If \code{datatype} is "CS" and \code{hierarchy}
-is not provided, the function will attempt to download the data without
-the hierarchy parameter.}
+\item{hierarchy}{Optional CS or CL hierarchy, for example \code{"H8"} or \code{8}.}
 
-\item{export_format}{description}
+\item{dir}{Directory where the zip file is saved.}
 
-\item{dir}{description}
+\item{file_name}{Optional file name to save the downloaded zip file as. The
+\code{.zip} suffix is added if omitted.}
 
-\item{file_name}{(Optional) String. The name to save the downloaded zip file
-as, without the .zip extension. If not provided, the file name will be
-generated based on the request parameters (e.g. "CS_DK_2023_H1.zip").}
+\item{verbose}{Passed to \code{icesRDBES::rdbes_download_data()}.}
 
-\item{verbose}{description}
+\item{payload}{Optional full RDBES download payload. If supplied, \code{datatype},
+\code{year}, \code{country} and \code{hierarchy} are ignored.}
 }
 \value{
-boolean. \code{TRUE} if the download was successful, \code{FALSE} otherwise.
+Logical \code{TRUE} if the download completed.
 }
 \description{
-need checks on argument format
-}
-\details{
-it seems that datatype = "CS" require a hierarchy value
+Downloads RDBES data through \code{icesRDBES::rdbes_download_data()}.
 }

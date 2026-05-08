@@ -46,3 +46,4 @@ package_overview.md
 /renv/
 .Rprofile
 renv.lock
+.positai
