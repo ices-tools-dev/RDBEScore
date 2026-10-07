@@ -2,7 +2,7 @@
 % Please edit documentation in R/validateRDBESEstObject.R
 \name{validateRDBESEstObject}
 \alias{validateRDBESEstObject}
-\title{Check whether an object is a valid RDBESEstObject}
+\title{Check whether an object is a valid RDBESEstObject (deprecated)}
 \usage{
 validateRDBESEstObject(objectToCheck, verbose = FALSE)
 }
@@ -16,7 +16,7 @@ out, or FALSE if you don't.  The default is FALSE.}
 Whoever revises this function please specify what it returns here
 }
 \description{
-Check whether an object is a valid RDBESEstObject
+Deprecated together with \code{\link[=createRDBESEstObject]{createRDBESEstObject()}}.
 }
 \examples{
 \dontrun{

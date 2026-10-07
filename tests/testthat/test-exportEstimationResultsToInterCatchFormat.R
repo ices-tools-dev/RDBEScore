@@ -51,14 +51,13 @@ test_that("exportEstimationResultsToInterCatchFormat runs without errors or warn
       # get some test data
       myH1RawObject <- generateTestData()
 
-      ## Create an estimation object, but stop at SA
-
-      myTestData <- createRDBESEstObject(myH1RawObject, 1, stopTable = "SA")
-      # Get rid of rows that don't have an SA row
-      myTestData <- myTestData[!is.na(myTestData$SAid),]
-      # Estimate using the data
-      myStrataResults <- doEstimationForAllStrata(myTestData, "SAsampWtLive")
-      myStrataResults
+      # Estimate using the data; hauls without an SA row for the species
+      # are taken as zero catch
+      # SA is SRSWOR with one sample per haul, so the unbiased variance is not
+      # estimable: approximate it treating the vessels (PSU) as WR
+      myStrataResults <- doEstimationForAllStrata(myH1RawObject, "SAsampWtLive",
+                                                  zeroIfNoChildren = "SS",
+                                                  varianceAsWR = "VS")
 
       # Get our estimated values for the PSU
       psuEstimates <- myStrataResults[myStrataResults$recType == "VS",]
@@ -100,7 +99,7 @@ test_that("exportEstimationResultsToInterCatchFormat runs without errors or warn
       icOutput <- exportEstimationResultsToInterCatchFormat(dataToOutput)
       expect_equal(length(icOutput), 15)
       expect_equal(icOutput[1], "HI,ZW,1965,NA,NA,NA,Stratum,VS_stratum1,NA,NA,-9,NA")
-      expect_equal(icOutput[2], "SI,ZW,1965,NA,NA,NA,Stratum,VS_stratum1,NA,1019159,1019159,L,A,NA,H,O,NA,kg, 3342.222,-9, 1053266,NA,NA,NA")
+      expect_equal(icOutput[2], "SI,ZW,1965,NA,NA,NA,Stratum,VS_stratum1,NA,1019159,1019159,L,A,NA,H,O,NA,kg, 3342.222,-9, 1108701,NA,NA,NA")
 
   })
 
@@ -109,14 +108,11 @@ test_that("exportEstimationResultsToInterCatchFormat gikves a warning when manda
   # get some test data
   myH1RawObject <- generateTestData()
 
-  ## Create an estimation object, but stop at SA
-
-  myTestData <- createRDBESEstObject(myH1RawObject, 1, stopTable = "SA")
-  # Get rid of rows that don't have an SA row
-  myTestData <- myTestData[!is.na(myTestData$SAid),]
-  # Estimate using the data
-  myStrataResults <- doEstimationForAllStrata(myTestData, "SAsampWtLive")
-  myStrataResults
+  # Estimate using the data; hauls without an SA row for the species are
+  # taken as zero catch
+  myStrataResults <- doEstimationForAllStrata(myH1RawObject, "SAsampWtLive",
+                                              zeroIfNoChildren = "SS",
+                                              varianceAsWR = "VS")
 
   # Get our estimated values for the PSU
   psuEstimates <- myStrataResults[myStrataResults$recType == "VS",]

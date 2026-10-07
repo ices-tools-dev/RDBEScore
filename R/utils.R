@@ -34,7 +34,24 @@ evenMoreUsedVars <- c("Weightg", "Lengthmm", "Group", "WeightIndexSum",
                       "i.SAparentID", "i.subSampleLevel", "i.topLevelSAid",
                       "subSampleLevel", "topLevelSAid")
 
-globalVariables(unique(c(usedVars, moreUsedVars, evenMoreUsedVars)))
+designEstimationVars <- c("node", "parent", "stratum", "method", "N", "n",
+                          "selProb", "incProb", "samp", "clustering",
+                          "clusterName", "methodCluster", "NCluster",
+                          "nCluster", "selProbCluster", "incProbCluster",
+                          "clusterNode", "x", "X", "ratio", "depth",
+                          "methodOriginal", "nResp", "uN", "un", "units",
+                          "w", "fpc", "cw", "varianceAsWR", "V1",
+                          "BVtypeAssess", "BVtypeMeas", "BVvalueMeas",
+                          "FMid", "parentNode", "BVfishId", "BVstratumName",
+                          "BVselectMeth", "BVnumTotal", "BVnumSamp",
+                          "BVselProb", "BVincProb", "SAseqNum", "parSAid",
+                          "var", "t", "v", "leafTable", "Swt", "Swt2",
+                          "Swtwx", "within", "n_g", "Swx", "Swx2", "ssq",
+                          "g", "R", "vb", "vw", "se", "var_est", "ssqScale",
+                          "okBetween", "okWithin", "okNode", "ok")
+
+globalVariables(unique(c(usedVars, moreUsedVars, evenMoreUsedVars,
+                         designEstimationVars)))
 
 
 #' as.integer.or.dbl

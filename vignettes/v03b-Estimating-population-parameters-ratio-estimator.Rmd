@@ -16,140 +16,312 @@ knitr::opts_chunk$set(
 ```
 
 
-## Introduction 
+## Introduction
 
-The aim of this document is to demonstrate how to estimate population parameters from RDBESDataObjects. 
+Catch numbers at age are usually estimated by raising the age composition of the samples to the landings: a ratio estimator with the landed weight as the auxiliary variable. This vignette estimates the numbers at age of sprat landed in the first and the fourth quarter in two ways, from the same samples and the same landings:
+
+1. **Simple estimation**: the fish of all samples of a quarter are pooled and their age composition is raised to the landings, with **addCLtoLowerCS(...)** and **doBVestimCANUM(...)**.
+2. **Design-based estimation**: every sampling stage is taken into account, with **createDesignTree(...)**, **doEstimationOnDesignTree(...)** and **doRatioEstimationToTotal(...)**.
+
+The results are shown side by side, and the last part explains where and why they differ.
 
 ```{r}
 library(RDBEScore)
+library(data.table)
 ```
 
-## Prerequisites
+## The data and its sampling design
 
-We'll use some example data from the RDBES.  For your own data it's a good idea to check your RDBESDataObjects are valid after any manipulations you perform.
-
-
-## Estimation workflow
-
-Estimation actually  is done on a *RDBESEstObject* that is generate from *RDBESDataObject* using **createRDBESEstObject(...)**. The following example uses a dataset that  resembles in many ways real data at ICES area 27.3.d.28.1 from the Estonian Baltic Trawling fleet for 2022 sprat (*Sprattus sprattus*).The dataset has both total landings and commercial sampling data.
+The example dataset resembles in many ways real data at ICES area 27.3.d.28.1 from the Estonian Baltic trawling fleet for 2022 sprat (*Sprattus sprattus*). The dataset has both total landings (CL) and commercial sampling data.
 
 ```{r}
 H8ExampleEE1
 ```
-The data has not gone through RDBES upload and download procedure and  contains invalid data types but also may have some other validity problems. However the fields for estimation should be present and valid.
+
+The data has not gone through the RDBES upload and download procedure and contains invalid data types but also may have some other validity problems. However the fields for estimation should be present and valid.
+
 ```{r eval=FALSE, echo=TRUE}
 #to check data types
 validateRDBESDataObject(H8ExampleEE1, checkDataTypes = TRUE, strict = FALSE)
 ```
 
-
-
-
-### Simple Estimation Example
-
-
-For the simplest case of estimation we need the RDBESDataObject with CS tables and a CL table. In the following example we will estimate the total number of sprat caught in the area 27.3.d.28.1 with the gear OTM_SPF_16-31_0_0 for the first and last quarter of the year.
+The design tree lists the sampling stages of the data:
 
 ```{r}
-#From the commertial landings table we need to get the total weight of the catches
-CLfieldstoSum <- c("CLoffWeight")
+x <- H8ExampleEE1
+tree <- createDesignTree(x, "BV", bvAssess = "Age", ratio = c(SA = "weight"),
+                         strictSampleSize = FALSE, varianceAsWR = "TE")
+tree[, .(units = .N, method = paste(unique(method), collapse = ", ")),
+     by = table]
 ```
 
-The most important thing in this estimation is to get the same strata for the CS and CL tables. This means we want to take the samples from the same area, with the same gear and the same species. Exactly how this is done depends on the upper and lower hierarchy used and how the sampling is stratified. In the following example we are using the lower hierarchy C meaning that we are extracting the BV data as the biological data. 
+Weeks (TE) are sampled within months (2 or 3 of the 4 weeks), vessels (VS) within the weeks, landings (LE) from the vessels and one box of sprat (SA) from each landing; all fish of a box are aged (BV). In two weeks there are two vessels although `VSnumSamp` is 1: `strictSampleSize = FALSE` keeps both, each raised as if it were the only one. The arguments `ratio` and `varianceAsWR` are explained below.
+
+## Simple estimation
+
+The samples and the landings have to be matched to the same strata: the area, the gear, the species and the months of the quarter. **addCLtoLowerCS(...)** extracts the BV data of the samples (lower hierarchy C) and adds the sum of the landings. **doBVestimCANUM(...)** pools all fish, computes the proportion at age and the mean weight and raises them to the landings $L$: the number of fish at age $a$ is $N_a = L \cdot n_a / w$, where $n_a$ is the number of sampled fish of age $a$ and $w$ the weight of all sampled fish.
 
 ```{r}
-#get the first quarter data from CS 
-strataListCS <- list(LEarea="27.3.d.28.1",
-                     LEmetier6 = "OTM_SPF_16-31_0_0",
-                     TEstratumName = month.name[1:3],
-                    SAspeCodeFAO = "SPR")
+quarters <- list(Q1 = 1:3, Q4 = 10:12)
+biolCL <- lapply(names(quarters), function(q) {
+  strataListCS <- list(LEarea = "27.3.d.28.1",
+                       LEmetier6 = "OTM_SPF_16-31_0_0",
+                       TEstratumName = month.name[quarters[[q]]],
+                       SAspeCodeFAO = "SPR")
+  strataListCL <- list(CLarea = "27.3.d.28.1",
+                       CLquar = as.integer(sub("Q", "", q)),
+                       CLmetier6 = "OTM_SPF_16-31_0_0",
+                       CLspecFAO = "SPR")
+  # the warnings only say that the months are combined into one stratum
+  suppressWarnings(
+    addCLtoLowerCS(x, strataListCS, strataListCL, combineStrata = TRUE,
+                   lowerHierarchy = "C", CLfields = "CLoffWeight"))
+})
+names(biolCL) <- names(quarters)
 
-#get the first quarter data from CL table
-strataListCL <- list(CLarea="27.3.d.28.1",
-                     CLquar = 1,
-                     CLmetier6 = "OTM_SPF_16-31_0_0",
-                     CLspecFAO = "SPR")
-
-#we are using the lower hierarchy C meaning that we are extracting the BV data
-#as the biological data
-biolCLQ1 <- addCLtoLowerCS(H8ExampleEE1, strataListCS, strataListCL,
-                         combineStrata =T, lowerHierarchy = "C",
-                         CLfields = CLfieldstoSum)
+simple <- rbindlist(lapply(names(quarters), function(q) {
+  # ages 0 to 7 and a plus group 8+
+  r <- doBVestimCANUM(biolCL[[q]], "sumCLoffWeight", classUnits = "Ageyear",
+                      classBreaks = 0:8)
+  r[, .(quarter = q, Age = as.character(Group), simple = totNum)]
+}))
 ```
 
-To estimate the total number of sprat caught in the area 27.3.d.28.1 with the gear OTM_SPF_16-31_0_0 for the first quarter of the year we need to use the function **doBVestimCANUM(...)**. The function takes the biological data table, the columns to be added to the final result and the class breaks for the estimation. The function returns a table with the estimates for the given class breaks.
-The allowed class units are "Ageyears", "Lenghtmm" and "Weightg". The class breaks are the number of classes to break the data into. The function will return the estimates for each class.
-The addColumns parameter is a vector of column names that will be added to the final result. The columns should be present in the biological data table. A minimum of one column (the sum column that in our case is "sumCLoffWeight") is required. The function will return the estimates for each unique value in the columns.
+The class breaks also decide which fish are used: with `classBreaks = 1:8` the fish of age 0 would be left out of the proportions at age.
+
+## Design-based estimation
+
+The design-based estimation follows the sampling stages of the design tree and uses two ratio estimators:
+
+- **A ratio estimator at the box stage.** The fish of a box are raised to the landing it was taken from with the ratio of the total and the sampled weight, `SAtotalWtMes / SAsampWtMes` (`ratio = c(SA = "weight")`), instead of the number of boxes, `SAnumTotal / SAnumSamp`. The landings, vessels and weeks are raised by their selection probabilities.
+- **A ratio estimator to the landings.** The numbers at age and the landed weight are estimated from the same samples. **doRatioEstimationToTotal(...)** then scales the numbers at age so that the estimated landings equal the CL landings of the quarter.
+
+Most weeks have one sampled vessel, so the variance within the weeks cannot be estimated. `varianceAsWR = "TE"` approximates the variance by treating the weeks as sampled with replacement, which overestimates it somewhat.
 
 ```{r}
-lenCANUMQ1 <- doBVestimCANUM(biolCLQ1, c("sumCLoffWeight"),
-             classUnits = "Lengthmm",
-             classBreaks = seq(70,130,10),
-             verbose = FALSE)
+# the number of fish by age (8 and older as 8+) and the sampled weight
+fish <- getLeafValuesBV(tree, x, classMeas = "Age")
+age <- as.integer(sub("N|Age=", "", fish$var, fixed = TRUE))
+fish[, var := paste0("N|Age=", ifelse(age >= 8, "8+", age))]
+leaves <- rbind(fish, getLeafValuesSA(tree, x, "SAsampWtMes"))
+est <- doEstimationOnDesignTree(tree, leaves)
 
-lenCANUMQ1
+# the quarter of each sample, from the month (TE stratum)
+quarterOf <- function(nodes) {
+  month <- getAncestorValue(tree, nodes, x, "TEstratumName")
+  paste0("Q", ceiling(match(month, month.name) / 3))
+}
+# the CL landings, in grammes like SAsampWtMes
+landings <- x$CL[CLarea == "27.3.d.28.1" &
+                   CLmetier6 == "OTM_SPF_16-31_0_0" & CLspecFAO == "SPR",
+                 .(L = sum(CLoffWeight) * 1000),
+                 by = .(quarter = paste0("Q", CLquar))]
+design <- doRatioEstimationToTotal(est, unique(fish$var), "SAsampWtMes",
+                                   X = setNames(landings$L, landings$quarter),
+                                   domainOf = quarterOf)
+design <- design[, .(quarter = domain,
+                     Age = sub("N|Age=", "", var, fixed = TRUE),
+                     design = est, se)]
 ```
 
-
-To have the estimates for several Quarters in the result same biolCL table creation is done for the last quarter of the year. 
+## The results side by side
 
 ```{r}
-strataListCS <- list(LEarea="27.3.d.28.1",
-                     LEmetier6 = "OTM_SPF_16-31_0_0",
-                     TEstratumName = month.name[10:12], #the last 3 months of the year
-                    SAspeCodeFAO = "SPR")
-
-strataListCL <- list(CLarea="27.3.d.28.1",
-                     CLquar = 4,
-                     CLmetier6 = "OTM_SPF_16-31_0_0",
-                     CLspecFAO = "SPR")
-
-biolCLQ4 <- addCLtoLowerCS(H8ExampleEE1, strataListCS, strataListCL,
-                         combineStrata =T, lowerHierarchy = "C",
-                         CLfields = CLfieldstoSum)
+cmp <- merge(simple[, .(quarter, Age, simple)], design,
+             by = c("quarter", "Age"), all = TRUE)
+cmp[is.na(simple), simple := 0]
+# ages found in neither estimate (age 0 in the first quarter)
+cmp <- cmp[simple > 0 | design > 0]
+cmp[, difference := fifelse(simple > 0, 100 * (design / simple - 1),
+                            NA_real_)]
+cmp[, ageOrder := as.integer(sub("+", "", Age, fixed = TRUE))]
+setorder(cmp, quarter, ageOrder)
+knitr::kable(cmp[, .(Quarter = quarter, Age,
+                     `Simple (millions)` = simple / 1e6,
+                     `Design-based (millions)` = design / 1e6,
+                     `Difference (%)` = difference,
+                     `Design-based CV (%)` = 100 * se / design)],
+             digits = 2,
+             caption = "Numbers at age of sprat raised to the CL landings")
 ```
 
 ```{r}
-#lets combine the two quarters into one table
-biolCL <- rbind(biolCLQ1, biolCLQ4)
+totals <- cmp[, .(simple = sum(simple) / 1e6, design = sum(design) / 1e6),
+              by = quarter]
+totals
 ```
 
-More columns from the above table can be added to the final result. The output is broken down by unique values in these columns.
+The total numbers are close (`r round(totals$simple[1], 1)` and `r round(totals$design[1], 1)` million in the first quarter), but the age compositions differ: the numbers of single ages differ by up to `r round(max(abs(cmp$difference), na.rm = TRUE))`%. Only the design-based estimates come with standard errors.
+
+### Numbers at length
+
+The same comparison for 10 mm length classes (`classBreaks = seq(70, 130, 10)`, with a plus group 130+ mm). For the design-based estimate the fish units are those measured for length (`bvAssess = "LengthTotal"`).
 
 ```{r}
-#this alllows to add extra columns into the final result 
-addCols <- c(names(strataListCS),
-             names(strataListCL),
-             paste0('sum', CLfieldstoSum))
+simpleL <- rbindlist(lapply(names(quarters), function(q) {
+  r <- doBVestimCANUM(biolCL[[q]], "sumCLoffWeight", classUnits = "Lengthmm",
+                      classBreaks = seq(70, 130, 10))
+  r[, .(quarter = q, Length = as.character(Group), simple = totNum)]
+}))
 
-ageCANUM <- doBVestimCANUM(biolCL, addCols,
-             classUnits = "Ageyear",
-             classBreaks = 1:8,
-             verbose = FALSE)
+treeL <- createDesignTree(x, "BV", bvAssess = "LengthTotal",
+                          ratio = c(SA = "weight"),
+                          strictSampleSize = FALSE, varianceAsWR = "TE")
+fishL <- getLeafValuesBV(treeL, x, classMeas = "LengthTotal",
+                         breaks = c(seq(70, 130, 10), Inf))
+estL <- doEstimationOnDesignTree(treeL, rbind(fishL,
+                                              getLeafValuesSA(treeL, x,
+                                                              "SAsampWtMes")))
+designL <- doRatioEstimationToTotal(estL, unique(fishL$var), "SAsampWtMes",
+                                    X = setNames(landings$L, landings$quarter),
+                                    domainOf = quarterOf)
+# class "[70,80)" is "70-80" and "[130,Inf)" is "130+" in doBVestimCANUM
+classLabel <- sub("N|LengthTotal=", "", designL$var, fixed = TRUE)
+bounds <- tstrsplit(gsub("[][()]", "", classLabel), ",")
+designL[, Length := fifelse(bounds[[2]] == "Inf", paste0(bounds[[1]], "+"),
+                            paste0(bounds[[1]], "-", bounds[[2]]))]
 
-ageCANUM
+cmpL <- merge(simpleL, designL[, .(quarter = domain, Length, design = est, se)],
+              by = c("quarter", "Length"), all = TRUE)
+cmpL[is.na(simple), simple := 0]
+cmpL[, lengthOrder := as.numeric(sub("[-+].*$", "", Length))]
+setorder(cmpL, quarter, lengthOrder)
+knitr::kable(cmpL[, .(Quarter = quarter, `Length (mm)` = Length,
+                      `Simple (millions)` = simple / 1e6,
+                      `Design-based (millions)` = design / 1e6,
+                      `Difference (%)` = fifelse(simple > 0,
+                                                 100 * (design / simple - 1),
+                                                 NA_real_),
+                      `Design-based CV (%)` = 100 * se / design)],
+             digits = 2,
+             caption = "Numbers at length of sprat raised to the CL landings")
+```
+
+The differences have the same cause as for the age compositions, explained next.
+
+## Why the estimates differ
+
+Both estimators raise the samples $k$ of a quarter to the same landings $L$, and both can be written as
+
+$$N_a = L \sum_k s_k \frac{n_{a,k}}{w_k}$$
+
+where $n_{a,k} / w_k$ is the number of fish of age $a$ per gram in sample $k$. They differ only in the weight $s_k$ that each sample gets:
+
+- **Simple**: $s_k = w_k / \sum_j w_j$, the share of the sample in the sampled weight. A sample of 1 kg counts twice as much as a sample of 0.5 kg, whatever the size of the landing it comes from.
+- **Design-based**: $s_k = W_k X_k / \sum_j W_j X_j$, the share of the landings the sample represents: the weight $X_k$ (`SAtotalWtMes`) of the landing it comes from, raised by $W_k$ for the selection of the landings, the vessels and the weeks.
+
+The weights of the samples are:
+
+```{r}
+# raising factor of a unit: product of the weights of it and the units above
+raising <- function(nodes) {
+  w <- rep(1, length(nodes))
+  repeat {
+    i <- match(nodes, tree$node)
+    if (all(is.na(i))) break
+    w <- w * fifelse(is.na(i), 1, tree$w[i])
+    nodes <- tree$parent[i]
+  }
+  w
+}
+samples <- tree[table == "SA", .(node, SAid = as.numeric(sub("SA:", "", node)),
+                                 W = raising(parent))]
+samples <- x$SA[, .(SAid, sampled = SAsampWtMes, landing = SAtotalWtMes)][
+  samples, on = "SAid"]
+samples[, quarter := quarterOf(samples$node)]
+samples[, month := getAncestorValue(tree, samples$node, x, "TEstratumName")]
+samples[, `:=`(simpleShare = 100 * sampled / sum(sampled),
+               designShare = 100 * W * landing / sum(W * landing)),
+        by = quarter]
+setorder(samples, quarter, SAid)
+knitr::kable(samples[, .(Quarter = quarter, Month = month, Sample = SAid,
+                         `Sampled (kg)` = sampled / 1000,
+                         `Landing (t)` = landing / 1e6,
+                         `Raising of the landing` = W,
+                         `Landings represented (t)` = W * landing / 1e6,
+                         `Simple weight (%)` = simpleShare,
+                         `Design-based weight (%)` = designShare)],
+             digits = 1, caption = "The weight of each sample")
+```
+
+```{r, include = FALSE}
+q1 <- samples[quarter == "Q1"]
+over <- q1[which.max(simpleShare - designShare)]
+under <- q1[which.max(designShare - simpleShare)]
+```
+
+In the first quarter sample `r over$SAid` (`r over$month`) has `r round(over$simpleShare)`% of the sampled weight but represents only `r round(over$designShare)`% of the landings, while sample `r under$SAid` (`r under$month`) has `r round(under$simpleShare)`% of the sampled weight and represents `r round(under$designShare)`% of the landings. The simple estimator gives the age composition of the first sample far too much weight and that of the second far too little.
+
+The formula reproduces both estimates (in the simple estimator $w_k$ is the weight of the aged fish, here within 0.2% of `SAsampWtMes`):
+
+```{r}
+# number and weight of the aged fish of each sample
+bv <- dcast(x$BV[BVtypeMeas %in% c("Age", "WeightMeasured")],
+            SAid + BVfishId ~ BVtypeMeas, value.var = "BVvalueMeas")
+bv[, Age := fifelse(as.integer(Age) >= 8, "8+", Age)]
+perSample <- bv[, .(fishWeight = sum(as.numeric(WeightMeasured))),
+                by = SAid][samples, on = "SAid"]
+perSample[, fishShare := fishWeight / sum(fishWeight), by = quarter]
+perAge <- perSample[bv[, .(n = .N), by = .(SAid, Age)], on = "SAid"]
+formula <- perAge[, .(simple = sum(fishShare * n / fishWeight),
+                      design = sum(designShare / 100 * n / sampled)),
+                  by = .(quarter, Age)]
+formula <- landings[formula, on = "quarter"]
+formula[, `:=`(simple = L * simple, design = L * design)]
+check <- cmp[formula, on = .(quarter, Age)]
+c(simple = isTRUE(all.equal(check$i.simple, check$simple)),
+  design = isTRUE(all.equal(check$i.design, check$design)))
+```
+
+The two estimators agree only when each sample represents the same share of the landings as its share of the sampled weight, that is when the samples are taken in proportion to the landings. Here the weeks, vessels and landings were sampled with different probabilities and the boxes come from landings of very different size, so the simple estimator over-represents some samples and under-represents others.
+
+Both estimators share the limits of the sampling: the second and third quarter have landings but no samples and cannot be raised, and in the fourth quarter the age composition of October and November is applied to the December landings as well. The estimated landings show how much the ratio to the CL landings corrects:
+
+```{r}
+landingsHat <- doRatioEstimationToTotal(est, "SAsampWtMes", "SAsampWtMes",
+                                        X = setNames(landings$L,
+                                                     landings$quarter),
+                                        domainOf = quarterOf)
+setorder(landingsHat, domain)
+knitr::kable(landingsHat[, .(Quarter = domain, `CL landings (t)` = X / 1e6,
+                             `Estimated from the samples (t)` = t_x / 1e6)],
+             digits = 1)
 ```
 
 ## Exporting results to InterCatch
 
-The results can be formatted for the InterCatch data call using **exportEstimationResultsToInterCatchFormat()**. 
-To do this we need to map the columns in our calculated `ageCANUM` object to the column names expected by the export function.
+The results can be formatted for the InterCatch data call using **exportEstimationResultsToInterCatchFormat()**. Here we export the design-based numbers at age with their variances. The mean weight at age is the ratio of the estimated weight and number of fish at age in each quarter.
 
 ```{r}
-# Map the results to InterCatch format
+# number and weight of fish by age (8+) and quarter
+byQuarter <- rbind(getLeafValuesBV(tree, x, classMeas = "Age"),
+                   getLeafValuesBV(tree, x, classMeas = "Age",
+                                   sumMeas = "WeightMeasured"))
+parts <- tstrsplit(byQuarter$var, "|Age=", fixed = TRUE)
+ageQ <- as.integer(parts[[2]])
+byQuarter[, var := paste(parts[[1]],
+                         fifelse(ageQ >= 8, "8+", as.character(ageQ)),
+                         quarterOf(node), sep = "|")]
+estQ <- doEstimationOnDesignTree(tree, byQuarter)$nodes[node == "ROOT"]
+estQ[, c("measure", "Age", "quarter") := tstrsplit(var, "|", fixed = TRUE)]
+meanWeight <- dcast(estQ, quarter + Age ~ measure, value.var = "t")
+meanWeight[, MeanWeight := WeightMeasured / N]
+results <- meanWeight[design, on = .(quarter, Age)][design > 0]
+setorder(results, quarter, Age)
+
 dataToExport <- data.frame(
     # HI columns
     Country = "EE",
     Year = "2022",
     SeasonType = "Quarter",
-    Season = ageCANUM$CLquar,
-    Fleet = ageCANUM$CLmetier6,
+    Season = as.integer(sub("Q", "", results$quarter)),
+    Fleet = "OTM_SPF_16-31_0_0",
     AreaType = "Div",
-    FishingArea = ageCANUM$CLarea,
-    DepthRange = "NA", 
-    
+    FishingArea = "27.3.d.28.1",
+    DepthRange = "NA",
+
     # SI columns
-    Species = ageCANUM$SAspeCodeFAO, 
+    Species = "SPR",
     Stock = "Unknown",
     CatchCategory = "L",
     ReportingCategory = "R",
@@ -158,26 +330,20 @@ dataToExport <- data.frame(
     SamplesOrigin = "U",
     QualityFlag = "U",
     UnitCATON = "kg",
-    CATON = ageCANUM$sumCLoffWeight,
-    OffLandings = ageCANUM$sumCLoffWeight,
-    
+    CATON = landings$L[match(results$quarter, landings$quarter)] / 1000,
+    OffLandings = landings$L[match(results$quarter, landings$quarter)] / 1000,
+
     # SD columns
     Sex = "N",
-    CANUMtype = "L",
-    AgeLength = as.integer(as.character(ageCANUM$Group)),
-    PlusGroup = ageCANUM$plusGroup,
-    #SampledCatch = ageCANUM$sumCLoffWeight,
-    #NumSamplesLngt = ageCANUM$lenMeas,
-    #NumLngtMeas = ageCANUM$lenMeas,
-    #NumSamplesAge = ageCANUM$lenMeas,
-    #NumAgeMeas = ageCANUM$lenMeas,
-    unitMeanWeight = "g", 
+    CANUMtype = "Age",
+    AgeLength = as.integer(sub("+", "", results$Age, fixed = TRUE)),
+    PlusGroup = 8,
+    unitMeanWeight = "g",
     unitCANUM = "n",
-    UnitAgeOrLength = "Age", 
-    UnitMeanLength = "mm",
-    NumberCaught = ageCANUM$totNum,
-    MeanWeight = ageCANUM$WeightgMean,
-    MeanLength = ageCANUM$LengthmmMean
+    UnitAgeOrLength = "year",
+    NumberCaught = results$design,
+    MeanWeight = results$MeanWeight,
+    varNumLanded = results$se^2
 )
 
 # Generate the InterCatch string
@@ -185,7 +351,7 @@ ic_output <- exportEstimationResultsToInterCatchFormat(dataToExport)
 
 # Show the first few lines of the output
 head(ic_output)
-``` 
+```
 
 
 See also other package vignettes:

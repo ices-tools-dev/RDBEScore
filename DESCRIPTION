@@ -116,6 +116,7 @@ Roxygen: list(markdown = TRUE)
 Suggests:
     knitr,
     rmarkdown,
+    SDAResources,
     testthat
 Depends:
     R (>= 4.1)

@@ -2,7 +2,7 @@
 % Please edit documentation in R/filterRDBESEstObject.R
 \name{filterRDBESEstObject}
 \alias{filterRDBESEstObject}
-\title{Filter an RDBESEstObject}
+\title{Filter an RDBESEstObject (deprecated)}
 \usage{
 filterRDBESEstObject(
   RDBESEstObjectToFilter,
@@ -26,6 +26,9 @@ the filtered input object of the same class as
 \code{RDBESEstObjectToFilter}
 }
 \description{
+Deprecated together with \code{\link[=createRDBESEstObject]{createRDBESEstObject()}}.
+}
+\details{
 The returned object will include all rows which include the field names
 and have one of the allowed values in \code{valuesToFilter}.
 }

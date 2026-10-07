@@ -1,3 +1,11 @@
+# createRDBESEstObject() is deprecated; these tests check that it still works,
+# so only its deprecation warning is muted
+createRDBESEstObjectQuietly <- function(...) {
+  withCallingHandlers(createRDBESEstObject(...), warning = function(w) {
+    if (grepl("deprecated", conditionMessage(w))) invokeRestart("muffleWarning")
+  })
+}
+
 capture.output({  ## suppresses printing of console output when running test()
 
   # common parameters
@@ -17,7 +25,7 @@ createTestObjectFromH1Data <- function(){
                                        c("DE_stratum1_H1","DE_stratum2_H1","DE_stratum3_H1"),
                                        killOrphans = TRUE)
 
-  myEstObject <- createRDBESEstObject(myRawObject,1)
+  myEstObject <- createRDBESEstObjectQuietly(myRawObject,1)
   myEstObject
 
 }

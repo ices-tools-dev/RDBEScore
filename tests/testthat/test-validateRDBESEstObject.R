@@ -1,9 +1,17 @@
+# createRDBESEstObject() is deprecated; these tests check that it still works,
+# so only its deprecation warning is muted
+createRDBESEstObjectQuietly <- function(...) {
+  withCallingHandlers(createRDBESEstObject(...), warning = function(w) {
+    if (grepl("deprecated", conditionMessage(w))) invokeRestart("muffleWarning")
+  })
+}
+
 capture.output({  ## suppresses printing of console output when running test()
 
 test_that("validateRDBESEstObject does not produce errors or warnings",  {
 
   myEmptyObject <- createRDBESDataObject()
-  myEStObj <- createRDBESEstObject(myEmptyObject,1)
+  myEStObj <- createRDBESEstObjectQuietly(myEmptyObject,1)
 
   expect_warning(validateRDBESEstObject(myEStObj),NA)
   expect_error(validateRDBESEstObject(myEStObj),NA)
@@ -11,21 +19,21 @@ test_that("validateRDBESEstObject does not produce errors or warnings",  {
 test_that("validateRDBESEstObject does not error for valid empty object",  {
 
   myEmptyObject <- createRDBESDataObject()
-  myEStObj <- createRDBESEstObject(myEmptyObject,1)
+  myEStObj <- createRDBESEstObjectQuietly(myEmptyObject,1)
   expect_error(validateRDBESEstObject(myEStObj),NA)
 
 })
 test_that("validateRDBESEstObject does not error for valid object from H1 data",  {
 
   myObject <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
-  myEStObj <- createRDBESEstObject(myObject,1)
+  myEStObj <- createRDBESEstObjectQuietly(myObject,1)
   expect_error(validateRDBESEstObject(myEStObj),NA)
 
 })
 test_that("validateRDBESEstObject does not error for valid object from H5 data",  {
 
   myObject <- importRDBESDataCSV(rdbesExtractPath = "./h5_v_20250211")
-  myEStObj <- createRDBESEstObject(myObject,5)
+  myEStObj <- createRDBESEstObjectQuietly(myObject,5)
   expect_error(validateRDBESEstObject(myEStObj),NA)
 
 })

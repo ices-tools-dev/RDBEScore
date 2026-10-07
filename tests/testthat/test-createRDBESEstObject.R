@@ -1,3 +1,11 @@
+# createRDBESEstObject() is deprecated; these tests check that it still works,
+# so only its deprecation warning is muted
+createRDBESEstObjectQuietly <- function(...) {
+  withCallingHandlers(createRDBESEstObject(...), warning = function(w) {
+    if (grepl("deprecated", conditionMessage(w))) invokeRestart("muffleWarning")
+  })
+}
+
 capture.output({  ## suppresses printing of console output when running test()
 
 test_that("createRDBESEstObject can create an object from an H1 data extract
@@ -9,8 +17,8 @@ test_that("createRDBESEstObject can create an object from an H1 data extract
   myRawObject <- filterRDBESDataObject(myRawObject,c("DEstratumName"),c("DE_stratum1_H1","DE_stratum2_H1","DE_stratum3_H1"))
   myRawObject <- findAndKillOrphans(myRawObject, verbose = FALSE)
 
-  myEstObject <- expect_warning(createRDBESEstObject(myRawObject,1),NA)
-  myEstObject <- expect_error(createRDBESEstObject(myRawObject,1),NA)
+  myEstObject <- expect_warning(createRDBESEstObjectQuietly(myRawObject,1),NA)
+  myEstObject <- expect_error(createRDBESEstObjectQuietly(myRawObject,1),NA)
   # Check we have the right number of sampling unit fields
   expect_equal(length(grep("^su1.*",names(myEstObject))),24)
   expect_equal(length(grep("^su2.*",names(myEstObject))),24)
@@ -28,8 +36,8 @@ test_that("createRDBESEstObject can create an object from an H5 data extract
 
   myRawObject <- H5Example
 
-  myEstObject <- expect_warning(createRDBESEstObject(myRawObject,5),NA)
-  myEstObject <- expect_error(createRDBESEstObject(myRawObject,5),NA)
+  myEstObject <- expect_warning(createRDBESEstObjectQuietly(myRawObject,5),NA)
+  myEstObject <- expect_error(createRDBESEstObjectQuietly(myRawObject,5),NA)
   # Check we have the right number of sampling unit fields
   expect_equal(length(grep("^su1.*",names(myEstObject))),24)
   expect_equal(length(grep("^su2.*",names(myEstObject))),24)
@@ -51,8 +59,8 @@ test_that("createRDBESEstObject can create an object from an empty H1 data extra
 
   myRawObject <- createRDBESDataObject()
 
-  myEstObject <- expect_warning(createRDBESEstObject(myRawObject,1),NA)
-  myEstObject <- expect_error(createRDBESEstObject(myRawObject,1),NA)
+  myEstObject <- expect_warning(createRDBESEstObjectQuietly(myRawObject,1),NA)
+  myEstObject <- expect_error(createRDBESEstObjectQuietly(myRawObject,1),NA)
   # Check we have the right number of sampling unit fields
   expect_equal(length(grep("^su1.*",names(myEstObject))),0)
   expect_equal(length(grep("^su2.*",names(myEstObject))),0)
@@ -87,8 +95,8 @@ test_that("createRDBESEstObject can create an object from an H1 data extract wit
   #            c("SAid","SAparentID", setdiff(names(myRawObject[["SA"]]), c("SAid","SAparentID"))   )
   #)
 
-  myEstObject <- expect_warning(createRDBESEstObject(myRawObject,1),NA)
-  myEstObject <- expect_error(createRDBESEstObject(myRawObject,1),NA)
+  myEstObject <- expect_warning(createRDBESEstObjectQuietly(myRawObject,1),NA)
+  myEstObject <- expect_error(createRDBESEstObjectQuietly(myRawObject,1),NA)
   # Check we have the right number of sampling unit fields
   expect_equal(length(grep("^su1.*",names(myEstObject))),24)
   expect_equal(length(grep("^su2.*",names(myEstObject))),24)
@@ -105,7 +113,7 @@ test_that("createRDBESEstObject fails when an invalid hierarchy is requested",  
 
   myRawObject <- H1Example
 
-  myEstObject <- expect_error(createRDBESEstObject(myRawObject,99),"An invalid value was used for the 'hierarchyToUse' parameter - createRDBESEstObject will not proceed")
+  myEstObject <- expect_error(createRDBESEstObjectQuietly(myRawObject,99),"An invalid value was used for the 'hierarchyToUse' parameter - createRDBESEstObject will not proceed")
 
 })
 test_that("createRDBESEstObject can create an object from an H1 data extract
@@ -117,8 +125,8 @@ test_that("createRDBESEstObject can create an object from an H1 data extract
     myRawObject <- filterRDBESDataObject(myRawObject,c("DEstratumName"),c("DE_stratum1_H1","DE_stratum2_H1","DE_stratum3_H1"))
     myRawObject <- findAndKillOrphans(myRawObject, verbose = FALSE)
 
-    myEstObject <- expect_warning(createRDBESEstObject(myRawObject,1,stopTable = "VS"),NA)
-    myEstObject <- expect_error(createRDBESEstObject(myRawObject,1,stopTable = "VS"),NA)
+    myEstObject <- expect_warning(createRDBESEstObjectQuietly(myRawObject,1,stopTable = "VS"),NA)
+    myEstObject <- expect_error(createRDBESEstObjectQuietly(myRawObject,1,stopTable = "VS"),NA)
     expect_equal(unique(myEstObject$su1table),"VS")
     # Check we have the right number of sampling unit fields
     expect_equal(length(grep("^su1.*",names(myEstObject))),24)
@@ -150,7 +158,7 @@ test_that("createRDBESEstObject can correctly create an object when there is no 
     myRawObject[["SA"]]$SAlowHierarchy <- "B"
     myRawObject["BV"] <- list(NULL)
 
-    myEstObject <- createRDBESEstObject(myRawObject, hierarchyToUse = 1)
+    myEstObject <- createRDBESEstObjectQuietly(myRawObject, hierarchyToUse = 1)
     expect_equal(nrow(myEstObject),10)
 
 })
@@ -177,7 +185,7 @@ test_that("createRDBESEstObject can correctly create an object when there is no 
   myRawObject[["BV"]][,"SAid"]<-548860
   myRawObject[["BV"]]$FMid <- NA
 
-  myEstObject <- createRDBESEstObject(myRawObject, hierarchyToUse = 1)
+  myEstObject <- createRDBESEstObjectQuietly(myRawObject, hierarchyToUse = 1)
   expect_equal(nrow(myEstObject),20)
 
 })
@@ -202,7 +210,7 @@ test_that("createRDBESEstObject can correctly create an object when there is no 
   myRawObject["FM"] <- list(NULL)
   myRawObject["BV"] <- list(NULL)
 
-  myEstObject <- createRDBESEstObject(myRawObject, hierarchyToUse = 1)
+  myEstObject <- createRDBESEstObjectQuietly(myRawObject, hierarchyToUse = 1)
   expect_equal(nrow(myEstObject),1)
 
 })
@@ -245,7 +253,7 @@ test_that("createRDBESEstObject creates the correct number of rows when there is
 
   myRawObject[["FM"]][myRawObject[["FM"]]$SAid == 548860,"SAid"] <- 548862
 
-  myEstObject <- createRDBESEstObject(myRawObject, hierarchyToUse = 1)
+  myEstObject <- createRDBESEstObjectQuietly(myRawObject, hierarchyToUse = 1)
   expect_equal(nrow(myEstObject),10)
 
 })
@@ -298,7 +306,7 @@ test_that("createRDBESEstObject creates the correct number of rows when there is
   # Need to re-set the key afer the rbind
   data.table::setkey(myRawObject[["FM"]],FMid)
 
-  myEstObject <- createRDBESEstObject(myRawObject, hierarchyToUse = 1)
+  myEstObject <- createRDBESEstObjectQuietly(myRawObject, hierarchyToUse = 1)
   expect_equal(nrow(myEstObject),20)
 
 })
@@ -306,7 +314,7 @@ test_that("createRDBESEstObject creates the correct number of rows when there is
 test_that("createRDBESEstObject does not create parentID columns",  {
 
             myRawObject <- H1Example
-            myEstObject <- createRDBESEstObject(myRawObject,1)
+            myEstObject <- createRDBESEstObjectQuietly(myRawObject,1)
 
             if (sum(grepl(".*parentID", names(myEstObject)), na.rm = TRUE) >0){
               SAParentIDExists <- TRUE
@@ -319,7 +327,7 @@ test_that("createRDBESEstObject does not create parentID columns",  {
 test_that("createRDBESEstObject does not need explicit hierarcy",  {
 
   myRawObject <- H1Example
-  myEstObject <- createRDBESEstObject(myRawObject)
+  myEstObject <- createRDBESEstObjectQuietly(myRawObject)
   expect_s3_class(myEstObject,"RDBESEstObject")
 })
 
@@ -335,10 +343,14 @@ test_that("createRDBESEstObject can create an object from an H1 data extract
             # Use the same id for SAseqNum and SAparSeqNum
             myRawObject[["SA"]]$SAparSequNum <- myRawObject[["SA"]]$SAseqNum
 
-            myEstObject <- expect_warning(createRDBESEstObject(myRawObject,1),NA)
-            myEstObject <- expect_error(createRDBESEstObject(myRawObject,1),NA)
+            myEstObject <- expect_warning(createRDBESEstObjectQuietly(myRawObject,1),NA)
+            myEstObject <- expect_error(createRDBESEstObjectQuietly(myRawObject,1),NA)
 
 
           })
 
 }) ## end capture.output
+
+test_that("createRDBESEstObject is deprecated", {
+  expect_warning(createRDBESEstObject(H1Example, 1, "SA"), "deprecated")
+})

@@ -1,4 +1,6 @@
-#' Check whether an object is a valid RDBESEstObject
+#' Check whether an object is a valid RDBESEstObject (deprecated)
+#'
+#' Deprecated together with [createRDBESEstObject()].
 #'
 #' @param objectToCheck The object to check
 #' @param verbose (Optional) Set to TRUE if you want informative text printed

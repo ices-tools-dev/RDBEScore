@@ -1,4 +1,6 @@
-#' Filter an RDBESEstObject
+#' Filter an RDBESEstObject (deprecated)
+#'
+#' Deprecated together with [createRDBESEstObject()].
 #'
 #' The returned object will include all rows which include the field names
 #' and have one of the allowed values in `valuesToFilter`.

@@ -2,7 +2,7 @@
 % Please edit documentation in R/createRDBESEstObject.R
 \name{createRDBESEstObject}
 \alias{createRDBESEstObject}
-\title{Creates an RDBESEstObject from RDBES data}
+\title{Creates an RDBESEstObject from RDBES data (deprecated)}
 \usage{
 createRDBESEstObject(
   rdbesPrepObject,
@@ -38,7 +38,11 @@ An object of class RDBESEstObject ready for use in design based
 estimation
 }
 \description{
-Creates an RDBESEstObject from RDBES data
+Deprecated: estimation is now done directly on the RDBESDataObject, see
+\code{\link[=createDesignTree]{createDesignTree()}}, \code{\link[=doEstimationOnDesignTree]{doEstimationOnDesignTree()}} and
+\code{\link[=doEstimationForAllStrata]{doEstimationForAllStrata()}}. The RDBESEstObject is kept for backward
+compatibility (e.g. for RDBESvisualise) and will be removed in a future
+version.
 }
 \examples{
 myH1EstObj <- createRDBESEstObject(H1Example, 1, "SA")

@@ -1,5 +1,10 @@
-#' Creates an RDBESEstObject from RDBES data
+#' Creates an RDBESEstObject from RDBES data (deprecated)
 #'
+#' Deprecated: estimation is now done directly on the RDBESDataObject, see
+#' [createDesignTree()], [doEstimationOnDesignTree()] and
+#' [doEstimationForAllStrata()]. The RDBESEstObject is kept for backward
+#' compatibility (e.g. for RDBESvisualise) and will be removed in a future
+#' version.
 #'
 #' @param rdbesPrepObject The RDBES object that should be used to
 #' create an estimation object
@@ -28,6 +33,11 @@ createRDBESEstObject <- function(rdbesPrepObject,
                                  verbose = FALSE,
                                  strict = TRUE,
                                  incDesignVariables = TRUE) {
+
+  .Deprecated(msg = paste0(
+    "'createRDBESEstObject' is deprecated: estimation is now done directly ",
+    "on the RDBESDataObject (see createDesignTree() and ",
+    "doEstimationForAllStrata())."))
 
   DEhierarchy <- summary(rdbesPrepObject)$hierarchy
   if(is.null(hierarchyToUse)){

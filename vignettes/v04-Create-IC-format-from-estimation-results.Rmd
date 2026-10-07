@@ -80,13 +80,12 @@ myH1 <- fixProbs(myH1RawObject)
 ## Step 2) Estimate for live weight for the data
 
 
-```{r}
-myTestData <- createRDBESEstObject(myH1, 1, stopTable = "SA")
-# Get rid of rows that don't have an SA row
-myTestData <- myTestData[!is.na(myTestData$SAid),]
-# Estimate using the data
-myStrataResults <- doEstimationForAllStrata(myTestData, "SAsampWtLive")
+Only some of the hauls (SS) have a sample (SA) of the species; the others are taken as zero catch of the species (`zeroIfNoChildren = "SS"`). The samples are one per haul, so the variance within the hauls cannot be estimated: the variance is approximated by treating the vessels, the primary sampling units, as sampled with replacement (`varianceAsWR = "VS"`).
 
+```{r}
+myStrataResults <- doEstimationForAllStrata(myH1, "SAsampWtLive",
+                                            zeroIfNoChildren = "SS",
+                                            varianceAsWR = "VS")
 ```
 
 ## Step 3) Export the results to InterCatch format (just HI and SI for this data)

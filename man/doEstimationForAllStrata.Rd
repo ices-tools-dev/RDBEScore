@@ -2,41 +2,56 @@
 % Please edit documentation in R/doEstimationForAllStrata.R
 \name{doEstimationForAllStrata}
 \alias{doEstimationForAllStrata}
-\title{Estimate totals and means, and try to generate samples variances for all
-strata in an RDBESEstObject}
+\title{Estimate totals of SA variables for all strata of an RDBESDataObject}
 \usage{
-doEstimationForAllStrata(RDBESEstObjectForEstim, targetValue, verbose = FALSE)
-}
-\arguments{
-\item{RDBESEstObjectForEstim}{The RDBESEstObject to generate estimates for}
-
-\item{targetValue}{The field to estimate for, for example "SAsampWtLive"}
-
-\item{verbose}{(Optional) If set to TRUE more detailed text will be printed
-out by the function.  Default is FALSE}
-}
-\value{
-A data frame containing estimates for all strata
-}
-\description{
-Estimate totals and means, and try to generate samples variances for all
-strata in an RDBESEstObject
-}
-\examples{
-\dontrun{
-
-myH1RawObject <-
-  importRDBESDataCSV(rdbesExtractPath = "tests\\\\testthat\\\\h1_v_1_19")
-
-# Update our test data with some random sample measurements
-myH1RawObject[["SA"]]$SAsampWtLive <-
-  round(runif(n = nrow(myH1RawObject[["SA"]]), min = 1, max = 100))
-
-myH1EstObj <- createRDBESEstObject(myH1RawObject, 1)
-
-myStrataEst <- doEstimationForAllStrata(
-  RDBESDataObjectForEstim = myH1EstObj,
-  targetValue = 'SAsampWtLive'
+doEstimationForAllStrata(
+  RDBESDataObject,
+  targetValue,
+  na = "stop",
+  zeroIfNoChildren = NULL,
+  verbose = FALSE,
+  ...
 )
 }
+\arguments{
+\item{RDBESDataObject}{An RDBESDataObject with a single upper hierarchy.}
+
+\item{targetValue}{One or more SA fields to estimate, for example
+"SAsampWtLive".}
+
+\item{na}{How to treat missing values of \code{targetValue}, see
+\code{\link[=getLeafValuesSA]{getLeafValuesSA()}}.}
+
+\item{zeroIfNoChildren}{Optional tables whose units without child units
+have a zero total, see \code{\link[=doEstimationOnDesignTree]{doEstimationOnDesignTree()}}.}
+
+\item{verbose}{(Optional) If set to TRUE more detailed text will be printed
+out by the function. Default is FALSE.}
+
+\item{...}{Further arguments to \code{\link[=createDesignTree]{createDesignTree()}}, e.g.
+\code{ratio = c(SA = "weight")}, \code{methodMap}, \code{nonResponse},
+\code{strictSampleSize} or \code{varianceAsWR}.}
+}
+\value{
+A data frame with one row per parent unit, child stratum and
+target value: \code{recType} (the table of the units in the stratum),
+\code{parentTable}, \code{parentTableID}, \code{stratumName}, \code{targetValue}, the number
+of sampled units \code{n.units}, \code{ratio} (ratio estimator used), \code{est.total},
+the variance components \code{var.between} and \code{var.within}, \code{var.total} and
+\code{se.total}. The rows with \code{recType == "DE"} hold the totals of each DE
+stratum.
+}
+\description{
+Design-based estimation directly on an RDBESDataObject: builds the design
+tree (\code{\link[=createDesignTree]{createDesignTree()}}), takes the values of \code{targetValue} from the
+lowest SA units (\code{\link[=getLeafValuesSA]{getLeafValuesSA()}}) and estimates the totals and their
+variances for every stratum of every sampling stage
+(\code{\link[=doEstimationOnDesignTree]{doEstimationOnDesignTree()}}). For variables from BV or FM, or for ratio
+estimation to known totals, use those functions and
+\code{\link[=doRatioEstimationToTotal]{doRatioEstimationToTotal()}} directly.
+}
+\examples{
+res <- doEstimationForAllStrata(H8ExampleEE1, "SAsampWtMes",
+                                strictSampleSize = FALSE)
+res[res$recType == "TE", ]
 }
