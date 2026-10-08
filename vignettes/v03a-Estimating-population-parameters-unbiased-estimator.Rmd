@@ -62,6 +62,30 @@ The variance of each stratum estimate is the variance between the sampled units 
 
 **doEstimationForAllStrata(...)** does both steps for variables of the SA table and returns the estimates for every stratum.
 
+### Implemented sampling schemes
+
+Every sampling stage describes how its units were selected with a `selectMeth` code. The table below lists the schemes that the estimator implements. The expansion weight `w` raises a sampled unit to its stratum, `fpc` is the finite population correction of the between unit variance, and the design fields are the RDBES fields the scheme needs. Any other `selectMeth` code stops the estimation unless it is mapped to one of these with the `methodMap` argument of **createDesignTree(...)**.
+
+```{r samplingSchemes, echo=FALSE}
+schemes <- data.table(
+  Method = c("CENSUS", "SRSWOR", "SRSWR", "UPSWOR", "UPSWR"),
+  Design = c("Census: every unit of the population is observed",
+             "Simple random sampling, without replacement",
+             "Simple random sampling, with replacement",
+             "Unequal probability sampling, without replacement",
+             "Unequal probability sampling, with replacement"),
+  `Expansion weight w` = c("1", "N / n", "N / n", "1 / incProb",
+                          "1 / (n * selProb)"),
+  fpc = c("0", "1 - n / N", "1", "NA", "1"),
+  `Design fields used` = c("-", "numTotal, numSamp", "numTotal, numSamp",
+                          "incProb", "selProb, numSamp"),
+  `Between unit variance` = c("zero", "Sen-Yates-Grundy", "Hansen-Hurwitz",
+                              "not estimable", "Hansen-Hurwitz"),
+  check.names = FALSE)
+knitr::kable(schemes, caption = paste("The sampling schemes implemented in",
+                                      "createDesignTree()"))
+```
+
 The following example uses a dataset that resembles in many ways real data at ICES area 27.3.d.28.1 from the Estonian Baltic Trawling fleet for 2022 sprat (*Sprattus sprattus*). The dataset has both total landings and commercial sampling data.
 
 ```{r}
@@ -83,6 +107,7 @@ tree[, .N, by = .(table, method, depth)]
 ```
 
 In two weeks there are two vessels in the data although `VSnumSamp` is 1. **createDesignTree(...)** stops on this by default; here `strictSampleSize = FALSE` turns the error into a warning and both vessels are raised as if each had been the only one sampled.
+
 
 ```{r, results='asis'}
 x <- H8ExampleEE1
@@ -123,6 +148,106 @@ knitr::kable(Q1results[columns], digits = 3, caption = captionText)
 ```
 
 As you can see from the table for the first 2 months the estimates are in line with the reported landings, while for March there is a big discrepancy.
+
+### Design checks
+
+**createDesignTree(...)** checks the design data before estimating and stops with an informative message instead of silently making assumptions. The table below shows what happens to the H8 example when one part of the design is incomplete or inconsistent. Every row is one small change to the data.
+
+```{r designChecks, echo=FALSE}
+designProblem <- function(change, strictSampleSize = FALSE, ...) {
+  x <- change(data.table::copy(H8ExampleEE1))
+  tryCatch({
+    suppressWarnings(createDesignTree(x, "SA",
+                                      strictSampleSize = strictSampleSize, ...))
+    "no error"
+  }, error = function(e) sub("\n.*", " ...", conditionMessage(e)))
+}
+
+designChecks <- data.table(
+  `Problem in the design data` = c(
+    "Two upper hierarchies in DE",
+    "An empty sampling table (VS)",
+        "A row without the id of its parent",
+    "A unit whose parent is not in the tree",
+    "A selection method without an estimator",
+    "Sampled units that do not match numSamp",
+    "An SRS stratum without numTotal",
+    "numTotal that differs within a stratum",
+    "UPSWOR units without incProb",
+    "UPSWR units without selProb",
+    "A selected unit that was not sampled",
+    "A missing ratio auxiliary value",
+    "ratio = 'weight' outside SA"),
+  `createDesignTree(...) stops with` = c(
+    designProblem(function(x) {
+      x$DE <- rbind(x$DE,
+                    data.table::copy(x$DE)[, `:=`(DEid = 2L, DEhierarchy = 5L)])
+      data.table::setkey(x$DE, DEid)
+      x
+    }),
+    designProblem(function(x) { x$VS <- x$VS[0, ]; x }),
+    designProblem(function(x) { x$LE[1, VSid := NA_integer_]; x }),
+    designProblem(function(x) { x$SA[1, SSid := 999L]; x }),
+    designProblem(function(x) { x$LE[, LEselectMeth := "PPS"]; x }),
+    designProblem(function(x) x, strictSampleSize = TRUE),
+    designProblem(function(x) { x$VS[1, VSnumTotal := NA_integer_]; x }),
+    designProblem(function(x) { x$VS[1, VSnumTotal := VSnumTotal + 1L]; x }),
+    designProblem(function(x) { x$VS[, VSselectMeth := "UPSWOR"]; x }),
+    designProblem(function(x) { x$VS[, VSselectMeth := "UPSWR"]; x }),
+    designProblem(function(x) {
+      x$SA[SAid == 2, SAsamp := "N"]
+      x$BV <- x$BV[SAid != 2]
+      x
+    }),
+    designProblem(function(x) { x$LE[, LEauxVarValue := NA_real_]; x },
+                  ratio = c(LE = "aux")),
+    designProblem(function(x) x, ratio = c(LE = "weight"))))
+knitr::kable(designChecks, caption = paste("createDesignTree() stops on incomplete",
+                                           "or inconsistent design data"))
+```
+
+`strictSampleSize = FALSE` is the only check that can be relaxed, turning the sample size mismatch into a warning. The other problems must either be fixed in the data or acknowledged with an explicit argument (`nonResponse`, `methodMap` or `ratio`).
+
+The estimation also stops rather than treating missing values as zero. For instance, a unit without data down to the leaf table is missing, not zero, and must be handled explicitly (see `zeroIfNoChildren`).
+
+```{r estimationChecks, echo=FALSE}
+tree <- suppressWarnings(createDesignTree(H8ExampleEE1, "SA",
+                                          strictSampleSize = FALSE))
+leaves <- getLeafValuesSA(tree, H8ExampleEE1, "SAsampWtMes")
+leafProblem <- function(f) {
+  tryCatch({ f(); "no error" },
+           error = function(e) sub("\n.*", " ...", conditionMessage(e)))
+}
+estimationChecks <- data.table(
+  `Problem in the leaf values` = c(
+    "A missing value in an SA field",
+    "A missing leaf value",
+    "A unit with no child units down to the leaf table",
+    "A leaf value for a unit not in the tree"),
+  `The estimation stops with` = c(
+    leafProblem(function() {
+      x <- data.table::copy(H8ExampleEE1)
+      x$SA[SAid == 1, SAsampWtMes := NA_real_]
+      getLeafValuesSA(tree, x, "SAsampWtMes")
+    }),
+    leafProblem(function() {
+      l <- data.table::copy(leaves); l[1, t := NA_real_]
+      doEstimationOnDesignTree(tree, l)
+    }),
+    leafProblem(function() {
+      x <- data.table::copy(H8ExampleEE1)
+      x$SA <- x$SA[SSid != 1]
+      x$BV <- x$BV[SAid %in% x$SA$SAid]
+      t <- suppressWarnings(createDesignTree(x, "SA", strictSampleSize = FALSE))
+      doEstimationOnDesignTree(t, getLeafValuesSA(t, x, "SAsampWtMes"))
+    }),
+    leafProblem(function() {
+      l <- data.table::copy(leaves); l[1, node := "SA:999999"]
+      doEstimationOnDesignTree(tree, l)
+    })))
+knitr::kable(estimationChecks, caption = paste("The estimation stops on missing",
+                                               "values and dead branches"))
+```
 
 In the next sections we will use data from R packages [survey](https://CRAN.R-project.org/package=survey) and [SDAResources](https://CRAN.R-project.org/package=SDAResources) that are converted into the *RDBESDataObject* to demonstrate the estimation procedure.
 
