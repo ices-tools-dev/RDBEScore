@@ -62,7 +62,7 @@ References
 ----------
 
 * Regional Database & Estimation System:
-https://sboxrdbes.ices.dk/
+https://rdbes.ices.dk/
 
 * Working Group on Governance of the Regional Database & Estimation System:
 https://www.ices.dk/community/groups/Pages/WGRDBESGOV.aspx
@@ -97,63 +97,154 @@ install_github("ices-tools-dev/RDBEScore@dev", build = FALSE)
 
 ## How to Start developing
 
-A good starting setup is a recent version of R, RStudio, and the packages commonly used for package development. `RDBEScore` currently requires R 4.1 or newer. In practice, most contributors will also want `remotes`, `devtools`, `roxygen2` and `testthat` installed locally. 
+Contributions and the use of AI coding tools are tolerated, but all code must be tested and checked by humans to maintain the reliability of the package.
 
-Use **camelCase** for new function names so they match the existing package style. A good function for a new contributor to take as an example is [createRDBESDataObject](https://github.com/ices-tools-dev/RDBEScore/blob/dev/R/createRDBESDataObject.R) but if you prefer something even more compact [getTablesInRDBESHierarchy](https://github.com/ices-tools-dev/RDBEScore/blob/dev/R/getTablesInRDBESHierarchy.R) is another good candidate. 
+### 1. Getting started
 
-Development work should start from the `dev` branch. Before making changes, pull the latest `dev`, create or claim an issue, and make the changes locally. New package code should be added to the core package directories so that it is available to other contributors and can be built and checked in the normal package workflow. In most cases this means placing function code in `R/`, packaged data in `data/`, data-preparation scripts in `data-raw/`, tests in `tests/`, and user-facing examples or longer documentation in `vignettes/`. The repository also contains `WGRDBES-EST` directory for extra documentation.
+Install a recent version of R (4.1 or newer), preferably with RStudio, and the packages `remotes`, `devtools`, `roxygen2` and `testthat`.
 
-When adding a new function, **aim to commit a complete unit of work rather than an unfinished fragment**. A typical contribution includes the function itself, roxygen2 documentation, any supporting example data, and tests for the new behaviour. If a change affects user workflows, add or update a vignette example when possible. This is more helpful to new users than adding code alone, and it makes review easier for maintainers.
+Use **camelCase** for new function names to match the existing package style. Two useful examples are [createRDBESDataObject](https://github.com/ices-tools-dev/RDBEScore/blob/dev/R/createRDBESDataObject.R) and the simpler [getTablesInRDBESHierarchy](https://github.com/ices-tools-dev/RDBEScore/blob/dev/R/getTablesInRDBESHierarchy.R).
 
-Before pushing changes, run local checks. At a minimum, regenerate documentation if needed, run tests, and **run a package check**. A common local workflow is:
+The main package directories are:
+
+- `R/` — R functions
+- `tests/testthat/` — function tests
+- `data/` — packaged datasets
+- `data-raw/` — scripts preparing package data
+- `vignettes/` — examples and user guides
+- `WGRDBES-EST/` — additional documentation
+
+### 2. Development workflow
+
+1. **Create or claim a GitHub issue.** Describe what needs to be added or changed, including the expected behaviour. Assign yourself to the issue so others know you are working on it.
+
+2. **Start from the latest `dev` branch.** Work directly on `dev` or create your own development branch based on it. The `main` branch is protected and only accepts changes through pull requests.
+
+3. **Write or modify the code and tests.** You can do this manually or with AI coding tools. New functions should include roxygen2 documentation and appropriate tests. Add or update examples and vignettes when relevant. Aim to keep changes related to one issue together.
+
+4. **Document AI involvement and human approvals.** Add the information described in Section 3 to every new or substantially modified function and test(s).
+
+5. **Check the complete package** before integrating changes into `dev`. Regenerate documentation, run the tests and check the package:
+
+   ```r
+   devtools::document()
+   devtools::test()
+   devtools::check()
+   ```
+
+   Fix any problems introduced by your changes before submitting them.
+
+6. **Commit your changes**, including the issue number in the commit message, for example: `Improve data validation #123` GitHub automatically links the commit to the issue, preserving the development history. Keep unrelated changes in separate commits whenever possible.
+
+7. **Request additional review if needed.** Ask another contributor in the issue discussion or add the `human review required` label. Once the changes are ready, they can be incorporated into `dev`. Only changes considered ready for release should be transferred to `main`.
+
+### 3. AI-assisted development and human review
+
+Starting with version 0.3.5, contributors are allowed to use AI coding tools to accelerate development. However, all contributors remain responsible for understanding and verifying their code, regardless of whether it was written manually or generated with AI.
+
+Every **new or substantially modified** function and test must document **AI involvement** and **human approvals**.
+
+**Function documentation**
+
+Include a `Development review` section in the function's roxygen2 documentation so that the information appears in the installed package's R help pages (`?functionName`).
 
 ```r
-devtools::document()
-devtools::test()
-#optionally do a full check as well
-devtools::check()
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Human approvals: 1 (Jane Smith)
+#' - Notes/scope: Tested with hierarchy H5 using
+#'   2025 RDBES data (downloaded 2026-10-14).
 ```
 
-## On `data.table` usage
+**Test documentation**
 
-Objects of type `data.table` passed as parameters should be copied before modification. As an example:
+Add the same information as comments immediately before **each `test_that()` block**, rather than only at the beginning of the test file. Different tests may have different authors, reviewers or levels of verification.
+
 ```r
-function zeroIds(sl) {
+# AI-assisted: Yes
+# Human approvals: 1 (Jane Smith)
+# Notes/scope: Expected results checked manually.
+test_that("function returns correct values", {
+  expect_equal(myFunction(2), 4)
+})
+
+# AI-assisted: No
+# Human approvals: 2 (Jane Smith, John Brown)
+test_that("function handles missing values", {
+  expect_true(is.na(myFunction(NA)))
+})
+```
+
+**Meaning of the fields**
+
+- **AI-assisted:** `Yes` if AI tools were used to generate or substantially modify the current code or test, otherwise `No`. Routine autocomplete or minor wording corrections do not need to be reported.
+- **Human approvals:** Number and full names of people who have checked and accepted the current implementation or test. The original contributor records one approval after checking their own work. Each additional reviewer who approves the current version is added.
+- **Notes/scope (optional):** Briefly describe what has been verified, for example specific RDBES sampling hierarchies, datasets, reference calculations, or known limitations. Include data versions or dates when relevant.
+
+**Updating approvals**
+
+When another person reviews the code or test and approves it without changes, add their name:
+
+```r
+# Human approvals: 2 (Jane Smith, John Brown)
+```
+
+If a reviewer substantially modifies the code, previous approvals are no longer assumed to apply. The person making the changes checks the modified version and updates the approval record:
+
+```r
+# Human approvals: 1 (John Brown)
+```
+
+Approvals for functions and tests are maintained separately. A change to one does not automatically invalidate approval of the other, unless its correctness is affected.
+
+**Testing and scientific reliability**
+
+All new or modified functionality should have appropriate tests. Expected test results must be independently established or checked by a human, rather than relying solely on AI-generated expectations. Where possible, statistical estimation functions should be tested against manually calculated results, published examples or independently verified reference implementations.
+
+Additional independent human review is particularly encouraged for statistical estimation functions and scientifically important data transformations. The number of human approvals indicates the extent of documented human review, but does not by itself guarantee scientific correctness. The optional `Notes/scope` field can clarify what has actually been verified.
+
+Existing functions and tests do not need to be retrospectively classified unless they are substantially modified.
+
+### 4. Releasing reviewed changes to `main`
+
+The `dev` branch may contain functions that are still being developed, tested or reviewed. **Only changes considered ready for release should be transferred to `main`.**
+
+When preparing a release:
+
+1. Identify the functions and changes that are ready, considering their tests, human approvals and any review notes.
+2. If only some changes from `dev` are ready, create a release branch from `main` and selectively transfer the required commits using Git cherry-pick. Include any dependent changes, tests and documentation.
+3. Run `devtools::document()`, `devtools::test()` and `devtools::check()` on the complete release candidate.
+4. Submit a pull request to `main` for final review and merging.
+
+Changes that are not yet sufficiently reviewed remain in `dev`. The complete `dev` branch should only be merged into `main` when all included changes are ready for release.
+
+Keeping commits focused on individual issues or functions makes selective releases easier.
+
+### 5. On `data.table` usage
+
+Objects of type `data.table` passed as parameters should be copied before modification to avoid unintentionally changing the original object by reference.
+
+For example:
+
+```r
+zeroIds <- function(sl) {
   sl <- data.table::copy(sl)
-  sl[,SLid:=0]
+  sl[, SLid := 0]
   sl
 }
 ```
-Now invocations of this function on SL tables will not alter the original copy.
 
-## Precommit-hook framework
+This ensures that calling `zeroIds()` does not modify the original input table.
 
-For adhering to package styling guides it is advisable to use precommit checks while developing.
-In order to run lintr and styler (etc) before committing code, follow the instructions at the following address: https://github.com/lorenzwalthert/precommit#installation
+### 6. Building binary packages (optional)
 
-1. Check that python3 is installed and install if necessary
-2. Run pip install
-   ```bash
-   pip3 install pre-commit --user
-   ```
-3. Install R precommit package
-   ```r
-   install.packages("precommit")
-   ```
-4. Run at the root of the git repository.
-   ```r
-   library(precommit)
-   precommit::use_precommit()
-   ```
-5. Running git commit should run the various checks automatically. See [the config file](.pre-commit-config.yaml) for all the checks.
+Binary packages can be built in RStudio using **Build → More → Build Binary Package**.
 
-## Building binary packages
+Alternatively, use the command line:
 
-Building binary packages can be achieved by running the following commands.
 ```bash
-Rscript.exe -e "roxygen2::roxygenize('.', roclets = c('rd', 'collate', 'namespace'))"
-Rcmd.exe INSTALL --build --preclean .
+Rscript -e "roxygen2::roxygenize('.', roclets = c('rd', 'collate', 'namespace'))"
+R CMD INSTALL --build .
 ```
-Note to replace `.` with the relative path of the project if necessary. Also on some operating systems, `Rcmd.exe` is called `Rcmd` and `Rscript.exe` is `Rcmd` respectively.
 
-In R-studio there is also a button on the `build` - tab: `More -> Build Binary Package` that builds the binary package.
+Commands and executable names may vary slightly between operating systems. Building binary packages is not required for normal development.
