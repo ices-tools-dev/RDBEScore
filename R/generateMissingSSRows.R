@@ -13,6 +13,10 @@
 #' the validation be strict? The default is TRUE.
 #'
 #' @return A data table of SS data with any missing rows added
+#' 
+#' @section Development review:
+#' - AI-assisted: No
+#' - Human review: rix133
 #' @export
 #'
 #' @examples
@@ -76,11 +80,12 @@ generateMissingSSRows <- function(RDBESDataObject,
   # Get the unique combinations of SL country, year, and list names
   mySLUnique <- unique(mySL[,c("SLcou","SLyear","SLspeclistName")])
 
-  mySSSLUnique <- dplyr::inner_join(mySSUnique,
-                                   mySLUnique,
-                                   by = c("SSyear" = "SLyear",
-                                          "SSctry" = "SLcou",
-                                          "SSspecListName" = "SLspeclistName"))
+  mySSSLUnique <- joinDT(mySSUnique,
+                         mySLUnique,
+                         by = c("SSyear" = "SLyear",
+                                "SSctry" = "SLcou",
+                                "SSspecListName" = "SLspeclistName"),
+                         type = "inner")
 
   if (nrow(mySSSLUnique) < 1){
     stop(paste0("The requested species list is not compatible with the ",
@@ -252,7 +257,7 @@ getMissingSSCatchFraction <- function(FOdata, SSdata, catchFra, verbose) {
     myFOFraction[myFOFraction$FOcatReg == catchFra, "FOcatReg"] <- "Catch"
   }
 
-  myFOSS <- dplyr::left_join(
+  myFOSS <- joinDT(
     myFOFraction,
     SSdata,
     by = c(

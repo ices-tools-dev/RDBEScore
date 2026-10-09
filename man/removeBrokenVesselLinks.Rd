@@ -23,6 +23,14 @@ an RDBESDataObject with any records with an invalid VDid removed
 Remove rows which are not pointing to a valid VesselDetails (VD) records i.e.
 those rows which have a value of VDid that does not exist in the VD table.
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: No
+\item Human review: rix133
+}
+}
+
 \examples{
 \dontrun{
 

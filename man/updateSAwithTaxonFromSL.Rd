@@ -44,6 +44,14 @@ or genus then the function retains the original SA species code.
 function also retains the original SA species code.
 }
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: No
+\item Human review: rix133
+}
+}
+
 \examples{
 \dontrun{
 myObject <- createRDBESDataObject(input = "WGRDBES-EST/personal/Kasia/vignettes/vignetteData")

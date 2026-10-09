@@ -23,3 +23,11 @@ RDBES data frame where SA was complemented with species looked for
 examples for now see
 https://github.com/ices-eg/WK_RDBES/tree/master/WKRDB-EST2/chairs/Nuno
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: No
+\item Human review: rix133
+}
+}
+

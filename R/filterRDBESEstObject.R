@@ -13,6 +13,9 @@
 #' @return the filtered input object of the same class as
 #'   `RDBESEstObjectToFilter`
 #'
+#' @section Development review:
+#' - AI-assisted: No
+#' - Human review: rix133
 #' @export
 #' @md
 #'
@@ -46,10 +49,11 @@ filterRDBESEstObject <- function(RDBESEstObjectToFilter,
 
   foundNames <- fieldsToFilter[fieldsToFilter %in% allColNames]
   if (length(foundNames) > 0) {
-    RDBESEstObjectToFilter <-
-            dplyr::filter(RDBESEstObjectToFilter,
-                  dplyr::if_all(all_of(foundNames), ~ .x %in% valuesToFilter)
-                  )
+    # Keep the rows where all of the found fields have an allowed value
+    rowsToKeep <- Reduce(`&`, lapply(foundNames, function(fieldName) {
+      RDBESEstObjectToFilter[[fieldName]] %in% valuesToFilter
+    }))
+    RDBESEstObjectToFilter <- RDBESEstObjectToFilter[rowsToKeep, ]
   }
 
   return(RDBESEstObjectToFilter)

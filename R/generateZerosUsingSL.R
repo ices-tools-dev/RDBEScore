@@ -11,10 +11,10 @@
 #'
 #' @return RDBES data frame where SA was complemented with species looked for
 #' (sensu in sampling objectives) but not registered in sample
+#' @section Development review:
+#' - AI-assisted: No
+#' - Human review: rix133
 #' @export
-#'
-
-
 generateZerosUsingSL <- function(x,
                                  verbose = FALSE,
                                  strict = TRUE) {
@@ -99,9 +99,9 @@ generateZerosUsingSL <- function(x,
         sppFromSL$SLrowNum <- seq.int(nrow(sppFromSL))
 
         # See which species/fraction need adding
-        sppToAdd <- dplyr::left_join(sppFromSL, SApresent,
-                                  by=c("SLcatchFrac" = "SAcatchCat",
-                                       "IScommTaxon" = "SAspeCode"))
+        sppToAdd <- joinDT(sppFromSL, SApresent,
+                           by=c("SLcatchFrac" = "SAcatchCat",
+                                "IScommTaxon" = "SAspeCode"))
         sppToAdd <- sppToAdd[is.na(sppToAdd$SArowNum),]
         sppToAdd <- sppToAdd[,c("SLcatchFrac","IScommTaxon")]
         sppToAdd <- unique(sppToAdd)

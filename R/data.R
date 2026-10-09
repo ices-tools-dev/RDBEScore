@@ -156,7 +156,7 @@
 #'   \item{IS}{the Individual Species table}
 
 #' }
-#' #' @source Richard Meitern @ Estonian Marine Institute, 2025
+#' @source Richard Meitern @ Estonian Marine Institute, 2025
 "H7Example"
 
 #' A dataset containing test RDBES data for H8 in the RDBESDataObject structure
@@ -182,7 +182,7 @@
 #'   \item{CL}{the Commertial Landing data table}
 #'   \item{CE}{the Commertial Effort data table}
 #' }
-#' #' @source Richard Meitern @ Estonian Marine Institute, 2025
+#' @source Richard Meitern @ Estonian Marine Institute, 2025
 "H8ExampleEE1"
 
 #' A dataset containing test RDBES data for H5 in the RDBESDataObject structure

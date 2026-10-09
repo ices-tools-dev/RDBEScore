@@ -29,6 +29,14 @@ the filtered input object of the same class as
 The returned object will include all rows which include the field names
 and have one of the allowed values in \code{valuesToFilter}.
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: No
+\item Human review: rix133
+}
+}
+
 \examples{
 \dontrun{
 

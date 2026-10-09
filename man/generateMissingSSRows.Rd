@@ -37,6 +37,14 @@ OR "Lan"+"Dis". In the latter case, if one is missing the other is to
 be assumed 0.
 This function generates SS rows for any missing catch fractions.
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: No
+\item Human review: rix133
+}
+}
+
 \examples{
 # To follow
 }

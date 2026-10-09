@@ -10,6 +10,9 @@
 #'
 #' @return an RDBESDataObject with any records with an invalid SpeciesListName
 #' rows removed
+#' @section Development review:
+#' - AI-assisted: No
+#' - Human review: rix133
 #' @export
 #'
 #' @examples
@@ -86,14 +89,13 @@ myTable$SSctry <- extractHigherFields(objectToCheck, "SS", "SDctry")
 
 
       # Inner join to the SL table
-      joinedTables <- dplyr::inner_join(myTable,
-                                    objectToCheck[["SL"]],
-                                    by = c("SSspecListName" = "SLspeclistName",
-                                           "SScatchFra" = "SLcatchFrac",
-                                           "SSyear" = "SLyear",
-                                           "SSctry" = "SLcou"),
-                                    multiple = "all",
-                                    relationship="many-to-many"
+      joinedTables <- joinDT(myTable,
+                             objectToCheck[["SL"]],
+                             by = c("SSspecListName" = "SLspeclistName",
+                                    "SScatchFra" = "SLcatchFrac",
+                                    "SSyear" = "SLyear",
+                                    "SSctry" = "SLcou"),
+                             type = "inner"
       )
 
 

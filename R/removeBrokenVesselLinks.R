@@ -8,6 +8,9 @@
 #' the validation be strict? The default is TRUE.
 #'
 #' @return an RDBESDataObject with any records with an invalid VDid removed
+#' @section Development review:
+#' - AI-assisted: No
+#' - Human review: rix133
 #' @export
 #'
 #' @examples
@@ -82,9 +85,10 @@ removeBrokenVesselLinks <- function(objectToCheck,
       myOrphanResults[, "vdExists"] <- FALSE
 
       # Inner join to the VD table
-      joinedTables <- dplyr::inner_join(myTable,
+      joinedTables <- joinDT(myTable,
         objectToCheck[["VD"]],
-        by = "VDid"
+        by = "VDid",
+        type = "inner"
       )
 
       # Update the results for any matches we found

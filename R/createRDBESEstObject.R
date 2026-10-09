@@ -18,6 +18,11 @@
 #'
 #' @return An object of class RDBESEstObject ready for use in design based
 #' estimation
+#' 
+#' @section Development review:
+#' - AI-assisted: No
+#' - Human review: rix133
+#' 
 #' @export
 #'
 #' @examples
@@ -212,7 +217,7 @@ createRDBESEstObject <- function(rdbesPrepObject,
     # (much faster than the recursive "getSubSampleLevel()" function it was using before)
     lookupDT <- prepareSubSampleLevelLookup(SAdata)
     # Apply it
-    subSampleLevels <- dplyr::left_join(SAdata, lookupDT, by = "SAid")
+    subSampleLevels <- joinDT(SAdata, lookupDT, by = "SAid")
     subSampleLevels <- subSampleLevels[,c("SAid","topLevelSAid","subSampleLevel")]
 
     rdbesPrepObjectCopy[["SA"]][, "SAtopLevelSAid"] <-
@@ -330,11 +335,9 @@ createRDBESEstObject <- function(rdbesPrepObject,
       # Use a left join on the deepest level of sampling so that we
       # get all the upper hierarchy rows
       if (j == numberOfSampleLevels) {
-        tempRDBESEstObj <- dplyr::left_join(tempUpper,
+        tempRDBESEstObj <- joinDT(tempUpper,
           tempLower,
-          by = saJoinField,
-          multiple = "all"
-
+          by = saJoinField
         )
       } else {
 
@@ -366,10 +369,10 @@ createRDBESEstObject <- function(rdbesPrepObject,
 
         # Use an inner join on the
         # currnt SA level so that we just get the matching rows
-        tempRDBESEstObj <- dplyr::inner_join(tempUpper,
+        tempRDBESEstObj <- joinDT(tempUpper,
           tempLower,
           by = saJoinField,
-          multiple = "all"
+          type = "inner"
         )
       }
       if (verbose) {
@@ -482,10 +485,9 @@ gc()
     gc()
     # if we have both FM and BV data - join them together
     fMBV <-
-      dplyr::left_join(rdbesPrepObject[["FM"]],
+      joinDT(rdbesPrepObject[["FM"]],
         rdbesPrepObject[["BV"]],
-        by = "FMid",
-        multiple = "all"
+        by = "FMid"
       )
     gc()
     # sort out the wrong SAid column name after the join
@@ -522,10 +524,10 @@ gc()
   } else {
 gc()
     # if we have both FM and BV data - join them together
-    bVFM <- dplyr::right_join(rdbesPrepObject[["FM"]],
+    bVFM <- joinDT(rdbesPrepObject[["FM"]],
       rdbesPrepObject[["BV"]],
       by = "FMid",
-      multiple = "all"
+      type = "right"
     )
     # sort out the wrong SAid column name after the join
     names(bVFM)[names(bVFM) == "SAid.y"] <- "SAid"
@@ -547,16 +549,16 @@ gc()
 
   # If we have data join our lowerX with the fmBV or BVFm data
   if (!is.null(nrow(fMBV))){
-    lowerA <- dplyr::left_join(lowerA, fMBV, by = "SAid", multiple = "all")
-    lowerB <- dplyr::left_join(lowerB, fMBV, by = "SAid", multiple = "all")
-    #lowerD <- dplyr::left_join(lowerD, fMBV, by = "SAid")
+    lowerA <- joinDT(lowerA, fMBV, by = "SAid")
+    lowerB <- joinDT(lowerB, fMBV, by = "SAid")
+    #lowerD <- joinDT(lowerD, fMBV, by = "SAid")
     lowerD <- NULL
     allLower <- rbind(allLower,lowerA, lowerB, lowerD)
   }
 
   if (!is.null(nrow(bVFM))){
     # Note the difference in lowerC
-    lowerC <- dplyr::left_join(lowerC, bVFM, by = "SAid", multiple = "all")
+    lowerC <- joinDT(lowerC, bVFM, by = "SAid")
     allLower <- rbind(allLower,lowerC)
   }
 
@@ -668,19 +670,12 @@ gc()
       }
       gc()
       # Join this new table to the existing data
+      # (joinDT keeps the columns and rows in the order of myRDBESEstObj)
       myRDBESEstObj <-
-        dplyr::left_join(myRDBESEstObj,
+        joinDT(myRDBESEstObj,
           rdbesPrepObject[[thisTable]],
           by = joinField
-          , multiple = "all"
         )
-      # TODO Should be able to use data.table to do a left join instead of dplyr
-      # but the two lines below were both wrong.  The first gives the columns back in the
-      # wrong order.  The second gives the columns in the right order but doesn't
-      # include all the rows :-(
-      #myRDBESEstObj <- rdbesPrepObject[[thisTable]][myRDBESEstObj, on = joinField]
-      # (the order of the tables is to ensure the columns are returned in the right order)
-      #myRDBESEstObj <- myRDBESEstObj[rdbesPrepObject[[thisTable]],  on = joinField]
     }
     gc()
     # recursively call this function
