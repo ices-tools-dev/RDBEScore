@@ -122,7 +122,7 @@ The main package directories are:
 
 3. **Write or modify the code and tests.** You can do this manually or with AI coding tools. New functions should include roxygen2 documentation and appropriate tests. Add or update examples and vignettes when relevant. Aim to keep changes related to one issue together.
 
-4. **Document AI involvement and human approvals.** Add the information described in Section 3 to every new or substantially modified function and test(s).
+4. **Document AI involvement and human review.** Add the information described in Section 3 to every new or substantially modified function and test(s).
 
 5. **Check the complete package** before integrating changes into `dev`. Regenerate documentation, run the tests and check the package:
 
@@ -142,7 +142,7 @@ The main package directories are:
 
 Starting with version 0.3.5, contributors are allowed to use AI coding tools to accelerate development. However, all contributors remain responsible for understanding and verifying their code, regardless of whether it was written manually or generated with AI.
 
-Every **new or substantially modified** function and test must document **AI involvement** and **human approvals**.
+Every **new or substantially modified** function and test must document **AI involvement** and **human review**.
 
 **Function documentation**
 
@@ -151,7 +151,7 @@ Include a `Development review` section in the function's roxygen2 documentation 
 ```r
 #' @section Development review:
 #' - AI-assisted: Yes
-#' - Human approvals: 1 (Jane Smith)
+#' - Human review: janesmith
 #' - Notes/scope: Tested with hierarchy H5 using
 #'   2025 RDBES data (downloaded 2026-10-14).
 ```
@@ -162,14 +162,14 @@ Add the same information as comments immediately before **each `test_that()` blo
 
 ```r
 # AI-assisted: Yes
-# Human approvals: 1 (Jane Smith)
+# Human review: janesmith
 # Notes/scope: Expected results checked manually.
 test_that("function returns correct values", {
   expect_equal(myFunction(2), 4)
 })
 
 # AI-assisted: No
-# Human approvals: 2 (Jane Smith, John Brown)
+# Human review: janesmith, johnbrown
 test_that("function handles missing values", {
   expect_true(is.na(myFunction(NA)))
 })
@@ -178,30 +178,30 @@ test_that("function handles missing values", {
 **Meaning of the fields**
 
 - **AI-assisted:** `Yes` if AI tools were used to generate or substantially modify the current code or test, otherwise `No`. Routine autocomplete or minor wording corrections do not need to be reported.
-- **Human approvals:** Number and full names of people who have checked and accepted the current implementation or test. The original contributor records one approval after checking their own work. Each additional reviewer who approves the current version is added.
+- **Human review:** Github usernames of people who have checked and accepted the current implementation or test. The original contributor records one approval after checking their own work. Each additional reviewer who approves the current version is added.
 - **Notes/scope (optional):** Briefly describe what has been verified, for example specific RDBES sampling hierarchies, datasets, reference calculations, or known limitations. Include data versions or dates when relevant.
 
-**Updating approvals**
+**Updating review**
 
-When another person reviews the code or test and approves it without changes, add their name:
-
-```r
-# Human approvals: 2 (Jane Smith, John Brown)
-```
-
-If a reviewer substantially modifies the code, previous approvals are no longer assumed to apply. The person making the changes checks the modified version and updates the approval record:
+When another person reviews the code or test and approves it without changes, add their username:
 
 ```r
-# Human approvals: 1 (John Brown)
+# Human review: janesmith, johnbrown
 ```
 
-Approvals for functions and tests are maintained separately. A change to one does not automatically invalidate approval of the other, unless its correctness is affected.
+If a reviewer substantially modifies the code, previous review are no longer assumed to apply. The person making the changes checks the modified version and updates the approval record:
+
+```r
+# Human review: johnbrown
+```
+
+review for functions and tests are maintained separately. A change to one does not automatically invalidate approval of the other, unless its correctness is affected.
 
 **Testing and scientific reliability**
 
 All new or modified functionality should have appropriate tests. Expected test results must be independently established or checked by a human, rather than relying solely on AI-generated expectations. Where possible, statistical estimation functions should be tested against manually calculated results, published examples or independently verified reference implementations.
 
-Additional independent human review is particularly encouraged for statistical estimation functions and scientifically important data transformations. The number of human approvals indicates the extent of documented human review, but does not by itself guarantee scientific correctness. The optional `Notes/scope` field can clarify what has actually been verified.
+Additional independent human review is particularly encouraged for statistical estimation functions and scientifically important data transformations. The number of human review indicates the extent of documented human review, but does not by itself guarantee scientific correctness. The optional `Notes/scope` field can clarify what has actually been verified.
 
 Existing functions and tests do not need to be retrospectively classified unless they are substantially modified.
 
@@ -209,12 +209,15 @@ Existing functions and tests do not need to be retrospectively classified unless
 
 The `dev` branch may contain functions that are still being developed, tested or reviewed. **Only changes considered ready for release should be transferred to `main`.**
 
-When preparing a release:
+We aim at 2 releases a year (autumn and spring) and an online meeting will be scheduled to a approve the pull request to the main
 
-1. Identify the functions and changes that are ready, considering their tests, human approvals and any review notes.
+When preparing a release a subset of the package contributors will:
+
+1. Identify the functions and changes that are ready, considering their tests, human review and any review notes.
 2. If only some changes from `dev` are ready, create a release branch from `main` and selectively transfer the required commits using Git cherry-pick. Include any dependent changes, tests and documentation.
 3. Run `devtools::document()`, `devtools::test()` and `devtools::check()` on the complete release candidate.
 4. Submit a pull request to `main` for final review and merging.
+
 
 Changes that are not yet sufficiently reviewed remain in `dev`. The complete `dev` branch should only be merged into `main` when all included changes are ready for release.
 
