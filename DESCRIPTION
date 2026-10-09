@@ -120,6 +120,5 @@ Suggests:
 Depends:
     R (>= 4.1)
 Imports:
-    data.table,
-    icesRDBES
+    data.table
 VignetteBuilder: knitr

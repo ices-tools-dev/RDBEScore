@@ -31,13 +31,38 @@ library(RDBEScore)
 dataDir <- "./yourDataDirectory/"
 
 #for demonstration purposes we will use the example data included in the package
+#for downloading actual data see the section below
 dataDir <- paste0(system.file("extdata", package = "RDBEScore"), "/")
 ```
 
 
+
+## Downloading data from the RDBES
+
+The data can be downloaded from the [RDBES web site](https://rdbes.ices.dk/#/), or from R with the [icesRDBES](https://ices-tools-prod.r-universe.dev/icesRDBES) package. icesRDBES is not on CRAN; install it from the ICES repository:
+
+```{r, eval = FALSE}
+install.packages("icesRDBES",
+                 repos = c("https://ices-tools-prod.r-universe.dev",
+                           "https://cloud.r-project.org"))
+```
+
+The download needs access to the RDBES see the [icesRDBES](https://ices-tools-prod.r-universe.dev/icesRDBES/) documentation.  For example, the CS data of hierarchy 1 for the test country ZW in 1965, as a `.zip` file with one `.csv` file per table:
+
+```{r, eval = FALSE}
+payload <- list(dataType = "CS",
+                format = "CsvFilePerTable",
+                hierarchies = list("H1"),
+                csFilters = list(deYear = list("1965"),
+                                 sdCountry = list("ZW")))
+zipFile <- icesRDBES::rdbes_download_data(payload, dest_dir = dataDir)
+```
+
+After downloading, the file can be imported as shown below.
+
 ## Importing zipped files
 
-It can directly import the `.zip` archive from the RDBES download containing all mandatory hierarchy tables plus VD and SL:
+RDBEScore package can directly import the `.zip` archive from the offial RDBES download containing all mandatory hierarchy tables plus VD and SL:
 
 ```{r}
 importedH1 <- createRDBESDataObject(input = paste0(dataDir,"H1_Example.zip"))
