@@ -21,3 +21,4 @@ package_overview.Rmd
 ^pkgdown$
 ^\.positai$
 ^\.claude$
+^personal$
