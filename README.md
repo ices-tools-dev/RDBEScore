@@ -97,13 +97,16 @@ install_github("ices-tools-dev/RDBEScore@dev", build = FALSE)
 
 ## How to Start developing
 
-Contributions and the use of AI coding tools are tolerated, but all code must be tested and checked by humans to maintain the reliability of the package.
+Contributions are welcome and the use of AI coding tools are premitted, but all code must be tested and checked by humans to maintain the reliability of the package. Confidential information should never be commited. 
+
+> [!WARNING]
+> Working with RDBES data is working with confidential data that is subjected to a data policy that aims to prevent unintended misuse or leakage of information by individual users, and keep trust in the RDBES system. Because of that, RDBES data should be handled with special care (e.g., never be commited to github or AI services) and development should be done, to the extent possible, using synthetic or public data.
 
 ### 1. Getting started
 
 Install a recent version of R (4.1 or newer), preferably with RStudio, and the packages `remotes`, `devtools`, `roxygen2` and `testthat`.
 
-Use **camelCase** for new function names to match the existing package style. Two useful examples are [createRDBESDataObject](https://github.com/ices-tools-dev/RDBEScore/blob/dev/R/createRDBESDataObject.R) and the simpler [getTablesInRDBESHierarchy](https://github.com/ices-tools-dev/RDBEScore/blob/dev/R/getTablesInRDBESHierarchy.R).
+Use **camelCase** for new function names to match the existing package style. See the package style guide for more details [style guide](https://github.com/ices-tools-dev/RDBEScore/blob/main/WGRDBES-EST/newbies_guide/StyleGuide_WKRDB-EST_Annex8.pdf). Two useful examples are [createRDBESDataObject](https://github.com/ices-tools-dev/RDBEScore/blob/dev/R/createRDBESDataObject.R) and the simpler [getTablesInRDBESHierarchy](https://github.com/ices-tools-dev/RDBEScore/blob/dev/R/getTablesInRDBESHierarchy.R).
 
 The main package directories are:
 
@@ -116,9 +119,9 @@ The main package directories are:
 
 ### 2. Development workflow
 
-1. **Create or claim a GitHub issue.** Describe what needs to be added or changed, including the expected behaviour. Assign yourself to the issue so others know you are working on it.
+1. **Create or claim a GitHub issue.** Describe what needs to be added or changed, including the expected behaviour. Assign yourself to the issue when you start working on it so others know.
 
-2. **Start from the latest `dev` branch.** Work directly on `dev` or create your own development branch based on it. The `main` branch is protected and only accepts changes through pull requests.
+2. **Start from the latest `dev` branch.** Work directly on `dev` if you can ensure that you never commit code that has failing tests. If you are unsure you can always create your own development branch based on `dev` and work there. Wherever you work remember to pull frequently so your code does not deviate too far from others. The `main` branch is protected and only accepts changes through pull requests.
 
 3. **Write or modify the code and tests.** You can do this manually or with AI coding tools. New functions should include roxygen2 documentation and appropriate tests. Add or update examples and vignettes when relevant. Aim to keep changes related to one issue together.
 
@@ -140,7 +143,7 @@ The main package directories are:
 
 ### 3. AI-assisted development and human review
 
-Starting with version 0.3.5, contributors are allowed to use AI coding tools to accelerate development. However, all contributors remain responsible for understanding and verifying their code, regardless of whether it was written manually or generated with AI.
+Starting with version 0.3.5, contributors are permitted to use AI coding tools to accelerate development. However, all contributors remain responsible for understanding and verifying their code, regardless of whether it was written manually or generated with AI. If you posess confidential RDBES data using installed AI products (e.g. VScode, Codex, Claude Code, PositAI, browser add-ons etc)  is not allowed.  Browser-based AI may be used as long as their permissions have been checked and confidential information is not submitted to them.
 
 Every **new or substantially modified** function and test must document **AI involvement** and **human review**.
 
