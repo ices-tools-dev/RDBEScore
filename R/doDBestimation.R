@@ -22,7 +22,7 @@
 #' @examples
 #' \dontrun{
 #' data(shrimps)
-#' doDBestimation (x = shrimps, estimateType = "total",
+#' RDBEScore:::doDBestimation (x = shrimps, estimateType = "total",
 #' pointEstimator = "Unbiased", varEstimator = "WRonPSUviaPsi",stage = 0,
 #' domainOfinterest = NULL )
 #'  }
