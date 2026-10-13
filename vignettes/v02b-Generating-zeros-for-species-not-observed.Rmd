@@ -29,12 +29,11 @@ library(data.table)
 ## Load and validate example data
 
 ```{r}
-# read an example dataset and simplify it to 1 trip and 1 haul [dev bote: this section needs to be reworked when data and filterRDBESDataObject are  updated]
+# read an example dataset and simplify it to 1 trip and 1 haul
 data(Pckg_survey_apistrat_H1)
 myH1DataObject1 <- Pckg_survey_apistrat_H1
 myH1DataObject1$SL<-myH1DataObject1$SL[grepl(myH1DataObject1$SL$SLspeclistName, pat="Pckg_survey_apistrat_H1"),]
-#myH1DataObject1<-filterAndTidyRDBESDataObject(myH1DataObject1, fieldsToFilter="FOid",valuesToFilter=70849, killOrphans = TRUE)
-myH1DataObject1<-filterRDBESDataObject(myH1DataObject1, fieldsToFilter="SSid",valuesToFilter=myH1DataObject1$SS$SSid[1], killOrphans = TRUE)
+myH1DataObject1<-filterAndTidyRDBESDataObject(myH1DataObject1, fieldsToFilter="FOid",valuesToFilter=70849)
 # check it is a valid RDBESobject
 validateRDBESDataObject(myH1DataObject1)
 ```
