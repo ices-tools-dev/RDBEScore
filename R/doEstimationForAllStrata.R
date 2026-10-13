@@ -12,6 +12,7 @@
 #' @examples
 #' \dontrun{
 #'
+#' data("H1Example")
 #' myH1DataObject <- H1Example
 #'
 #' # Update our test data with some random sample measurements
