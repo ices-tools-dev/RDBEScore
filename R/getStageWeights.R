@@ -9,8 +9,21 @@
 #' lowest-level SA gets `w = f_VS * f_FT * f_FO` (SS is always 1).
 #'
 #' Selection methods are not used for the factors. They are logged per stage.
-#' Sampled hauls without an SA of the species are counted as zero catch, which
-#' is logged as an assumption.
+#'
+#' **Zeros and non-response.** A sampled haul (`FOsamp` not `"N"`) can be:
+#' * with an included sample of the species: its fish count,
+#' * without any sample of the species: zero catch, logged as an assumption
+#'   (the species is assumed to be on the species list),
+#' * with a recorded zero (an SA with total weight 0, see
+#'   [getSampleUnits()]): zero catch, logged as information,
+#' * with samples of the species that are all excluded (for example lower
+#'   hierarchy D, missing weights, no FM or BV): no usable information, so
+#'   it is treated as not sampled (non-response) and left out of the number
+#'   of sampled hauls.
+#'
+#' A trip without any sampled haul left, and a vessel without any sampled
+#' trip left, are treated as not sampled in the same way. All of this is
+#' logged.
 #'
 #' @param RDBESDataObj An `RDBESDataObject` of hierarchy 1.
 #' @param sampleUnits Output of [getSampleUnits()].
@@ -35,17 +48,81 @@ getStageWeights <- function(RDBESDataObj, sampleUnits, scheme,
                                      includeLowHierTables = FALSE,
                                      includeTablesNotInSampHier = FALSE)
   stages <- names(scheme$stages)
+  lowest <- stages[length(stages)]
+  lowId <- paste0(lowest, "id")
   unitWeights <- list()
   prevW <- NULL
+
+  # Unit tables of all stages
+  unitTables <- list()
+  for (tb in stages) {
+    unitTables[[tb]] <- getUnitTable(
+      RDBESDataObj, tb,
+      fields = stageFieldsNeeded(RDBESDataObj, tb, scheme$stages[[tb]]),
+      verbose = verbose)
+    log <- rbind(log, getRatioLog(unitTables[[tb]]))
+  }
+
+  # Non-response at the lowest stage: a sampled haul whose samples of the
+  # species are all excluded (and none is a recorded zero) gives no usable
+  # information. It is treated as not sampled, not as zero catch. A haul
+  # without any sample of the species stays sampled with zero catch.
+  su0 <- sampleUnits
+  withSA <- unique(su0[[lowId]])
+  usable <- unique(su0[include == TRUE |
+                         excludeReason == zeroSampleReason()][[lowId]])
+  nonResp <- setdiff(withSA, usable)
+  lowUnits <- unitTables[[lowest]]
+  drop <- lowUnits$sampled & lowUnits[[lowId]] %in% nonResp
+  if (any(drop)) {
+    lowUnits[drop, sampled := FALSE]
+    unitTables[[lowest]] <- lowUnits
+    log <- addToRatioLog(log, step, "exclusion",
+      paste0("Sampled ", lowest, " units whose samples of the species were ",
+             "all excluded: treated as not sampled (non-response)"),
+      sum(drop), verbose)
+  }
+  partly <- intersect(unique(su0[include == TRUE][[lowId]]),
+                      unique(su0[include == FALSE &
+                                   excludeReason != zeroSampleReason()][[lowId]]))
+  if (length(partly) > 0) {
+    log <- addToRatioLog(log, step, "warning",
+      paste0(lowest, " units with both included and excluded samples of the ",
+             "species: the excluded part counts as zero"),
+      length(partly), verbose)
+  }
+
+  # A unit stays sampled only if at least one unit below it is sampled
+  if (length(stages) > 1) {
+    for (k in rev(seq_len(length(stages) - 1))) {
+      tb <- stages[k]
+      idCol <- paste0(tb, "id")
+      below <- unitTables[[stages[k + 1]]]
+      keepIds <- below[sampled == TRUE][[idCol]]
+      u <- unitTables[[tb]]
+      dropUp <- u$sampled & !u[[idCol]] %in% keepIds
+      if (any(dropUp)) {
+        u[dropUp, sampled := FALSE]
+        unitTables[[tb]] <- u
+        log <- addToRatioLog(log, step, "exclusion",
+          paste0(tb, " units without any sampled ", stages[k + 1],
+                 " unit left: treated as not sampled (non-response)"),
+          sum(dropUp), verbose)
+      }
+    }
+  }
 
   for (tb in stages) {
     s <- scheme$stages[[tb]]
     idCol <- paste0(tb, "id")
     parentId <- paste0(chain[match(tb, chain) - 1], "id")
-    units <- getUnitTable(RDBESDataObj, tb,
-                          fields = stageFieldsNeeded(RDBESDataObj, tb, s),
-                          verbose = verbose)
-    log <- rbind(log, getRatioLog(units))
+    units <- unitTables[[tb]]
+    # Only units under a sampled parent are raised
+    k <- match(tb, stages)
+    if (k > 1) {
+      parentsKept <- unitTables[[stages[k - 1]]][sampled == TRUE][[parentId]]
+      units <- units[units[[parentId]] %in% parentsKept]
+    }
     stageStep <- paste0(step, " (", tb, ")")
 
     totalCol <- NULL
@@ -116,9 +193,8 @@ getStageWeights <- function(RDBESDataObj, sampleUnits, scheme,
     uw <- unitWeights[[tb]]
     su[, (paste0("f_", tb)) := uw$factor[match(su[[idCol]], uw[[idCol]])]]
   }
-  lowest <- stages[length(stages)]
   lw <- unitWeights[[lowest]]
-  m <- match(su[[paste0(lowest, "id")]], lw[[paste0(lowest, "id")]])
+  m <- match(su[[lowId]], lw[[lowId]])
   su[, `:=`(w = lw$wUnit[m], DEid = lw$DEid[m],
             DEstratumName = lw$DEstratumName[m])]
   noW <- su[include == TRUE & is.na(w), .N]
@@ -128,14 +204,22 @@ getStageWeights <- function(RDBESDataObj, sampleUnits, scheme,
          "hierarchy.", call. = FALSE)
   }
 
-  # Sampled hauls without the species count as zero catch
-  nZero <- sum(!lw[[paste0(lowest, "id")]] %in%
-                 su[include == TRUE][[paste0(lowest, "id")]])
-  if (nZero > 0) {
+  # Sampled hauls with zero catch: a recorded zero, or no sample of the
+  # species at all (then the species is assumed to be on the species list)
+  zeroIds <- setdiff(lw[[lowId]], su[include == TRUE][[lowId]])
+  recorded <- intersect(zeroIds,
+                        su[excludeReason == zeroSampleReason()][[lowId]])
+  notFound <- setdiff(zeroIds, su[[lowId]])
+  if (length(recorded) > 0) {
+    log <- addToRatioLog(log, step, "info",
+      paste0("Sampled ", lowest, " units with a recorded zero of the ",
+             "species: zero catch"), length(recorded), verbose)
+  }
+  if (length(notFound) > 0) {
     log <- addToRatioLog(log, step, "assumption",
-      paste0("Sampled ", lowest, " units without an included sample of the ",
-             "species are counted as zero catch (species assumed on the ",
-             "species list)"), nZero, verbose)
+      paste0("Sampled ", lowest, " units without a sample of the species are ",
+             "counted as zero catch (species assumed on the species list)"),
+      length(notFound), verbose)
   }
 
   attr(su, "unitWeights") <- unitWeights

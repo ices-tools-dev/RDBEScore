@@ -83,6 +83,11 @@ ratioDomainVars <- function() {
   c("year", "quarter", "month", "area", "statRect", "metier6")
 }
 
+#' Exclusion reason of a recorded zero (an SA with total weight 0)
+#' @keywords internal
+#' @noRd
+zeroSampleReason <- function() "recorded zero (total weight 0)"
+
 #' Check that the requested domain variables are supported
 #' @keywords internal
 #' @noRd

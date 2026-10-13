@@ -316,6 +316,69 @@ test_that("external auxiliary tables give the same result as the RDBES fields", 
   expect_error(estimate(obj, scBadKey), "not in the unit table")
 })
 
+test_that("zeros stay in the sampled hauls, unusable hauls are non-response", {
+  sim <- simulate(lowHierarchy = "C", haulsPerTrip = 4,
+                  vesselsInPopulation = 4)
+  obj <- sim$obj
+  saOf <- function(foid) obj$SA[SSid %in% obj$SS[FOid == foid, SSid], SAid]
+  # Trip 1 has hauls 1 to 4, all sampled:
+  # haul 1: species observed and usable
+  # haul 2: no sample of the species (not observed)
+  sa2 <- saOf(2)
+  obj$BV <- obj$BV[!SAid %in% sa2]
+  obj$SA <- obj$SA[!SAid %in% sa2]
+  # haul 3: recorded zero, written as generateZerosUsingSL() does
+  sa3 <- saOf(3)
+  obj$BV <- obj$BV[!SAid %in% sa3]
+  obj$SA[SAid %in% sa3, `:=`(SAtotalWtMes = 0L, SAsampWtMes = 0L,
+                             SAlowHierarchy = "D", SAsamp = "N")]
+  # haul 4: species observed but the sample is unusable (lower hierarchy D)
+  sa4 <- saOf(4)
+  obj$BV <- obj$BV[!SAid %in% sa4]
+  obj$SA[SAid %in% sa4, SAlowHierarchy := "D"]
+
+  su <- getSampleUnits(obj, species = "PLE")
+  expect_equal(su[SAid %in% sa3, excludeReason],
+               "recorded zero (total weight 0)")
+  expect_true(any(grepl("Recorded zeros", getRatioLog(su)$message)))
+  expect_false(any(grepl("Excluded.*recorded zero",
+                         getRatioLog(su)$message)))
+
+  sc <- raisingScheme(FO = stageRaising("count"), top = topRaising("ratio"))
+  sw <- getStageWeights(obj, su, sc)
+  # hauls 1, 2 and 3 are sampled, haul 4 is non-response: 4 / 3
+  expect_equal(unique(sw[FTid == 1 & include == TRUE, f_FO]), 4 / 3)
+  fo <- attr(sw, "unitWeights")$FO
+  expect_true(all(c(1, 2, 3) %in% fo$FOid))
+  expect_false(4 %in% fo$FOid)
+  msg <- getRatioLog(sw)$message
+  expect_true(any(grepl("all excluded: treated as not sampled", msg)))
+  expect_true(any(grepl("with a recorded zero", msg)))
+  expect_true(any(grepl("without a sample of the species", msg)))
+  # other trips are unaffected
+  expect_true(all(sw[FTid != 1 & include == TRUE, f_FO] == 1))
+})
+
+test_that("a trip without usable hauls is non-response at the trip stage", {
+  sim <- simulate(lowHierarchy = "C", haulsPerTrip = 2,
+                  vesselsInPopulation = 4)
+  obj <- sim$obj
+  # all samples of trip 2 (vessel 1) are unusable
+  saTrip2 <- obj$SA[SSid %in% obj$SS[FOid %in% obj$FO[FTid == 2, FOid],
+                                     SSid], SAid]
+  obj$BV <- obj$BV[!SAid %in% saTrip2]
+  obj$SA[SAid %in% saTrip2, SAlowHierarchy := "D"]
+  su <- getSampleUnits(obj, species = "PLE")
+  sc <- raisingScheme(FO = stageRaising("count"), FT = stageRaising("count"),
+                      VS = stageRaising("count"))
+  sw <- getStageWeights(obj, su, sc)
+  # vessel 1 keeps 1 of its 2 trips: FTnumTotal 2 / 1
+  expect_equal(unique(sw[FTid == 1 & include == TRUE, f_FT]), 2)
+  expect_false(2 %in% attr(sw, "unitWeights")$FT$FTid)
+  expect_true(any(grepl("FT units without any sampled FO unit left",
+                        getRatioLog(sw)$message)))
+})
+
 test_that("stage-wise raising stops on missing totals and wrong strata", {
   sim <- simulate(lowHierarchy = "C")
   obj <- sim$obj

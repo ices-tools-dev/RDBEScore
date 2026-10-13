@@ -68,11 +68,17 @@ as suspicious.
 FO value. \code{areaLookup} recodes areas (for example divisions to
 sub-areas).
 
+\strong{Recorded zeros.} An SA with a total weight of 0 (for example made by
+\code{\link[=generateZerosUsingSL]{generateZerosUsingSL()}}) records that the species was looked for and not
+found. It is flagged \code{include = FALSE} with \code{excludeReason = "recorded zero (total weight 0)"} and logged as information: its haul counts as
+sampled with zero catch.
+
 \strong{Exclusions.} Samples not sampled (\code{SAsamp == "N"}, also inherited from a
 parent SA), lower hierarchy D, samples without the weights needed for
 raising, and samples without fish records (no FM for lower hierarchy A or
-B, no BV for C) are flagged \code{include = FALSE}. Later steps exclude them
-from both the numerator and the auxiliary total of the ratio.
+B, no BV for C) are flagged \code{include = FALSE}. They add nothing to the
+estimate. A haul whose samples of the species are all excluded is treated
+as not sampled (non-response) by \code{\link[=getStageWeights]{getStageWeights()}}.
 
 Only upper hierarchy 1 is implemented. Clustering (\code{XXclustering} other
 than \code{"N"}) is logged. It does not affect the point estimates.

@@ -32,8 +32,23 @@ lowest-level SA gets \code{w = f_VS * f_FT * f_FO} (SS is always 1).
 }
 \details{
 Selection methods are not used for the factors. They are logged per stage.
-Sampled hauls without an SA of the species are counted as zero catch, which
-is logged as an assumption.
+
+\strong{Zeros and non-response.} A sampled haul (\code{FOsamp} not \code{"N"}) can be:
+\itemize{
+\item with an included sample of the species: its fish count,
+\item without any sample of the species: zero catch, logged as an assumption
+(the species is assumed to be on the species list),
+\item with a recorded zero (an SA with total weight 0, see
+\code{\link[=getSampleUnits]{getSampleUnits()}}): zero catch, logged as information,
+\item with samples of the species that are all excluded (for example lower
+hierarchy D, missing weights, no FM or BV): no usable information, so
+it is treated as not sampled (non-response) and left out of the number
+of sampled hauls.
+}
+
+A trip without any sampled haul left, and a vessel without any sampled
+trip left, are treated as not sampled in the same way. All of this is
+logged.
 }
 \seealso{
 \code{\link[=raisingScheme]{raisingScheme()}}, \code{\link[=raiseToDE]{raiseToDE()}}

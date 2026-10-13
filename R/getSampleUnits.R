@@ -30,11 +30,18 @@
 #' FO value. `areaLookup` recodes areas (for example divisions to
 #' sub-areas).
 #'
+#' **Recorded zeros.** An SA with a total weight of 0 (for example made by
+#' [generateZerosUsingSL()]) records that the species was looked for and not
+#' found. It is flagged `include = FALSE` with `excludeReason = "recorded
+#' zero (total weight 0)"` and logged as information: its haul counts as
+#' sampled with zero catch.
+#'
 #' **Exclusions.** Samples not sampled (`SAsamp == "N"`, also inherited from a
 #' parent SA), lower hierarchy D, samples without the weights needed for
 #' raising, and samples without fish records (no FM for lower hierarchy A or
-#' B, no BV for C) are flagged `include = FALSE`. Later steps exclude them
-#' from both the numerator and the auxiliary total of the ratio.
+#' B, no BV for C) are flagged `include = FALSE`. They add nothing to the
+#' estimate. A haul whose samples of the species are all excluded is treated
+#' as not sampled (non-response) by [getStageWeights()].
 #'
 #' Only upper hierarchy 1 is implemented. Clustering (`XXclustering` other
 #' than `"N"`) is logged. It does not affect the point estimates.
@@ -268,7 +275,12 @@ getSampleUnits <- function(RDBESDataObj,
   # Inclusion flags
   # ---------------------------------------------------------------------------
   su[, excludeReason := NA_character_]
-  su[notSampledInTree == TRUE, excludeReason := "SAsamp is N (not sampled)"]
+  # A total weight of 0 records that the species was looked for and not
+  # found (e.g. rows made by generateZerosUsingSL()). It adds nothing to the
+  # estimate, and its haul counts as sampled with zero catch.
+  su[!is.na(x) & x == 0, excludeReason := zeroSampleReason()]
+  su[is.na(excludeReason) & notSampledInTree == TRUE,
+     excludeReason := "SAsamp is N (not sampled)"]
   su[is.na(excludeReason) & SAlowHierarchy == "D",
      excludeReason := "lower hierarchy D (no measurements)"]
   su[is.na(excludeReason) & (is.na(raiseFactor) | is.na(x)),
@@ -283,7 +295,14 @@ getSampleUnits <- function(RDBESDataObj,
   su[is.na(excludeReason) & SAlowHierarchy == "C" & !SAid %in% saWithBV,
      excludeReason := "lower hierarchy C but no BV records"]
   su[, include := is.na(excludeReason)]
-  ex <- su[include == FALSE, .N, by = excludeReason]
+  nZero <- su[excludeReason == zeroSampleReason(), .N]
+  if (nZero > 0) {
+    log <- addToRatioLog(log, step, "info",
+      "Recorded zeros (total weight 0): the species was not found, zero catch",
+      nZero, verbose)
+  }
+  ex <- su[include == FALSE & excludeReason != zeroSampleReason(), .N,
+           by = excludeReason]
   for (i in seq_len(nrow(ex))) {
     log <- addToRatioLog(log, step, "exclusion",
       paste0("Excluded from numerator and auxiliary total: ",
