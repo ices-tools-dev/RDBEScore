@@ -4,7 +4,15 @@
 \alias{upperTblData}
 \title{Get Field from Upper Table}
 \usage{
-upperTblData(field, values, tbls, level, verbose = FALSE)
+upperTblData(
+  field,
+  values,
+  tbls,
+  level,
+  verbose = FALSE,
+  requestedField = field,
+  requestedValues = values
+)
 }
 \arguments{
 \item{field}{A character string specifying the field to get.}
@@ -34,12 +42,20 @@ values and returns the result.
 NB! running on the RDBESDataObject will work properly if it is sorted by default the tables are not
 in the correct order for a spesific hierarchy.
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Human review: rix133
+}
+}
+
 \examples{
 # it is important to run these functions only on sorted RDBESDataObject
 RDBEScore:::upperTblData("SAid", c(1), sort(H8ExampleEE1), "DE", verbose = TRUE)
 DE <- data.table::data.table(DEid = c(1, 2))
 SD <- data.table::data.table(SDid = c(1, 2), DEid = c(1, 2))
-VS <- data.table::data.table(VSid = c(1, 2),SDid =c(1,2),  value = c(10, 20))
+VS <- data.table::data.table(VSid = c(1, 2),SDid =c(1,2),  VSvalue = c(10, 20))
 tbls <- list(DE = DE, SD = SD, VS = VS)
 RDBEScore:::upperTblData("VSid", c(1), tbls, "DE")
 }
