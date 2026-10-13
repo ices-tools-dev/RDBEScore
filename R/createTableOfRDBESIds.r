@@ -13,7 +13,7 @@
 #' @examples
 #' \dontrun{
 #' myH1DataObject <- H1Example
-#' myTableOfIds <- createTableOfRDBESIds(myH1DataObject)}
+#' myTableOfIds <- RDBEScore:::createTableOfRDBESIds(myH1DataObject)}
 #'
 
 createTableOfRDBESIds<-function(x, addSAseqNums=TRUE){
