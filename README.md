@@ -213,7 +213,7 @@ Existing functions and tests do not need to be retrospectively classified unless
 
 The `dev` branch may contain functions that are still being developed, tested or reviewed. **Only changes considered ready for release should be transferred to `main`.**
 
-We aim at 2 releases a year (autumn and spring) and an online meeting will be scheduled to a approve the pull request to the main
+We aim at 2 releases a year (autumn and spring) and an online meeting will be scheduled to approve the pull request to the main.
 
 When preparing a release a subset of the package contributors will:
 
