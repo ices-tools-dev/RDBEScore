@@ -13,7 +13,7 @@ generateTestTbls(tblNames, prevTbls = list(), ...)
 Defaults to empty list}
 
 \item{...}{
-  Arguments passed on to \code{\link[=makeTbl]{makeTbl}}
+  Arguments passed on to \code{\link{makeTbl}}
   \describe{
     \item{\code{tblName}}{Name of the table}
     \item{\code{rows}}{numeric number of rows per parent record. Defaults to 4.}
