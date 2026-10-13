@@ -35,10 +35,14 @@ export(updateSAwithTaxonFromSL)
 export(validateRDBESDataObject)
 export(validateRDBESEstObject)
 import(data.table)
-importFrom(stats,formula)
-importFrom(stats,na.omit)
-importFrom(stats,rnorm)
-importFrom(stats,setNames)
-importFrom(utils,file_test)
-importFrom(utils,packageDescription)
-importFrom(utils,tail)
+importFrom(stats,
+  formula,
+  na.omit,
+  rnorm,
+  setNames
+)
+importFrom(utils,
+  file_test,
+  packageDescription,
+  tail
+)
