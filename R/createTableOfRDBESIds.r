@@ -12,12 +12,9 @@
 #'
 #' @examples
 #' \dontrun{
+#' myH1DataObject <- H1Example
+#' myTableOfIds <- createTableOfRDBESIds(myH1DataObject)}
 #'
-#' myH1RawObject <-
-#'   importRDBESDataCSV(rdbesExtractPath = "tests\\testthat\\h1_v_1_19_13")
-#'
-#' myTableOfIds<- createTableOfRDBESIds(myH1RawObject)
-#' }
 
 createTableOfRDBESIds<-function(x, addSAseqNums=TRUE){
 
