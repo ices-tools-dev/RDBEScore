@@ -16,11 +16,11 @@
 #' @examples
 #' \dontrun{
 #'
-#' myH1RawObject <-
-#'   importRDBESDataCSV(rdbesExtractPath = "tests\\testthat\\h1_v_1_19")
+#' data("H1Example")
+#' myH1DataObject <- H1Example
 #' myFields <- c("VDlenCat")
 #' myValues <- c("18-<24")
-#' myFilteredObject <- filterRDBESDataObject(myH1RawObject,
+#' myFilteredObject <- filterRDBESDataObject(myH1DataObject,
 #'   fieldsToFilter = myFields,
 #'   valuesToFilter = myValues
 #' )
