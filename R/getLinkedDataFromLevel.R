@@ -26,11 +26,15 @@
 #' # Retrieve data from the VS level based on BVfishId from the BV table
 #' getLinkedDataFromLevel("BVfishId", c("410472143", "410472144"), H8ExampleEE1, "VS", TRUE)
 #' }
+#' @section Development review:
+#' - AI-assisted: No
+#' - Review: rix133
 #' @export
 getLinkedDataFromLevel <- function(field, values, rdbesTables, level, verbose = FALSE){
 
   # Check if rdbesTables is of class "RDBESDataObject"
   if(inherits(rdbesTables, "RDBESDataObject")) {
+    availableTblNames <- names(rdbesTables)
     rdbesTables <- sort(rdbesTables)
   } else {
     stop("rdbesTables must be of class RDBESDataObject")
@@ -44,8 +48,34 @@ getLinkedDataFromLevel <- function(field, values, rdbesTables, level, verbose = 
   # Extract the source table abbreviation from the field name
   sourceTbl <- substr(field, 1, 2)
 
-  # Get the list of table names
-  tblNames <- names(rdbesTables)
+  #get the hierarchy of the source table
+  summary_values <- summary(rdbesTables)
+  hierarchy <- NA
+  if(!is.null(summary_values$hierarchy)){
+    if(length(summary_values$hierarchy)>1){
+      stop("Mixed hierarchy RDBESDataObject!", call.=FALSE)
+    }
+    hierarchy <- summary_values$hierarchy
+  } else {
+    stop(paste0("No hierarchy, RDBESdataObject:\n "))
+  }
+
+  # Get the list of table names with optional if needed
+  tblNames <- getTablesInRDBESHierarchy(hierarchy)
+  requiredTblNames <- getTablesInRDBESHierarchy(
+    hierarchy,
+    includeOptTables = FALSE
+  )
+
+  keepTblNames <- c(requiredTblNames, sourceTbl, level)
+  tblNames <- tblNames[tblNames %in% keepTblNames]
+
+  #stop if tables in the data are missing required tables
+  missingTbls <- requiredTblNames[!requiredTblNames %in% availableTblNames]
+  if(length(missingTbls) > 0){
+    stop(paste0("Missing required tables in the RDBESDataObject: ",
+                paste(missingTbls, collapse = ", ")))
+  }
 
   # Determine the positions of sourceTbl and target level in the table list
   sourcePos <- which(tblNames == sourceTbl)

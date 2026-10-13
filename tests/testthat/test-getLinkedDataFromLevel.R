@@ -1,3 +1,6 @@
+# AI-assisted: Yes
+# Review: rix133
+capture.output({  ## suppresses printing of console output when running test()
 
 # Test for Example 1: Going up in the table hierarchy to retrieve data from the DE table
 test_that("Retrieve data from DE based on BVid", {
@@ -37,6 +40,28 @@ test_that("Retrieve data from VS based on BVfishId", {
 
 })
 
+test_that("optional source tables can be linked to required tables", {
+  result <- getLinkedDataFromLevel(
+    "FTid",
+    H5Example$FT$FTid[1],
+    H5Example,
+    "DE"
+  )
+
+  expect_s3_class(result, "data.table")
+  expect_equal(nrow(result), 1)
+})
+
+test_that("error when a required table is missing", {
+  h5 <- data.table::copy(H5Example)
+  h5[["SD"]] <- NULL
+
+  expect_error(
+    getLinkedDataFromLevel("DEid", c(1), h5, "BV"),
+    "Missing required tables in the RDBESDataObject: SD"
+  )
+})
+
 test_that("Error when rdbesTables is not of class RDBESDataObject", {
   # Pass an invalid class (e.g., a list) instead of RDBESDataObject
   invalid_rdbesTables <- list()
@@ -53,6 +78,20 @@ test_that("Error when level is not found in rdbesTables", {
   expect_error(
     getLinkedDataFromLevel("BVid", c(1), H8ExampleEE1, "XX"),
     "Table XX not found in the RDBESDataObject"
+  )
+})
+
+test_that("Error when mixed hierarchy in rdbesTables", {
+  obj <- data.table::copy(H8ExampleEE1)
+  # Add a DE row from a different hierarchy
+  obj[["DE"]] <- rbind(obj[["DE"]], H1Example[["DE"]][1])
+
+
+  expect_error(
+    suppressWarnings(
+      getLinkedDataFromLevel("BVid", c(1), obj, "TE")
+    ),
+    "Mixed hierarchy RDBESDataObject!"
   )
 })
 
@@ -79,7 +118,7 @@ test_that("Retrieve data from VS based on BVfishId if There is an empty intermed
   expect_equal(nrow(res2), 3995)
 })
 
-
+})
 
 
 

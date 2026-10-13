@@ -23,6 +23,14 @@ The subset of the table at the specified \code{level}.
 \description{
 The \code{getLinkedDataFromLevel} function facilitates the retrieval of linked data between different levels of RDBES tables. Depending on the relative positions of the source and target tables within the \code{RDBESDataObject}, the function determines whether to traverse "up" or "down" the data hierarchy to obtain the desired linked data.
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: No
+\item Review: rix133
+}
+}
+
 \examples{
 \dontrun{
 # Example 1: Going up in the table hierarchy to retrieve data from the DE table
