@@ -164,6 +164,36 @@ test_that("Retrieve data from FO based on DEid retains the DEid field", {
   expect_equal(result$DEid, c(rep(5351, 300), rep(5393, 20)))
 })
 
+test_that("Both traversal directions return the requested field and the target columns only", {
+  # downwards: requested field is not an id
+  down <- getLinkedDataFromLevel("TEstratumName", c("January", "February"),
+                                 H8ExampleEE1, "SA")
+  expect_setequal(names(down), c("TEstratumName", names(H8ExampleEE1$SA)))
+  expect_equal(nrow(down), 6)
+  expect_equal(sort(unique(down$TEstratumName)), c("February", "January"))
+  expect_equal(anyDuplicated(down[, c("TEstratumName", "SAid")]), 0)
+
+  # upwards
+  up <- getLinkedDataFromLevel("SAid", c(1, 2), H8ExampleEE1, "TE")
+  expect_setequal(names(up), c("SAid", names(H8ExampleEE1$TE)))
+  expect_equal(up$SAid, c(1, 2))
+  expect_equal(up$TEid, c(1, 1))
+})
+
+test_that("Same-level queries follow the same output convention", {
+  result <- getLinkedDataFromLevel("TEstratumName", c("January", "February"),
+                                   H8ExampleEE1, "TE")
+
+  expect_setequal(names(result), names(H8ExampleEE1$TE))
+  expect_equal(anyDuplicated(names(result)), 0)
+  expect_equal(nrow(result), 4)
+})
+
+test_that("Linked data does not contain intermediate hierarchy ids", {
+  result <- getLinkedDataFromLevel("DEid", c(1), H8ExampleEE1, "SA")
+
+  expect_setequal(names(result), unique(c("DEid", names(H8ExampleEE1$SA))))
+})
 })
 
 

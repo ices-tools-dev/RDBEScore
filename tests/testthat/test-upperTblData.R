@@ -1,4 +1,4 @@
-# AI-assisted: No
+# AI-assisted: Yes
 # Review: rix133
 capture.output({  ## suppresses printing of console output when running test()
 
@@ -62,5 +62,34 @@ test_that("upperTblData has the in about the several rows requested also in the 
   expected <- data.table(VSvalue = c(10,20), DEid = c(1,2))
 
   expect_equal(result, expected)
+})
+
+test_that("upperTblData keeps different requested values that share a target record", {
+
+  SD2 <- data.table(SDid = c(1, 2), DEid = c(1, 1))
+  tbls2 <- list(DE = DE, SD = SD2, VS = VS)
+
+  result <- upperTblData("VSid", c(1, 2), tbls2, "DE")
+
+  expect_setequal(names(result), c("VSid", "DEid"))
+  expect_equal(result[, .(VSid, DEid)], data.table(VSid = c(1, 2), DEid = c(1, 1)))
+})
+
+test_that("upperTblData collapses repeated paths between a requested value and a target record", {
+
+  VS2 <- data.table(VSid = c(1, 2), SDid = c(1, 1), VSvalue = c(10, 10))
+  tbls2 <- list(DE = DE, SD = SD, VS = VS2)
+
+  result <- upperTblData("VSvalue", c(10), tbls2, "DE")
+
+  expect_equal(result[, .(VSvalue, DEid)], data.table(VSvalue = 10, DEid = 1))
+})
+
+test_that("upperTblData keeps the requested value when the target field is unused", {
+  tbls2 <- list(DE = data.table(DEid = 1, VSid = NA_real_), SD = SD, VS = VS)
+  result <- upperTblData("VSid", 1, tbls2, "DE")
+
+  expect_equal(result$DEid, 1)
+  expect_equal(result$VSid, 1)
 })
 })

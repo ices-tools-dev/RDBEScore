@@ -18,7 +18,9 @@ getLinkedDataFromLevel(field, values, rdbesTables, level, verbose = FALSE)
 \item{verbose}{Logical flag indicating whether to print detailed information about the data retrieval process. Default is \code{FALSE}.}
 }
 \value{
-The subset of the table at the specified \code{level}.
+A data.table containing the requested \code{field} and all columns of the
+table at \code{level}, with one row per unique requested value and linked record.
+Intermediate hierarchy IDs are not added. Column order is not guaranteed.
 }
 \description{
 The \code{getLinkedDataFromLevel} function facilitates the retrieval of linked data between different levels of RDBES tables. Depending on the relative positions of the source and target tables within the \code{RDBESDataObject}, the function determines whether to traverse "up" or "down" the data hierarchy to obtain the desired linked data.

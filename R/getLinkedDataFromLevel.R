@@ -8,7 +8,9 @@
 #' @param level A character string specifying the target table level from which to retrieve linked data. This must be one of the names within the `rdbesTables` object.
 #' @param verbose Logical flag indicating whether to print detailed information about the data retrieval process. Default is `FALSE`.
 #'
-#' @return  The subset of the table at the specified `level`.
+#' @return A data.table containing the requested `field` and all columns of the
+#'   table at `level`, with one row per unique requested value and linked record.
+#'   Intermediate hierarchy IDs are not added. Column order is not guaranteed.
 #'
 #' @examples
 #' \dontrun{

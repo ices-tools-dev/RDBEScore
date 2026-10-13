@@ -17,13 +17,15 @@
 #' @param tbls A named list of data frames containing tables at different levels.
 #' @param level A character string specifying the level to get data from.
 #' @param verbose (Optional) Set to TRUE if you want informative text printed
+#' @param requestedField Internal: the originally requested field.
+#' @param requestedValues Internal: the original value for each element of `values`.
 #'
 #' @return A data frame containing rows from an upper table that match the
 #'  provided values for the specified field.
 #'
 #' @section Development review:
 #' - AI-assisted: Yes
-#' - Human review: rix133
+#' - Review: rix133
 #'
 #' @examples
 #' # it is important to run these functions only on sorted RDBESDataObject
@@ -76,6 +78,7 @@ upperTblData <- function(field, values, tbls, level, verbose = FALSE,
   data.table::setnames(result, ".currentValue", field)
 
   if (requestedField %in% names(result)) {
+    data.table::set(result, j = requestedField, value = result[[".requestedValue"]])
     result[, .requestedValue := NULL]
   } else {
     data.table::setnames(result, ".requestedValue", requestedField)

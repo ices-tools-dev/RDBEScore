@@ -24,6 +24,10 @@ upperTblData(
 \item{level}{A character string specifying the level to get data from.}
 
 \item{verbose}{(Optional) Set to TRUE if you want informative text printed}
+
+\item{requestedField}{Internal: the originally requested field.}
+
+\item{requestedValues}{Internal: the original value for each element of \code{values}.}
 }
 \value{
 A data frame containing rows from an upper table that match the
@@ -46,7 +50,7 @@ in the correct order for a spesific hierarchy.
 
 \itemize{
 \item AI-assisted: Yes
-\item Human review: rix133
+\item Review: rix133
 }
 }
 
