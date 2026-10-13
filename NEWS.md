@@ -1,5 +1,5 @@
 # RDBEScore 0.4.0
-
+- Package README updated with AI usage guidelines
 - Dependencies: removed `dplyr` from Imports. Joins now use the internal `data.table` helper `joinDT()`, which keeps dplyr's row order, column order and `.x`/`.y` suffixes, so results are unchanged; `filterRDBESEstObject()` and the vignette use base R/`data.table` instead of dplyr.
 - Bug fix: addressed [#259](https://github.com/ices-tools-dev/RDBEScore/issues/259) selecting multiple strata with `addCLtoLowerCS()`
 
