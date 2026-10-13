@@ -30,10 +30,11 @@
 #'
 #' @examples
 #' \dontrun{
-#' myEmptyRDBESObject <- importRDBESDataCSV()
-#' rdbesExtractPath <- "./tests/testthat/h7_v_1_19_18/"
-#' obj <- RDBEScore:::importRDBESDataCSV(rdbesExtractPath)
-#' }
+#' dataDir <- paste0(system.file("extdata", package = "RDBEScore"), "/")
+#' tmpDir<-tempdir(check = FALSE)
+#' unzip(paste0(dataDir,"H1_Example.zip"), exdir=tmpDir)
+#' myH1DataObject<-importRDBESDataCSV(file.path(tmpDir,"H1"))
+#' validateRDBESDataObject(myH1DataObject)}
 #'
 importRDBESDataCSV <- function(rdbesExtractPath = NULL,
                                listOfFileNames = NULL,
