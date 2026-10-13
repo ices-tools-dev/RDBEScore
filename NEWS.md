@@ -1,3 +1,12 @@
+# RDBEScore (development version)
+
+- New stage-wise estimation for upper hierarchy 1 (landings): `doRatioEstimation(obj, species, raising = raisingScheme(...))` estimates numbers, mean weight and mean length at age or length per domain. The samples are raised within the sample, then stage by stage (vessels, trips, hauls) with a method chosen per stage: `"none"`, `"count"` (N / n), `"aux"` (RDBES auxiliary fields), `"ratio"` (any columns or a function), `"external"` (user tables via `externalAux()`) or `"prob"` (reported inclusion probabilities), within design strata. The top is raised to the DE totals (`DEauxVarTot` per DE stratum) or not at all. Selection methods are logged, not used. Species selection (SS) is always 1.
+- Each step is exported and returns an inspectable table: `getSampleUnits()`, `expandWithinSample()`, `getUnitTable()`, `computeStageFactors()`, `getStageWeights()`, `raiseToDE()`, `summariseRatioEstimates()`. Schemes are built with `raisingScheme()`, `stageRaising()`, `topRaising()` and `externalAux()`. Assumptions and exclusions are collected in a log, read with `getRatioLog()`.
+- `summariseRatioEstimates()` columns carry units: `meanWeight_g`, `meanLength_mm`, `totalWeight_kg`, `X_kg`, `sumX_kg`, `lengthClass_mm`.
+- `getSampleUnits()` excludes, and logs, lowest-level SA records of lower hierarchy A or B without FM, or C without BV.
+- New vignette "03c Estimating numbers at age with stage-wise raising", with the simulated example data `H1StageRaisingExample` and its true numbers at age `H1StageRaisingTruth` (built in `data-raw/create_H1StageRaising_ExampleData.R`).
+- New `getRDBESCodeList()` and `checkRDBESCodes()` check coded fields against the live ICES code lists (`icesVocab`, now in Imports). `classifySelectionMethod()` classifies selection methods by design quality.
+
 # RDBEScore 0.3.5
 
 - Bug fix: addressed [#251](https://github.com/ices-tools-dev/RDBEScore/issues/251).

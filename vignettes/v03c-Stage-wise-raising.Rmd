@@ -1,0 +1,287 @@
+---
+title: "03c Estimating numbers at age with stage-wise raising"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{03c Estimating numbers at age with stage-wise raising}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Introduction
+
+Countries raise their commercial samples in different ways. Some pool all
+sampled hauls and raise them directly to the landings. Others raise hauls to
+the trip by the number of hauls, trips to the vessel by trip landings, and so
+on. This vignette shows how to do any of these with one function,
+`doRatioEstimation()`, by choosing the raising method **per stage** of the
+sampling hierarchy.
+
+The idea is simple. Hierarchy 1 is sampled top-down: design stratum (DE),
+vessel (VS), trip (FT), haul (FO), species selection (SS), sample (SA) and
+fish (BV, FM). Raising goes the other way:
+
+1. **Within the sample**, the measured fish are raised to the catch fraction
+   of the haul by the sampled weight (`SAtotalWtMes / SAsampWtMes`).
+2. **At every stage**, the sampled units are raised to their parent unit
+   (hauls to their trip, trips to their vessel, vessels to the DE stratum)
+   with a factor. The method of each stage is your choice.
+3. **At the top**, the result is optionally calibrated to a total of the DE
+   stratum (`DEauxVarTot`).
+
+The factors of all stages are multiplied, so each sample gets one weight
+`w`. The estimate of numbers at age is the sum of `w` times the numbers at
+age in the samples.
+
+```{r}
+library(RDBEScore)
+library(data.table)
+```
+
+## The example data
+
+`H1StageRaisingExample` is a small simulated hierarchy 1 object for plaice
+(PLE). Because it is simulated, the true numbers at age of the whole
+population are known, in `H1StageRaisingTruth`.
+
+There are 4 vessels with 2 trips each and 6 hauls per trip. The sampling is
+deliberately uneven: the two vessels that catch young plaice had only 1 haul
+sampled per trip, the two vessels that catch old plaice had all 6 hauls
+sampled.
+
+```{r}
+obj <- H1StageRaisingExample
+obj$FO[, .(hauls = .N, sampled = sum(FOsamp == "Y")), by = .(FTid)]
+obj$DE[, .(DEstratumName, DEauxVarTot, DEauxVarName, DEauxVarUnit)]
+```
+
+## A raising scheme
+
+A scheme says how each stage is raised. It is built with `raisingScheme()`,
+one `stageRaising()` per stage and one `topRaising()`. Stages that are not
+given are pooled (`"none"`). SS is always 1: a species list with more species
+gets no extra weight.
+
+| method | factor for a sampled unit | fields used |
+|---|---|---|
+| `"none"` | 1 (units pooled) | |
+| `"count"` | N / n | `XXnumTotal`, number of sampled units |
+| `"aux"` | aux total / sum of aux of the sampled units | `XXauxVarTot`, `XXauxVarValue` |
+| `"ratio"` | total / sum of value | any columns you name, or a function |
+| `"external"` | total / sum of value | your own tables via `externalAux()` |
+| `"prob"` | 1 / inclusion probability | `XXincProb` |
+
+Factors are computed within each parent and design stratum
+(`XXstratumName`). The selection method (`XXselectMeth`) is never used to
+compute a factor, it is only logged.
+
+Here, hauls are raised to the trip by counts, trips and vessels are pooled,
+and the top is a ratio to the landed live weight in DE:
+
+```{r}
+scheme <- raisingScheme(
+  FO  = stageRaising("count"),
+  top = topRaising("ratio", total = "DEauxVarTot",
+                   value = "speciesLiveWeight", at = "SA"))
+scheme
+```
+
+## Running the estimation
+
+```{r}
+res <- doRatioEstimation(obj, species = "PLE", raising = scheme,
+                         target = "Age", plusGroup = 8, checkCodes = FALSE)
+res
+```
+
+`checkCodes = FALSE` skips the check of coded fields against the ICES code
+lists, which needs internet access.
+
+The result holds every intermediate table. The estimates are per domain
+(year, quarter, area and métier by default) and age:
+
+```{r}
+head(res$estimates[, .(year, quarter, area, age, N, meanWeight_g,
+                       meanLength_mm, totalWeight_kg, SOP)])
+```
+
+Assumptions and exclusions are collected in the log:
+
+```{r}
+res$log[, .(step, level, message, n)]
+```
+
+## The steps one by one
+
+`doRatioEstimation()` runs a chain of exported functions. Each can be run on
+its own to inspect what happens.
+
+**1. Sample units.** One row per lowest-level SA (the SA with no sub-sample
+below it), with its path through the hierarchy, its domain, the raising
+factor within the sample and its live weight `x` (kg).
+
+```{r}
+su <- getSampleUnits(obj, species = "PLE")
+head(su[, .(SAid, FOid, FTid, VSid, quarter, area, raiseFactor, x, include)])
+```
+
+**2. Expansion within the sample.** Numbers (and weights and lengths) at age
+of each sample, raised to the catch fraction it represents.
+
+```{r}
+ex <- expandWithinSample(obj, su, target = "Age")
+head(ex[, .(SAid, class, yN, yW)])
+```
+
+**3. Unit tables and stage factors.** `getUnitTable()` returns all units of
+one stage, including sampled hauls in which no plaice was found.
+`computeStageFactors()` is the engine that computes the factor of every
+sampled unit.
+
+```{r}
+hauls <- getUnitTable(obj, "FO")
+head(hauls[, .(FOid, FTid, FOstratumName, FOnumTotal, FOnumSamp, sampled)])
+f <- computeStageFactors(hauls, id = "FOid", by = c("FTid", "FOstratumName"),
+                         total = "FOnumTotal", sampled = "sampled")
+unique(f[, .(FTid, n, total, factor)])
+```
+
+Trips of the young vessels have 1 sampled haul out of 6, so each sampled
+haul counts 6 times. Trips of the old vessels have all hauls sampled, so the
+factor is 1.
+
+**4. Stage weights.** The factors of all stages, multiplied into one weight
+`w` per sample.
+
+```{r}
+sw <- getStageWeights(obj, su, scheme)
+unique(sw[, .(VSid, FTid, f_VS, f_FT, f_FO, w)])
+```
+
+**5. Raising to the DE stratum.** Weighted sums per DE stratum, domain and
+age, with the top ratio `DEauxVarTot / sum(w x)`.
+
+```{r}
+raised <- raiseToDE(ex, sw, obj)
+attr(raised, "topRatios")
+```
+
+**6. Summary.** Numbers, mean weight and mean length per domain and age,
+with the sum-of-products check.
+
+```{r}
+head(summariseRatioEstimates(raised, plusGroup = 8))
+```
+
+## Why the method per stage matters
+
+The sampled hauls are not spread evenly: old-fish vessels are sampled six
+times more heavily than young-fish vessels. Pooling the hauls lets the old
+fish dominate. Raising hauls by counts, or by an auxiliary variable,
+corrects for that.
+
+```{r}
+schemes <- list(
+  pooled = raisingScheme(top = topRaising("ratio")),
+  countHauls = scheme,
+  auxChain = raisingScheme(FO = stageRaising("aux"),
+                           FT = stageRaising("aux"),
+                           top = topRaising("ratio")),
+  countAll = raisingScheme(FO = stageRaising("count"),
+                           FT = stageRaising("count"),
+                           VS = stageRaising("count")))
+
+meanAge <- function(d) d[, sum(age * N) / sum(N)]
+comparison <- rbindlist(lapply(names(schemes), function(nm) {
+  r <- doRatioEstimation(obj, species = "PLE", raising = schemes[[nm]],
+                         checkCodes = FALSE)
+  data.table(scheme = nm, meanAge = meanAge(r$estimates),
+             totalN = sum(r$estimates$N))
+}))
+rbind(data.table(scheme = "truth", meanAge = meanAge(H1StageRaisingTruth),
+                 totalN = sum(H1StageRaisingTruth$N)),
+      comparison)
+```
+
+- **pooled** over-estimates the mean age by more than a year and
+  under-estimates the numbers, because old fish are heavier.
+- **countHauls** removes most of that error.
+- **auxChain** uses the landed weight of each haul and trip, which follows
+  the catch even more closely.
+- **countAll** has no top ratio, so its level depends only on the sampled
+  hauls. It is the design-based expansion.
+
+This is one simulated data set, so the differences between the corrected
+schemes are partly chance. The pooling error is not: it comes from the
+sampling design.
+
+## Other options
+
+**Any columns, or a function.** With `"ratio"` you name the total and the
+value. The value may be a function of the unit table, for example days at
+sea:
+
+```{r, eval = FALSE}
+daysAtSea <- function(u) {
+  as.numeric(as.Date(u$FTarvDate) - as.Date(u$FTdepDate)) + 1
+}
+stageRaising("ratio", total = "FTauxVarTot", value = daysAtSea)
+```
+
+**External auxiliary information.** Values or totals that are not in the
+upload, such as logbook landings or national statistics, can be given as a
+table with key columns:
+
+```{r}
+logbook <- data.frame(FTid = obj$FT$FTid, landKg = obj$FT$FTauxVarValue)
+external <- raisingScheme(
+  FT = stageRaising("external", total = "FTauxVarTot",
+                    value = externalAux(logbook, by = "FTid",
+                                        col = "landKg")),
+  FO = stageRaising("count"),
+  top = topRaising("ratio"))
+external
+```
+
+**Reported inclusion probabilities.** `stageRaising("prob")` uses
+`1 / XXincProb` as reported.
+
+**Strata.** By default every stage is raised within its design stratum.
+`strata = NULL` pools the strata of a parent, and another column of the
+stage table can be named instead.
+
+**The top.** `topRaising("none")` takes the weighted sum as the estimate.
+Every stage must then be raised to its population. With `at = "FT"` (or
+`"FO"`, `"VS"`) the top ratio uses a quantity measured on trips (hauls,
+vessels), and sampled units without the species stay in the sum.
+
+## Checks
+
+The run stops with a message when the information does not fit the
+scheme, for example:
+
+- a total is missing, or differs within a stratum,
+- a stratum has a positive total but no sampled units,
+- a sampled unit has no external value, or external keys are duplicated,
+- the top is `"none"` while a stage is not raised.
+
+## Assumptions and limitations
+
+- A sampled haul without a sample of the species counts as **zero catch**.
+  That is only right if the species was on the species list. Consider
+  `generateZerosUsingSL()` first, and check the log.
+- The top ratio is formed per DE stratum and shared by all domains (quarter,
+  area, métier) of that stratum.
+- `X_kg` in the estimates is the estimated live weight of the species from
+  the sample weights. SOP therefore compares the raised fish weights with the
+  raised sample weights. A value of 1 does not prove the weights are right.
+- Not covered yet: variance, raising within a sample by fish counts
+  (`SAnumTotal / SAnumSamp`), sub-sampling of BV, hierarchies other than 1,
+  and discards.

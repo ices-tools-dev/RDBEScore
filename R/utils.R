@@ -34,7 +34,32 @@ evenMoreUsedVars <- c("Weightg", "Lengthmm", "Group", "WeightIndexSum",
                       "i.SAparentID", "i.subSampleLevel", "i.topLevelSAid",
                       "subSampleLevel", "topLevelSAid")
 
-globalVariables(unique(c(usedVars, moreUsedVars, evenMoreUsedVars)))
+# Columns used by the ratio estimation functions (doRatioEstimation and steps)
+ratioUsedVars <- c("table", "field", "value", "valid", "n", "codeType",
+                   "deprecated", "parentSAid", "SAseqNum",
+                   "x.SAid", "convFac", "SAconFacMeasLive", "SAtotalWtLive",
+                   "SApres", "WliveNode", "SAtotalWtMes", "SAsampWtMes",
+                   "fNode", "raiseFactor", "x", "SDid", "DEid", "DEyear",
+                   "SAselectMeth", "SAselectionClass", "sampDate", "year",
+                   "month", "quarter", "FOendDate", "area", "SAarea",
+                   "FOarea", "statRect", "SAstatRect", "FOstatRect",
+                   "metier6", "SAmetier6", "FOmetier6", "excludeReason",
+                   "notSampledInTree", "include", "N", "conv", "FMtypeMeas",
+                   "accMM", "FMaccuracy", "lengthClass", "FMclassMeas",
+                   "midLength", "SAidFish", "FMidFish", "FMid", "BVfishId",
+                   "BVtypeMeas", "BVpres", "age", "len", "wt", "nAll", "nHas",
+                   "nAged", "f", "k", "nW", "sW", "nL", "sL", "meanW",
+                   "FMnumAtUnit", "sMid", "mTot", "m", "mL", "r", "rW", "rL",
+                   "rTot", "meanWeight", "meanLength", "prop", "yN", "yNW",
+                   "yW", "yNL", "yL", "nFish", "stratum", "X",
+                   "sumX", "ratio", "NW", "W", "NL", "L",
+                   "totalWeight", "sop", "SOP", "weightCoverage",
+                   ".samp", ".v", ".T", ".grp", ".ns", "nT", "hasNA",
+                   "sumValue", "reported", ".stratum", ".id", ".x", ".total",
+                   "wUnit", "w", "sampled", "include", "VDid", "T", "sumWX")
+
+globalVariables(unique(c(usedVars, moreUsedVars, evenMoreUsedVars,
+                         ratioUsedVars)))
 
 
 #' as.integer.or.dbl

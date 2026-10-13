@@ -578,3 +578,38 @@
 
 
 
+
+#' Simulated hierarchy 1 data for stage-wise raising
+#'
+#' A small simulated RDBESDataObject of upper hierarchy 1 with a known truth
+#' ([H1StageRaisingTruth]), used in the vignette on stage-wise raising and in
+#' the examples of [doRatioEstimation()].
+#'
+#' Four vessels (the whole population), 2 trips each, 6 hauls per trip, in
+#' quarters 1 and 2 and areas 27.4.a and 27.4.b. Haul sampling is unequal and
+#' linked to the age composition: the two vessels with young plaice have 1
+#' haul sampled per trip, the two vessels with old plaice have all 6 hauls
+#' sampled. One box of at most 40 plaice per sampled haul, all fish aged
+#' (lower hierarchy C).
+#'
+#' Hauls not sampled have `FOsamp = "N"`. Every stage carries `XXincProb`,
+#' `XXauxVarValue` (landed live weight of the unit, kg) and `XXauxVarTot`
+#' (the total of its parent). `DEauxVarTot` is the landed live weight of the
+#' population (kg). The CL table holds the landings of all hauls.
+#'
+#' @format An `RDBESDataObject` with the tables DE, SD, VS, FT, FO, SS, SA, BV
+#'   and CL filled.
+#' @source Simulated with `data-raw/create_H1StageRaising_ExampleData.R`.
+#' @seealso [H1StageRaisingTruth], [raisingScheme()]
+"H1StageRaisingExample"
+
+#' True numbers at age of the simulated stage-wise raising data
+#'
+#' The numbers and live weight at age of all fish in the population of
+#' [H1StageRaisingExample], sampled or not.
+#'
+#' @format A `data.table` with columns `year`, `quarter`, `area`, `metier6`,
+#'   `age`, `N` (number of fish) and `W` (live weight, g).
+#' @source Simulated with `data-raw/create_H1StageRaising_ExampleData.R`.
+#' @seealso [H1StageRaisingExample]
+"H1StageRaisingTruth"

@@ -8,9 +8,16 @@ doEstimationRatio(
   RDBESDataObj,
   targetValue = "LengthComp",
   raiseVar = "Weight",
+  marketProp = NULL,
+  totalLandings = NULL,
+  landingsWtUnit = "kg",
+  marketPropCatCol = "commSizeCat",
+  marketPropValCol = "prop",
+  plusGroup = NULL,
   classUnits = "mm",
   classBreaks = c(100, 300, 10),
   LWparam = NULL,
+  aggregate = TRUE,
   verbose = FALSE
 )
 }
@@ -25,12 +32,51 @@ estimate. Options are \code{"LengthComp"} or \code{"AgeComp"}.}
 \item{raiseVar}{The raising variable used to construct the ratio estimator.
 Options are \code{"Weight"} (SAtotalWtMes / SAsampWtMes),
 \code{"Count"} (SAnumTotal / SAnumSamp), or any other value which will
-use \code{SAauxVarValue} directly as the raise factor.}
+use \code{SAauxVarValue} directly as the raise factor.
+\strong{Ignored when \code{marketProp} is supplied} (see Details), in which
+case the market-category ratio estimator is used instead.}
+
+\item{marketProp}{Optional. The market-category (commercial size category)
+composition of the landings, used to raise the age/length composition the
+same way as the TYPE-Ia procedure (\code{RaiseNumbers}). This is the
+\code{prop_MC} vector in that procedure. Supply EITHER:
+\itemize{
+\item a named numeric vector, names = market categories matching
+\code{SAcommCat}, values = proportion of the landed weight in each
+category (e.g. \code{c("1"=0.20, "2"=0.34, "3"=0.34, "4"=0.12)}); or
+\item a two-column \code{data.frame}/\code{data.table} with a category
+column (\code{marketPropCatCol}) and a proportion column
+(\code{marketPropValCol}).
+}
+Proportions are used together with
+\code{totalLandings} to obtain the landed weight per category as
+\eqn{W_c = totalLandings \times prop_c} (exactly \code{Rtot_landing *
+  prop_MC}). When \code{NULL} (default) the function falls back to the
+per-sample SA raise factor controlled by \code{raiseVar}.}
+
+\item{totalLandings}{Optional. A single number: the TOTAL landed weight of
+the species in this estimation stratum (area * species * season * metier),
+e.g. the summed CL official weight (\code{CLoffWeight}) for that stratum,
+or InterCatch CATON. Required when \code{marketProp} is supplied (the
+proportions are multiplied by it to give the per-category weights).}
+
+\item{landingsWtUnit}{Unit of \code{totalLandings}: \code{"kg"} or
+\code{"g"}. BV individual weights are assumed to be grams (RDBES
+\code{Weightg}); the landed weight is converted to grams internally so
+that \code{numbers = W_c / meanWeight_c} is dimensionally consistent.
+Default \code{"kg"}.}
+
+\item{marketPropCatCol, marketPropValCol}{Column names used only when
+\code{marketProp} is supplied as a data.frame. Defaults
+\code{"commSizeCat"} and \code{"prop"}.}
+
+\item{plusGroup}{Optional integer age. Ages greater than or equal to this
+value are collapsed into a single plus group (labelled as the plus-group
+age) before raising. Used only for \code{targetValue = "AgeComp"}.
+\code{NULL} (default) keeps ages as reported.}
 
 \item{classUnits}{Units of the length class intervals, e.g. \code{"mm"} or
-\code{"cm"}. Used only for \code{targetValue = "LengthComp"}: in LH A
-and B, checks consistency with FM data; in LH C, used to transform raw BV
-lengths before class assignment.
+\code{"cm"}. Used only for \code{targetValue = "LengthComp"}.
 Codes: \url{https://vocab.ices.dk/?ref=1608}}
 
 \item{classBreaks}{A numeric vector of three values:
@@ -38,37 +84,84 @@ Codes: \url{https://vocab.ices.dk/?ref=1608}}
 for \code{targetValue = "LengthComp"}.}
 
 \item{LWparam}{A numeric vector of length two \code{c(a, b)} specifying the
-weight-length relationship (W = a * L^b). Used in LH A and B when
-individual weights are absent from BV but lengths are available.}
+weight-length relationship (W = a * L^b). Used when individual weights are
+absent from BV but lengths are available.}
+
+\item{aggregate}{Logical. If \code{TRUE} (default), the per-sample raised
+numbers are summed over samples to give one estimate per class for the
+whole (filtered) data set, and the mean weight/length per class is the
+numbers-weighted mean across samples. If \code{FALSE}, the function returns
+the un-aggregated per-sample table (one row per SAid * class), which is the
+original behaviour and is useful for diagnostics. Ignored in the
+market-category ratio mode (\code{marketProp} supplied), which always
+aggregates across categories.}
 
 \item{verbose}{Logical; if \code{TRUE}, informational messages are printed
 during processing.}
 }
 \value{
 A \code{data.table} with estimated numbers at length or age and
-associated mean values. Key output columns:
+associated mean values.
+With \code{aggregate = TRUE} (or in market-category mode) there is one row
+per class:
 \itemize{
 \item \code{LengthClass} or \code{Age} — the grouping variable
-\item \code{NumbersAtLength} or \code{NumbersAtAge} — raised estimates
-\item \code{MeanWeightAtLength} or \code{BVMeanWeight} — mean weight
-\item \code{MeanLengthAtAge} — mean length at age (AgeComp only)
-\item \code{raiseFactor} — the SA-level raise factor applied
+\item \code{NumbersAtLength} or \code{NumbersAtAge} — raised estimates,
+summed over samples
+\item \code{MeanWeightAtLength} or \code{MeanWeightAtAge} — numbers-
+weighted mean weight
+\item \code{MeanLengthAtAge} — numbers-weighted mean length at age
+(AgeComp only, when a length is available)
 }
+With \code{aggregate = FALSE} the result is one row per \code{SAid} * class
+and additionally carries \code{SAid}, the per-sample raised numbers, and
+\code{raiseFactor} (the SA-level raise factor applied).
 }
 \description{
 Estimate Numbers and Mean Values by Length or Age Class
 }
 \details{
+\strong{Two raising modes.}
+\enumerate{
+\item \emph{Per-sample SA raise} (\code{marketProp = NULL}): each SA record
+is raised by \code{raiseVar} (\code{SAtotalWtMes/SAsampWtMes},
+\code{SAnumTotal/SAnumSamp}, or \code{SAauxVarValue}). This is the
+original RDBEScore behaviour and is self-contained within the sampled
+fraction.
+\item \emph{Market-category ratio estimator} (\code{marketProp} +
+\code{totalLandings} supplied): reproduces the IMARES TYPE-Ia raising
+(\code{RaiseNumbers}). The landed weight per category is first obtained
+as \eqn{W_c = totalLandings \times prop_c} (the \code{Rtot_landing *
+    prop_MC} step). Sampled fish are stratified by commercial size category
+\code{SAcommCat}. For each category \eqn{c}:
+\deqn{N_c = W_c / \bar{w}_c}
+where \eqn{\bar{w}_c} is the mean individual fish weight in that category
+(from BV). The age proportions within a category
+\eqn{P_{a,c} = n_{a,c}/n_c} are then scaled to the population:
+\deqn{N_a = \sum_c P_{a,c}\, N_c.}
+Mean weight at age is the across-category, numbers-weighted mean
+(\code{tab_PB_age_c} in the original code). This matches the existing
+database-driven function and is the recommended mode for the NL auction
+(market-category) sampling design.
+}
+
+\strong{Expected inputs} (one stratum at a time; filter the object to a
+single quarter * area * metier first, exactly as the TYPE-Ia loop does):
+\preformatted{
+  marketProp    = c("1" = 0.20, "2" = 0.34, "3" = 0.34, "4" = 0.12)
+  totalLandings = 62650          # kg of PLE landed in this stratum
+}
+which is equivalent to passing the per-category weights
+\code{totalLandings * marketProp} directly.
+
+\strong{Weights are used as-is}: no gutted->whole or presentation/state
+conversion is applied. Ensure the BV weights and the \code{totalLandings}
+refer to the same presentation/state of processing before calling.
+
 The three lower hierarchies differ in which tables are present:
 \itemize{
-\item \strong{LH A}: \code{SA -> FM -> BV}. FM holds the length-frequency;
-BV holds individual biological measurements for a subsample of
-fish within each FM length class. Supports both LengthComp and AgeComp.
-\item \strong{LH B}: \code{SA -> FM} only. FM holds the length-frequency;
-no individual biological measurements (no BV). Supports
-LengthComp only; AgeComp is not possible without BV.
-\item \strong{LH C}: \code{SA -> BV} only. Individual biological
-measurements link directly to SA; no FM length-frequency tally.
-Supports both LengthComp and AgeComp.
+\item \strong{LH A}: \code{SA -> FM -> BV}.
+\item \strong{LH B}: \code{SA -> FM} only (no BV; AgeComp not possible).
+\item \strong{LH C}: \code{SA -> BV} only.
 }
 }

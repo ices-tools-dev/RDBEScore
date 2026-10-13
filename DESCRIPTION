@@ -122,5 +122,6 @@ Depends:
 Imports:
     dplyr (>= 1.1.3),
     data.table,
+    icesVocab,
     icesRDBES
 VignetteBuilder: knitr
