@@ -47,9 +47,11 @@
 #' than `"N"`) is logged. It does not affect the point estimates.
 #'
 #' @param RDBESDataObj A valid `RDBESDataObject` of hierarchy 1.
-#' @param species Species to estimate. A FAO 3-alpha code matched to
-#'   `SAspeCodeFAO`, or an AphiaID (numeric) matched to `SAspeCode`. Several
-#'   values are allowed.
+#' @param species Species to estimate, as AphiaID(s) (WoRMS), matched to
+#'   `SAspeCode`, for example `127143` for plaice. Several values are allowed.
+#'   FAO 3-alpha codes are not accepted: rows added by
+#'   [generateZerosUsingSL()] and [generateNAsUsingSL()] carry the AphiaID
+#'   only.
 #' @param catchCat Catch category (`SAcatchCat`). Only `"Lan"` is supported
 #'   in this version. Default `"Lan"`.
 #' @param areaLookup Optional `data.frame` with columns `from` and `to` to
@@ -81,8 +83,11 @@ getSampleUnits <- function(RDBESDataObj,
   # field to all values given, which is safe here because species codes and
   # catch category codes cannot coincide.
   # ---------------------------------------------------------------------------
-  bySpeCode <- suppressWarnings(!any(is.na(as.numeric(species))))
-  speField <- if (bySpeCode) "SAspeCode" else "SAspeCodeFAO"
+  # Species are AphiaIDs only, as in the species list (IScommTaxon) and the
+  # other RDBEScore functions. Rows added by generateZerosUsingSL() and
+  # generateNAsUsingSL() have SAspeCode but no SAspeCodeFAO.
+  checkAphiaIds(species, RDBESDataObj$SA)
+  speField <- "SAspeCode"
   filtered <- filterRDBESDataObject(RDBESDataObj, c(speField, "SAcatchCat"),
                                     c(species, catchCat), strict = strict)
   if (is.null(RDBESDataObj$SA) || nrow(RDBESDataObj$SA) == 0) {

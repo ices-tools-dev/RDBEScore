@@ -47,7 +47,7 @@
 #' \dontrun{
 #' scheme <- raisingScheme(FO = stageRaising("count"),
 #'                         top = topRaising("ratio"))
-#' res <- doRatioEstimation(myH1Object, species = "PLE", raising = scheme,
+#' res <- doRatioEstimation(myH1Object, species = 127143, raising = scheme,
 #'                          target = "Age", plusGroup = 10)
 #' res
 #' res$estimates

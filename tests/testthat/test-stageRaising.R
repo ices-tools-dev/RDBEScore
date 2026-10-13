@@ -172,7 +172,7 @@ test_that("ratio and external accept columns, functions and user tables", {
 domainKey <- c("year", "quarter", "area", "metier6")
 simulate <- function(...) suppressWarnings(simulateH1RatioData(...))
 estimate <- function(obj, scheme, ...) {
-  suppressWarnings(doRatioEstimation(obj, species = "PLE", raising = scheme,
+  suppressWarnings(doRatioEstimation(obj, species = 127143, raising = scheme,
                                      checkCodes = FALSE, ...))
 }
 vsTruth <- function(res, truth) {
@@ -337,7 +337,7 @@ test_that("zeros stay in the sampled hauls, unusable hauls are non-response", {
   obj$BV <- obj$BV[!SAid %in% sa4]
   obj$SA[SAid %in% sa4, SAlowHierarchy := "D"]
 
-  su <- getSampleUnits(obj, species = "PLE")
+  su <- getSampleUnits(obj, species = 127143)
   expect_equal(su[SAid %in% sa3, excludeReason],
                "recorded zero (total weight 0)")
   expect_true(any(grepl("Recorded zeros", getRatioLog(su)$message)))
@@ -359,6 +359,33 @@ test_that("zeros stay in the sampled hauls, unusable hauls are non-response", {
   expect_true(all(sw[FTid != 1 & include == TRUE, f_FO] == 1))
 })
 
+test_that("species are AphiaIDs, and rows without an FAO code are found", {
+  sim <- simulate(lowHierarchy = "C", haulsPerTrip = 4,
+                  vesselsInPopulation = 4)
+  obj <- sim$obj
+  expect_error(getSampleUnits(obj, species = "PLE"),
+               "AphiaID.*PLE = 127143")
+  saOf <- function(foid) obj$SA[SSid %in% obj$SS[FOid == foid, SSid], SAid]
+  # haul 2: zero row as made by generateZerosUsingSL() (FAO code NA)
+  sa2 <- saOf(2)
+  obj$BV <- obj$BV[!SAid %in% sa2]
+  obj$SA[SAid %in% sa2, `:=`(SAspeCodeFAO = NA_character_, SAtotalWtMes = 0L,
+                             SAsampWtMes = 0L, SAlowHierarchy = "D",
+                             SAsamp = "N")]
+  # haul 3: NA row as made by generateNAsUsingSL() (FAO code "")
+  sa3 <- saOf(3)
+  obj$BV <- obj$BV[!SAid %in% sa3]
+  obj$SA[SAid %in% sa3, `:=`(SAspeCodeFAO = "", SAtotalWtMes = NA_integer_,
+                             SAsampWtMes = NA_integer_, SAsamp = "N")]
+  su <- getSampleUnits(obj, species = 127143)
+  expect_true(all(c(sa2, sa3) %in% su$SAid))
+  sw <- getStageWeights(obj, su, raisingScheme(FO = stageRaising("count"),
+                                               top = topRaising("ratio")))
+  # hauls 1, 2 (zero) and 4 are sampled, haul 3 (not looked for) is not
+  expect_equal(unique(sw[FTid == 1 & include == TRUE, f_FO]), 4 / 3)
+  expect_false(3 %in% attr(sw, "unitWeights")$FO$FOid)
+})
+
 test_that("a trip without usable hauls is non-response at the trip stage", {
   sim <- simulate(lowHierarchy = "C", haulsPerTrip = 2,
                   vesselsInPopulation = 4)
@@ -368,7 +395,7 @@ test_that("a trip without usable hauls is non-response at the trip stage", {
                                      SSid], SAid]
   obj$BV <- obj$BV[!SAid %in% saTrip2]
   obj$SA[SAid %in% saTrip2, SAlowHierarchy := "D"]
-  su <- getSampleUnits(obj, species = "PLE")
+  su <- getSampleUnits(obj, species = 127143)
   sc <- raisingScheme(FO = stageRaising("count"), FT = stageRaising("count"),
                       VS = stageRaising("count"))
   sw <- getStageWeights(obj, su, sc)

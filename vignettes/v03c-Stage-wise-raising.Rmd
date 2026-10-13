@@ -74,7 +74,7 @@ A scheme says how each stage is raised. It is built with
 always 1: a species list with more species gets no extra weight.
 
 | method | factor for a sampled unit | fields used |
-|------------------------|------------------------|------------------------|
+|----|----|----|
 | `"none"` | 1 (units pooled) |  |
 | `"count"` | N / n | `XXnumTotal`, number of sampled units |
 | `"aux"` | aux total / sum of aux of the sampled units | `XXauxVarTot`, `XXauxVarValue` |
@@ -100,10 +100,15 @@ scheme
 ## Running the estimation
 
 ```{r}
-res <- doRatioEstimation(obj, species = "PLE", raising = scheme,
+res <- doRatioEstimation(obj, species = 127143, raising = scheme,
                          target = "Age", plusGroup = 8, checkCodes = FALSE)
 res
 ```
+
+The species is given as its AphiaID (WoRMS), here `127143` for plaice,
+as in `SAspeCode` and in the species list. FAO codes are not accepted,
+because the zero and NA rows added by `generateZerosUsingSL()` and
+`generateNAsUsingSL()` carry the AphiaID only.
 
 `checkCodes = FALSE` skips the check of coded fields against the ICES
 code lists, which needs internet access.
@@ -132,7 +137,7 @@ sub-sample below it), with its path through the hierarchy, its domain,
 the raising factor within the sample and its live weight `x` (kg).
 
 ```{r}
-su <- getSampleUnits(obj, species = "PLE")
+su <- getSampleUnits(obj, species = 127143)
 head(su[, .(SAid, FOid, FTid, VSid, quarter, area, raiseFactor, x, include)])
 ```
 
@@ -204,7 +209,7 @@ schemes <- list(
 
 meanAge <- function(d) d[, sum(age * N) / sum(N)]
 comparison <- rbindlist(lapply(names(schemes), function(nm) {
-  r <- doRatioEstimation(obj, species = "PLE", raising = schemes[[nm]],
+  r <- doRatioEstimation(obj, species = 127143, raising = schemes[[nm]],
                          checkCodes = FALSE)
   data.table(scheme = nm, meanAge = meanAge(r$estimates),
              totalN = sum(r$estimates$N))

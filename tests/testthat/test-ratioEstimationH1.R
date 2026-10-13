@@ -22,7 +22,7 @@ pooled <- raisingScheme(top = topRaising("ratio"))
 
 test_that("a census design reproduces numbers and mean weight at age", {
   sim <- simulate(lowHierarchy = "C")
-  res <- doRatioEstimation(sim$obj, species = "PLE", target = "Age",
+  res <- doRatioEstimation(sim$obj, species = 127143, target = "Age",
                            raising = pooled, checkCodes = FALSE)
   expect_s3_class(res, "RDBESRatioEstimate")
   m <- compareToTruth(res$estimates, sim$truthAge)
@@ -35,7 +35,7 @@ test_that("a census design reproduces numbers and mean weight at age", {
 
 test_that("numbers at length from LH B on a census design reproduce the truth", {
   sim <- simulate(lowHierarchy = "B")
-  res <- doRatioEstimation(sim$obj, species = "PLE", raising = pooled,
+  res <- doRatioEstimation(sim$obj, species = 127143, raising = pooled,
                            target = "Length",
                            checkCodes = FALSE)
   m <- compareToTruth(res$estimates, sim$truthLength,
@@ -45,9 +45,9 @@ test_that("numbers at length from LH B on a census design reproduce the truth", 
 
 test_that("domain totals over quarters equal the annual estimate on a census design", {
   sim <- simulate(lowHierarchy = "C")
-  byQ <- doRatioEstimation(sim$obj, species = "PLE", raising = pooled,
+  byQ <- doRatioEstimation(sim$obj, species = 127143, raising = pooled,
                            checkCodes = FALSE)
-  byY <- doRatioEstimation(sim$obj, species = "PLE", raising = pooled,
+  byY <- doRatioEstimation(sim$obj, species = 127143, raising = pooled,
                            checkCodes = FALSE,
                            domainVars = c("year", "area", "metier6"))
   sq <- byQ$estimates[, .(N = sum(N)), by = .(year, area, metier6, age)]
@@ -62,7 +62,7 @@ test_that("domain totals over quarters equal the annual estimate on a census des
 
 test_that("sub-sample chain raising factor is the product of W/w along the chain", {
   sim <- simulate(lowHierarchy = "C", subsample = TRUE)
-  su <- getSampleUnits(sim$obj, species = "PLE")
+  su <- getSampleUnits(sim$obj, species = 127143)
   sa <- sim$obj$SA
   lowest <- su[1]
   child <- sa[SAid == lowest$SAid]
@@ -82,7 +82,7 @@ test_that("sub-sample chain raising factor is the product of W/w along the chain
 
 test_that("LH A sample ALK expansion matches a hand calculation", {
   sim <- simulate(lowHierarchy = "A")
-  su <- getSampleUnits(sim$obj, species = "PLE")
+  su <- getSampleUnits(sim$obj, species = 127143)
   ex <- expandWithinSample(sim$obj, su, target = "Age")
   sid <- su$SAid[1]
   fm <- sim$obj$FM[SAid == sid]
@@ -106,7 +106,7 @@ test_that("pooled ALK fill keeps all measured fish when classes lack aged fish",
   # remove the aged fish of one length class in the first sample
   fm1 <- obj$FM[SAid == obj$SA$SAid[1]][order(FMclassMeas)][3]
   obj$BV <- obj$BV[FMid != fm1$FMid]
-  su <- getSampleUnits(obj, species = "PLE")
+  su <- getSampleUnits(obj, species = 127143)
   own <- expandWithinSample(obj, su, target = "Age", ageRoute = "sample")
   fill <- expandWithinSample(obj, su, target = "Age",
                              ageRoute = "sampleFillPooled")
@@ -125,10 +125,10 @@ test_that("LH D and not-sampled SAs are excluded from numerator and auxiliary to
   sim <- simulate(lowHierarchy = c("C", "D"))
   obj <- sim$obj
   obj$SA[SAid == 1, SAsamp := "N"]
-  su <- getSampleUnits(obj, species = "PLE")
+  su <- getSampleUnits(obj, species = 127143)
   expect_true(all(su[SAlowHierarchy == "D", include] == FALSE))
   expect_false(su[SAid == 1, include])
-  res <- doRatioEstimation(obj, species = "PLE", raising = pooled,
+  res <- doRatioEstimation(obj, species = 127143, raising = pooled,
                            checkCodes = FALSE)
   used <- unique(res$expanded$SAid)
   expect_false(any(used %in% su[include == FALSE, SAid]))
@@ -143,7 +143,7 @@ test_that("lowest-level SAs without fish records are excluded and logged", {
   sim <- simulate(lowHierarchy = "C")
   obj <- sim$obj
   obj$BV <- obj$BV[SAid != 1 | is.na(SAid)]
-  su <- getSampleUnits(obj, species = "PLE")
+  su <- getSampleUnits(obj, species = 127143)
   expect_false(su[SAid == 1, include])
   expect_equal(su[SAid == 1, excludeReason],
                "lower hierarchy C but no BV records")
@@ -154,10 +154,10 @@ test_that("lowest-level SAs without fish records are excluded and logged", {
   sim <- simulate(lowHierarchy = "B")
   obj <- sim$obj
   obj$FM <- obj$FM[SAid != 1]
-  su <- getSampleUnits(obj, species = "PLE")
+  su <- getSampleUnits(obj, species = 127143)
   expect_equal(su[SAid == 1, excludeReason],
                "lower hierarchy A or B but no FM records")
-  res <- doRatioEstimation(obj, species = "PLE", raising = pooled,
+  res <- doRatioEstimation(obj, species = 127143, raising = pooled,
                            target = "Length",
                            checkCodes = FALSE)
   expect_false(1 %in% res$expanded$SAid)
@@ -166,9 +166,9 @@ test_that("lowest-level SAs without fish records are excluded and logged", {
 
 test_that("gutted BV weights need gutToLive, and then match the live truth", {
   sim <- simulate(lowHierarchy = "C", gutted = TRUE)
-  expect_error(doRatioEstimation(sim$obj, species = "PLE", raising = pooled,
+  expect_error(doRatioEstimation(sim$obj, species = 127143, raising = pooled,
                                  checkCodes = FALSE), "gutToLive")
-  res <- doRatioEstimation(sim$obj, species = "PLE", raising = pooled,
+  res <- doRatioEstimation(sim$obj, species = 127143, raising = pooled,
                            checkCodes = FALSE,
                            gutToLive = 1 / 0.88)
   mw <- merge(res$estimates, sim$truthAge, by = c(domainKey, "age"))
@@ -179,7 +179,7 @@ test_that("gutted BV weights need gutToLive, and then match the live truth", {
 test_that("non-probabilistic selection is logged as an assumption, not stopped", {
   sim <- simulate(lowHierarchy = "C",
                   selectMeth = c(VS = "NPJS", FT = "NPQSRSWOR", FO = "CENSUS"))
-  res <- doRatioEstimation(sim$obj, species = "PLE", raising = pooled,
+  res <- doRatioEstimation(sim$obj, species = 127143, raising = pooled,
                            checkCodes = FALSE)
   a <- res$log[level == "assumption", message]
   expect_true(any(grepl("VS selection is Non-probabilistic", a)))
@@ -190,15 +190,15 @@ test_that("non-probabilistic selection is logged as an assumption, not stopped",
 
 test_that("doRatioEstimation needs a raising scheme", {
   sim <- simulate()
-  expect_error(doRatioEstimation(sim$obj, species = "PLE", checkCodes = FALSE),
+  expect_error(doRatioEstimation(sim$obj, species = 127143, checkCodes = FALSE),
                "raisingScheme")
 })
 
 test_that("only hierarchy 1 and landings are accepted", {
-  expect_error(getSampleUnits(H8ExampleEE1, species = "SPR", strict = FALSE),
+  expect_error(getSampleUnits(H8ExampleEE1, species = 126425, strict = FALSE),
                "Only upper hierarchy 1")
   sim <- simulate()
-  expect_error(getSampleUnits(sim$obj, species = "PLE", catchCat = "Dis"),
+  expect_error(getSampleUnits(sim$obj, species = 127143, catchCat = "Dis"),
                "Lan")
 })
 
@@ -222,7 +222,7 @@ test_that("pooled and counted hauls on a sampled design are close to the truth",
                   raisingScheme(FO = stageRaising("count"),
                                 top = topRaising("ratio")))
   for (sc in schemes) {
-    res <- doRatioEstimation(sim$obj, species = "PLE", raising = sc,
+    res <- doRatioEstimation(sim$obj, species = 127143, raising = sc,
                              checkCodes = FALSE)
     m <- compareToTruth(res$estimates, sim$truthAge)
     expect_lt(abs(sum(m$N.est) / sum(m$N.true) - 1), 0.05)
@@ -259,7 +259,7 @@ test_that("checkRDBESCodes flags values that are not in the ICES lists", {
   obj$SA[SAid == 1, SAselectMeth := "RANDOMISH"]
   chk <- checkRDBESCodes(obj, tables = "SA")
   expect_equal(chk[valid == FALSE, value], "RANDOMISH")
-  expect_warning(doRatioEstimation(obj, species = "PLE", raising = pooled),
+  expect_warning(doRatioEstimation(obj, species = 127143, raising = pooled),
                  "RANDOMISH")
 })
 

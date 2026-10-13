@@ -21,7 +21,7 @@ exclusions, warnings and information to its output. This returns it.
 }
 \examples{
 \dontrun{
-su <- getSampleUnits(myH1Object, species = "PLE")
+su <- getSampleUnits(myH1Object, species = 127143)
 getRatioLog(su)
 }
 }

@@ -16,9 +16,11 @@ getSampleUnits(
 \arguments{
 \item{RDBESDataObj}{A valid \code{RDBESDataObject} of hierarchy 1.}
 
-\item{species}{Species to estimate. A FAO 3-alpha code matched to
-\code{SAspeCodeFAO}, or an AphiaID (numeric) matched to \code{SAspeCode}. Several
-values are allowed.}
+\item{species}{Species to estimate, as AphiaID(s) (WoRMS), matched to
+\code{SAspeCode}, for example \code{127143} for plaice. Several values are allowed.
+FAO 3-alpha codes are not accepted: rows added by
+\code{\link[=generateZerosUsingSL]{generateZerosUsingSL()}} and \code{\link[=generateNAsUsingSL]{generateNAsUsingSL()}} carry the AphiaID
+only.}
 
 \item{catchCat}{Catch category (\code{SAcatchCat}). Only \code{"Lan"} is supported
 in this version. Default \code{"Lan"}.}

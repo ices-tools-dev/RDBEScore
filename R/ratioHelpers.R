@@ -83,6 +83,32 @@ ratioDomainVars <- function() {
   c("year", "quarter", "month", "area", "statRect", "metier6")
 }
 
+#' Check that species are given as AphiaIDs
+#'
+#' Stops when a value is not a whole number. For FAO codes found in the SA
+#' table, the message suggests the matching AphiaID.
+#' @param species the species argument
+#' @param sa the SA table, used to suggest AphiaIDs
+#' @keywords internal
+#' @noRd
+checkAphiaIds <- function(species, sa = NULL) {
+  num <- suppressWarnings(as.numeric(as.character(species)))
+  bad <- species[is.na(num) | num != round(num)]
+  if (length(bad) == 0) return(invisible(TRUE))
+  hint <- ""
+  if (!is.null(sa) && all(c("SAspeCodeFAO", "SAspeCode") %in% names(sa))) {
+    m <- unique(sa[as.character(sa$SAspeCodeFAO) %in% as.character(bad),
+                   c("SAspeCodeFAO", "SAspeCode"), with = FALSE])
+    if (nrow(m) > 0) {
+      hint <- paste0(" In this SA table: ",
+                     paste0(m$SAspeCodeFAO, " = ", m$SAspeCode,
+                            collapse = ", "), ".")
+    }
+  }
+  stop("species must be AphiaID(s), not: ", paste(bad, collapse = ", "),
+       ".", hint, call. = FALSE)
+}
+
 #' Exclusion reason of a recorded zero (an SA with total weight 0)
 #' @keywords internal
 #' @noRd
@@ -143,7 +169,7 @@ addToRatioLog <- function(log, step, level, message, n = NA_integer_,
 #'
 #' @examples
 #' \dontrun{
-#' su <- getSampleUnits(myH1Object, species = "PLE")
+#' su <- getSampleUnits(myH1Object, species = 127143)
 #' getRatioLog(su)
 #' }
 getRatioLog <- function(x) {

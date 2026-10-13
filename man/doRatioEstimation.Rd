@@ -27,9 +27,11 @@ doRatioEstimation(
 \arguments{
 \item{RDBESDataObj}{A valid \code{RDBESDataObject} of hierarchy 1.}
 
-\item{species}{Species to estimate. A FAO 3-alpha code matched to
-\code{SAspeCodeFAO}, or an AphiaID (numeric) matched to \code{SAspeCode}. Several
-values are allowed.}
+\item{species}{Species to estimate, as AphiaID(s) (WoRMS), matched to
+\code{SAspeCode}, for example \code{127143} for plaice. Several values are allowed.
+FAO 3-alpha codes are not accepted: rows added by
+\code{\link[=generateZerosUsingSL]{generateZerosUsingSL()}} and \code{\link[=generateNAsUsingSL]{generateNAsUsingSL()}} carry the AphiaID
+only.}
 
 \item{raising}{A stage-wise raising scheme from \code{\link[=raisingScheme]{raisingScheme()}}.}
 
@@ -112,7 +114,7 @@ Not in this version: variance, hierarchies other than 1, discards.
 \dontrun{
 scheme <- raisingScheme(FO = stageRaising("count"),
                         top = topRaising("ratio"))
-res <- doRatioEstimation(myH1Object, species = "PLE", raising = scheme,
+res <- doRatioEstimation(myH1Object, species = 127143, raising = scheme,
                          target = "Age", plusGroup = 10)
 res
 res$estimates
