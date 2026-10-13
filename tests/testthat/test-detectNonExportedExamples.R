@@ -40,11 +40,11 @@ test_that("detectNonExportedExamples finds non-exported functions in examples", 
   # Help page example calls the internal function
   writeLines(
     c(
-      "\\\\name{public_fun}",
-      "\\\\alias{public_fun}",
-      "\\\\title{Public function}",
-      "\\\\description{A test help page.}",
-      "\\\\examples{",
+      "\\name{public_fun}",
+      "\\alias{public_fun}",
+      "\\title{Public function}",
+      "\\description{A test help page.}",
+      "\\examples{",
       "public_fun(1)",
       "internal_fun(1)",
       "}"
@@ -63,6 +63,9 @@ test_that("detectNonExportedExamples finds non-exported functions in examples", 
     result$function_name == "internal_fun" &
       result$defined_in_package
   ))
+
+  # Clean up
+  unlink(pkg_path, recursive = TRUE)
 })
 
 test_that("detectNonExportedExamples ignores exported functions", {
@@ -113,5 +116,9 @@ test_that("detectNonExportedExamples ignores exported functions", {
   result <- detectNonExportedExamples(pkg_path)
 
   expect_false(any(result$function_name == "public_fun"))
+
+  # Clean up
+  unlink(pkg_path, recursive = TRUE)
+
 })
 
