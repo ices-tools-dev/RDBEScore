@@ -32,7 +32,7 @@
 #' \dontrun{
 #' myEmptyRDBESObject <- importRDBESDataCSV()
 #' rdbesExtractPath <- "./tests/testthat/h7_v_1_19_18/"
-#' obj <- importRDBESDataCSV(rdbesExtractPath)
+#' obj <- RDBEScore:::importRDBESDataCSV(rdbesExtractPath)
 #' }
 #'
 importRDBESDataCSV <- function(rdbesExtractPath = NULL,

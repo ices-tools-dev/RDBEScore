@@ -23,7 +23,7 @@
 #' @examples
 #' \dontrun{
 #' rdbesExtractPath <- "./2022_FPN_FPE_H7.zip"
-#' obj <- importRDBESDataZIP(rdbesExtractPath)
+#' obj <- RDBEScore:::importRDBESDataZIP(rdbesExtractPath)
 #' }
 
 importRDBESDataZIP <- function(filenames,
