@@ -22,15 +22,12 @@
 #'
 #' @examples
 #' \dontrun{
-#'
-#' myH1RawObject <-
-#'     importRDBESDataCSV(rdbesExtractPath = "tests\\testthat\\h1_v_1_19")
-#' myH5RawObject <-
-#'     importRDBESDataCSV(rdbesExtractPath = "tests\\testthat\\h5_v_1_19")
-#'
-#' myCombinedRawObject <- combineRDBESDataObjects(RDBESDataObject1=myH1RawObject,
-#'                                              RDBESDataObject2=myH5RawObject)
-#' }
+#' myH1DataObject <- H1Example
+#' myH5DataObject <- H5Example
+#' myCombinedRawObject <- combineRDBESDataObjects(RDBESDataObject1=myH1DataObject,
+#'                                              RDBESDataObject2=myH5DataObject)
+#' myCombinedRawObject <- combineRDBESDataObjects(RDBESDataObject1=myH1DataObject,
+#'                                              RDBESDataObject2=myH5DataObject, strict=F)}                                              RDBESDataObject2=myH5RawObject)
 combineRDBESDataObjects <- function(RDBESDataObject1,
                                     RDBESDataObject2,
                                     verbose = FALSE,
