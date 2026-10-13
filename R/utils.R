@@ -49,7 +49,7 @@ globalVariables(unique(c(usedVars, moreUsedVars, evenMoreUsedVars)))
 #' @return a vector of integers or doubles
 #' @importFrom stats na.omit
 #' @keywords internal
-
+#' @exportS3Method NULL
 as.integer.or.dbl <- function(x){
   # we apply as.numeric in case it is a character vector
   # we apply as.omit because that causes an error
