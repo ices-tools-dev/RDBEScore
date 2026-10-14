@@ -27,11 +27,19 @@
 #' @md
 #' @export
 #' @aliases checkRDBESDataObject
+#'
 #' @examples
-#' \dontrun{
-#' dataDir <- paste0(system.file("extdata", package = "RDBEScore"), "/")
-#' myH1DataObject <- createRDBESDataObject(input = paste0(dataDir,"H1_Example.zip"))
-#' validateRDBESDataObject(myH1DataObject)}
+#' H1DataObj <- Pckg_survey_apistrat_H1
+#' H1DataObjValidated <- validateRDBESDataObject(H1DataObj, checkDataTypes = TRUE)
+#' summary(H1DataObjValidated)
+#'
+#' # The backwards-compatible validation alias
+#' checkRDBESDataObject(H1DataObj)
+#'
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: rix133
+#' - Notes/scope: examples only
 validateRDBESDataObject <- function(objectToCheck,
                                 checkDataTypes = FALSE,
                                 verbose = FALSE,

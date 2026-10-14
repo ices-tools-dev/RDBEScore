@@ -110,7 +110,6 @@
 
 #' The default files names when you download data from the RDBES.
 #'
-#'
 #' @format A list containing the default file names for each RDBES table
 #' @source \url{https://rdbes.ices.dk/}
 "DefaultFileNames"

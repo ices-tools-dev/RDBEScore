@@ -1,20 +1,19 @@
 
 #' Create a table of RDBES Ids
 #'
-#' examples for now see
-#' https://github.com/ices-eg/WK_RDBES/tree/master/WKRDB-EST2/chairs/Nuno
-#'
 #' @param x RDBESdataObject
 #' @param addSAseqNums should SAseqNum be included? Default value is TRUE
 #'
 #' @return data frame of Ids of all tables in sampling hierarchy
 #'
-#'
 #' @examples
-#' \dontrun{
-#' myH1DataObject <- H1Example
-#' myTableOfIds <- RDBEScore:::createTableOfRDBESIds(myH1DataObject)}
+#' idTable <- RDBEScore:::createTableOfRDBESIds(Pckg_survey_apistrat_H1)
+#' head(idTable)
 #'
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: pending
+#' - Notes/scope:
 
 createTableOfRDBESIds<-function(x, addSAseqNums=TRUE){
 

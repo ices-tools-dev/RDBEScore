@@ -24,6 +24,17 @@
 #' @return a named list
 #' @export
 #'
+#' @examples
+#' H1DataObj <- H1Example
+#' # Construct an object from already prepared data.tables
+#' newDataObj <- newRDBESDataObject(DE = data.table::copy(H1DataObj$DE),
+#'                                 SD = data.table::copy(H1DataObj$SD))
+#' summary(newDataObj)
+#'
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: rix133
+#' - Notes/scope: examples only
 newRDBESDataObject <- function(DE = NULL,
                               SD = NULL,
                               VS = NULL,

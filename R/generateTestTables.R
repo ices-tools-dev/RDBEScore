@@ -19,6 +19,14 @@
 #'
 #' @return a data.table
 #'
+#' @examples
+#' # A small synthetic table for checking a sampling calculation
+#' RDBEScore:::makeTbl("VS", rows = 2, selMeth = "SRSWOR")
+#'
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: rix133
+#' - Notes/scope: examples only
 makeTbl <- function(tblName,
                     prevTbls = list(),
                     rows = 4,
@@ -73,10 +81,16 @@ makeTbl <- function(tblName,
 #' @return a list of named data.table's
 #'
 #' @examples
-#' \dontrun{
-#' RDBEScore:::generateTestTbls(c("A", "B", "C"), selMeth = "SRSWOR")
-#' RDBEScore:::generateTestTbls(LETTERS[1:5]) # makes 5 tables with method CENSUS
-#' }
+#' # Small synthetic hierarchy with two rows per parent
+#' tables <- RDBEScore:::generateTestTbls(c("A", "B", "C"), rows = 2,
+#'                                       selMeth = "SRSWOR")
+#' vapply(tables, nrow, integer(1))
+#' head(tables$C)
+#'
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: rix133
+#' - Notes/scope: examples only
 generateTestTbls <- function(tblNames, prevTbls = list(), ...) {
   tbl <- makeTbl(tblNames[1], prevTbls, ...)
   prevTbls[[tblNames[1]]] <- tbl

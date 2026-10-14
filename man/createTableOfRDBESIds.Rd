@@ -15,15 +15,19 @@ createTableOfRDBESIds(x, addSAseqNums = TRUE)
 data frame of Ids of all tables in sampling hierarchy
 }
 \description{
-examples for now see
-https://github.com/ices-eg/WK_RDBES/tree/master/WKRDB-EST2/chairs/Nuno
+Create a table of RDBES Ids
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: pending
+\item Notes/scope:
+}
+}
+
 \examples{
-\dontrun{
+idTable <- RDBEScore:::createTableOfRDBESIds(Pckg_survey_apistrat_H1)
+head(idTable)
 
-myH1RawObject <-
-  importRDBESDataCSV(rdbesExtractPath = "tests\\\\testthat\\\\h1_v_1_19_13")
-
-myTableOfIds<- createTableOfRDBESIds(myH1RawObject)
-}
 }

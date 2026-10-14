@@ -13,24 +13,19 @@
 #' @section Development review:
 #' - AI-assisted: Yes
 #' - Review: rix133
+#' - Notes/scope:
+#'
 #' @export
 #'
 #' @examples
-#' \dontrun{
+#' H1DataObj <- H1Example
+#' # Retain one species list, leaving selections linked to other lists
+#' H1DataObjFiltered <- filterRDBESDataObject(
+#'   H1DataObj, "SLspeclistName", "ZW_1965_SpeciesList2"
+#' )
+#' H1DataObjCleaned <- removeBrokenSpeciesListLinks(H1DataObjFiltered)
+#' c(before = nrow(H1DataObjFiltered$SS), after = nrow(H1DataObjCleaned$SS))
 #'
-#' data("H1Example")
-#' myH1DataObject <- H1Example
-#' myFields <- c("SLspeclistName")
-#' myValues <- c("WGRDBES-EST TEST 5 - sprat data")
-#' myFilteredObject <- filterRDBESDataObject(myH1DataObject,
-#'   fieldsToFilter = myFields,
-#'   valuesToFilter = myValues
-#' )
-#' myObjectValidSpeciesListLinks <- removeBrokenSpeciesListLinks(
-#'   objectToCheck = myFilteredObject,
-#'   verbose = FALSE
-#' )
-#' }
 removeBrokenSpeciesListLinks <- function(objectToCheck,
                                         verbose = FALSE,
                                         strict = TRUE) {

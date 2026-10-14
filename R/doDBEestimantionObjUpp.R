@@ -7,10 +7,15 @@
 #' (DBEestimantionObjUpp)
 #'
 #' @examples
-#' \dontrun{
-#' myH1DataObject <- H1Example
-#' H1out <- RDBEScore:::doDBEestimantionObjUpp(myH1DataObject)
-#' }
+#' # This legacy helper expects data.frames and no NULL table entries
+#' H1Tables <- lapply(Filter(Negate(is.null), Pckg_survey_apistrat_H1), as.data.frame)
+#' upper <- RDBEScore:::doDBEestimantionObjUpp(H1Tables)
+#' upper$expectedTables
+#'
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: rix133
+#' - Notes/scope: examples only
 
 
 doDBEestimantionObjUpp <-

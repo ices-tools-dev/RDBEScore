@@ -76,3 +76,28 @@ The calculations are as follows:
 }
 }
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: rix133
+\item Notes/scope:
+}
+}
+
+\examples{
+H8DataObj <- H8ExampleEE1
+# First-quarter sprat example from the ratio-estimation vignette
+strataCS <- list(LEarea = "27.3.d.28.1", LEmetier6 = "OTM_SPF_16-31_0_0",
+                 TEstratumName = month.name[1:3], SAspeCodeFAO = "SPR")
+strataCL <- list(CLarea = "27.3.d.28.1", CLquar = 1,
+                 CLmetier6 = "OTM_SPF_16-31_0_0", CLspecFAO = "SPR")
+# A warning reports that the three months are pooled into one stratum
+biolCL <- addCLtoLowerCS(H8DataObj, strataCS, strataCL,
+                       CLfields = "CLoffWeight")
+lengthCANUM <- doBVestimCANUM(biolCL, addColumns = "sumCLoffWeight",
+                             classUnits = "Lengthmm",
+                             classBreaks = seq(70, 130, 10))
+lengthCANUM[, c("Group", "WeightgMean", "totWeight", "totNum")]
+
+}

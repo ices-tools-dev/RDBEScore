@@ -27,23 +27,17 @@ and sampling country against the SL table.
 \itemize{
 \item AI-assisted: Yes
 \item Review: rix133
+\item Notes/scope:
 }
 }
 
 \examples{
-\dontrun{
+H1DataObj <- H1Example
+# Retain one species list, leaving selections linked to other lists
+H1DataObjFiltered <- filterRDBESDataObject(
+  H1DataObj, "SLspeclistName", "ZW_1965_SpeciesList2"
+)
+H1DataObjCleaned <- removeBrokenSpeciesListLinks(H1DataObjFiltered)
+c(before = nrow(H1DataObjFiltered$SS), after = nrow(H1DataObjCleaned$SS))
 
-myH1RawObject <-
-  importRDBESDataCSV(rdbesExtractPath = "tests\\\\testthat\\\\h1_v_1_19")
-myFields <- c("SLspeclistName")
-myValues <- c("WGRDBES-EST TEST 5 - sprat data")
-myFilteredObject <- filterRDBESDataObject(myH1RawObject,
-  fieldsToFilter = myFields,
-  valuesToFilter = myValues
-)
-myObjectValidSpeciesListLinks <- removeBrokenSpeciesListLinks(
-  objectToCheck = myFilteredObject,
-  verbose = FALSE
-)
-}
 }

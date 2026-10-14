@@ -35,12 +35,11 @@ Also bypasses any optional tables (e.g. FT in H5).
 \itemize{
 \item AI-assisted: Yes
 \item Human review: rix133
+\item Notes/scope:
 }
 }
 
 \examples{
-\dontrun{
-  RDBEScore:::extractHigherFields(H1Example, "SS", "DEyear")
-}
+head(RDBEScore:::extractHigherFields(H1Example, "SS", "DEyear"))
 }
 \keyword{internal}

@@ -24,18 +24,17 @@
 #' an empty RDBESDataObject will be returned.
 #'
 #' @section Development review:
-#' - AI-assisted: No
+#' - AI-assisted: Yes
 #' - Review: rix133
 #' - Notes/scope: Added tests dealing with over integer limit
 #'
 #' @examples
-#' \dontrun{
-#' dataDir <- paste0(system.file("extdata", package = "RDBEScore"), "/")
-#' tmpDir<-tempdir(check = FALSE)
-#' unzip(paste0(dataDir,"H1_Example.zip"), exdir=tmpDir)
-#' myH1DataObject<-RDBEScore:::importRDBESDataCSV(file.path(tmpDir,"H1"))
-#' validateRDBESDataObject(myH1DataObject)}
-#'
+#' # Import a CSV distributed with the package using its explicit table name
+#' csvDir <- system.file("extdata", package = "RDBEScore")
+#' object <- RDBEScore:::importRDBESDataCSV(
+#'   csvDir, listOfFileNames = list(VS = "VesselSelection.csv")
+#' )
+#' head(object$VS[, c("VSid", "VSselectMeth", "VSnumSamp", "VSnumTotal")])
 importRDBESDataCSV <- function(rdbesExtractPath = NULL,
                                listOfFileNames = NULL,
                                castToCorrectDataTypes = TRUE,

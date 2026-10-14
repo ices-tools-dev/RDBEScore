@@ -25,14 +25,17 @@
 #' Sprat(126425), in SL Clupeidae (125464) function renameSpeciesSA rename Sprat
 #' from SA to Clupeidae. Clupeidae(family rank) is higher rank than Sprat(species rank).
 #'@section Development review:
-#' - AI-assisted: No
-#' - Human review: rix133
+#' - AI-assisted: Yes
+#' - Review: rix133
+#' - Notes/scope: examples only
+#'
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' myObject <- createRDBESDataObject(input = "WGRDBES-EST/personal/Kasia/vignettes/vignetteData")
-#' renameSpeciesSA(RDBESDataObject=myObject,validate,verbose,strict)}
+#' H1DataObj <- Pckg_survey_apistrat_H1
+#' H1DataObjUpdated <- updateSAwithTaxonFromSL(H1DataObj)
+#' unique(H1DataObjUpdated$SA$SAspeCode)
+#'
 
 updateSAwithTaxonFromSL <- function(RDBESDataObject,
                             validate = TRUE,

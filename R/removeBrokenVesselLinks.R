@@ -9,26 +9,19 @@
 #'
 #' @return an RDBESDataObject with any records with an invalid VDid removed
 #' @section Development review:
-#' - AI-assisted: No
+#' - AI-assisted: Yes
 #' - Human review: rix133
+#' - Notes/scope:
+#'
 #' @export
 #'
 #' @examples
-#' \dontrun{
+#' H1DataObj <- Pckg_survey_apistrat_H1
+#' # Retain a vessel-length category, leaving sampling records for other vessels
+#' H1DataObjFiltered <- filterRDBESDataObject(H1DataObj, "VDlenCat", "VL1012")
+#' H1DataObjCleaned <- removeBrokenVesselLinks(H1DataObjFiltered, verbose = FALSE)
+#' c(before = nrow(H1DataObjFiltered$VS), after = nrow(H1DataObjCleaned$VS))
 #'
-#' data("H1Example")
-#' myH1DataObject <- H1Example
-#' myFields <- c("VDlenCat")
-#' myValues <- c("18-<24")
-#' myFilteredObject <- filterRDBESDataObject(myH1DataObject,
-#'   fieldsToFilter = myFields,
-#'   valuesToFilter = myValues
-#' )
-#' myObjectValidVesselLinks <- removeBrokenVesselLinks(
-#'   objectToCheck = myFilteredObject,
-#'   verbose = FALSE
-#' )
-#' }
 removeBrokenVesselLinks <- function(objectToCheck,
                                     verbose = FALSE,
                                     strict = TRUE) {

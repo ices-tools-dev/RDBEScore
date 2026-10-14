@@ -41,11 +41,22 @@ estimation options
 Create design-based point and variance estimates from
 RDBES estimation object (rdbesEstimObj)
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: rix133
+\item Notes/scope: examples only, this is a legacy function
+}
+}
+
 \examples{
-\dontrun{
-data(shrimps)
-doDBestimation (x = shrimps, estimateType = "total",
-pointEstimator = "Unbiased", varEstimator = "WRonPSUviaPsi",stage = 0,
-domainOfinterest = NULL )
- }
+# Two sampled primary units with inclusion probability 1/2
+sample <- data.table::data.table(
+  targetValue = c(10, 20), su1unitName = c("A", "B"),
+  su1inclusionProb = c(0.5, 0.5), su2inclusionProb = c(1, 1),
+  su1numberSampled = c(2, 2)
+)
+RDBEScore:::doDBestimation(sample)
+
 }

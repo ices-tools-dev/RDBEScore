@@ -47,13 +47,15 @@ function also retains the original SA species code.
 \section{Development review}{
 
 \itemize{
-\item AI-assisted: No
-\item Human review: rix133
+\item AI-assisted: Yes
+\item Review: rix133
+\item Notes/scope: examples only
 }
 }
 
 \examples{
-\dontrun{
-myObject <- createRDBESDataObject(input = "WGRDBES-EST/personal/Kasia/vignettes/vignetteData")
-renameSpeciesSA(RDBESDataObject=myObject,validate,verbose,strict)}
+H1DataObj <- Pckg_survey_apistrat_H1
+H1DataObjUpdated <- updateSAwithTaxonFromSL(H1DataObj)
+unique(H1DataObjUpdated$SA$SAspeCode)
+
 }

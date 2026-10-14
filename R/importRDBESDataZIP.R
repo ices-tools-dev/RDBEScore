@@ -21,11 +21,16 @@
 #' @md
 #'
 #' @examples
-#' \dontrun{
-#' dataDir <- paste0(system.file("extdata", package = "RDBEScore"), "/")
-#' myH1DataObject <- RDBEScore:::importRDBESDataZIP(file.path(dataDir,"H1_Example.zip"))
-#' validateRDBESDataObject(myH1DataObject)}
+#' # Import the example ZIP distributed with the package
+#' zipPath <- system.file("extdata", "H1_Example.zip", package = "RDBEScore")
+#' object <- RDBEScore:::importRDBESDataZIP(zipPath)
+#' summary(object)
 #'
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: rix133
+#' - Notes/scope: examples only
+
 importRDBESDataZIP <- function(filenames,
                                castToCorrectDataTypes = TRUE,
                                Hierarchy = NULL, ...) {

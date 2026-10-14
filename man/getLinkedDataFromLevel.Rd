@@ -28,25 +28,25 @@ The \code{getLinkedDataFromLevel} function facilitates the retrieval of linked d
 \section{Development review}{
 
 \itemize{
-\item AI-assisted: No
+\item AI-assisted: Yes
 \item Review: rix133
+\item Notes/scope: examples only
 }
 }
 
 \examples{
-\dontrun{
-# Example 1: Going up in the table hierarchy to retrieve data from the DE table
-# Retrieve data from the DE level based on BVid from the BV table
-# This returns 1 row from the DE table
-getLinkedDataFromLevel("BVid", c(1), H8ExampleEE1, "DE", TRUE)
+H8DataObj <- H8ExampleEE1
+# Go up from a biological measurement to its design
+linkedDesign <- getLinkedDataFromLevel("BVid", 1, H8DataObj, "DE")
+linkedDesign[, c("BVid", "DEid", "DEstratumName")]
 
-# Example 2: Going down in the table hierarchy to retrieve data from the SA table
-# Retrieve data from the SA level based on DEid from the DE table
-# This returns 15 rows from the SA table
-getLinkedDataFromLevel("DEid", c(1), H8ExampleEE1, "SA", TRUE)
+# Go down from a design to its samples
+linkedSamples <- getLinkedDataFromLevel("DEid", 1, H8DataObj, "SA")
+head(linkedSamples[, c("DEid", "SAid", "SAspeCode")])
 
-# Example 3: Going up in the table hierarchy to see the Vessel that caught a specific fish
-# Retrieve data from the VS level based on BVfishId from the BV table
-getLinkedDataFromLevel("BVfishId", c("410472143", "410472144"), H8ExampleEE1, "VS", TRUE)
-}
+# Link a fish identifier to its vessel selection record
+linkedVessels <- getLinkedDataFromLevel("BVfishId", H8DataObj$BV$BVfishId[1],
+                                       H8DataObj, "VS")
+linkedVessels[, c("BVfishId", "VSid", "VDid")]
+
 }

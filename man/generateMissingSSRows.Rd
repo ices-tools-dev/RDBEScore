@@ -40,11 +40,17 @@ This function generates SS rows for any missing catch fractions.
 \section{Development review}{
 
 \itemize{
-\item AI-assisted: No
-\item Human review: rix133
+\item AI-assisted: Yes
+\item Review: rix133
+\item Notes/scope: examples only
 }
 }
 
 \examples{
-# To follow
+H1DataObj <- data.table::copy(Pckg_survey_apistrat_H1)
+# Simulate operations reporting all catch with only landing selections present
+H1DataObj$FO$FOcatReg <- "All"
+SSWithMissingRows <- generateMissingSSRows(H1DataObj, H1DataObj$SL$SLspeclistName[1])
+head(SSWithMissingRows[, c("SSid", "FOid", "SScatchFra")])
+
 }

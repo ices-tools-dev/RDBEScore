@@ -72,3 +72,19 @@ measurements link directly to SA; no FM length-frequency tally.
 Supports both LengthComp and AgeComp.
 }
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: rix133
+\item Notes/scope: examples only
+}
+}
+
+\examples{
+H8DataObj <- data.table::copy(H8ExampleEE1)
+composition <- doEstimationRatio(H8DataObj, targetValue = "LengthComp",
+                                 classBreaks = c(50, 200, 10))
+head(composition[, c("SAid", "LengthClass", "NumbersAtLength", "MeanWeightAtLength")])
+
+}

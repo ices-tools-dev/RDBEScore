@@ -49,6 +49,17 @@
 #'
 #' @importFrom utils tail
 #' @export
+#'
+#' @examples
+#' H8DataObj <- data.table::copy(H8ExampleEE1)
+#' composition <- doEstimationRatio(H8DataObj, targetValue = "LengthComp",
+#'                                  classBreaks = c(50, 200, 10))
+#' head(composition[, c("SAid", "LengthClass", "NumbersAtLength", "MeanWeightAtLength")])
+#'
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: rix133
+#' - Notes/scope: examples only
 doEstimationRatio <- function(RDBESDataObj,
                               targetValue  = "LengthComp",
                               raiseVar     = "Weight",

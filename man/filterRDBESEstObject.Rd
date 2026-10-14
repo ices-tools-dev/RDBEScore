@@ -32,17 +32,17 @@ and have one of the allowed values in \code{valuesToFilter}.
 \section{Development review}{
 
 \itemize{
-\item AI-assisted: No
-\item Human review: rix133
+\item AI-assisted: Yes
+\item Review: rix133
+\item Notes/scope: examples only
 }
 }
 
 \examples{
-\dontrun{
+H1DataObj <- Pckg_survey_apistrat_H1
+H1EstObj <- createRDBESEstObject(H1DataObj, 1, stopTable = "SA")
+# Select the elementary-school stratum
+H1EstObjFiltered <- filterRDBESEstObject(H1EstObj, "VSstratumName", "E")
+dim(H1EstObjFiltered)
 
- myRawObject <- createRDBESDataObject(input = "tests\\\\testthat\\\\h1_v_1_19_26")
- myEstObject <- createRDBESEstObject(myRawObject,1)
- myFilteredEst <- filterRDBESEstObject(myEst,c("BVid"),c(7349207))
-
-}
 }

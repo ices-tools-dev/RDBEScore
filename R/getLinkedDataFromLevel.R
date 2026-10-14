@@ -12,26 +12,28 @@
 #'   table at `level`, with one row per unique requested value and linked record.
 #'   Intermediate hierarchy IDs are not added. Column order is not guaranteed.
 #'
-#' @examples
-#' \dontrun{
-#' # Example 1: Going up in the table hierarchy to retrieve data from the DE table
-#' # Retrieve data from the DE level based on BVid from the BV table
-#' # This returns 1 row from the DE table
-#' getLinkedDataFromLevel("BVid", c(1), H8ExampleEE1, "DE", TRUE)
-#'
-#' # Example 2: Going down in the table hierarchy to retrieve data from the SA table
-#' # Retrieve data from the SA level based on DEid from the DE table
-#' # This returns 15 rows from the SA table
-#' getLinkedDataFromLevel("DEid", c(1), H8ExampleEE1, "SA", TRUE)
-#'
-#' # Example 3: Going up in the table hierarchy to see the Vessel that caught a specific fish
-#' # Retrieve data from the VS level based on BVfishId from the BV table
-#' getLinkedDataFromLevel("BVfishId", c("410472143", "410472144"), H8ExampleEE1, "VS", TRUE)
-#' }
 #' @section Development review:
-#' - AI-assisted: No
+#' - AI-assisted: Yes
 #' - Review: rix133
+#' - Notes/scope: examples only
+#'
 #' @export
+#'
+#' @examples
+#' H8DataObj <- H8ExampleEE1
+#' # Go up from a biological measurement to its design
+#' linkedDesign <- getLinkedDataFromLevel("BVid", 1, H8DataObj, "DE")
+#' linkedDesign[, c("BVid", "DEid", "DEstratumName")]
+#'
+#' # Go down from a design to its samples
+#' linkedSamples <- getLinkedDataFromLevel("DEid", 1, H8DataObj, "SA")
+#' head(linkedSamples[, c("DEid", "SAid", "SAspeCode")])
+#'
+#' # Link a fish identifier to its vessel selection record
+#' linkedVessels <- getLinkedDataFromLevel("BVfishId", H8DataObj$BV$BVfishId[1],
+#'                                        H8DataObj, "VS")
+#' linkedVessels[, c("BVfishId", "VSid", "VDid")]
+#'
 getLinkedDataFromLevel <- function(field, values, rdbesTables, level, verbose = FALSE){
 
   # Check if rdbesTables is of class "RDBESDataObject"

@@ -1,4 +1,5 @@
 # RDBEScore 0.4.0
+- Documentation: revised function examples to run with packaged or small synthetic data, retaining `\dontrun` for examples that demonstrate strict validation errors (#272).
 - Breaking: `getLinkedDataFromLevel()` now returns the requested field and target-table columns in both directions, without adding intermediate hierarchy ids (#268). Non-id requested fields are retained when going down the hierarchy. `getLowerTableSubsets()` avoids duplicated requested-field columns.
 - Package README updated with AI usage guidelines
 - Dependencies: removed `dplyr` from Imports. Joins now use the internal `data.table` helper `joinDT()`, which keeps dplyr's row order, column order and `.x`/`.y` suffixes, so results are unchanged; `filterRDBESEstObject()` and the vignette use base R/`data.table` instead of dplyr.

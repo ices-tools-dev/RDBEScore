@@ -15,12 +15,19 @@
 #' @return A data table of SS data with any missing rows added
 #' 
 #' @section Development review:
-#' - AI-assisted: No
-#' - Human review: rix133
+#' - AI-assisted: Yes
+#' - Review: rix133
+#' - Notes/scope: examples only
+#'
 #' @export
 #'
 #' @examples
-#' # To follow
+#' H1DataObj <- data.table::copy(Pckg_survey_apistrat_H1)
+#' # Simulate operations reporting all catch with only landing selections present
+#' H1DataObj$FO$FOcatReg <- "All"
+#' SSWithMissingRows <- generateMissingSSRows(H1DataObj, H1DataObj$SL$SLspeclistName[1])
+#' head(SSWithMissingRows[, c("SSid", "FOid", "SScatchFra")])
+#'
 generateMissingSSRows <- function(RDBESDataObject,
                                   speciesListName,
                                   verbose = FALSE,

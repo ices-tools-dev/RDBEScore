@@ -67,10 +67,14 @@ as.integer.or.dbl <- function(x){
 #' @param dt A data table to check
 #' @param col A character string specifying the name of the column to check
 #' @return  nothing if the column exists and has unique values, otherwise an error is thrown
+#'
 #' @examples
-#' \dontrun{
-#'   RDBEScore:::check_key_column(H1Example$DE, "DEid")
-#' }
+#' RDBEScore:::check_key_column(H1Example$DE, "DEid")
+#'
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: rix133
+#' - Notes/scope: examples only
 check_key_column <- function(dt, col) {
   # Check if column exists in data table
   if (!col %in% colnames(dt)) {
@@ -182,11 +186,12 @@ makeDT <- function(x){
 #' - AI-assisted: Yes
 #' - Human review: rix133
 #'
-#' @examples
-#' \dontrun{
-#'   RDBEScore:::extractHigherFields(H1Example, "SS", "DEyear")
-#' }
+#' - Notes/scope:
+#'
 #' @keywords internal
+#'
+#' @examples
+#' head(RDBEScore:::extractHigherFields(H1Example, "SS", "DEyear"))
 extractHigherFields <- function(object, table, field){
 
   # Check for a single hierarchy
