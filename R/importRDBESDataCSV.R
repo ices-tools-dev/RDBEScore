@@ -33,7 +33,7 @@
 #' dataDir <- paste0(system.file("extdata", package = "RDBEScore"), "/")
 #' tmpDir<-tempdir(check = FALSE)
 #' unzip(paste0(dataDir,"H1_Example.zip"), exdir=tmpDir)
-#' myH1DataObject<-importRDBESDataCSV(file.path(tmpDir,"H1"))
+#' myH1DataObject<-RDBEScore:::importRDBESDataCSV(file.path(tmpDir,"H1"))
 #' validateRDBESDataObject(myH1DataObject)}
 #'
 importRDBESDataCSV <- function(rdbesExtractPath = NULL,
