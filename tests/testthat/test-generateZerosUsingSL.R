@@ -77,6 +77,8 @@ test_that("generateZerosUsingSL creates rows for SLcou*SLinst*SLspeclistName*SLy
 	  # Check all species in species list are now present in SA (that won't always be the case but should be here)
 	  tempSL <- merge(myTest[["SL"]], myTest[["IS"]],  by = "SLid")
 	  expect_equal(all(tempSL$IScommTaxon %in% myTest[["SA"]]$SAspeCode),TRUE)
+	  # check all SAid are finite
+	  expect_equal(all(is.finite(myTest$SAid)),TRUE)
 
 })
 
