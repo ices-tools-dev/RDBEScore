@@ -64,25 +64,24 @@ metaprogramming. It also relies on the package's source files and
 
 \itemize{
 \item AI-assisted: Yes
-\item Review: pending
+\item Review:
 \item Notes/scope: not really reviewed, just worked when needed and could be useful
 in the future
 }
 }
 
 \examples{
-# Scan a minimal synthetic package source tree
-pkgPath <- tempfile("examplePackage")
-dir.create(pkgPath)
-dir.create(file.path(pkgPath, "R"))
-dir.create(file.path(pkgPath, "man"))
-writeLines("helper <- function() 1", file.path(pkgPath, "R", "helper.R"))
-writeLines(character(), file.path(pkgPath, "NAMESPACE"))
-writeLines(c("\\\\name{helper}", "\\\\title{Example helper}",
-             "\\\\description{A synthetic helper.}", "\\\\examples{helper()}"),
-           file.path(pkgPath, "man", "helper.Rd"))
-RDBEScore:::detectNonExportedFunctionsInExamples(pkgPath)
-unlink(pkgPath, recursive = TRUE)
+\dontrun{
+# Scan a local package source directory
+issues <- detectNonExportedFunctionsInExamples("path/to/package")
+
+# Display all detected calls
+print(issues)
+
+# Inspect calls whose definitions were not found in the source
+subset(issues, defined_in_package == FALSE)
+}
+
 }
 \seealso{
 \code{\link[tools:parse_Rd]{tools::parse_Rd()}}, \code{\link[tools:Rd2ex]{tools::Rd2ex()}}
