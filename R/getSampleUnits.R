@@ -1,4 +1,4 @@
-#' Build the table of sample units for ratio estimation (hierarchy 1)
+#' Build the table of sample units for ratio estimation (hierarchies 1 and 5)
 #'
 #' First step of the ratio estimation workflow (see [doRatioEstimation()]).
 #' It returns one row per **lowest-level Sample (SA) record** of the requested
@@ -8,7 +8,9 @@
 #' the fish were measured. Parent SA records are used only for their weights.
 #'
 #'
-#' * the path through the upper hierarchy (`VSid`, `FTid`, `FOid`, `SSid`) with
+#' * the path through the upper hierarchy (`VSid`, `FTid`, `FOid`, `SSid` in
+#'   hierarchy 1, `OSid`, `LEid`, optionally `FTid`, and `SSid` in
+#'   hierarchy 5) with
 #'   the selection method, its design class ([classifySelectionMethod()]),
 #'   stratum, `numTotal` and `numSamp` of every stage,
 #' * the SA sub-sample tree: `topSAid`, `SAlevel` and `raiseFactor`, the
@@ -25,16 +27,18 @@
 #' 1 and logged. A presentation other than `WHL` with a factor of 1 is logged
 #' as suspicious.
 #'
-#' **Domain variables.** Date: `FOendDate`, else `FOstartDate`, else
-#' `FTarvDate`. Area, rectangle and métier: the SA value when filled, else the
-#' FO value. `areaLookup` recodes areas (for example divisions to
-#' sub-areas).
+#' **Domain variables.** Date in hierarchy 1: `FOendDate`, else
+#' `FOstartDate`, else `FTarvDate`. In hierarchy 5: `LEdate`, else
+#' `FTarvDate` (when FT is used), else `OSsamDate`. Area, rectangle and
+#' métier: the SA value when filled, else the FO value (hierarchy 1) or the
+#' LE value (hierarchy 5). `areaLookup` recodes areas (for example divisions
+#' to sub-areas).
 #'
 #' **Recorded zeros.** An SA with a total weight of 0 (for example made by
 #' [generateZerosUsingSL()]) records that the species was looked for and not
 #' found. It is flagged `include = FALSE` with `excludeReason = "recorded
-#' zero (total weight 0)"` and logged as information: its haul counts as
-#' sampled with zero catch.
+#' zero (total weight 0)"` and logged as information: its haul (or landing
+#' event) counts as sampled with zero catch.
 #'
 #' **Exclusions.** Samples not sampled (`SAsamp == "N"`, also inherited from a
 #' parent SA), lower hierarchy D, samples without the weights needed for
@@ -43,10 +47,11 @@
 #' estimate. A haul whose samples of the species are all excluded is treated
 #' as not sampled (non-response) by [getStageWeights()].
 #'
-#' Only upper hierarchy 1 is implemented. Clustering (`XXclustering` other
-#' than `"N"`) is logged. It does not affect the point estimates.
+#' Upper hierarchies 1 and 5 are implemented. The object must hold one
+#' hierarchy. Clustering (`XXclustering` other than `"N"`) is logged. It does
+#' not affect the point estimates.
 #'
-#' @param RDBESDataObj A valid `RDBESDataObject` of hierarchy 1.
+#' @param RDBESDataObj A valid `RDBESDataObject` of hierarchy 1 or 5.
 #' @param species Species to estimate, as AphiaID(s) (WoRMS), matched to
 #'   `SAspeCode`, for example `127143` for plaice. Several values are allowed.
 #'   FAO 3-alpha codes are not accepted: rows added by
@@ -61,7 +66,8 @@
 #' @param verbose Logical. Print log entries as messages. Default `FALSE`.
 #'
 #' @return A `data.table`, one row per lowest-level SA. The assumptions and exclusions
-#'   log is attached as attribute `"ratioLog"`.
+#'   log is attached as attribute `"ratioLog"`. The attributes `"species"`,
+#'   `"catchCat"` and `"hierarchy"` hold the selection.
 #' @seealso [doRatioEstimation()], [expandWithinSample()]
 #' @export
 getSampleUnits <- function(RDBESDataObj,
@@ -94,17 +100,11 @@ getSampleUnits <- function(RDBESDataObj,
     stop("The SA table is empty.")
   }
 
-  hier <- unique(RDBESDataObj$DE$DEhierarchy)
-  if (length(hier) != 1 || !identical(as.integer(hier), 1L)) {
-    stop("Only upper hierarchy 1 is implemented. DEhierarchy in the data: ",
-         paste(hier, collapse = ", "), call. = FALSE)
-  }
-
-  # Sampling stages between SD and SA, taken from the package hierarchy table
-  chain <- getTablesInRDBESHierarchy(1, includeOptTables = FALSE,
-                                     includeLowHierTables = FALSE,
-                                     includeTablesNotInSampHier = FALSE)
-  stages <- setdiff(chain, c("DE", "SD", "SA"))
+  # Sampling stages between SD and SA: from the package hierarchy table,
+  # plus an optional stage when the data use it (FT under LE in H5)
+  sc <- ratioStageChain(RDBESDataObj)
+  spec <- sc$spec
+  stages <- c(sc$stages, "SS")
 
   sa <- data.table::copy(filtered$SA)
   if (nrow(sa) == 0) {
@@ -180,11 +180,12 @@ getSampleUnits <- function(RDBESDataObj,
   # ---------------------------------------------------------------------------
   designCols <- c("stratumName", "selectMeth", "numTotal", "numSamp",
                   "clustering", "samp")
-  extraCols <- list(VS = character(0),
-                    FT = c("FTarvDate", "FTdepDate"),
-                    FO = c("FOendDate", "FOstartDate", "FOarea",
-                           "FOstatRect", "FOmetier6"),
-                    SS = character(0))
+  domainSourceCols <- c(spec$dateCols, spec$areaCol, spec$statRectCol,
+                        spec$metierCol)
+  extraCols <- lapply(stages, function(tb) {
+    domainSourceCols[substr(domainSourceCols, 1, 2) == tb]
+  })
+  names(extraCols) <- stages
   path <- unique(su[, .(SSid)])
   for (k in rev(seq_along(stages))) {
     tb <- stages[k]
@@ -206,6 +207,9 @@ getSampleUnits <- function(RDBESDataObj,
     }
   }
 
+  # SA has its own (usually empty) links such as LEid in H5: the path wins
+  clash <- setdiff(intersect(names(su), names(path)), "SSid")
+  if (length(clash) > 0) su[, (clash) := NULL]
   su <- merge(su, path, by = "SSid", all.x = TRUE)
   su[, SAselectionClass := classifySelectionMethod(SAselectMeth)]
 
@@ -241,14 +245,7 @@ getSampleUnits <- function(RDBESDataObj,
   # ---------------------------------------------------------------------------
   # Domain variables
   # ---------------------------------------------------------------------------
-  d <- parseRDBESDate(su$FOendDate)
-  if ("FOstartDate" %in% names(su)) {
-    d[is.na(d)] <- parseRDBESDate(su$FOstartDate)[is.na(d)]
-  }
-  if ("FTarvDate" %in% names(su)) {
-    d[is.na(d)] <- parseRDBESDate(su$FTarvDate)[is.na(d)]
-  }
-  su[, sampDate := d]
+  su[, sampDate := firstDate(su, spec$dateCols)]
   su[, year := as.integer(format(sampDate, "%Y"))]
   su[is.na(year), year := as.integer(DEyear)]
   su[, month := as.integer(format(sampDate, "%m"))]
@@ -256,17 +253,22 @@ getSampleUnits <- function(RDBESDataObj,
   nNoDate <- su[is.na(sampDate), .N]
   if (nNoDate > 0) {
     log <- addToRatioLog(log, step, "warning",
-      "No FO or FT date: quarter and month are NA for these samples",
+      paste0("No date in ",
+             paste(intersect(spec$dateCols, names(su)), collapse = ", "),
+             ": quarter and month are NA for these samples"),
       nNoDate, verbose)
   }
-  su[, area := data.table::fifelse(!isBlank(SAarea), as.character(SAarea),
-                                   as.character(FOarea))]
-  su[, statRect := data.table::fifelse(!isBlank(SAstatRect),
-                                       as.character(SAstatRect),
-                                       as.character(FOstatRect))]
-  su[, metier6 := data.table::fifelse(!isBlank(SAmetier6),
-                                      as.character(SAmetier6),
-                                      as.character(FOmetier6))]
+  fallback <- function(saCol, upCol) {
+    up <- if (upCol %in% names(su)) {
+      as.character(su[[upCol]])
+    } else {
+      rep(NA_character_, nrow(su))
+    }
+    data.table::fifelse(!isBlank(su[[saCol]]), as.character(su[[saCol]]), up)
+  }
+  su[, area := fallback("SAarea", spec$areaCol)]
+  su[, statRect := fallback("SAstatRect", spec$statRectCol)]
+  su[, metier6 := fallback("SAmetier6", spec$metierCol)]
   if (!is.null(areaLookup)) {
     al <- data.table::as.data.table(areaLookup)
     if (!all(c("from", "to") %in% names(al))) {
@@ -331,6 +333,9 @@ getSampleUnits <- function(RDBESDataObj,
   keep <- unique(intersect(keep, names(su)))
   out <- su[, keep, with = FALSE]
   data.table::setorder(out, SAid)
+  attr(out, "species") <- species
+  attr(out, "catchCat") <- catchCat
+  attr(out, "hierarchy") <- spec$hierarchy
   attr(out, "ratioLog") <- log
   out[]
 }

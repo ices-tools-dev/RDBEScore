@@ -2,7 +2,7 @@
 % Please edit documentation in R/getSampleUnits.R
 \name{getSampleUnits}
 \alias{getSampleUnits}
-\title{Build the table of sample units for ratio estimation (hierarchy 1)}
+\title{Build the table of sample units for ratio estimation (hierarchies 1 and 5)}
 \usage{
 getSampleUnits(
   RDBESDataObj,
@@ -14,7 +14,7 @@ getSampleUnits(
 )
 }
 \arguments{
-\item{RDBESDataObj}{A valid \code{RDBESDataObject} of hierarchy 1.}
+\item{RDBESDataObj}{A valid \code{RDBESDataObject} of hierarchy 1 or 5.}
 
 \item{species}{Species to estimate, as AphiaID(s) (WoRMS), matched to
 \code{SAspeCode}, for example \code{127143} for plaice. Several values are allowed.
@@ -35,7 +35,8 @@ object. Default \code{TRUE}.}
 }
 \value{
 A \code{data.table}, one row per lowest-level SA. The assumptions and exclusions
-log is attached as attribute \code{"ratioLog"}.
+log is attached as attribute \code{"ratioLog"}. The attributes \code{"species"},
+\code{"catchCat"} and \code{"hierarchy"} hold the selection.
 }
 \description{
 First step of the ratio estimation workflow (see \code{\link[=doRatioEstimation]{doRatioEstimation()}}).
@@ -47,7 +48,9 @@ the fish were measured. Parent SA records are used only for their weights.
 }
 \details{
 \itemize{
-\item the path through the upper hierarchy (\code{VSid}, \code{FTid}, \code{FOid}, \code{SSid}) with
+\item the path through the upper hierarchy (\code{VSid}, \code{FTid}, \code{FOid}, \code{SSid} in
+hierarchy 1, \code{OSid}, \code{LEid}, optionally \code{FTid}, and \code{SSid} in
+hierarchy 5) with
 the selection method, its design class (\code{\link[=classifySelectionMethod]{classifySelectionMethod()}}),
 stratum, \code{numTotal} and \code{numSamp} of every stage,
 \item the SA sub-sample tree: \code{topSAid}, \code{SAlevel} and \code{raiseFactor}, the
@@ -65,15 +68,17 @@ represents. This is the auxiliary variable of the ratio estimators.
 1 and logged. A presentation other than \code{WHL} with a factor of 1 is logged
 as suspicious.
 
-\strong{Domain variables.} Date: \code{FOendDate}, else \code{FOstartDate}, else
-\code{FTarvDate}. Area, rectangle and métier: the SA value when filled, else the
-FO value. \code{areaLookup} recodes areas (for example divisions to
-sub-areas).
+\strong{Domain variables.} Date in hierarchy 1: \code{FOendDate}, else
+\code{FOstartDate}, else \code{FTarvDate}. In hierarchy 5: \code{LEdate}, else
+\code{FTarvDate} (when FT is used), else \code{OSsamDate}. Area, rectangle and
+métier: the SA value when filled, else the FO value (hierarchy 1) or the
+LE value (hierarchy 5). \code{areaLookup} recodes areas (for example divisions
+to sub-areas).
 
 \strong{Recorded zeros.} An SA with a total weight of 0 (for example made by
 \code{\link[=generateZerosUsingSL]{generateZerosUsingSL()}}) records that the species was looked for and not
-found. It is flagged \code{include = FALSE} with \code{excludeReason = "recorded zero (total weight 0)"} and logged as information: its haul counts as
-sampled with zero catch.
+found. It is flagged \code{include = FALSE} with \code{excludeReason = "recorded zero (total weight 0)"} and logged as information: its haul (or landing
+event) counts as sampled with zero catch.
 
 \strong{Exclusions.} Samples not sampled (\code{SAsamp == "N"}, also inherited from a
 parent SA), lower hierarchy D, samples without the weights needed for
@@ -82,8 +87,9 @@ B, no BV for C) are flagged \code{include = FALSE}. They add nothing to the
 estimate. A haul whose samples of the species are all excluded is treated
 as not sampled (non-response) by \code{\link[=getStageWeights]{getStageWeights()}}.
 
-Only upper hierarchy 1 is implemented. Clustering (\code{XXclustering} other
-than \code{"N"}) is logged. It does not affect the point estimates.
+Upper hierarchies 1 and 5 are implemented. The object must hold one
+hierarchy. Clustering (\code{XXclustering} other than \code{"N"}) is logged. It does
+not affect the point estimates.
 }
 \seealso{
 \code{\link[=doRatioEstimation]{doRatioEstimation()}}, \code{\link[=expandWithinSample]{expandWithinSample()}}

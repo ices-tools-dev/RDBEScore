@@ -93,9 +93,11 @@ stageRaising <- function(method = c("none", "count", "aux", "ratio",
 #'   `"speciesLiveWeight"` (the live weight of the species in each lowest-level
 #'   SA, with `at = "SA"`), a column name of the stage table given by `at`, a
 #'   function of that table, or an [externalAux()] object.
-#' @param at Stage on which `value` is measured: `"SA"`, `"FO"`, `"FT"` or
-#'   `"VS"`. When it is not `"SA"`, sampled units without the species stay in
-#'   the sum of x.
+#' @param at Stage on which `value` is measured: `"SA"` or a stage of the
+#'   hierarchy (`"VS"`, `"FT"` or `"FO"` in hierarchy 1, `"OS"`, `"LE"` or
+#'   `"FT"` in hierarchy 5). [raisingScheme()] checks it against the
+#'   hierarchy. When it is not `"SA"`, sampled units without the species stay
+#'   in the sum of x.
 #' @param strata DE column that defines the top strata. Default
 #'   `"DEstratumName"`.
 #'
@@ -111,7 +113,10 @@ topRaising <- function(method = c("none", "ratio"), total = "DEauxVarTot",
   method <- match.arg(method)
   checkRaisingArg(total, "total", allowFunction = FALSE)
   checkRaisingArg(value, "value", allowFunction = TRUE)
-  at <- match.arg(at, c("SA", "FO", "FT", "VS"))
+  if (!(is.character(at) && length(at) == 1 && grepl("^[A-Z]{2}$", at))) {
+    stop("at must be \"SA\" or a stage table name such as \"FT\" or \"LE\".",
+         call. = FALSE)
+  }
   if (identical(value, "speciesLiveWeight") && at != "SA") {
     stop("value = \"speciesLiveWeight\" is measured on SA: use at = \"SA\".",
          call. = FALSE)
@@ -178,13 +183,19 @@ externalAux <- function(data, by, col) {
 #' by the top ratio.
 #'
 #' Stages not given are `"none"` (pooled). The species selection (SS) is
-#' always 1: a species list with more species gets no extra weight. Only
-#' hierarchy 1 is implemented.
+#' always 1: a species list with more species gets no extra weight.
 #'
-#' @param ... Stage raising methods, named by stage (`FO`, `FT`, `VS`), each
-#'   made with [stageRaising()].
+#' Hierarchies 1 and 5 are implemented. In hierarchy 5 the stages are OS
+#' (onshore event) and LE (landing event). FT is an optional stage under LE:
+#' name it (`FT = stageRaising(...)`) when the SS records of the data link to
+#' FT. If the data use FT and the scheme does not name it, FT is `"none"`.
+#'
+#' @param ... Stage raising methods, named by stage (`VS`, `FT`, `FO` in
+#'   hierarchy 1, `OS`, `LE`, `FT` in hierarchy 5), each made with
+#'   [stageRaising()].
 #' @param top The top raising, made with [topRaising()].
-#' @param hierarchy The RDBES upper hierarchy. Only `1` for now.
+#' @param hierarchy The RDBES upper hierarchy: `1` (default) or `5`. It must
+#'   match `DEhierarchy` in the data.
 #'
 #' @return An object of class `RDBESRaisingScheme`: a list with `stages` (one
 #'   resolved entry per stage, with the actual column names) and `top`.
@@ -195,10 +206,12 @@ externalAux <- function(data, by, col) {
 #' raisingScheme(FO = stageRaising("count"),
 #'               FT = stageRaising("count"),
 #'               top = topRaising("ratio", value = "speciesLiveWeight"))
+#' # Hierarchy 5: auction days counted, landings raised by landed weight
+#' raisingScheme(OS = stageRaising("count"), LE = stageRaising("aux"),
+#'               top = topRaising("ratio"), hierarchy = 5)
 raisingScheme <- function(..., top = topRaising("none"), hierarchy = 1) {
-  if (!identical(as.integer(hierarchy), 1L)) {
-    stop("Only hierarchy 1 is implemented.", call. = FALSE)
-  }
+  spec <- hierarchySpec(hierarchy)
+  hierarchy <- spec$hierarchy
   given <- list(...)
   if (length(given) > 0 &&
       (is.null(names(given)) || any(names(given) == ""))) {
@@ -208,15 +221,23 @@ raisingScheme <- function(..., top = topRaising("none"), hierarchy = 1) {
   if ("SS" %in% names(given)) {
     stop("SS is always 1 and cannot be raised.", call. = FALSE)
   }
-  chain <- getTablesInRDBESHierarchy(hierarchy, includeOptTables = FALSE,
-                                     includeLowHierTables = FALSE,
-                                     includeTablesNotInSampHier = FALSE)
-  stages <- setdiff(chain, c("DE", "SD", "SS", "SA"))
-  bad <- setdiff(names(given), stages)
+  stages <- spec$stages
+  allowed <- c(stages, names(spec$optional))
+  bad <- setdiff(names(given), allowed)
   if (length(bad) > 0) {
     stop("Unknown stage(s): ", paste(bad, collapse = ", "),
          ". Stages in hierarchy ", hierarchy, ": ",
-         paste(stages, collapse = ", "), call. = FALSE)
+         paste(allowed, collapse = ", "), call. = FALSE)
+  }
+  # Optional stages are used only when named, placed under their parent
+  for (opt in intersect(names(spec$optional), names(given))) {
+    stages <- append(stages, opt,
+                     after = match(spec$optional[[opt]], stages))
+  }
+  if (inherits(top, "RDBESTopRaising") && !top$at %in% c("SA", allowed)) {
+    stop("top at = \"", top$at, "\" is not a stage of hierarchy ", hierarchy,
+         ". Use \"SA\" or one of: ", paste(allowed, collapse = ", "), ".",
+         call. = FALSE)
   }
   for (nm in names(given)) {
     if (!inherits(given[[nm]], "RDBESStageRaising")) {

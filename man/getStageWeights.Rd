@@ -7,48 +7,60 @@
 getStageWeights(RDBESDataObj, sampleUnits, scheme, verbose = FALSE)
 }
 \arguments{
-\item{RDBESDataObj}{An \code{RDBESDataObject} of hierarchy 1.}
+\item{RDBESDataObj}{An \code{RDBESDataObject} of hierarchy 1 or 5.}
 
 \item{sampleUnits}{Output of \code{\link[=getSampleUnits]{getSampleUnits()}}.}
 
-\item{scheme}{A scheme made with \code{\link[=raisingScheme]{raisingScheme()}}.}
+\item{scheme}{A scheme made with \code{\link[=raisingScheme]{raisingScheme()}}, for the same
+hierarchy as the data.}
 
 \item{verbose}{Logical. Print log entries as messages. Default \code{FALSE}.}
 }
 \value{
-\code{sampleUnits} with the columns \code{f_VS}, \code{f_FT}, \code{f_FO}, \code{w}, \code{DEid}
+\code{sampleUnits} with the columns \code{f_XX} (one per stage), \code{w}, \code{DEid}
 and \code{DEstratumName} added. Attributes: \code{"unitWeights"}, a list with one
 table per stage (unit id, ancestor ids, \code{factor} and cumulative weight
 \code{wUnit} of every sampled unit), \code{"scheme"} and \code{"ratioLog"}.
 }
 \description{
 Step of stage-wise raising (see \code{\link[=raisingScheme]{raisingScheme()}}). For every stage of the
-scheme (VS, FT, FO) it builds the unit table (\code{\link[=getUnitTable]{getUnitTable()}}), resolves
-the total and value chosen by the user (RDBES column, function or
-\code{\link[=externalAux]{externalAux()}} table), and computes a factor per sampled unit within
-parent x stratum (\code{\link[=computeStageFactors]{computeStageFactors()}}). The factors are multiplied down
-the hierarchy, so every unit gets a cumulative weight, and every
-lowest-level SA gets \code{w = f_VS * f_FT * f_FO} (SS is always 1).
+stage (VS, FT, FO in hierarchy 1, OS, LE and optionally FT in hierarchy 5)
+it builds the unit table (\code{\link[=getUnitTable]{getUnitTable()}}), resolves the total and value
+chosen by the user (RDBES column, function or \code{\link[=externalAux]{externalAux()}} table), and
+computes a factor per sampled unit within parent x stratum
+(\code{\link[=computeStageFactors]{computeStageFactors()}}). The factors are multiplied down the hierarchy,
+so every unit gets a cumulative weight, and every lowest-level SA gets
+\code{w}, the product of the stage factors (for example
+\code{f_VS * f_FT * f_FO}. SS is always 1).
 }
 \details{
+The stages come from the data: in hierarchy 5, FT is a stage when the SS
+records link to FT. A stage the data use but the scheme does not name is
+\code{"none"}. A stage the scheme names but the data do not use stops the run.
+
 Selection methods are not used for the factors. They are logged per stage.
 
-\strong{Zeros and non-response.} A sampled haul (\code{FOsamp} not \code{"N"}) can be:
+\strong{Zeros and non-response.} A sampled unit of the lowest stage (a haul in
+hierarchy 1, a landing event or trip in hierarchy 5) can be:
 \itemize{
 \item with an included sample of the species: its fish count,
-\item without any sample of the species: zero catch, logged as an assumption
-(the species is assumed to be on the species list),
 \item with a recorded zero (an SA with total weight 0, see
 \code{\link[=getSampleUnits]{getSampleUnits()}}): zero catch, logged as information,
+\item without any sample of the species: zero catch only if the species was
+looked for, that is, one of its SS records for the catch category has
+\code{SSuseCalcZero = "Y"} and the species is on its species list (SL/IS).
+Without SL/IS in the object, \code{"Y"} alone counts, logged as an
+assumption. Otherwise (\code{"N"}, blank, or the species not on the list) the
+species was not looked for: non-response, left out of the number of
+sampled units,
 \item with samples of the species that are all excluded (for example lower
 hierarchy D, missing weights, no FM or BV): no usable information, so
-it is treated as not sampled (non-response) and left out of the number
-of sampled hauls.
+it is treated as not sampled (non-response).
 }
 
-A trip without any sampled haul left, and a vessel without any sampled
-trip left, are treated as not sampled in the same way. All of this is
-logged.
+A unit without any sampled unit below it left (for example a trip
+without sampled hauls) is treated as not sampled in the same way. All of
+this is logged.
 }
 \seealso{
 \code{\link[=raisingScheme]{raisingScheme()}}, \code{\link[=raiseToDE]{raiseToDE()}}

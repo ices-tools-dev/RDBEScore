@@ -15,10 +15,11 @@
 #' least one record in the stage below. Units marked sampled without records
 #' below are logged and treated as not sampled.
 #'
-#' @param RDBESDataObj An `RDBESDataObject` of hierarchy 1.
-#' @param stage Stage table name: `"VS"`, `"FT"` or `"FO"`.
+#' @param RDBESDataObj An `RDBESDataObject` of hierarchy 1 or 5.
+#' @param stage Stage table name: `"VS"`, `"FT"` or `"FO"` in hierarchy 1,
+#'   `"OS"`, `"LE"` or (when SS links to FT) `"FT"` in hierarchy 5.
 #' @param fields Optional extra columns of the stage table, or of VD (for
-#'   `stage = "VS"`, joined through `VDid`).
+#'   stage tables with a `VDid`, such as VS and LE, joined through `VDid`).
 #' @param verbose Logical. Print log entries as messages. Default `FALSE`.
 #'
 #' @return A `data.table`, one row per unit. The log is attached as
@@ -27,10 +28,9 @@
 #' @export
 getUnitTable <- function(RDBESDataObj, stage, fields = NULL,
                          verbose = FALSE) {
-  chain <- getTablesInRDBESHierarchy(1, includeOptTables = FALSE,
-                                     includeLowHierTables = FALSE,
-                                     includeTablesNotInSampHier = FALSE)
-  stages <- setdiff(chain, c("DE", "SD", "SS", "SA"))
+  sc <- ratioStageChain(RDBESDataObj)
+  chain <- sc$chain
+  stages <- sc$stages
   if (!stage %in% stages) {
     stop("stage must be one of ", paste(stages, collapse = ", "), ".",
          call. = FALSE)
@@ -49,7 +49,11 @@ getUnitTable <- function(RDBESDataObj, stage, fields = NULL,
 
   designCols <- intersect(paste0(stage, RDBEScore::designVariables),
                           names(tbl))
-  vdFields <- if (stage == "VS") grep("^VD", fields, value = TRUE) else NULL
+  vdFields <- if ("VDid" %in% names(tbl)) {
+    grep("^VD", fields, value = TRUE)
+  } else {
+    NULL
+  }
   ownFields <- setdiff(fields, vdFields)
   badFields <- setdiff(ownFields, names(tbl))
   if (length(badFields) > 0) {

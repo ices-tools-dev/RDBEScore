@@ -194,9 +194,9 @@ test_that("doRatioEstimation needs a raising scheme", {
                "raisingScheme")
 })
 
-test_that("only hierarchy 1 and landings are accepted", {
+test_that("only implemented hierarchies and landings are accepted", {
   expect_error(getSampleUnits(H8ExampleEE1, species = 126425, strict = FALSE),
-               "Only upper hierarchy 1")
+               "Hierarchy 8 is not implemented yet")
   sim <- simulate()
   expect_error(getSampleUnits(sim$obj, species = 127143, catchCat = "Dis"),
                "Lan")

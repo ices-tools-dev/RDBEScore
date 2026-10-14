@@ -148,15 +148,19 @@ raiseToDE <- function(expanded, stageWeights, RDBESDataObj,
   data.table::setorderv(out, c(domainVars, "stratum", "class"))
 
   # Domain summary
-  idCols <- intersect(c("VSid", "FTid", "FOid"), names(su))
+  # Number of sampled units per stage, e.g. nVessels or nLandingEvents
+  sc <- ratioStageChain(RDBESDataObj)
+  labels <- sc$spec$unitLabels[sc$stages]
+  idCols <- paste0(sc$stages, "id")
+  keepIds <- idCols %in% names(su)
+  idCols <- idCols[keepIds]
+  labels <- labels[keepIds]
   suR <- merge(su, ratios[, .(.stratum, ratio)], by = ".stratum")
   domSum <- suR[, c(list(nSamples = .N, sumX = sum(w * x),
                          X = sum(w * x * ratio)),
                     lapply(.SD, data.table::uniqueN)),
                 by = domainVars, .SDcols = idCols]
-  data.table::setnames(domSum, idCols,
-                       c(VSid = "nVessels", FTid = "nTrips",
-                         FOid = "nHauls")[idCols])
+  data.table::setnames(domSum, idCols, unname(labels))
 
   log <- addToRatioLog(log, step, "info", "Domains estimated",
                        nrow(domSum), verbose)

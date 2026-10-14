@@ -1,10 +1,11 @@
-#' Stage-wise estimation of numbers at age or length (hierarchy 1, landings)
+#' Stage-wise estimation of numbers at age or length (hierarchies 1 and 5, landings)
 #'
 #' Estimates numbers, mean weight and mean length at age or at length per
 #' domain (for example year x quarter x area x métier). The samples are
-#' raised within the sample, then stage by stage (vessels, trips, hauls) with
-#' the method chosen for each stage in a [raisingScheme()], and finally to the
-#' totals of the DE stratum.
+#' raised within the sample, then stage by stage (vessels, trips, hauls in
+#' hierarchy 1, onshore events, landing events and optionally trips in
+#' hierarchy 5) with the method chosen for each stage in a
+#' [raisingScheme()], and finally to the totals of the DE stratum.
 #'
 #' This wrapper runs the steps below in order. Every step is exported and
 #' can be run on its own to inspect the intermediate tables, which are all
@@ -24,7 +25,10 @@
 #' Selection methods are not used to compute weights. Non-probabilistic
 #' designs are logged as assumptions.
 #'
-#' Not in this version: variance, hierarchies other than 1, discards.
+#' Implemented for upper hierarchies 1 and 5. The scheme must be made for the
+#' hierarchy of the data (`raisingScheme(..., hierarchy = 5)`).
+#'
+#' Not in this version: variance, hierarchies other than 1 and 5, discards.
 #'
 #' @inheritParams getSampleUnits
 #' @inheritParams expandWithinSample
@@ -138,7 +142,8 @@ print.RDBESRatioEstimate <- function(x, ...) {
   est <- x$estimates
   dv <- s$domainVars
   nDom <- nrow(unique(est[, dv, with = FALSE]))
-  cat("RDBES stage-wise estimate (hierarchy 1)\n")
+  cat("RDBES stage-wise estimate (hierarchy ", s$raising$hierarchy, ")\n",
+      sep = "")
   cat("  species:", paste(s$species, collapse = ", "),
       "| target:", s$target, "\n")
   print(s$raising)

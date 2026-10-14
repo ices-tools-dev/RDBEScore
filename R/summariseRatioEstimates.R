@@ -23,8 +23,10 @@
 #'   `meanWeight_g` (live), `meanLength_mm`, `totalWeight_kg`, `nFish` (fish
 #'   measured or aged), and per domain `X_kg` (estimated live weight of the
 #'   species), `SOP`, `weightCoverage`, `nSamples`, `sumX_kg` (weighted live
-#'   weight of the samples before the top ratio), `nVessels`, `nTrips` and
-#'   `nHauls`.
+#'   weight of the samples before the top ratio) and the number of sampled
+#'   units per stage: `nVessels`, `nTrips` and `nHauls` in hierarchy 1,
+#'   `nOnshoreEvents`, `nLandingEvents` (and `nTrips` when FT is a stage) in
+#'   hierarchy 5.
 #' @seealso [doRatioEstimation()]
 #' @export
 summariseRatioEstimates <- function(raised, plusGroup = NULL) {

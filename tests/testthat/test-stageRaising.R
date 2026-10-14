@@ -145,7 +145,11 @@ test_that("constructors reject wrong input", {
                "needs an externalAux")
   expect_error(topRaising("ratio", value = "speciesLiveWeight", at = "FT"),
                "use at = \"SA\"")
-  expect_error(raisingScheme(hierarchy = 2), "Only hierarchy 1")
+  expect_error(raisingScheme(hierarchy = 2), "not implemented yet")
+  expect_error(topRaising("ratio", value = "x", at = "fo"), "stage table")
+  expect_error(raisingScheme(top = topRaising("ratio", value = "x",
+                                              at = "LE")),
+               "not a stage of hierarchy 1")
 })
 
 test_that("ratio and external accept columns, functions and user tables", {
@@ -357,6 +361,50 @@ test_that("zeros stay in the sampled hauls, unusable hauls are non-response", {
   expect_true(any(grepl("without a sample of the species", msg)))
   # other trips are unaffected
   expect_true(all(sw[FTid != 1 & include == TRUE, f_FO] == 1))
+})
+
+test_that("a haul without the species is a zero only if SS says it was looked for", {
+  sim <- simulate(lowHierarchy = "C", haulsPerTrip = 4,
+                  vesselsInPopulation = 4)
+  obj <- sim$obj
+  # haul 2 of trip 1 has no sample of the species
+  sa2 <- obj$SA[SSid %in% obj$SS[FOid == 2, SSid], SAid]
+  obj$BV <- obj$BV[!SAid %in% sa2]
+  obj$SA <- obj$SA[!SAid %in% sa2]
+  sc <- raisingScheme(FO = stageRaising("count"), top = topRaising("ratio"))
+  fTrip1 <- function(o) {
+    sw <- getStageWeights(o, getSampleUnits(o, species = 127143), sc)
+    list(f = unique(sw[FTid == 1 & include == TRUE, f_FO]),
+         msg = getRatioLog(sw)$message)
+  }
+  # SSuseCalcZero "Y" and no SL/IS: zero, logged as an assumption
+  r <- fTrip1(obj)
+  expect_equal(r$f, 1)
+  expect_true(any(grepl("no SL/IS in the object", r$msg)))
+  # SSuseCalcZero "N": not looked for, non-response
+  oN <- data.table::copy(obj)
+  oN$SS[FOid == 2, SSuseCalcZero := "N"]
+  r <- fTrip1(oN)
+  expect_equal(r$f, 4 / 3)
+  expect_true(any(grepl("SSuseCalcZero is not \"Y\": not looked for", r$msg)))
+  # SSuseCalcZero "Y" with a species list
+  withList <- function(o, taxon) {
+    o$SS[, SLid := 1L]
+    o$SL <- data.table::data.table(SLid = 1L, SLrecType = "SL", SLcou = "ZW",
+                                   SLinst = "4484", SLspeclistName = "Sim",
+                                   SLyear = 2024L, SLcatchFrac = "Lan")
+    o$IS <- data.table::data.table(ISid = 1L, SLid = 1L, ISrecType = "IS",
+                                   IScommTaxon = taxon, ISsppCode = taxon)
+    data.table::setkey(o$SL, SLid)
+    data.table::setkey(o$IS, ISid)
+    o
+  }
+  r <- fTrip1(withList(data.table::copy(obj), 127143L))
+  expect_equal(r$f, 1)
+  expect_true(any(grepl("is on the species list", r$msg)))
+  r <- fTrip1(withList(data.table::copy(obj), 126436L))
+  expect_equal(r$f, 4 / 3)
+  expect_true(any(grepl("not on the species list", r$msg)))
 })
 
 test_that("species are AphiaIDs, and rows without an FAO code are found", {

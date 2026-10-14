@@ -1,36 +1,48 @@
 #' Stage weights of the sample units
 #'
 #' Step of stage-wise raising (see [raisingScheme()]). For every stage of the
-#' scheme (VS, FT, FO) it builds the unit table ([getUnitTable()]), resolves
-#' the total and value chosen by the user (RDBES column, function or
-#' [externalAux()] table), and computes a factor per sampled unit within
-#' parent x stratum ([computeStageFactors()]). The factors are multiplied down
-#' the hierarchy, so every unit gets a cumulative weight, and every
-#' lowest-level SA gets `w = f_VS * f_FT * f_FO` (SS is always 1).
+#' stage (VS, FT, FO in hierarchy 1, OS, LE and optionally FT in hierarchy 5)
+#' it builds the unit table ([getUnitTable()]), resolves the total and value
+#' chosen by the user (RDBES column, function or [externalAux()] table), and
+#' computes a factor per sampled unit within parent x stratum
+#' ([computeStageFactors()]). The factors are multiplied down the hierarchy,
+#' so every unit gets a cumulative weight, and every lowest-level SA gets
+#' `w`, the product of the stage factors (for example
+#' `f_VS * f_FT * f_FO`. SS is always 1).
+#'
+#' The stages come from the data: in hierarchy 5, FT is a stage when the SS
+#' records link to FT. A stage the data use but the scheme does not name is
+#' `"none"`. A stage the scheme names but the data do not use stops the run.
 #'
 #' Selection methods are not used for the factors. They are logged per stage.
 #'
-#' **Zeros and non-response.** A sampled haul (`FOsamp` not `"N"`) can be:
+#' **Zeros and non-response.** A sampled unit of the lowest stage (a haul in
+#' hierarchy 1, a landing event or trip in hierarchy 5) can be:
 #' * with an included sample of the species: its fish count,
-#' * without any sample of the species: zero catch, logged as an assumption
-#'   (the species is assumed to be on the species list),
 #' * with a recorded zero (an SA with total weight 0, see
 #'   [getSampleUnits()]): zero catch, logged as information,
+#' * without any sample of the species: zero catch only if the species was
+#'   looked for, that is, one of its SS records for the catch category has
+#'   `SSuseCalcZero = "Y"` and the species is on its species list (SL/IS).
+#'   Without SL/IS in the object, `"Y"` alone counts, logged as an
+#'   assumption. Otherwise (`"N"`, blank, or the species not on the list) the
+#'   species was not looked for: non-response, left out of the number of
+#'   sampled units,
 #' * with samples of the species that are all excluded (for example lower
 #'   hierarchy D, missing weights, no FM or BV): no usable information, so
-#'   it is treated as not sampled (non-response) and left out of the number
-#'   of sampled hauls.
+#'   it is treated as not sampled (non-response).
 #'
-#' A trip without any sampled haul left, and a vessel without any sampled
-#' trip left, are treated as not sampled in the same way. All of this is
-#' logged.
+#' A unit without any sampled unit below it left (for example a trip
+#' without sampled hauls) is treated as not sampled in the same way. All of
+#' this is logged.
 #'
-#' @param RDBESDataObj An `RDBESDataObject` of hierarchy 1.
+#' @param RDBESDataObj An `RDBESDataObject` of hierarchy 1 or 5.
 #' @param sampleUnits Output of [getSampleUnits()].
-#' @param scheme A scheme made with [raisingScheme()].
+#' @param scheme A scheme made with [raisingScheme()], for the same
+#'   hierarchy as the data.
 #' @param verbose Logical. Print log entries as messages. Default `FALSE`.
 #'
-#' @return `sampleUnits` with the columns `f_VS`, `f_FT`, `f_FO`, `w`, `DEid`
+#' @return `sampleUnits` with the columns `f_XX` (one per stage), `w`, `DEid`
 #'   and `DEstratumName` added. Attributes: `"unitWeights"`, a list with one
 #'   table per stage (unit id, ancestor ids, `factor` and cumulative weight
 #'   `wUnit` of every sampled unit), `"scheme"` and `"ratioLog"`.
@@ -43,11 +55,46 @@ getStageWeights <- function(RDBESDataObj, sampleUnits, scheme,
   }
   step <- "getStageWeights"
   log <- newRatioLog()
-  chain <- getTablesInRDBESHierarchy(scheme$hierarchy,
-                                     includeOptTables = FALSE,
-                                     includeLowHierTables = FALSE,
-                                     includeTablesNotInSampHier = FALSE)
-  stages <- names(scheme$stages)
+  hier <- dataHierarchy(RDBESDataObj)
+  if (!identical(as.integer(scheme$hierarchy), hier)) {
+    stop("The scheme is for hierarchy ", scheme$hierarchy, " but the data ",
+         "are hierarchy ", hier, ". Use raisingScheme(..., hierarchy = ",
+         hier, ").", call. = FALSE)
+  }
+  sc <- ratioStageChain(RDBESDataObj)
+  chain <- sc$chain
+  stages <- sc$stages
+  notInData <- setdiff(names(scheme$stages), stages)
+  if (length(notInData) > 0) {
+    stop("The scheme raises stage(s) the data do not use: ",
+         paste(notInData, collapse = ", "), ". Stages in the data: ",
+         paste(stages, collapse = ", "), ".", call. = FALSE)
+  }
+  notInScheme <- setdiff(stages, names(scheme$stages))
+  if (length(notInScheme) > 0) {
+    if (scheme$top$method == "none") {
+      stop("The data use stage(s) ", paste(notInScheme, collapse = ", "),
+           " that the scheme does not raise. With top = \"none\" every ",
+           "stage must be raised: add them to raisingScheme().",
+           call. = FALSE)
+    }
+    log <- addToRatioLog(log, step, "info",
+      paste0("Stage(s) used by the data but not in the scheme, pooled ",
+             "(\"none\"): ", paste(notInScheme, collapse = ", ")),
+      NA, verbose)
+  }
+  stageSchemes <- lapply(stages, function(tb) {
+    if (tb %in% names(scheme$stages)) {
+      scheme$stages[[tb]]
+    } else {
+      resolveStageRaising(stageRaising("none"), tb)
+    }
+  })
+  names(stageSchemes) <- stages
+  species <- attr(sampleUnits, "species")
+  if (is.null(species)) species <- unique(sampleUnits$SAspeCode)
+  catchCat <- attr(sampleUnits, "catchCat")
+  if (is.null(catchCat)) catchCat <- unique(sampleUnits$SAcatchCat)
   lowest <- stages[length(stages)]
   lowId <- paste0(lowest, "id")
   unitWeights <- list()
@@ -58,15 +105,16 @@ getStageWeights <- function(RDBESDataObj, sampleUnits, scheme,
   for (tb in stages) {
     unitTables[[tb]] <- getUnitTable(
       RDBESDataObj, tb,
-      fields = stageFieldsNeeded(RDBESDataObj, tb, scheme$stages[[tb]]),
+      fields = stageFieldsNeeded(RDBESDataObj, tb, stageSchemes[[tb]]),
       verbose = verbose)
     log <- rbind(log, getRatioLog(unitTables[[tb]]))
   }
 
-  # Non-response at the lowest stage: a sampled haul whose samples of the
+  # Non-response at the lowest stage: a sampled unit whose samples of the
   # species are all excluded (and none is a recorded zero) gives no usable
-  # information. It is treated as not sampled, not as zero catch. A haul
-  # without any sample of the species stays sampled with zero catch.
+  # information. It is treated as not sampled, not as zero catch. A unit
+  # without any sample of the species is a zero only if the species was
+  # looked for (SSuseCalcZero = "Y" and on the species list).
   su0 <- sampleUnits
   withSA <- unique(su0[[lowId]])
   usable <- unique(su0[include == TRUE |
@@ -81,6 +129,23 @@ getStageWeights <- function(RDBESDataObj, sampleUnits, scheme,
       paste0("Sampled ", lowest, " units whose samples of the species were ",
              "all excluded: treated as not sampled (non-response)"),
       sum(drop), verbose)
+  }
+  noSA <- lowUnits[sampled == TRUE & !lowUnits[[lowId]] %in% withSA][[lowId]]
+  lookedFor <- speciesLookedFor(RDBESDataObj, lowest, noSA, species,
+                                catchCat)
+  notLooked <- lookedFor[!reason %in% c("on list", "no list")]
+  if (nrow(notLooked) > 0) {
+    lowUnits[lowUnits[[lowId]] %in% notLooked[[lowId]], sampled := FALSE]
+    unitTables[[lowest]] <- lowUnits
+    why <- c("SSuseCalcZero not Y" = "SSuseCalcZero is not \"Y\"",
+             "not on list" = "the species is not on the species list")
+    for (r in unique(notLooked$reason)) {
+      log <- addToRatioLog(log, step, "exclusion",
+        paste0("Sampled ", lowest, " units without a sample of the species ",
+               "and ", why[[r]], ": not looked for, treated as not sampled ",
+               "(non-response)"),
+        sum(notLooked$reason == r), verbose)
+    }
   }
   partly <- intersect(unique(su0[include == TRUE][[lowId]]),
                       unique(su0[include == FALSE &
@@ -113,7 +178,7 @@ getStageWeights <- function(RDBESDataObj, sampleUnits, scheme,
   }
 
   for (tb in stages) {
-    s <- scheme$stages[[tb]]
+    s <- stageSchemes[[tb]]
     idCol <- paste0(tb, "id")
     parentId <- paste0(chain[match(tb, chain) - 1], "id")
     units <- unitTables[[tb]]
@@ -171,7 +236,7 @@ getStageWeights <- function(RDBESDataObj, sampleUnits, scheme,
     }
 
     # Cumulative weight: own factor times the weight of the parent unit
-    keep <- intersect(c(idCol, parentId, "VSid", "FTid", "SDid", "DEid",
+    keep <- intersect(c(idCol, parentId, paste0(stages, "id"), "SDid", "DEid",
                         "DEstratumName"), names(units))
     uw <- merge(units[sampled == TRUE, keep, with = FALSE],
                 f[, c(idCol, "factor"), with = FALSE], by = idCol)
@@ -204,8 +269,8 @@ getStageWeights <- function(RDBESDataObj, sampleUnits, scheme,
          "hierarchy.", call. = FALSE)
   }
 
-  # Sampled hauls with zero catch: a recorded zero, or no sample of the
-  # species at all (then the species is assumed to be on the species list)
+  # Sampled units with zero catch: a recorded zero, or no sample of the
+  # species while it was looked for (SSuseCalcZero = "Y")
   zeroIds <- setdiff(lw[[lowId]], su[include == TRUE][[lowId]])
   recorded <- intersect(zeroIds,
                         su[excludeReason == zeroSampleReason()][[lowId]])
@@ -215,11 +280,20 @@ getStageWeights <- function(RDBESDataObj, sampleUnits, scheme,
       paste0("Sampled ", lowest, " units with a recorded zero of the ",
              "species: zero catch"), length(recorded), verbose)
   }
-  if (length(notFound) > 0) {
+  onList <- intersect(notFound, lookedFor[reason == "on list"][[lowId]])
+  noList <- intersect(notFound, lookedFor[reason == "no list"][[lowId]])
+  if (length(onList) > 0) {
+    log <- addToRatioLog(log, step, "info",
+      paste0("Sampled ", lowest, " units without a sample of the species are ",
+             "counted as zero catch (SSuseCalcZero is \"Y\" and the species ",
+             "is on the species list)"), length(onList), verbose)
+  }
+  if (length(noList) > 0) {
     log <- addToRatioLog(log, step, "assumption",
       paste0("Sampled ", lowest, " units without a sample of the species are ",
-             "counted as zero catch (species assumed on the species list)"),
-      length(notFound), verbose)
+             "counted as zero catch (SSuseCalcZero is \"Y\", no SL/IS in the ",
+             "object, so the species is assumed on the species list)"),
+      length(noList), verbose)
   }
 
   attr(su, "unitWeights") <- unitWeights
@@ -238,7 +312,7 @@ stageFieldsNeeded <- function(RDBESDataObj, tb, s) {
             if (inherits(s$value, "RDBESExternalAux")) s$value$by,
             s$strata)
   available <- names(RDBESDataObj[[tb]])
-  if (tb == "VS" && !is.null(RDBESDataObj$VD)) {
+  if ("VDid" %in% available && !is.null(RDBESDataObj$VD)) {
     available <- c(available, grep("^VD", names(RDBESDataObj$VD),
                                    value = TRUE))
   }

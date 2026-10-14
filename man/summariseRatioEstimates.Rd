@@ -18,8 +18,10 @@ A \code{data.table} with the domain variables, \code{age} or
 \code{meanWeight_g} (live), \code{meanLength_mm}, \code{totalWeight_kg}, \code{nFish} (fish
 measured or aged), and per domain \code{X_kg} (estimated live weight of the
 species), \code{SOP}, \code{weightCoverage}, \code{nSamples}, \code{sumX_kg} (weighted live
-weight of the samples before the top ratio), \code{nVessels}, \code{nTrips} and
-\code{nHauls}.
+weight of the samples before the top ratio) and the number of sampled
+units per stage: \code{nVessels}, \code{nTrips} and \code{nHauls} in hierarchy 1,
+\code{nOnshoreEvents}, \code{nLandingEvents} (and \code{nTrips} when FT is a stage) in
+hierarchy 5.
 }
 \description{
 Last step of the ratio estimation workflow (see \code{\link[=doRatioEstimation]{doRatioEstimation()}}).

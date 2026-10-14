@@ -44,6 +44,9 @@ The factors of all stages are multiplied, so each sample gets one weight
 `w`. The estimate of numbers at age is the sum of `w` times the numbers
 at age in the samples.
 
+The same functions work for hierarchy 5 (onshore sampling), see
+[Hierarchy 5](#hierarchy-5) below.
+
 ```{r}
 library(RDBEScore)
 library(data.table)
@@ -272,6 +275,48 @@ estimate. Every stage must then be raised to its population. With
 on trips (hauls, vessels), and sampled units without the species stay in
 the sum.
 
+## Hierarchy 5 {#hierarchy-5}
+
+Hierarchy 5 is onshore sampling: design stratum (DE), onshore event (OS,
+for example an auction day or a port day), landing event (LE), species
+selection (SS) and sample (SA). FT is optional under LE. When the SS
+records link to FT, FT is a third raising stage (OS, LE, FT).
+
+The functions are the same. Only the stage names change, and the scheme
+must say `hierarchy = 5`:
+
+```{r, eval = FALSE}
+# Auction days counted within their OS stratum, landing events counted
+# per auction day, then a ratio to the DE total
+sc5 <- raisingScheme(OS = stageRaising("count"),
+                     LE = stageRaising("count"),
+                     top = topRaising("ratio"),
+                     hierarchy = 5)
+res5 <- doRatioEstimation(myH5Object, species = 127143, raising = sc5)
+
+# Landing events raised by their landed weight
+raisingScheme(OS = stageRaising("count"), LE = stageRaising("aux"),
+              hierarchy = 5)
+
+# With FT under LE
+raisingScheme(OS = stageRaising("count"), LE = stageRaising("count"),
+              FT = stageRaising("count"), hierarchy = 5)
+```
+
+What differs from hierarchy 1:
+
+-   The domain date is `LEdate`, else `FTarvDate` (when FT is used),
+    else `OSsamDate`. Area, rectangle and métier come from LE when the
+    SA value is blank.
+-   VD fields can be used at LE (through the `VDid` of LE, as at VS in
+    hierarchy 1), for example `value = "VDlen"`.
+-   The sample counts in the estimates are `nOnshoreEvents`,
+    `nLandingEvents` and, with FT, `nTrips`.
+-   If the data use FT and the scheme does not name it, FT is pooled
+    (`"none"`) and this is logged. A scheme that names FT on data
+    without FT stops, and so do data where some SS records link to LE
+    and others to FT.
+
 ## Checks
 
 The run stops with a message when the information does not fit the
@@ -285,9 +330,14 @@ scheme, for example:
 
 ## Assumptions and limitations
 
--   A sampled haul without a sample of the species counts as **zero
-    catch**. That is only right if the species was on the species list.
-    Consider `generateZerosUsingSL()` first, and check the log.
+-   A sampled haul (or landing event) without a sample of the species
+    counts as **zero catch** only if the species was looked for: one of
+    its SS records has `SSuseCalcZero = "Y"` and the species is on its
+    species list (SL/IS). Without SL/IS in the object, `"Y"` alone
+    counts and the log says so. Otherwise the species was **not looked
+    for**, and the unit is left out as non-response. Running
+    `generateZerosUsingSL()` first turns the zeros into recorded zeros
+    (SA rows with weight 0).
 -   The top ratio is formed per DE stratum and shared by all domains
     (quarter, area, métier) of that stratum.
 -   `X_kg` in the estimates is the estimated live weight of the species
@@ -296,4 +346,4 @@ scheme, for example:
     the weights are right.
 -   Not covered yet: variance, raising within a sample by fish counts
     (`SAnumTotal / SAnumSamp`), sub-sampling of BV, hierarchies other
-    than 1, and discards.
+    than 1 and 5, and discards.

@@ -7,12 +7,14 @@
 raisingScheme(..., top = topRaising("none"), hierarchy = 1)
 }
 \arguments{
-\item{...}{Stage raising methods, named by stage (\code{FO}, \code{FT}, \code{VS}), each
-made with \code{\link[=stageRaising]{stageRaising()}}.}
+\item{...}{Stage raising methods, named by stage (\code{VS}, \code{FT}, \code{FO} in
+hierarchy 1, \code{OS}, \code{LE}, \code{FT} in hierarchy 5), each made with
+\code{\link[=stageRaising]{stageRaising()}}.}
 
 \item{top}{The top raising, made with \code{\link[=topRaising]{topRaising()}}.}
 
-\item{hierarchy}{The RDBES upper hierarchy. Only \code{1} for now.}
+\item{hierarchy}{The RDBES upper hierarchy: \code{1} (default) or \code{5}. It must
+match \code{DEhierarchy} in the data.}
 }
 \value{
 An object of class \code{RDBESRaisingScheme}: a list with \code{stages} (one
@@ -27,13 +29,20 @@ by the top ratio.
 }
 \details{
 Stages not given are \code{"none"} (pooled). The species selection (SS) is
-always 1: a species list with more species gets no extra weight. Only
-hierarchy 1 is implemented.
+always 1: a species list with more species gets no extra weight.
+
+Hierarchies 1 and 5 are implemented. In hierarchy 5 the stages are OS
+(onshore event) and LE (landing event). FT is an optional stage under LE:
+name it (\code{FT = stageRaising(...)}) when the SS records of the data link to
+FT. If the data use FT and the scheme does not name it, FT is \code{"none"}.
 }
 \examples{
 raisingScheme(FO = stageRaising("count"),
               FT = stageRaising("count"),
               top = topRaising("ratio", value = "speciesLiveWeight"))
+# Hierarchy 5: auction days counted, landings raised by landed weight
+raisingScheme(OS = stageRaising("count"), LE = stageRaising("aux"),
+              top = topRaising("ratio"), hierarchy = 5)
 }
 \seealso{
 \code{\link[=stageRaising]{stageRaising()}}, \code{\link[=topRaising]{topRaising()}}, \code{\link[=externalAux]{externalAux()}}

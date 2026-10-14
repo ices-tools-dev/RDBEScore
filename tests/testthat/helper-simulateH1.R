@@ -151,7 +151,7 @@ simulateH1RatioData <- function(seed = 1,
                    SSrecType = "SS", SSseqNum = 1L, SSstratification = "N",
                    SSstratumName = "U", SSclustering = "N",
                    SSclusterName = "U", SScatchFra = "Lan",
-                   SSspecListName = "Sim", SSuseCalcZero = "N",
+                   SSspecListName = "Sim", SSuseCalcZero = "Y",
                    SSnumTotal = 1L, SSnumSamp = 1L, SSselectMeth = "CENSUS",
                    SSunitName = "species", SSsamp = "Y")
   FO <- FO[FO$FOid %in% hauls$FOid, ]

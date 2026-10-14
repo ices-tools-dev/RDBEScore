@@ -2,7 +2,7 @@
 % Please edit documentation in R/doRatioEstimation.R
 \name{doRatioEstimation}
 \alias{doRatioEstimation}
-\title{Stage-wise estimation of numbers at age or length (hierarchy 1, landings)}
+\title{Stage-wise estimation of numbers at age or length (hierarchies 1 and 5, landings)}
 \usage{
 doRatioEstimation(
   RDBESDataObj,
@@ -25,7 +25,7 @@ doRatioEstimation(
 )
 }
 \arguments{
-\item{RDBESDataObj}{A valid \code{RDBESDataObject} of hierarchy 1.}
+\item{RDBESDataObj}{A valid \code{RDBESDataObject} of hierarchy 1 or 5.}
 
 \item{species}{Species to estimate, as AphiaID(s) (WoRMS), matched to
 \code{SAspeCode}, for example \code{127143} for plaice. Several values are allowed.
@@ -84,9 +84,10 @@ An object of class \code{RDBESRatioEstimate}, a list with
 \description{
 Estimates numbers, mean weight and mean length at age or at length per
 domain (for example year x quarter x area x métier). The samples are
-raised within the sample, then stage by stage (vessels, trips, hauls) with
-the method chosen for each stage in a \code{\link[=raisingScheme]{raisingScheme()}}, and finally to the
-totals of the DE stratum.
+raised within the sample, then stage by stage (vessels, trips, hauls in
+hierarchy 1, onshore events, landing events and optionally trips in
+hierarchy 5) with the method chosen for each stage in a
+\code{\link[=raisingScheme]{raisingScheme()}}, and finally to the totals of the DE stratum.
 }
 \details{
 This wrapper runs the steps below in order. Every step is exported and
@@ -108,7 +109,10 @@ ratio to the DE total.
 Selection methods are not used to compute weights. Non-probabilistic
 designs are logged as assumptions.
 
-Not in this version: variance, hierarchies other than 1, discards.
+Implemented for upper hierarchies 1 and 5. The scheme must be made for the
+hierarchy of the data (\code{raisingScheme(..., hierarchy = 5)}).
+
+Not in this version: variance, hierarchies other than 1 and 5, discards.
 }
 \examples{
 \dontrun{

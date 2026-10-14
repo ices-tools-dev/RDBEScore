@@ -7,12 +7,13 @@
 getUnitTable(RDBESDataObj, stage, fields = NULL, verbose = FALSE)
 }
 \arguments{
-\item{RDBESDataObj}{An \code{RDBESDataObject} of hierarchy 1.}
+\item{RDBESDataObj}{An \code{RDBESDataObject} of hierarchy 1 or 5.}
 
-\item{stage}{Stage table name: \code{"VS"}, \code{"FT"} or \code{"FO"}.}
+\item{stage}{Stage table name: \code{"VS"}, \code{"FT"} or \code{"FO"} in hierarchy 1,
+\code{"OS"}, \code{"LE"} or (when SS links to FT) \code{"FT"} in hierarchy 5.}
 
 \item{fields}{Optional extra columns of the stage table, or of VD (for
-\code{stage = "VS"}, joined through \code{VDid}).}
+stage tables with a \code{VDid}, such as VS and LE, joined through \code{VDid}).}
 
 \item{verbose}{Logical. Print log entries as messages. Default \code{FALSE}.}
 }
