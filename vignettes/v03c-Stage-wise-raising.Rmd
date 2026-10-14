@@ -73,7 +73,7 @@ obj$DE[, .(DEstratumName, DEauxVarTot, DEauxVarName, DEauxVarUnit)]
 
 A scheme says how each stage is raised. It is built with
 `raisingScheme()`, one `stageRaising()` per stage and one
-`topRaising()`. Stages that are not given are pooled (`"none"`). SS is
+`deRaising()`. Stages that are not given are pooled (`"none"`). SS is
 always 1: a species list with more species gets no extra weight.
 
 At each stage, the units are grouped by parent and design stratum
@@ -105,7 +105,7 @@ is
 
 $$\hat N_{d,a} = r_H \sum_{k \in d} w_k \, y_{k,a}$$
 
-with $r_H = 1$ for `topRaising("none")`, and for `topRaising("ratio")`
+with $r_H = 1$ for `deRaising("none")`, and for `deRaising("ratio")`
 
 $$r_H = \frac{T_H}{\sum_{k \in H} w_k \, x_k}$$
 
@@ -118,7 +118,7 @@ pooled, and the top is a ratio to the landed live weight in DE:
 ```{r}
 scheme <- raisingScheme(
   FO  = stageRaising("count"),
-  top = topRaising("ratio", total = "DEauxVarTot",
+  DE = deRaising("ratio", total = "DEauxVarTot",
                    value = "speciesLiveWeight", at = "SA"))
 scheme
 ```
@@ -205,7 +205,7 @@ and age, with the top ratio `DEauxVarTot / sum(w x)`.
 
 ```{r}
 raised <- raiseToDE(ex, sw, obj)
-attr(raised, "topRatios")
+attr(raised, "deRatios")
 ```
 
 **6. Summary.** Numbers, mean weight and mean length per domain and age,
@@ -224,11 +224,11 @@ variable, corrects for that.
 
 ```{r}
 schemes <- list(
-  pooled = raisingScheme(top = topRaising("ratio")),
+  pooled = raisingScheme(DE = deRaising("ratio")),
   countHauls = scheme,
   auxChain = raisingScheme(FO = stageRaising("aux"),
                            FT = stageRaising("aux"),
-                           top = topRaising("ratio")),
+                           DE = deRaising("ratio")),
   countAll = raisingScheme(FO = stageRaising("count"),
                            FT = stageRaising("count"),
                            VS = stageRaising("count")))
@@ -281,7 +281,7 @@ external <- raisingScheme(
                     value = externalAux(logbook, by = "FTid",
                                         col = "landKg")),
   FO = stageRaising("count"),
-  top = topRaising("ratio"))
+  DE = deRaising("ratio"))
 external
 ```
 
@@ -292,7 +292,7 @@ external
 `strata = NULL` pools the strata of a parent, and another column of the
 stage table can be named instead.
 
-**The top.** `topRaising("none")` takes the weighted sum as the
+**The top.** `deRaising("none")` takes the weighted sum as the
 estimate. Every stage must then be raised to its population. With
 `at = "FT"` (or `"FO"`, `"VS"`) the top ratio uses a quantity measured
 on trips (hauls, vessels), and sampled units without the species stay in
@@ -313,7 +313,7 @@ must say `hierarchy = 5`:
 # per auction day, then a ratio to the DE total
 sc5 <- raisingScheme(OS = stageRaising("count"),
                      LE = stageRaising("count"),
-                     top = topRaising("ratio"),
+                     DE = deRaising("ratio"),
                      hierarchy = 5)
 res5 <- doRatioEstimation(myH5Object, species = 127143, raising = sc5)
 

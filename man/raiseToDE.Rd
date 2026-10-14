@@ -33,8 +33,8 @@ tables of \code{at}).}
 A \code{data.table} with the domain
 variables, \code{stratum} (the DE stratum), \code{class}, raised \code{N}, \code{NW}, \code{W},
 \code{NL}, \code{L}, \code{nFish}, and \code{sumX} (weighted sample live weight, kg), \code{X}
-(estimated live weight, kg) and \code{ratio} (top ratio, 1 for \code{"none"}).
-Attributes: \code{"topRatios"}, \code{"domainSummary"}, \code{"target"},
+(estimated live weight, kg) and \code{ratio} (DE ratio, 1 for \code{"none"}).
+Attributes: \code{"deRatios"}, \code{"domainSummary"}, \code{"target"},
 \code{"domainVars"} and \code{"ratioLog"}.
 }
 \description{
@@ -43,7 +43,7 @@ expanded sample from \code{\link[=expandWithinSample]{expandWithinSample()}} is 
 weight \code{w} from \code{\link[=getStageWeights]{getStageWeights()}}, and summed per DE stratum, domain and
 class:
 \deqn{\hat N_{d,a} = r_h \sum_{i \in d} w_i y_{i,a}}
-With top \code{"none"}, \eqn{r_h = 1}. With top \code{"ratio"},
+With DE \code{"none"}, \eqn{r_h = 1}. With DE \code{"ratio"},
 \eqn{r_h = T_h / \sum_{j \in h} w_j x_j} per DE stratum \eqn{h}, where
 \eqn{T_h} is \code{DEauxVarTot} (or an external total) and \eqn{x_j} the
 auxiliary value of the sampled units of the stage given by \code{at}, weighted

@@ -125,9 +125,9 @@ test_that("raisingScheme fills in the stage defaults", {
   expect_output(print(sc), "SS: always 1")
 })
 
-test_that("stages not given are none, and top none needs all stages raised", {
+test_that("stages not given are none, and DE none needs all stages raised", {
   sc <- raisingScheme(FO = stageRaising("count"),
-                      top = topRaising("ratio"))
+                      DE = deRaising("ratio"))
   expect_equal(sc$stages$VS$method, "none")
   expect_error(raisingScheme(FO = stageRaising("count")),
                "every stage must be raised")
@@ -143,11 +143,11 @@ test_that("constructors reject wrong input", {
                "sets total and value itself")
   expect_error(stageRaising("external", total = "A", value = "B"),
                "needs an externalAux")
-  expect_error(topRaising("ratio", value = "speciesLiveWeight", at = "FT"),
+  expect_error(deRaising("ratio", value = "speciesLiveWeight", at = "FT"),
                "use at = \"SA\"")
   expect_error(raisingScheme(hierarchy = 2), "not implemented yet")
-  expect_error(topRaising("ratio", value = "x", at = "fo"), "stage table")
-  expect_error(raisingScheme(top = topRaising("ratio", value = "x",
+  expect_error(deRaising("ratio", value = "x", at = "fo"), "stage table")
+  expect_error(raisingScheme(DE = deRaising("ratio", value = "x",
                                               at = "LE")),
                "not a stage of hierarchy 1")
 })
@@ -161,7 +161,7 @@ test_that("ratio and external accept columns, functions and user tables", {
   ea <- externalAux(logbook, by = "FTunitName", col = "landKg")
   expect_s3_class(ea, "RDBESExternalAux")
   s2 <- stageRaising("external", total = "FTauxVarTot", value = ea)
-  sc <- raisingScheme(FT = s2, top = topRaising("ratio"))
+  sc <- raisingScheme(FT = s2, DE = deRaising("ratio"))
   expect_output(print(sc), "external 'landKg' by FTunitName")
   expect_error(externalAux(rbind(logbook, logbook), by = "FTunitName",
                            col = "landKg"), "Duplicate keys")
@@ -199,9 +199,9 @@ test_that("on a census design every method reproduces the truth", {
                         VS = stageRaising("aux")),
     prob = raisingScheme(FO = stageRaising("prob"), FT = stageRaising("prob"),
                          VS = stageRaising("prob")),
-    pooledDE = raisingScheme(top = topRaising("ratio")),
+    pooledDE = raisingScheme(DE = deRaising("ratio")),
     countDE = raisingScheme(FO = stageRaising("count"),
-                            top = topRaising("ratio")))
+                            DE = deRaising("ratio")))
   for (nm in names(schemes)) {
     res <- estimate(sim$obj, schemes[[nm]])
     m <- vsTruth(res, sim$truthAge)
@@ -210,7 +210,7 @@ test_that("on a census design every method reproduces the truth", {
   }
 })
 
-test_that("count raising with no top ratio equals the hand-computed expansion", {
+test_that("count raising with no DE ratio equals the hand-computed expansion", {
   sim <- simulate(lowHierarchy = "C", haulsPerTrip = 4,
                   sampledHaulsPerTrip = 2)
   sc <- raisingScheme(FO = stageRaising("count"), FT = stageRaising("count"),
@@ -237,9 +237,9 @@ test_that("aux raising adds the sampled weights up to the aux total", {
 test_that("counting hauls removes the bias of pooling under unequal sampling", {
   skip_on_cran()
   meanAge <- function(d) d[, sum(age * N) / sum(N)]
-  scNone <- raisingScheme(top = topRaising("ratio"))
+  scNone <- raisingScheme(DE = deRaising("ratio"))
   scCount <- raisingScheme(FO = stageRaising("count"),
-                           top = topRaising("ratio"))
+                           DE = deRaising("ratio"))
   # Old vessels (3, 4) have all hauls sampled, young ones one haul per trip
   err <- data.table::rbindlist(lapply(1:10, function(sd) {
     sim <- simulate(seed = sd, haulsPerTrip = 6,
@@ -255,20 +255,20 @@ test_that("counting hauls removes the bias of pooling under unequal sampling", {
   expect_lt(abs(mean(err$count)), 0.15)
 })
 
-test_that("a top ratio on trips keeps trips without the species in the sum", {
+test_that("a DE ratio on trips keeps trips without the species in the sum", {
   sim <- simulate(lowHierarchy = "C", vesselsInPopulation = 4)
   obj <- sim$obj
   zeroHauls <- obj$FO[FTid == 1, FOid]
   dropSA <- obj$SA[SSid %in% obj$SS[FOid %in% zeroHauls, SSid], SAid]
   obj$SA <- obj$SA[!SAid %in% dropSA]
   obj$BV <- obj$BV[!SAid %in% dropSA]
-  scFT <- raisingScheme(top = topRaising("ratio", value = "FTauxVarValue",
+  scFT <- raisingScheme(DE = deRaising("ratio", value = "FTauxVarValue",
                                          at = "FT"))
-  scSA <- raisingScheme(top = topRaising("ratio"))
+  scSA <- raisingScheme(DE = deRaising("ratio"))
   rFT <- estimate(obj, scFT)
   rSA <- estimate(obj, scSA)
-  expect_equal(attr(rFT$raised, "topRatios")$sumWX, sum(obj$FT$FTauxVarValue))
-  expect_lt(attr(rSA$raised, "topRatios")$sumWX, sum(obj$FT$FTauxVarValue))
+  expect_equal(attr(rFT$raised, "deRatios")$sumWX, sum(obj$FT$FTauxVarValue))
+  expect_lt(attr(rSA$raised, "deRatios")$sumWX, sum(obj$FT$FTauxVarValue))
   expect_true(any(grepl("counted as zero catch", rFT$log$message)))
 })
 
@@ -277,7 +277,7 @@ test_that("external auxiliary tables give the same result as the RDBES fields", 
                   sampledHaulsPerTrip = c(1, 3))
   obj <- sim$obj
   scAux <- raisingScheme(FT = stageRaising("aux"), FO = stageRaising("count"),
-                         top = topRaising("ratio"))
+                         DE = deRaising("ratio"))
   logbook <- data.frame(FTid = obj$FT$FTid, landKg = obj$FT$FTauxVarValue)
   stats <- data.frame(DEstratumName = obj$DE$DEstratumName,
                       landKg = obj$DE$DEauxVarTot)
@@ -286,7 +286,7 @@ test_that("external auxiliary tables give the same result as the RDBES fields", 
                       value = externalAux(logbook, by = "FTid",
                                           col = "landKg")),
     FO = stageRaising("count"),
-    top = topRaising("ratio", total = externalAux(stats,
+    DE = deRaising("ratio", total = externalAux(stats,
                                                   by = "DEstratumName",
                                                   col = "landKg")))
   a <- estimate(obj, scAux)
@@ -299,7 +299,7 @@ test_that("external auxiliary tables give the same result as the RDBES fields", 
     FT = stageRaising("external", total = "FTauxVarTot",
                       value = externalAux(extra, by = "FTid",
                                           col = "landKg")),
-    top = topRaising("ratio"))
+    DE = deRaising("ratio"))
   expect_true(any(grepl("match no unit", estimate(obj, scExtra)$log$message)))
 
   # a sampled trip without an external value stops the run
@@ -308,7 +308,7 @@ test_that("external auxiliary tables give the same result as the RDBES fields", 
     FT = stageRaising("external", total = "FTauxVarTot",
                       value = externalAux(short, by = "FTid",
                                           col = "landKg")),
-    top = topRaising("ratio"))
+    DE = deRaising("ratio"))
   expect_error(estimate(obj, scShort), "missing for 1 sampled")
 
   # keys must exist in the unit table
@@ -316,7 +316,7 @@ test_that("external auxiliary tables give the same result as the RDBES fields", 
     FT = stageRaising("external", total = "FTauxVarTot",
                       value = externalAux(data.frame(nokey = 1, landKg = 1),
                                           by = "nokey", col = "landKg")),
-    top = topRaising("ratio"))
+    DE = deRaising("ratio"))
   expect_error(estimate(obj, scBadKey), "not in the unit table")
 })
 
@@ -348,7 +348,7 @@ test_that("zeros stay in the sampled hauls, unusable hauls are non-response", {
   expect_false(any(grepl("Excluded.*recorded zero",
                          getRatioLog(su)$message)))
 
-  sc <- raisingScheme(FO = stageRaising("count"), top = topRaising("ratio"))
+  sc <- raisingScheme(FO = stageRaising("count"), DE = deRaising("ratio"))
   sw <- getStageWeights(obj, su, sc)
   # hauls 1, 2 and 3 are sampled, haul 4 is non-response: 4 / 3
   expect_equal(unique(sw[FTid == 1 & include == TRUE, f_FO]), 4 / 3)
@@ -371,7 +371,7 @@ test_that("a haul without the species is a zero only if SS says it was looked fo
   sa2 <- obj$SA[SSid %in% obj$SS[FOid == 2, SSid], SAid]
   obj$BV <- obj$BV[!SAid %in% sa2]
   obj$SA <- obj$SA[!SAid %in% sa2]
-  sc <- raisingScheme(FO = stageRaising("count"), top = topRaising("ratio"))
+  sc <- raisingScheme(FO = stageRaising("count"), DE = deRaising("ratio"))
   fTrip1 <- function(o) {
     sw <- getStageWeights(o, getSampleUnits(o, species = 127143), sc)
     list(f = unique(sw[FTid == 1 & include == TRUE, f_FO]),
@@ -428,7 +428,7 @@ test_that("species are AphiaIDs, and rows without an FAO code are found", {
   su <- getSampleUnits(obj, species = 127143)
   expect_true(all(c(sa2, sa3) %in% su$SAid))
   sw <- getStageWeights(obj, su, raisingScheme(FO = stageRaising("count"),
-                                               top = topRaising("ratio")))
+                                               DE = deRaising("ratio")))
   # hauls 1, 2 (zero) and 4 are sampled, haul 3 (not looked for) is not
   expect_equal(unique(sw[FTid == 1 & include == TRUE, f_FO]), 4 / 3)
   expect_false(3 %in% attr(sw, "unitWeights")$FO$FOid)
@@ -458,12 +458,12 @@ test_that("stage-wise raising stops on missing totals and wrong strata", {
   sim <- simulate(lowHierarchy = "C")
   obj <- sim$obj
   obj$DE$DEauxVarTot <- NA_real_
-  expect_error(estimate(obj, raisingScheme(top = topRaising("ratio"))),
+  expect_error(estimate(obj, raisingScheme(DE = deRaising("ratio"))),
                "missing in")
   expect_error(estimate(sim$obj,
                         raisingScheme(FO = stageRaising("count",
                                                         strata = "nope"),
-                                      top = topRaising("ratio"))),
+                                      DE = deRaising("ratio"))),
                "strata column 'nope' not found")
 })
 

@@ -4,28 +4,28 @@
 \alias{raisingScheme}
 \title{Stage-wise raising scheme}
 \usage{
-raisingScheme(..., top = topRaising("none"), hierarchy = 1)
+raisingScheme(..., DE = deRaising("none"), hierarchy = 1)
 }
 \arguments{
 \item{...}{Stage raising methods, named by stage (\code{VS}, \code{FT}, \code{FO} in
 hierarchy 1, \code{OS}, \code{LE}, \code{FT} in hierarchy 5), each made with
 \code{\link[=stageRaising]{stageRaising()}}.}
 
-\item{top}{The top raising, made with \code{\link[=topRaising]{topRaising()}}.}
+\item{DE}{The raising to the DE stratum, made with \code{\link[=deRaising]{deRaising()}}.}
 
 \item{hierarchy}{The RDBES upper hierarchy: \code{1} (default) or \code{5}. It must
 match \code{DEhierarchy} in the data.}
 }
 \value{
 An object of class \code{RDBESRaisingScheme}: a list with \code{stages} (one
-resolved entry per stage, with the actual column names) and \code{top}.
+resolved entry per stage, with the actual column names) and \code{DE}.
 }
 \description{
-Combines the raising method of every sampling stage and of the top into
+Combines the raising method of every sampling stage and of the DE step into
 one scheme for \code{\link[=doRatioEstimation]{doRatioEstimation()}}. Every stage gives each sampled unit
 a factor. The factors are multiplied along the path, so each lowest-level
 SA gets one weight \code{w}. Estimates are \eqn{\sum w y}, optionally followed
-by the top ratio.
+by the DE ratio.
 }
 \details{
 Stages not given are \code{"none"} (pooled). The species selection (SS) is
@@ -39,11 +39,11 @@ FT. If the data use FT and the scheme does not name it, FT is \code{"none"}.
 \examples{
 raisingScheme(FO = stageRaising("count"),
               FT = stageRaising("count"),
-              top = topRaising("ratio", value = "speciesLiveWeight"))
+              DE = deRaising("ratio", value = "speciesLiveWeight"))
 # Hierarchy 5: auction days counted, landings raised by landed weight
 raisingScheme(OS = stageRaising("count"), LE = stageRaising("aux"),
-              top = topRaising("ratio"), hierarchy = 5)
+              DE = deRaising("ratio"), hierarchy = 5)
 }
 \seealso{
-\code{\link[=stageRaising]{stageRaising()}}, \code{\link[=topRaising]{topRaising()}}, \code{\link[=externalAux]{externalAux()}}
+\code{\link[=stageRaising]{stageRaising()}}, \code{\link[=deRaising]{deRaising()}}, \code{\link[=externalAux]{externalAux()}}
 }

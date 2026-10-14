@@ -13,8 +13,8 @@ compareToTruth <- function(estimates, truth, classCol = "age") {
 
 simulate <- function(...) suppressWarnings(simulateH1RatioData(...))
 
-# Direct raising: samples pooled, ratio to the DE total at the top
-pooled <- raisingScheme(top = topRaising("ratio"))
+# Direct raising: samples pooled, ratio to the DE total
+pooled <- raisingScheme(DE = deRaising("ratio"))
 
 # ---------------------------------------------------------------------------
 # Census designs reproduce the truth exactly
@@ -220,7 +220,7 @@ test_that("pooled and counted hauls on a sampled design are close to the truth",
   sim <- do.call(simulate, args)
   schemes <- list(pooled,
                   raisingScheme(FO = stageRaising("count"),
-                                top = topRaising("ratio")))
+                                DE = deRaising("ratio")))
   for (sc in schemes) {
     res <- doRatioEstimation(sim$obj, species = 127143, raising = sc,
                              checkCodes = FALSE)

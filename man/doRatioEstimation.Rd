@@ -101,8 +101,8 @@ classes, domain, raising factor and live weight \code{x}.
 fraction (lower hierarchies A, B and C).
 \item \code{\link[=getStageWeights]{getStageWeights()}}: the factor of every stage and the weight \code{w} of
 each lowest-level SA.
-\item \code{\link[=raiseToDE]{raiseToDE()}}: weighted sums per DE stratum and domain, with the top
-ratio to the DE total.
+\item \code{\link[=raiseToDE]{raiseToDE()}}: weighted sums per DE stratum and domain, with the DE
+ratio (optional).
 \item \code{\link[=summariseRatioEstimates]{summariseRatioEstimates()}}: final table with SOP and sample counts.
 }
 
@@ -117,7 +117,7 @@ Not in this version: variance, hierarchies other than 1 and 5, discards.
 \examples{
 \dontrun{
 scheme <- raisingScheme(FO = stageRaising("count"),
-                        top = topRaising("ratio"))
+                        DE = deRaising("ratio"))
 res <- doRatioEstimation(myH1Object, species = 127143, raising = scheme,
                          target = "Age", plusGroup = 10)
 res

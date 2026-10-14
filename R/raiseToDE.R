@@ -5,7 +5,7 @@
 #' weight `w` from [getStageWeights()], and summed per DE stratum, domain and
 #' class:
 #' \deqn{\hat N_{d,a} = r_h \sum_{i \in d} w_i y_{i,a}}
-#' With top `"none"`, \eqn{r_h = 1}. With top `"ratio"`,
+#' With DE `"none"`, \eqn{r_h = 1}. With DE `"ratio"`,
 #' \eqn{r_h = T_h / \sum_{j \in h} w_j x_j} per DE stratum \eqn{h}, where
 #' \eqn{T_h} is `DEauxVarTot` (or an external total) and \eqn{x_j} the
 #' auxiliary value of the sampled units of the stage given by `at`, weighted
@@ -33,8 +33,8 @@
 #' @return A `data.table` with the domain
 #'   variables, `stratum` (the DE stratum), `class`, raised `N`, `NW`, `W`,
 #'   `NL`, `L`, `nFish`, and `sumX` (weighted sample live weight, kg), `X`
-#'   (estimated live weight, kg) and `ratio` (top ratio, 1 for `"none"`).
-#'   Attributes: `"topRatios"`, `"domainSummary"`, `"target"`,
+#'   (estimated live weight, kg) and `ratio` (DE ratio, 1 for `"none"`).
+#'   Attributes: `"deRatios"`, `"domainSummary"`, `"target"`,
 #'   `"domainVars"` and `"ratioLog"`.
 #' @seealso [getStageWeights()], [summariseRatioEstimates()]
 #' @export
@@ -48,8 +48,8 @@ raiseToDE <- function(expanded, stageWeights, RDBESDataObj,
   checkDomainVars(domainVars)
   step <- "raiseToDE"
   log <- newRatioLog()
-  top <- scheme$top
-  stratCol <- top$strata
+  deStep <- scheme$DE
+  stratCol <- deStep$strata
 
   su <- data.table::copy(stageWeights[include == TRUE &
                                         SAid %in% unique(expanded$SAid)])
@@ -60,9 +60,9 @@ raiseToDE <- function(expanded, stageWeights, RDBESDataObj,
   }
   de <- data.table::copy(RDBESDataObj$DE)
   if (!stratCol %in% names(de)) {
-    stop("Top strata column '", stratCol, "' not in DE.", call. = FALSE)
+    stop("DE strata column '", stratCol, "' not in DE.", call. = FALSE)
   }
-  # One top stratum per DE record. The label is the strata column, with the
+  # One stratum per DE record. The label is the strata column, with the
   # DEid added when a label is used by more than one DE record (for example
   # several years or sampling schemes in one object).
   labs <- as.character(de[[stratCol]])
@@ -72,35 +72,35 @@ raiseToDE <- function(expanded, stageWeights, RDBESDataObj,
   su <- merge(su, deLab, by = "DEid", all.x = TRUE)
 
   # ---------------------------------------------------------------------------
-  # Top ratio per DE stratum
+  # DE ratio per DE stratum
   # ---------------------------------------------------------------------------
-  if (top$method == "none") {
+  if (deStep$method == "none") {
     ratios <- data.table::data.table(.stratum = unique(su$.stratum),
                                      ratio = 1)
     log <- addToRatioLog(log, step, "info",
-      "Top 'none': estimates are the weighted sums, no top ratio", NA,
+      "DE 'none': estimates are the weighted sums, no DE ratio", NA,
       verbose)
   } else {
-    if (top$at == "SA") {
+    if (deStep$at == "SA") {
       xu <- su[, .(.id = SAid, DEid, wUnit = w, x)]
-      if (!identical(top$value, "speciesLiveWeight")) {
-        r <- resolveRaisingArg(su, top$value, ".x", step, verbose)
+      if (!identical(deStep$value, "speciesLiveWeight")) {
+        r <- resolveRaisingArg(su, deStep$value, ".x", step, verbose)
         xu[, x := r$units$.x[match(xu$.id, r$units$SAid)]]
         log <- rbind(log, r$log)
       }
     } else {
-      uw <- attr(stageWeights, "unitWeights")[[top$at]]
+      uw <- attr(stageWeights, "unitWeights")[[deStep$at]]
       if (is.null(uw)) {
-        stop("No unit weights for stage ", top$at, ".", call. = FALSE)
+        stop("No unit weights for stage ", deStep$at, ".", call. = FALSE)
       }
-      idCol <- paste0(top$at, "id")
-      units <- getUnitTable(RDBESDataObj, top$at,
+      idCol <- paste0(deStep$at, "id")
+      units <- getUnitTable(RDBESDataObj, deStep$at,
                             fields = stageFieldsNeeded(
-                              RDBESDataObj, top$at,
-                              list(value = top$value, total = NULL,
+                              RDBESDataObj, deStep$at,
+                              list(value = deStep$value, total = NULL,
                                    strata = NULL)),
                             verbose = verbose)
-      r <- resolveRaisingArg(units, top$value, ".x", step, verbose)
+      r <- resolveRaisingArg(units, deStep$value, ".x", step, verbose)
       log <- rbind(log, r$log)
       xu <- merge(uw[, c(idCol, "DEid", "wUnit"), with = FALSE],
                   r$units[, c(idCol, ".x"), with = FALSE], by = idCol)
@@ -108,7 +108,7 @@ raiseToDE <- function(expanded, stageWeights, RDBESDataObj,
     }
     xu[, .v := wUnit * x]
 
-    r <- resolveRaisingArg(de, top$total, ".total", step, verbose)
+    r <- resolveRaisingArg(de, deStep$total, ".total", step, verbose)
     log <- rbind(log, r$log)
     deT <- merge(deLab, r$units[, .(DEid, .total)], by = "DEid")
     noSample <- deT[!is.na(.total) & .total > 0 & !DEid %in% xu$DEid]
@@ -124,7 +124,7 @@ raiseToDE <- function(expanded, stageWeights, RDBESDataObj,
     ratios <- unique(f[, .(.stratum, ratio = factor, T = total,
                            sumWX = sumValue)])
     log <- addToRatioLog(log, step, "info",
-      paste0("Top ratio per ", stratCol, " with x measured on ", top$at),
+      paste0("DE ratio per ", stratCol, " with x measured on ", deStep$at),
       nrow(ratios), verbose)
   }
 
@@ -164,10 +164,10 @@ raiseToDE <- function(expanded, stageWeights, RDBESDataObj,
 
   log <- addToRatioLog(log, step, "info", "Domains estimated",
                        nrow(domSum), verbose)
-  topRatios <- data.table::copy(ratios)
-  data.table::setnames(topRatios, ".stratum", "stratum")
-  data.table::setkey(topRatios, NULL)
-  attr(out, "topRatios") <- topRatios[]
+  deRatios <- data.table::copy(ratios)
+  data.table::setnames(deRatios, ".stratum", "stratum")
+  data.table::setkey(deRatios, NULL)
+  attr(out, "deRatios") <- deRatios[]
   attr(out, "domainSummary") <- domSum
   attr(out, "target") <- attr(expanded, "target")
   attr(out, "domainVars") <- domainVars

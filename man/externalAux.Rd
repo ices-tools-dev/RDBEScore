@@ -23,12 +23,12 @@ An object of class \code{RDBESExternalAux}.
 Wraps a user table with auxiliary values or totals that are not in the
 RDBES upload, for example logbook landings per trip, VMS fishing hours per
 haul or national landings per DE stratum. Use it as \code{total} or \code{value} in
-\code{\link[=stageRaising]{stageRaising()}} or \code{\link[=topRaising]{topRaising()}}.
+\code{\link[=stageRaising]{stageRaising()}} or \code{\link[=deRaising]{deRaising()}}.
 }
 \examples{
 logbook <- data.frame(FTunitName = c("T1", "T2"), landKg = c(5200, 3100))
 externalAux(logbook, by = "FTunitName", col = "landKg")
 }
 \seealso{
-\code{\link[=stageRaising]{stageRaising()}}, \code{\link[=topRaising]{topRaising()}}
+\code{\link[=stageRaising]{stageRaising()}}, \code{\link[=deRaising]{deRaising()}}
 }

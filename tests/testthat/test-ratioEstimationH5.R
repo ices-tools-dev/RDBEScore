@@ -37,9 +37,9 @@ test_that("on a census design every method reproduces the truth in H5", {
                         hierarchy = 5),
     prob = raisingScheme(OS = stageRaising("prob"), LE = stageRaising("prob"),
                          hierarchy = 5),
-    pooledDE = raisingScheme(top = topRaising("ratio"), hierarchy = 5),
+    pooledDE = raisingScheme(DE = deRaising("ratio"), hierarchy = 5),
     countDE = raisingScheme(LE = stageRaising("count"),
-                            top = topRaising("ratio"), hierarchy = 5))
+                            DE = deRaising("ratio"), hierarchy = 5))
   for (nm in names(schemes)) {
     res <- estimate5(sim$obj, schemes[[nm]])
     m <- vsTruth5(res, sim$truthAge)
@@ -104,7 +104,7 @@ test_that("VD fields can be used at LE", {
   sim <- simulate5(lowHierarchy = "C", vesselsInPopulation = 4)
   sc <- raisingScheme(LE = stageRaising("ratio", total = "LEauxVarTot",
                                         value = "VDlen"),
-                      top = topRaising("ratio"), hierarchy = 5)
+                      DE = deRaising("ratio"), hierarchy = 5)
   sw <- getStageWeights(sim$obj, getSampleUnits(sim$obj, 127143), sc)
   le <- sim$obj$LE
   vd <- sim$obj$VD
@@ -131,10 +131,10 @@ test_that("FT under LE is a stage when SS links to FT", {
   expect_equal(m$N.est, m$N.true, tolerance = 1e-6)
   expect_true("nTrips" %in% names(res$estimates))
 
-  # FT not named: pooled, logged, and only allowed with a top ratio
-  scTop <- raisingScheme(LE = stageRaising("count"),
-                         top = topRaising("ratio"), hierarchy = 5)
-  res2 <- estimate5(obj, scTop)
+  # FT not named: pooled, logged, and only allowed with a DE ratio
+  scDE <- raisingScheme(LE = stageRaising("count"),
+                         DE = deRaising("ratio"), hierarchy = 5)
+  res2 <- estimate5(obj, scDE)
   expect_true(any(grepl("not in the scheme, pooled", res2$log$message)))
   scNone <- raisingScheme(OS = stageRaising("count"),
                           LE = stageRaising("count"), hierarchy = 5)
@@ -143,7 +143,7 @@ test_that("FT under LE is a stage when SS links to FT", {
 
 test_that("FT in the scheme but not in the data stops, and so do mixed links", {
   sim <- simulate5(lowHierarchy = "C", vesselsInPopulation = 4)
-  sc <- raisingScheme(FT = stageRaising("count"), top = topRaising("ratio"),
+  sc <- raisingScheme(FT = stageRaising("count"), DE = deRaising("ratio"),
                       hierarchy = 5)
   expect_error(estimate5(sim$obj, sc), "data do not use: FT")
 
@@ -168,7 +168,7 @@ test_that("a landing without the species is a zero only with SSuseCalcZero Y", {
   sa1 <- saOfLE(obj, 1)
   obj$BV <- obj$BV[!SAid %in% sa1]
   obj$SA <- obj$SA[!SAid %in% sa1]
-  sc <- raisingScheme(LE = stageRaising("count"), top = topRaising("ratio"),
+  sc <- raisingScheme(LE = stageRaising("count"), DE = deRaising("ratio"),
                       hierarchy = 5)
   fOS1 <- function(o) {
     sw <- getStageWeights(o, getSampleUnits(o, species = 127143), sc)
@@ -207,9 +207,9 @@ test_that("an onshore event without usable landings is non-response", {
 
 test_that("scheme and data must be the same hierarchy", {
   sim <- simulate5(lowHierarchy = "C", vesselsInPopulation = 4)
-  expect_error(estimate5(sim$obj, raisingScheme(top = topRaising("ratio"))),
+  expect_error(estimate5(sim$obj, raisingScheme(DE = deRaising("ratio"))),
                "scheme is for hierarchy 1 but the data are hierarchy 5")
-  expect_error(raisingScheme(top = topRaising("ratio", value = "x",
+  expect_error(raisingScheme(DE = deRaising("ratio", value = "x",
                                               at = "FO"), hierarchy = 5),
                "not a stage of hierarchy 5")
   expect_error(raisingScheme(FO = stageRaising("count"), hierarchy = 5),

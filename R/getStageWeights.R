@@ -72,9 +72,9 @@ getStageWeights <- function(RDBESDataObj, sampleUnits, scheme,
   }
   notInScheme <- setdiff(stages, names(scheme$stages))
   if (length(notInScheme) > 0) {
-    if (scheme$top$method == "none") {
+    if (scheme$DE$method == "none") {
       stop("The data use stage(s) ", paste(notInScheme, collapse = ", "),
-           " that the scheme does not raise. With top = \"none\" every ",
+           " that the scheme does not raise. With DE = \"none\" every ",
            "stage must be raised: add them to raisingScheme().",
            call. = FALSE)
     }

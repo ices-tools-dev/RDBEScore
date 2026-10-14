@@ -1,8 +1,8 @@
 # Constructors for stage-wise raising schemes:
-# stageRaising(), topRaising(), externalAux() and raisingScheme().
+# stageRaising(), deRaising(), externalAux() and raisingScheme().
 # A scheme states, for every sampling stage of the hierarchy, how the sampled
-# units are raised to their parent unit, and how the top of the hierarchy is
-# raised to the totals of the DE stratum.
+# units are raised to their parent unit, and how the highest stage is raised
+# to the totals of the DE stratum.
 
 #' Raising method for one sampling stage
 #'
@@ -39,7 +39,7 @@
 #'   (`XXstratumName`). `NULL` means one group per parent.
 #'
 #' @return An object of class `RDBESStageRaising`.
-#' @seealso [raisingScheme()], [topRaising()], [externalAux()]
+#' @seealso [raisingScheme()], [deRaising()], [externalAux()]
 #' @export
 #'
 #' @examples
@@ -77,14 +77,15 @@ stageRaising <- function(method = c("none", "count", "aux", "ratio",
             class = "RDBESStageRaising")
 }
 
-#' Raising method for the top of the hierarchy (DE stratum)
+#' Raising to the DE stratum
 #'
-#' Says how the weighted sample is raised to the whole DE stratum.
+#' Says how the weighted sample is raised to the whole DE stratum, the
+#' sampling frame of the design. Given as `DE = ` in [raisingScheme()].
 #' `"none"` takes the weighted sum as the estimate, so every stage must be
 #' raised to its population. `"ratio"` multiplies by
 #' \eqn{T / \sum w x} per DE stratum, where \eqn{T} is `DEauxVarTot` (or an
-#' external total) and \eqn{x} the same quantity measured on the sampled
-#' units.
+#' external total per DE stratum) and \eqn{x} the same quantity measured on
+#' the sampled units.
 #'
 #' @param method `"none"` or `"ratio"`.
 #' @param total Total per DE stratum: a DE column (default `"DEauxVarTot"`)
@@ -98,18 +99,18 @@ stageRaising <- function(method = c("none", "count", "aux", "ratio",
 #'   `"FT"` in hierarchy 5). [raisingScheme()] checks it against the
 #'   hierarchy. When it is not `"SA"`, sampled units without the species stay
 #'   in the sum of x.
-#' @param strata DE column that defines the top strata. Default
+#' @param strata DE column that defines the DE strata. Default
 #'   `"DEstratumName"`.
 #'
-#' @return An object of class `RDBESTopRaising`.
+#' @return An object of class `RDBESDERaising`.
 #' @seealso [raisingScheme()]
 #' @export
 #'
 #' @examples
-#' topRaising("ratio", value = "speciesLiveWeight", at = "SA")
-topRaising <- function(method = c("none", "ratio"), total = "DEauxVarTot",
-                       value = "speciesLiveWeight", at = "SA",
-                       strata = "DEstratumName") {
+#' deRaising("ratio", value = "speciesLiveWeight", at = "SA")
+deRaising <- function(method = c("none", "ratio"), total = "DEauxVarTot",
+                      value = "speciesLiveWeight", at = "SA",
+                      strata = "DEstratumName") {
   method <- match.arg(method)
   checkRaisingArg(total, "total", allowFunction = FALSE)
   checkRaisingArg(value, "value", allowFunction = TRUE)
@@ -126,7 +127,7 @@ topRaising <- function(method = c("none", "ratio"), total = "DEauxVarTot",
   }
   structure(list(method = method, total = total, value = value, at = at,
                  strata = strata),
-            class = "RDBESTopRaising")
+            class = "RDBESDERaising")
 }
 
 #' Externally provided auxiliary information
@@ -134,7 +135,7 @@ topRaising <- function(method = c("none", "ratio"), total = "DEauxVarTot",
 #' Wraps a user table with auxiliary values or totals that are not in the
 #' RDBES upload, for example logbook landings per trip, VMS fishing hours per
 #' haul or national landings per DE stratum. Use it as `total` or `value` in
-#' [stageRaising()] or [topRaising()].
+#' [stageRaising()] or [deRaising()].
 #'
 #' @param data A `data.frame` with the key columns and the value column.
 #' @param by Key columns. They must also exist in the unit table they are
@@ -144,7 +145,7 @@ topRaising <- function(method = c("none", "ratio"), total = "DEauxVarTot",
 #' @param col Name of the numeric column in `data` that holds the values.
 #'
 #' @return An object of class `RDBESExternalAux`.
-#' @seealso [stageRaising()], [topRaising()]
+#' @seealso [stageRaising()], [deRaising()]
 #' @export
 #'
 #' @examples
@@ -176,11 +177,11 @@ externalAux <- function(data, by, col) {
 
 #' Stage-wise raising scheme
 #'
-#' Combines the raising method of every sampling stage and of the top into
+#' Combines the raising method of every sampling stage and of the DE step into
 #' one scheme for [doRatioEstimation()]. Every stage gives each sampled unit
 #' a factor. The factors are multiplied along the path, so each lowest-level
 #' SA gets one weight `w`. Estimates are \eqn{\sum w y}, optionally followed
-#' by the top ratio.
+#' by the DE ratio.
 #'
 #' Stages not given are `"none"` (pooled). The species selection (SS) is
 #' always 1: a species list with more species gets no extra weight.
@@ -193,23 +194,23 @@ externalAux <- function(data, by, col) {
 #' @param ... Stage raising methods, named by stage (`VS`, `FT`, `FO` in
 #'   hierarchy 1, `OS`, `LE`, `FT` in hierarchy 5), each made with
 #'   [stageRaising()].
-#' @param top The top raising, made with [topRaising()].
+#' @param DE The raising to the DE stratum, made with [deRaising()].
 #' @param hierarchy The RDBES upper hierarchy: `1` (default) or `5`. It must
 #'   match `DEhierarchy` in the data.
 #'
 #' @return An object of class `RDBESRaisingScheme`: a list with `stages` (one
-#'   resolved entry per stage, with the actual column names) and `top`.
-#' @seealso [stageRaising()], [topRaising()], [externalAux()]
+#'   resolved entry per stage, with the actual column names) and `DE`.
+#' @seealso [stageRaising()], [deRaising()], [externalAux()]
 #' @export
 #'
 #' @examples
 #' raisingScheme(FO = stageRaising("count"),
 #'               FT = stageRaising("count"),
-#'               top = topRaising("ratio", value = "speciesLiveWeight"))
+#'               DE = deRaising("ratio", value = "speciesLiveWeight"))
 #' # Hierarchy 5: auction days counted, landings raised by landed weight
 #' raisingScheme(OS = stageRaising("count"), LE = stageRaising("aux"),
-#'               top = topRaising("ratio"), hierarchy = 5)
-raisingScheme <- function(..., top = topRaising("none"), hierarchy = 1) {
+#'               DE = deRaising("ratio"), hierarchy = 5)
+raisingScheme <- function(..., DE = deRaising("none"), hierarchy = 1) {
   spec <- hierarchySpec(hierarchy)
   hierarchy <- spec$hierarchy
   given <- list(...)
@@ -234,8 +235,8 @@ raisingScheme <- function(..., top = topRaising("none"), hierarchy = 1) {
     stages <- append(stages, opt,
                      after = match(spec$optional[[opt]], stages))
   }
-  if (inherits(top, "RDBESTopRaising") && !top$at %in% c("SA", allowed)) {
-    stop("top at = \"", top$at, "\" is not a stage of hierarchy ", hierarchy,
+  if (inherits(DE, "RDBESDERaising") && !DE$at %in% c("SA", allowed)) {
+    stop("DE at = \"", DE$at, "\" is not a stage of hierarchy ", hierarchy,
          ". Use \"SA\" or one of: ", paste(allowed, collapse = ", "), ".",
          call. = FALSE)
   }
@@ -244,8 +245,8 @@ raisingScheme <- function(..., top = topRaising("none"), hierarchy = 1) {
       stop("Stage ", nm, " must be made with stageRaising().", call. = FALSE)
     }
   }
-  if (!inherits(top, "RDBESTopRaising")) {
-    stop("top must be made with topRaising().", call. = FALSE)
+  if (!inherits(DE, "RDBESDERaising")) {
+    stop("DE must be made with deRaising().", call. = FALSE)
   }
 
   resolved <- lapply(stages, function(tb) {
@@ -256,13 +257,13 @@ raisingScheme <- function(..., top = topRaising("none"), hierarchy = 1) {
 
   notRaised <- stages[vapply(resolved, function(s) s$method == "none",
                              logical(1))]
-  if (top$method == "none" && length(notRaised) > 0) {
-    stop("With top = \"none\" every stage must be raised to its population, ",
+  if (DE$method == "none" && length(notRaised) > 0) {
+    stop("With DE = \"none\" every stage must be raised to its population, ",
          "but these stages are \"none\": ", paste(notRaised, collapse = ", "),
-         ". Use \"count\" (it gives 1 when all units were sampled) or a top ",
+         ". Use \"count\" (it gives 1 when all units were sampled) or a DE ",
          "ratio.", call. = FALSE)
   }
-  structure(list(stages = resolved, top = top, hierarchy = hierarchy),
+  structure(list(stages = resolved, DE = DE, hierarchy = hierarchy),
             class = "RDBESRaisingScheme")
 }
 
@@ -332,8 +333,8 @@ print.RDBESRaisingScheme <- function(x, ...) {
     }
     cat("\n")
   }
-  tp <- x$top
-  cat("  top: ", tp$method, sep = "")
+  tp <- x$DE
+  cat("  DE: ", tp$method, sep = "")
   if (tp$method == "ratio") {
     cat(" | total:", describeRaisingArg(tp$total),
         "| value:", describeRaisingArg(tp$value), "at", tp$at,

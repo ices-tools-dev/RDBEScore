@@ -18,8 +18,8 @@
 #'    fraction (lower hierarchies A, B and C).
 #' 4. [getStageWeights()]: the factor of every stage and the weight `w` of
 #'    each lowest-level SA.
-#' 5. [raiseToDE()]: weighted sums per DE stratum and domain, with the top
-#'    ratio to the DE total.
+#' 5. [raiseToDE()]: weighted sums per DE stratum and domain, with the DE
+#'    ratio (optional).
 #' 6. [summariseRatioEstimates()]: final table with SOP and sample counts.
 #'
 #' Selection methods are not used to compute weights. Non-probabilistic
@@ -50,7 +50,7 @@
 #' @examples
 #' \dontrun{
 #' scheme <- raisingScheme(FO = stageRaising("count"),
-#'                         top = topRaising("ratio"))
+#'                         DE = deRaising("ratio"))
 #' res <- doRatioEstimation(myH1Object, species = 127143, raising = scheme,
 #'                          target = "Age", plusGroup = 10)
 #' res

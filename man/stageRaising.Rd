@@ -57,5 +57,5 @@ stageRaising("count")
 stageRaising("ratio", total = "FTauxVarTot", value = "FTauxVarValue")
 }
 \seealso{
-\code{\link[=raisingScheme]{raisingScheme()}}, \code{\link[=topRaising]{topRaising()}}, \code{\link[=externalAux]{externalAux()}}
+\code{\link[=raisingScheme]{raisingScheme()}}, \code{\link[=deRaising]{deRaising()}}, \code{\link[=externalAux]{externalAux()}}
 }
