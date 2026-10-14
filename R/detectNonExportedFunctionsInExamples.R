@@ -64,7 +64,11 @@
 #' @examples
 #' \dontrun{
 #' # Scan a local package source directory
+<<<<<<< Updated upstream:R/detectNonExportedExamples.R
 #' issues <- RDBEScore:::detectNonExportedExamples("path/to/package")
+=======
+#' issues <- detectNonExportedFunctionsInExamples("path/to/package")
+>>>>>>> Stashed changes:R/detectNonExportedFunctionsInExamples.R
 #'
 #' # Display all detected calls
 #' print(issues)
@@ -74,7 +78,7 @@
 #' }
 #'
 
-detectNonExportedExamples <- function(pkgPath) {
+detectNonExportedFunctionsInExamples <- function(pkgPath) {
   stopifnot(dir.exists(pkgPath))
 
   man_dir <- file.path(pkgPath, "man")

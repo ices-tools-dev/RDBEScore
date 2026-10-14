@@ -3,7 +3,7 @@
 #' - Notes/scope: not really reviewed, just worked when needed
 #'
 
-test_that("detectNonExportedExamples finds non-exported functions in examples", {
+test_that("detectNonExportedFunctionsInExamples finds non-exported functions in examples", {
   pkg_path <- tempfile("testpkg-")
   dir.create(pkg_path)
   dir.create(file.path(pkg_path, "R"))
@@ -52,7 +52,7 @@ test_that("detectNonExportedExamples finds non-exported functions in examples", 
     file.path(pkg_path, "man", "public_fun.Rd")
   )
 
-  result <- detectNonExportedExamples(pkg_path)
+  result <- detectNonExportedFunctionsInExamples(pkg_path)
 
   expect_true(is.data.frame(result))
   expect_true(all(c(
@@ -68,7 +68,7 @@ test_that("detectNonExportedExamples finds non-exported functions in examples", 
   unlink(pkg_path, recursive = TRUE)
 })
 
-test_that("detectNonExportedExamples ignores exported functions", {
+test_that("detectNonExportedFunctionsInExamples ignores exported functions", {
   pkg_path <- tempfile("testpkg-")
   dir.create(pkg_path)
   dir.create(file.path(pkg_path, "R"))
@@ -113,7 +113,7 @@ test_that("detectNonExportedExamples ignores exported functions", {
     file.path(pkg_path, "man", "public_fun.Rd")
   )
 
-  result <- detectNonExportedExamples(pkg_path)
+  result <- detectNonExportedFunctionsInExamples(pkg_path)
 
   expect_false(any(result$function_name == "public_fun"))
 
