@@ -269,7 +269,7 @@ raiseToTotals <- function(su, expanded, stageWeights, RDBESDataObj, tot,
   if (length(noTotal) > 0) {
     stop(step, ": totals strata (", paste(cols, collapse = " | "), ") with ",
          "sampled units but no row in the totals table: ",
-         paste(utils::head(noTotal, 10), collapse = "; "),
+         paste(utils::head(noTotal, 10), collapse = ", "),
          if (length(noTotal) > 10) " ...", ". Check that the codes match.",
          call. = FALSE)
   }
@@ -278,7 +278,7 @@ raiseToTotals <- function(su, expanded, stageWeights, RDBESDataObj, tot,
     log <- addToRatioLog(log, step, "warning",
       paste0("Totals strata with a total but no sampled units, not raised ",
              "(sum of their totals ", format(sum(noSample$.total)), "): ",
-             paste(utils::head(noSample$.g, 10), collapse = "; "),
+             paste(utils::head(noSample$.g, 10), collapse = ", "),
              if (nrow(noSample) > 10) " ..."),
       nrow(noSample), verbose)
   }
