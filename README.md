@@ -9,7 +9,7 @@
 [![CRAN Total](http://cranlogs.r-pkg.org/badges/grand-total/RDBEScore)](https://cran.r-project.org/package=RDBEScore)
 -->
 
-[<img align="right" alt="ICES Logo" width="17%" height="17%" src="http://ices.dk/_layouts/15/1033/images/icesimg/iceslogo.png">](http://ices.dk)
+[<img align="right" alt="ICES Logo" width="14%" height="14%" src="https://www.ices.dk/SiteCollectionImages/ICES%20logos/ICES%20logo%20acronym_small.jpg">](http://ices.dk)
 
 `RDBEScore`
 =========
@@ -97,7 +97,7 @@ install_github("ices-tools-dev/RDBEScore@dev", build = FALSE)
 
 ## How to Start developing
 
-Contributions are welcome and the use of AI coding tools are premitted, but all code must be tested and checked by humans to maintain the reliability of the package. Confidential information should never be commited. 
+Contributions are welcome and the use of AI coding tools are permitted, but all code must be tested and checked by humans to maintain the reliability of the package. Confidential information should never be commited. 
 
 > [!WARNING]
 > Working with RDBES data is working with confidential data that is subjected to a data policy that aims to prevent unintended misuse or leakage of information by individual users, and keep trust in the RDBES system. Because of that, RDBES data should be handled with special care (e.g., never be commited to github or AI services without explicit permission from the data owner) and development should be done, to the extent possible, using synthetic or public data.
@@ -123,7 +123,7 @@ The main package directories are:
 
 2. **Start from the latest `dev` branch.** Work directly on `dev` if you can ensure that you never commit code that has failing tests. If you are unsure you can always create your own development branch based on `dev` and work there. Wherever you work remember to pull frequently so your code does not deviate too far from others. The `main` branch is protected and only accepts changes through pull requests.
 
-3. **Write or modify the code and tests.** You can do this manually or with AI coding tools. New functions should include roxygen2 documentation and appropriate tests. Add or update examples and vignettes when relevant. Aim to keep changes related to one issue together.
+3. **Write or modify the code and tests.** You can do this manually or with AI coding tools. New functions should include *roxygen2* documentation and appropriate tests. Add or update examples and vignettes when relevant. Aim to keep changes related to one issue together.
 
 4. **Document AI involvement and human review.** Add the information described in Section 3 to every new or substantially modified function and test(s).
 
@@ -143,13 +143,13 @@ The main package directories are:
 
 ### 3. AI-assisted development and human review
 
-Starting with version 0.3.5, contributors are permitted to use AI coding tools to accelerate development. However, all contributors remain responsible for understanding and verifying their code, regardless of whether it was written manually or generated with AI. If you posess confidential RDBES data using installed AI products (e.g. VScode, Codex, Claude Code, PositAI, browser add-ons etc) is  only allowed if you have explicit permission from the data owner.  Browser-based AI may also be used as long as tools permissions have been checked and confidential information or data is not submitted to them.
+Starting with version 0.3.5, contributors are permitted to use AI coding tools to accelerate development. However, all contributors remain responsible for understanding and verifying their code, regardless of whether it was written manually or generated with AI. If you possess confidential RDBES data when using installed AI products (e.g. VScode, Codex, Claude Code, PositAI, browser add-ons etc), that is  only allowed if you have explicit permission from the data owner. Browser-based AI may also be used as long as tools permissions have been checked and confidential information or data is not submitted to them.
 
 Every **new or substantially modified** function and test must document **AI involvement**.
 
 **Function documentation**
 
-Include a `Development review` section in the function's roxygen2 documentation so that the information appears in the installed package's R help pages (`?functionName`).
+Include a `Development review` section in the function's *roxygen2* documentation so that the information appears in the installed package's R help pages (`?functionName`).
 
 ```r
 #' @section Development review:
@@ -183,7 +183,7 @@ capture.output({  ## suppresses printing of console output when running test()
 **Meaning of the fields**
 
 - **AI-assisted:** `Yes` if AI tools were used to generate or substantially modify the current code or test, otherwise `No`. Routine autocomplete or minor wording corrections do not need to be reported.
-- **Review:** Github usernames of people who have checked and accepted the current implementation or test. The original contributor records one approval after checking their own work. Each additional reviewer who approves the current version is added.
+- **Review:** GitHub usernames of people who have checked and accepted the current implementation or test. The original contributor records one approval after checking their own work. Each additional reviewer who approves the current version is added.
 - **Notes/scope (optional):** Briefly describe what has been verified, for example specific RDBES sampling hierarchies, datasets, reference calculations, or known limitations. Include data versions or dates when relevant.
 
 **Updating review**
@@ -194,12 +194,12 @@ When another person reviews the code or test and approves it without changes, ad
 # Review: janesmith, johnbrown
 ```
 
-If a reviewer wants to modify the code substantially they are expected to raise an issue to inform others about it. Previous reviewers should be assigned to that issue and informed about the new issue. 
+If a reviewer wants to modify the code substantially, they are expected to raise an issue to inform others about it. Previous reviewers should be assigned to that issue and informed about the new issue. 
 
 Review for functions and tests are maintained separately. A change to one does not automatically invalidate approval of the other, unless its correctness is affected.
 
 **Major changes**
-Major changes (Sensu changes to multiple functions, that take time to review) should only be done after a plenary discussion. To the extent possible the previous reviewers are informed ahead of those changes and allowed enough time to form an opinion.
+Major changes (Sensu changes to multiple functions, that take time to review) should only be done after a plenary discussion. To the extent possible, the previous reviewers are informed ahead of those changes and allowed enough time to form an opinion.
 
 **Testing and scientific reliability**
 
@@ -215,7 +215,7 @@ The `dev` branch may contain functions that are still being developed, tested or
 
 We aim at 2 releases a year (autumn and spring) and an online meeting will be scheduled to approve the pull request to the main.
 
-When preparing a release a subset of the package contributors will:
+When preparing a release, a subset of the package contributors will:
 
 1. Identify the functions and changes that are ready, considering their tests, human review and any review notes.
 2. If only some changes from `dev` are ready, create a release branch from `main` and selectively transfer the required commits using Git cherry-pick. Include any dependent changes, tests and documentation.

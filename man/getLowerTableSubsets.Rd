@@ -41,3 +41,12 @@ The function recursively intersects the rows of the target lower level table tha
 the values from each subset in the upper tables. It then ensures that only unique rows are returned,
 based on the ID column of the target table.
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: rix133
+}
+}
+
+\keyword{internal}

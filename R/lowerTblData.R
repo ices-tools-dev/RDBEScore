@@ -11,12 +11,18 @@
 #' @param tbls A named list of data frames representing the tables.
 #' @param level A character string specifying the name of the target lower level table.
 #' @param verbose A logical value indicating whether to print intermediate levels during recursion.
-#' @param path_order Internal: character vector tracking the traversal path of IDs during
-#'   recursion to preserve a stable column order in the returned result. Users should not
-#'   normally set this; it is maintained by recursive calls (default NULL).
+#' @param requestedField Internal: the originally requested field, carried
+#'   through the recursion (default `field`).
+#' @param requestedValues Internal: the originally requested value belonging to
+#'   each element of `values`, carried through the recursion (default `values`).
 #'
-#' @return A data frame containing the rows of the target lower level table that are associated with
-#'   the given values of the upper table field.
+#' @return A data.table with the originally requested field and all columns of
+#'   the `level` table. No intermediate hierarchy IDs are added. It has one row
+#'   per unique requested value and linked `level` record.
+#'
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: rix133
 #'
 #' @examples
 #' # it is important to run the function only on the sorted RDBESDataObject
@@ -31,73 +37,53 @@
 #'
 #' RDBEScore:::lowerTblData("TEid", c(4), tblsSprat, "LE", TRUE)
 #' @keywords internal
-lowerTblData <- function(field, values, tbls, level, verbose = FALSE, path_order = NULL) {
-  if(!is.list(tbls)) stop("tbls must be a list")
+lowerTblData <- function(field, values, tbls, level, verbose = FALSE,
+                         requestedField = field, requestedValues = values) {
+  if (!is.list(tbls)) stop("tbls must be a list")
+  if (!level %in% names(tbls)) stop("Missing table in data: ", level)
 
-  start <- substr(field, start = 1, stop = 2)
-  if (start == level) {
-    res <- tbls[[level]]
-    return(res[get(field) %in% values])
+  current <- substr(field, 1, 2)
+  i <- match(current, names(tbls))
+  if (is.na(i)) stop("Missing table: ", current)
+
+  # Keep track of original requested values
+  mapping <- unique(data.table::data.table(
+    .currentValue = values,
+    .requestedValue = requestedValues
+  ))
+
+  result <- merge(mapping, tbls[[current]],
+                  by.x = ".currentValue", by.y = field,
+                  sort = FALSE, allow.cartesian = TRUE)
+  data.table::setnames(result, ".currentValue", field)
+
+  if (current != level) {
+    if (verbose) cat(field, ": ", paste(values, collapse = ", "), "\n", sep = "")
+
+    # Find the nearest following non-empty table in hierarchy order
+    candidates <- seq_along(tbls)[-seq_len(i)]
+    candidates <- candidates[vapply(tbls[candidates], NROW, integer(1)) > 0L]
+    if (!length(candidates)) stop("No more lower tables found")
+
+    nextName <- names(tbls)[min(candidates)]
+    idField <- paste0(current, "id")
+    nextField <- paste0(nextName, "id")
+    if (!all(c(idField, nextField) %in% names(tbls[[nextName]]))) {
+      stop("Error in linking tables ", current, " and ", nextName)
+    }
+
+    result <- result[, c(idField, ".requestedValue"), with = FALSE]
+    result <- merge(result, tbls[[nextName]][, c(idField, nextField), with = FALSE],
+                    by = idField, sort = FALSE, allow.cartesian = TRUE)
+    return(lowerTblData(
+      nextField, result[[nextField]], tbls, level,
+      verbose, requestedField, result[[".requestedValue"]]
+    ))
   }
-  currTbl <- which(start == names(tbls))
 
-  # assumes tables are in correct order and no empty tables
-  tc <- 1
-  nextTbl <- tbls[[currTbl + tc]]
-  while (is.null(nextTbl) || nrow(nextTbl) == 0) {
-    tc <- tc + 1
-    if(currTbl + tc > length(tbls)) stop("No more lower tables found")
-    nextTbl <- tbls[[currTbl + tc]]
-  }
+  if (requestedField %in% names(result)) result[, (requestedField) := NULL]
+  data.table::setnames(result, ".requestedValue", requestedField)
+  data.table::setcolorder(result, c(requestedField, setdiff(names(result), requestedField)))
 
-  nextTblField <- paste0(names(tbls)[currTbl + tc], "id")
-  if (verbose) {
-    cat(paste0(field, ": ", paste0(values, collapse = ", "), "\n"))
-  }
-  if (!field %in% colnames(nextTbl)) {
-    tbl <- tbls[[currTbl]]
-    curTblId <- paste0(names(tbls)[currTbl], "id")
-    values <- tbl[get(field) %in% values, get(curTblId)]
-    field <- curTblId
-  }
-
-  # Initialize and update path order to ensure the original search field stays first
-  if (is.null(path_order)) path_order <- field
-  path_order <- unique(c(path_order, nextTblField))
-
-  # values in next table for recursion
-  nextTblValues <- nextTbl[get(field) %in% values, get(nextTblField)]
-
-  # NEW: build link (current id -> next id) so we can keep intermediate IDs
-  linkDT <- unique(nextTbl[get(field) %in% values,
-                           .(from = get(field), to = get(nextTblField))])
-  data.table::setnames(linkDT, c("from","to"), c(field, nextTblField))
-
-  # recurse
-  res <- lowerTblData(nextTblField, nextTblValues, tbls, level, verbose, path_order)
-
-  # NEW: merge link back so the current level's ID is preserved
-  # Always attach the authoritative parent id from the link.
-  # If a column with the same name already exists (from another variant), drop it first,
-  # then merge in the value derived from the current hierarchy.
-  if (field %in% names(res)) {
-    res[, (field) := NULL]
-  }
-  res <- merge(
-    linkDT[, c(nextTblField, field), with = FALSE],
-    res,
-    by = nextTblField,
-    all.y = TRUE,
-    allow.cartesian = TRUE
-  )
-
-  #keep path columns toward the front with stable overall path order
-  path_cols <- intersect(path_order, names(res))
-  other_cols <- setdiff(names(res), path_cols)
-  if (length(path_cols) > 0) data.table::setcolorder(res, c(path_cols, other_cols))
-
-  # Ensure no data.table key is set on the result
-  data.table::setkeyv(res, NULL)
-
-  res
+  result
 }

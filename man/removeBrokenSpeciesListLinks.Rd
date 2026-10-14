@@ -2,9 +2,7 @@
 % Please edit documentation in R/removeBrokenSpeciesListLinks.R
 \name{removeBrokenSpeciesListLinks}
 \alias{removeBrokenSpeciesListLinks}
-\title{Remove rows which are not pointing to a valid SpecliestListDetails (SL)
-records i.e.those rows which have a value of SpeciesListName that does not
-exist in the SL table.}
+\title{Remove SS rows with broken species-list links}
 \usage{
 removeBrokenSpeciesListLinks(objectToCheck, verbose = FALSE, strict = TRUE)
 }
@@ -12,25 +10,23 @@ removeBrokenSpeciesListLinks(objectToCheck, verbose = FALSE, strict = TRUE)
 \item{objectToCheck}{an RDBESDataObject.}
 
 \item{verbose}{(Optional) If set to TRUE more detailed text will be printed
-out by the function.  Default is TRUE.}
+out by the function.  Default is FALSE.}
 
 \item{strict}{(Optional) This function validates its input data - should
 the validation be strict? The default is TRUE.}
 }
 \value{
-an RDBESDataObject with any records with an invalid SpeciesListName
-rows removed
+an RDBESDataObject with SS rows without a matching SL record removed.
 }
 \description{
-Remove rows which are not pointing to a valid SpecliestListDetails (SL)
-records i.e.those rows which have a value of SpeciesListName that does not
-exist in the SL table.
+A species-list link matches the list name, catch fraction, design year
+and sampling country against the SL table.
 }
 \section{Development review}{
 
 \itemize{
-\item AI-assisted: No
-\item Human review: rix133
+\item AI-assisted: Yes
+\item Review: rix133
 }
 }
 

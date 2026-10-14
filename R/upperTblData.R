@@ -17,50 +17,75 @@
 #' @param tbls A named list of data frames containing tables at different levels.
 #' @param level A character string specifying the level to get data from.
 #' @param verbose (Optional) Set to TRUE if you want informative text printed
+#' @param requestedField Internal: the originally requested field.
+#' @param requestedValues Internal: the original value for each element of `values`.
 #'
 #' @return A data frame containing rows from an upper table that match the
 #'  provided values for the specified field.
+#'
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: rix133
 #'
 #' @examples
 #' # it is important to run these functions only on sorted RDBESDataObject
 #' RDBEScore:::upperTblData("SAid", c(1), sort(H8ExampleEE1), "DE", verbose = TRUE)
 #' DE <- data.table::data.table(DEid = c(1, 2))
 #' SD <- data.table::data.table(SDid = c(1, 2), DEid = c(1, 2))
-#' VS <- data.table::data.table(VSid = c(1, 2),SDid =c(1,2),  value = c(10, 20))
+#' VS <- data.table::data.table(VSid = c(1, 2),SDid =c(1,2),  VSvalue = c(10, 20))
 #' tbls <- list(DE = DE, SD = SD, VS = VS)
 #' RDBEScore:::upperTblData("VSid", c(1), tbls, "DE")
 #' @keywords internal
-upperTblData <- function(field, values, tbls, level, verbose = FALSE){
-  #check if tables are of correct type
-  if(!is.list(tbls)) stop("tbls must be a list")
-  if(!level %in% names(tbls)) stop(level, " must be a character string in the names of the tables")
+upperTblData <- function(field, values, tbls, level, verbose = FALSE,
+                         requestedField = field, requestedValues = values) {
 
-  start <- substr(field, start=1, stop=2)
-  if(start == level){
-    res <- tbls[[level]]
-    return(res[get(field) %in% values,])
+  if (!is.list(tbls)) stop("tbls must be a list")
+  if (!level %in% names(tbls)) stop("Missing table in data: ", level)
+
+  current <- substr(field, 1, 2)
+  i <- match(current, names(tbls))
+  if (is.na(i)) stop("Missing table: ", current)
+
+  # Keep track of original requested IDs
+  mapping <- unique(data.table::data.table(
+    .currentValue = values,
+    .requestedValue = requestedValues
+  ))
+
+  # Match rows at the current level
+  result <- merge(mapping, tbls[[current]],
+                  by.x = ".currentValue", by.y = field,
+                  sort = FALSE, allow.cartesian = TRUE)
+
+  # Continue recursively until the target level is reached
+  if (current != level) {
+    if (verbose) message(current, ": ", paste(values, collapse = ", "))
+
+    # Find the nearest preceding non-empty table
+    candidates <- seq_len(i - 1L)
+    candidates <- candidates[vapply(tbls[candidates], NROW, integer(1)) > 0L]
+    if (!length(candidates)) stop("No upper table found for ", current)
+
+    parentField <- paste0(names(tbls)[max(candidates)], "id")
+
+    return(upperTblData(
+      parentField, result[[parentField]], tbls, level,
+      verbose, requestedField, result[[".requestedValue"]]
+    ))
   }
-  tbl <- tbls[[start]]
-  currTbl <- which(start == names(tbls))
-  if(verbose){
-    print(paste0(start,": ", paste0(values, collapse = ", ")))
+
+  # Restore column names at the target level
+  data.table::setnames(result, ".currentValue", field)
+
+  if (requestedField %in% names(result)) {
+    data.table::set(result, j = requestedField, value = result[[".requestedValue"]])
+    result[, .requestedValue := NULL]
+  } else {
+    data.table::setnames(result, ".requestedValue", requestedField)
+    data.table::setcolorder(
+      result, c(requestedField, setdiff(names(result), requestedField))
+    )
   }
-  #skip NULL tables
-  tc <- -1
-  prevTbl <- names(tbls)[currTbl+tc]
-  tryCatch({
-    while(is.null(tbls[[prevTbl]]) || nrow(tbls[[prevTbl]]) == 0){
-      if(verbose){
-        print(paste0("Skipping: ", prevTbl))
-      }
-      tc <- tc - 1
-      if((currTbl+tc) < 1) stop("No table found")
-      prevTbl <- names(tbls)[currTbl+tc]
-    }
-  }, error = function(e) {
-    stop("Error in linking tables ", names(tbls)[currTbl], " and ",prevTbl)
-  })
-  prevTblfield <-  paste0(names(tbls)[currTbl+tc], "id")
-  prevTblvalues <- tbl[get(field) %in% values, get(prevTblfield)]
-  upperTblData(prevTblfield,prevTblvalues, tbls[1:currTbl], level, verbose)
+
+  result
 }

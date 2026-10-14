@@ -230,6 +230,8 @@ validateRDBESDataObject(myFilteredObjectValidSpeciesLinks, verbose = FALSE)
 Sometimes it we want to see how a field or values in the **RDBESDataObject** are connected to other tables.
 One use case would be e.g. to see when a specific Landing Event (LE) occured.For this we can use the **getLinkedDataFromLevel()** function. 
 
+The result contains the requested field and all columns of the target table, without adding intermediate hierarchy ids. Each row links a requested value to a target record. Different requested values linked to the same record are retained. This applies in both directions and to queries within the same table; column order is not guaranteed.
+
 ```{r}
 #get the TE table corresponding to the first LEid in the H8ExampleEE1 object
 getLinkedDataFromLevel("LEid", c(1), H8ExampleEE1, "TE", verbose = TRUE)
@@ -237,7 +239,7 @@ getLinkedDataFromLevel("LEid", c(1), H8ExampleEE1, "TE", verbose = TRUE)
 Similarly we can get the subset of the LE table corresponding to a specific value in the TE table. This does not have to be the *id* field, but can be any field in the table.
 
 ```{r}
-#get the TE table corresponding to the first LEid in the H8ExampleEE1 object
+#get the LE table corresponding to the TEstratumName "November" in the H8ExampleEE1 object
 getLinkedDataFromLevel("TEstratumName", c("November"), H8ExampleEE1, "LE", verbose = TRUE)
 ```
 Several values can be used to get a subset of the table. 

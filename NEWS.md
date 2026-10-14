@@ -1,4 +1,5 @@
 # RDBEScore 0.4.0
+- Breaking: `getLinkedDataFromLevel()` now returns the requested field and target-table columns in both directions, without adding intermediate hierarchy ids (#268). Non-id requested fields are retained when going down the hierarchy. `getLowerTableSubsets()` avoids duplicated requested-field columns.
 - Package README updated with AI usage guidelines
 - Dependencies: removed `dplyr` from Imports. Joins now use the internal `data.table` helper `joinDT()`, which keeps dplyr's row order, column order and `.x`/`.y` suffixes, so results are unchanged; `filterRDBESEstObject()` and the vignette use base R/`data.table` instead of dplyr.
 - Bug fix: addressed [#259](https://github.com/ices-tools-dev/RDBEScore/issues/259) selecting multiple strata with `addCLtoLowerCS()`
