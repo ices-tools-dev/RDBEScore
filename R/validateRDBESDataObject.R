@@ -29,10 +29,9 @@
 #' @aliases checkRDBESDataObject
 #' @examples
 #' \dontrun{
-#' myH1RawObject <-
-#' importRDBESDataCSV(rdbesExtractPath = "tests/testthat/h1_v_1_19")
-#' validateRDBESDataObject(myH1RawObject)}
-#'
+#' dataDir <- paste0(system.file("extdata", package = "RDBEScore"), "/")
+#' myH1DataObject <- createRDBESDataObject(input = paste0(dataDir,"H1_Example.zip"))
+#' validateRDBESDataObject(myH1DataObject)}
 validateRDBESDataObject <- function(objectToCheck,
                                 checkDataTypes = FALSE,
                                 verbose = FALSE,

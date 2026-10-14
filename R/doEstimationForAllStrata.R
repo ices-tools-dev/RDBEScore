@@ -12,17 +12,17 @@
 #' @examples
 #' \dontrun{
 #'
-#' myH1RawObject <-
-#'   importRDBESDataCSV(rdbesExtractPath = "tests\\testthat\\h1_v_1_19")
+#' data("H1Example")
+#' myH1DataObject <- H1Example
 #'
 #' # Update our test data with some random sample measurements
-#' myH1RawObject[["SA"]]$SAsampWtLive <-
-#'   round(runif(n = nrow(myH1RawObject[["SA"]]), min = 1, max = 100))
+#' myH1DataObject[["SA"]]$SAsampWtLive <-
+#'   round(runif(n = nrow(myH1DataObject[["SA"]]), min = 1, max = 100))
 #'
-#' myH1EstObj <- createRDBESEstObject(myH1RawObject, 1)
+#' myH1EstObj <- createRDBESEstObject(myH1DataObject, 1)
 #'
 #' myStrataEst <- doEstimationForAllStrata(
-#'   RDBESDataObjectForEstim = myH1EstObj,
+#'   RDBESEstObjectForEstim = myH1EstObj,
 #'   targetValue = 'SAsampWtLive'
 #' )
 #' }

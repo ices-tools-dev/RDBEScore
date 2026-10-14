@@ -12,7 +12,7 @@
 #' input <- "WKRDB-EST2/testData/output/DBErawObj/"
 #' output <- "WKRDB-EST2/subGroup1/personal/John/PreparedOutputs/"
 #'
-#' createDBEPrepObj(input = input, output = output)
+#' RDBEScore:::createDBEPrepObj(input = input, output = output)
 #' }
 createDBEPrepObj <- function(input, output) {
 

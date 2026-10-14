@@ -19,11 +19,11 @@
 #' @examples
 #' \dontrun{
 #'
-#' myH1RawObject <-
-#' importRDBESDataCSV(rdbesExtractPath = "tests\\testthat\\h1_v_1_19")
+#' data("H1Example")
+#' myH1DataObject <- H1Example
 #' myFields <- c("SDctry","VDctry","VDflgCtry","FTarvLoc")
 #' myValues <- c("ZW","ZWBZH","ZWVFA" )
-#' myFilteredObject <- filterRDBESDataObject(myH1RawObject,
+#' myFilteredObject <- filterRDBESDataObject(myH1DataObject,
 #'                                         fieldsToFilter = myFields,
 #'                                         valuesToFilter = myValues )
 #' myObjectNoOrphans <- findAndKillOrphans(objectToCheck = myFilteredObject,

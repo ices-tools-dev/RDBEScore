@@ -22,10 +22,10 @@
 #'
 #' @examples
 #' \dontrun{
-#' rdbesExtractPath <- "./2022_FPN_FPE_H7.zip"
-#' obj <- importRDBESDataZIP(rdbesExtractPath)
-#' }
-
+#' dataDir <- paste0(system.file("extdata", package = "RDBEScore"), "/")
+#' myH1DataObject <- RDBEScore:::importRDBESDataZIP(file.path(dataDir,"H1_Example.zip"))
+#' validateRDBESDataObject(myH1DataObject)}
+#'
 importRDBESDataZIP <- function(filenames,
                                castToCorrectDataTypes = TRUE,
                                Hierarchy = NULL, ...) {

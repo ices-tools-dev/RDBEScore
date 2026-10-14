@@ -29,13 +29,13 @@
 #' @examples
 #' \dontrun{
 #'
-#' myH1RawObject <-
-#'   importRDBESDataCSV(rdbesExtractPath = "tests\\testthat\\h1_v_1_19")
+#' data("H1Example")
+#' myH1DataObject <- H1Example
 #'
 #' myFields <- c("SDctry", "VDctry", "VDflgCtry", "FTarvLoc")
 #' myValues <- c("ZW", "ZWBZH", "ZWVFA")
 #'
-#' myFilteredObject <- filterRDBESDataObject(myH1RawObject,
+#' myFilteredObject <- filterRDBESDataObject(myH1DataObject,
 #'   fieldsToFilter = myFields,
 #'   valuesToFilter = myValues
 #' )
@@ -43,10 +43,10 @@
 #' # Inverse filtering (exclude certain values)
 #' # Example: keep all DE rows except those with DEid in `excludedValues`
 #' # Compute the complement of the excluded set using setdiff
-#' allValues <- unique(myH1RawObject$DE$DEid)
+#' allValues <- unique(myH1DataObject$DE$DEid)
 #' excludedValues <- c(5351)
 #' myInverseFiltered <- filterRDBESDataObject(
-#'   myH1RawObject,
+#'   myH1DataObject,
 #'   fieldsToFilter = "DEid",
 #'   valuesToFilter = setdiff(allValues, excludedValues)
 #' )

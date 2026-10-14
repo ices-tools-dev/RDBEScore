@@ -10,9 +10,9 @@
 #'
 #' @examples
 #' \dontrun{
-#' myH1RawObject <-
-#' importRDBESDataCSV(rdbesExtractPath = "tests/testthat/h1_v_1_19")
-#' myEStObj <- createRDBESEstObject(myH1RawObject,1)
+#' dataDir <- paste0(system.file("extdata", package = "RDBEScore"), "/")
+#' myH1DataObject <- createRDBESDataObject(input = paste0(dataDir,"H1_Example.zip"))
+#' myEStObj <- createRDBESEstObject(myH1DataObject,1)
 #' validateRDBESEstObject(myEStObj)}
 validateRDBESEstObject <- function(objectToCheck, verbose = FALSE){
 
