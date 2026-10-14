@@ -120,7 +120,9 @@ generateZerosUsingSL <- function(x,
           dummyRows$SAstratification <- 'N'
           dummyRows$SAstratumName <- 'U'
           dummyRows$SAspeCode<-sppToAdd$IScommTaxon
-          dummyRows[,c("SAtotalWtLive","SAsampWtLive","SAtotalWtMes","SAsampWtMes","SAspecState")]<-0
+          dummyRows[,c("SAtotalWtLive","SAtotalWtMes")] <- NA
+          dummyRows[,c("SAsampWtLive", "SAsampWtMes")] <-0
+          dummyRows$SAspecState <-'Unknown'
           dummyRows$SAnumTotal <- ifelse(dummyRows$SAunitType=="Individuals", 0, dummyRows$SAnumTotal)
           dummyRows$SAnumSamp <- ifelse(dummyRows$SAunitType=="Individuals", 0, dummyRows$SAnumSamp)
           dummyRows$SAselProb <- 1
