@@ -64,7 +64,7 @@
 #' @examples
 #' \dontrun{
 #' # Scan a local package source directory
-#' issues <- detectNonExportedExamples("path/to/package")
+#' issues <- RDBEScore:::detectNonExportedExamples("path/to/package")
 #'
 #' # Display all detected calls
 #' print(issues)
