@@ -76,18 +76,41 @@ A scheme says how each stage is raised. It is built with
 `topRaising()`. Stages that are not given are pooled (`"none"`). SS is
 always 1: a species list with more species gets no extra weight.
 
-| method | factor for a sampled unit | fields used |
-|----|----|----|
-| `"none"` | 1 (units pooled) |  |
-| `"count"` | N / n | `XXnumTotal`, number of sampled units |
-| `"aux"` | aux total / sum of aux of the sampled units | `XXauxVarTot`, `XXauxVarValue` |
-| `"ratio"` | total / sum of value | any columns you name, or a function |
-| `"external"` | total / sum of value | your own tables via `externalAux()` |
-| `"prob"` | 1 / inclusion probability | `XXincProb` |
+At each stage, the units are grouped by parent and design stratum
+(`XXstratumName`). For a group $h$, $s_h$ is the set of its sampled
+units and $n_h$ their number. Each sampled unit $i \in s_h$ gets a
+factor $f_i$:
 
-Factors are computed within each parent and design stratum
-(`XXstratumName`). The selection method (`XXselectMeth`) is never used
-to compute a factor, it is only logged.
+| method | factor $f_i$ | in words | fields used |
+|----|----|----|----|
+| `"none"` | $1$ | units pooled |  |
+| `"count"` | $N_h / n_h$ | units in the group / sampled units | $N_h$ = `XXnumTotal` |
+| `"aux"` | $X_h / \sum_{j \in s_h} x_j$ | aux total / sum of aux of the sampled units | $X_h$ = `XXauxVarTot`, $x_j$ = `XXauxVarValue` |
+| `"ratio"` | $T_h / \sum_{j \in s_h} v_j$ | total / sum of value | any columns you name, or a function for $v$ |
+| `"external"` | $T_h / \sum_{j \in s_h} v_j$ | total / sum of value | your own tables via `externalAux()` |
+| `"prob"` | $1 / \pi_i$ | 1 / inclusion probability | $\pi_i$ = `XXincProb` |
+
+*count* and *aux* are presets of *ratio*: *count* is $T_h = N_h$ with
+$v_j = 1$. The selection method (`XXselectMeth`) is never used to
+compute a factor, it is only logged.
+
+The factors are multiplied along the path, so each lowest-level sample
+$k$ gets one weight, for example in hierarchy 1
+
+$$w_k = f_{VS} \, f_{FT} \, f_{FO}$$
+
+(SS is always 1). With $y_{k,a}$ the numbers at age $a$ in sample $k$,
+raised within the sample, the estimate for domain $d$ in DE stratum $H$
+is
+
+$$\hat N_{d,a} = r_H \sum_{k \in d} w_k \, y_{k,a}$$
+
+with $r_H = 1$ for `topRaising("none")`, and for `topRaising("ratio")`
+
+$$r_H = \frac{T_H}{\sum_{k \in H} w_k \, x_k}$$
+
+where $T_H$ is `DEauxVarTot` and $x_k$ the same quantity measured on the
+samples (by default the live weight of the species in sample $k$).
 
 Here, hauls are raised to the trip by counts, trips and vessels are
 pooled, and the top is a ratio to the landed live weight in DE:
