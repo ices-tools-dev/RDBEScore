@@ -64,12 +64,17 @@ generateZerosUsingSL <- function(x,
         # in the following, the max SAid is determined. That SAid + a decimal will constitute the SAid of the new 0 rows
         # determine upper table (parentIdVar) and its value (parentIdValue)
         # note, the use of which is an attempt to make this hierarchy independent - there may be better forms to achieve this.
-        parentIdVar<-c("FOid","TEid","LEid","FTid")[which(!is.na(mySS[mySS$SLid == targetSLid,c("FOid","TEid","LEid","FTid")]))]
-        parentIdValue<-tmpSS[[parentIdVar]][tmpSS$SLid == targetSLid]
+        #tablesInHierarchy <- getTablesInRDBESHierarchy(x$DE$DEhierarchy, includeOptTables=F)
+        #parentIdVar<-paste0(tablesInHierarchy[match("SS",tablesInHierarchy)-1],"id")
+        #parentIdValue<-mySS[[parentIdVar]]
         # associates the parentIdVar to tmpSA
-        tmpSA$parentIdVar<-x[[gsub("id","",parentIdVar)]][[parentIdVar]][match(parentIdValue, x[[gsub("id","",parentIdVar)]][[parentIdVar]])]
+        #tmpSA$parentIdVar<-x[[gsub("id","",parentIdVar)]][[parentIdVar]][match(parentIdValue, x[[gsub("id","",parentIdVar)]][[parentIdVar]])]
+
+
         # find the max SAid to be used
-        maxSAid<-max(tmpSA[tmpSA$parentIdVar==parentIdValue,]$SAid)
+        if(mySS$SSid %in% tmpSA$SSid)
+          {maxSAid<-max(tmpSA[tmpSA$SSid == mySS$SSid,]$SAid)
+        } else maxSAid<-max(tmpSA$SAid) # if does not exist, takes the maximum to append in the end
 
         #  Check which species/fraction are present in SA
         SApresent <- tmpSA[tmpSA$SSid == mySS$SSid,c("SAcatchCat","SAspeCode")]
@@ -114,7 +119,7 @@ generateZerosUsingSL <- function(x,
           dummyRows[,10:31]<-NA # an alternative here could be "NotAvailable" or "NotApplicable" or source from other tables with assumptions
           # handling of a few specific variables (probably will need some tunning later on)
           dummyRows$SAid <- maxSAid+0.001*c(1:nrow(sppToAdd))
-          dummyRows$SSid <- tmpSS$SSid[tmpSS$SLid == targetSLid]
+          dummyRows$SSid <- mySS$SSid
           dummyRows$SAseqNum <- 1:nrow(sppToAdd)
           dummyRows$SAunitName <- 1:nrow(sppToAdd)
           dummyRows$SAstratification <- 'N'
@@ -140,7 +145,7 @@ generateZerosUsingSL <- function(x,
           tmpSA<-rbind(dummyRows, tmpSA)
           #tmpSA[ ,tmpKey1 := paste(DEyear, SDctry, SDinst, SSspecListName, SAcatchCat, SAspeCode)]
           # cleans up parentIdVar
-          tmpSA$parentIdVar<-NULL
+          #tmpSA$parentIdVar<-NULL
         }
       }
     }
