@@ -64,7 +64,7 @@ generateZerosUsingSL <- function(x,
         # in the following, the max SAid is determined. That SAid + a decimal will constitute the SAid of the new 0 rows
         # determine upper table (parentIdVar) and its value (parentIdValue)
         # note, the use of which is an attempt to make this hierarchy independent - there may be better forms to achieve this.
-        parentIdVar<-c("FOid","TEid","LEid","FTid")[which(!is.na(tmpSS[tmpSS$SLid == targetSLid,c("FOid","TEid","LEid","FTid")]))]
+        parentIdVar<-c("FOid","TEid","LEid","FTid")[which(!is.na(mySS[mySS$SLid == targetSLid,c("FOid","TEid","LEid","FTid")]))]
         parentIdValue<-tmpSS[[parentIdVar]][tmpSS$SLid == targetSLid]
         # associates the parentIdVar to tmpSA
         tmpSA$parentIdVar<-x[[gsub("id","",parentIdVar)]][[parentIdVar]][match(parentIdValue, x[[gsub("id","",parentIdVar)]][[parentIdVar]])]
