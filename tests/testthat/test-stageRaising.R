@@ -262,8 +262,10 @@ test_that("a DE ratio on trips keeps trips without the species in the sum", {
   dropSA <- obj$SA[SSid %in% obj$SS[FOid %in% zeroHauls, SSid], SAid]
   obj$SA <- obj$SA[!SAid %in% dropSA]
   obj$BV <- obj$BV[!SAid %in% dropSA]
-  scFT <- raisingScheme(DE = deRaising("ratio", value = "FTauxVarValue",
-                                         at = "FT"))
+  # FO must be raised below a ratio on FT. All hauls are sampled: count = 1
+  scFT <- raisingScheme(FO = stageRaising("count"),
+                        DE = deRaising("ratio", value = "FTauxVarValue",
+                                       at = "FT"))
   scSA <- raisingScheme(DE = deRaising("ratio"))
   rFT <- estimate(obj, scFT)
   rSA <- estimate(obj, scSA)

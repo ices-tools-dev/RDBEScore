@@ -80,11 +80,18 @@ getStageWeights <- function(RDBESDataObj, sampleUnits, scheme,
   }
   notInScheme <- setdiff(stages, names(scheme$stages))
   if (length(notInScheme) > 0) {
-    if (scheme$DE$method == "none") {
+    if (scheme$DE$method == "none" && is.null(scheme$totals)) {
       stop("The data use stage(s) ", paste(notInScheme, collapse = ", "),
-           " that the scheme does not raise. With DE = \"none\" every ",
-           "stage must be raised: add them to raisingScheme().",
+           " that the scheme does not raise. With DE = \"none\" and no ",
+           "totals every stage must be raised: add them to raisingScheme().",
            call. = FALSE)
+    }
+    notRaised <- c(notInScheme, names(scheme$stages)[vapply(
+      scheme$stages, function(s) s$method == "none", logical(1))])
+    for (st in list(list(name = "DE", s = scheme$DE),
+                    list(name = "totals", s = scheme$totals))) {
+      if (is.null(st$s) || st$s$method == "none") next
+      checkStagesBelowRaised(st$s$at, stages, notRaised, st$name)
     }
     log <- addToRatioLog(log, step, "info",
       paste0("Stage(s) used by the data but not in the scheme, pooled ",

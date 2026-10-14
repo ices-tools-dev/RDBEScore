@@ -372,6 +372,7 @@ getSampleUnits <- function(RDBESDataObj,
   attr(out, "catchCat") <- catchCat
   attr(out, "hierarchy") <- spec$hierarchy
   attr(out, "withinSample") <- wsMethod
+  attr(out, "areaLookup") <- areaLookup
   attr(out, "ratioLog") <- log
   out[]
 }

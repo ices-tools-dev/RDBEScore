@@ -170,6 +170,73 @@ deRaising <- function(method = c("none", "ratio"), total = "DEauxVarTot",
             class = "RDBESDERaising")
 }
 
+#' Raising to totals you supply
+#'
+#' An optional last step, after the DE step: the estimate is raised to totals
+#' from outside the sampling design, for example landings from CL, effort
+#' from CE or national statistics. Given as `totals = ` in [raisingScheme()].
+#' Per totals stratum \eqn{g} the factor is
+#' \deqn{r_g = T_g / \sum_{i \in g} w_i r_{DE,i} x_i}
+#' where \eqn{w_i r_{DE,i}} is the weight of unit \eqn{i} after the stages
+#' and the DE step, and \eqn{x_i} the same quantity as \eqn{T_g} measured on
+#' it. The strata are chosen freely: any column the samples carry.
+#'
+#' With the same x in the DE step and here, and every totals stratum inside
+#' one DE stratum, the DE ratio cancels: the result equals raising to the
+#' totals alone. It matters when a totals stratum spans several DE strata.
+#'
+#' @param total An [externalAux()] table with one row per totals stratum.
+#'   Its key columns (`by`) are the strata.
+#' @param strata Columns that define the totals strata. Default: the key
+#'   columns of `total`. Allowed: the domain variables (`"year"`,
+#'   `"quarter"`, `"month"`, `"area"`, `"statRect"`, `"metier6"`, derived as
+#'   in [getSampleUnits()]), any SA column (for example `"SAcommCat"`, only
+#'   with `at = "SA"`), or any column of a stage table or DE.
+#' @param value The quantity x measured on the sampled units, as in
+#'   [deRaising()]: `"speciesLiveWeight"` (default), `"fishWeight"`,
+#'   `"fishCount"`, or a column or function of the table given by `at`.
+#' @param at `"SA"` or a stage of the hierarchy. With a stage, sampled units
+#'   without the species stay in the sum of x (needed when x is effort).
+#'
+#' @return An object of class `RDBESTotalsRaising`.
+#' @seealso [raisingScheme()], [deRaising()]
+#' @export
+#'
+#' @examples
+#' landings <- data.frame(quarter = 1:4, metier6 = "OTB_DEF_70-99_0_0",
+#'                        kg = c(1200, 900, 1500, 1100))
+#' totalsRaising(externalAux(landings, by = c("quarter", "metier6"),
+#'                           col = "kg"))
+totalsRaising <- function(total, strata = NULL, value = "speciesLiveWeight",
+                          at = "SA") {
+  if (!inherits(total, "RDBESExternalAux")) {
+    stop("total must be an externalAux() table with your totals, one row ",
+         "per totals stratum.", call. = FALSE)
+  }
+  if (is.null(strata)) strata <- total$by
+  if (!is.character(strata) || length(strata) == 0) {
+    stop("strata must name one or more columns.", call. = FALSE)
+  }
+  if (!setequal(strata, total$by)) {
+    stop("strata must be the key columns of the totals table (by = ",
+         paste(total$by, collapse = ", "), ").", call. = FALSE)
+  }
+  checkRaisingArg(value, "value", allowFunction = TRUE)
+  if (!(is.character(at) && length(at) == 1 && grepl("^[A-Z]{2}$", at))) {
+    stop("at must be \"SA\" or a stage table name such as \"FT\" or \"LE\".",
+         call. = FALSE)
+  }
+  checkSamplePresetAt(value, at)
+  saCols <- strata[startsWith(strata, "SA")]
+  if (length(saCols) > 0 && at != "SA") {
+    stop("SA column(s) ", paste(saCols, collapse = ", "), " as strata need ",
+         "at = \"SA\".", call. = FALSE)
+  }
+  structure(list(method = "ratio", total = total, strata = strata,
+                 value = value, at = at),
+            class = "RDBESTotalsRaising")
+}
+
 #' Externally provided auxiliary information
 #'
 #' Wraps a user table with auxiliary values or totals that are not in the
@@ -237,12 +304,19 @@ externalAux <- function(data, by, col) {
 #' @param SA The raising within the sample, made with [sampleRaising()].
 #'   Default `sampleRaising("weight")`.
 #' @param DE The raising to the DE stratum, made with [deRaising()].
+#' @param totals Optional raising to totals you supply, made with
+#'   [totalsRaising()]. Applied after the DE step. Default `NULL` (none).
 #' @param hierarchy The RDBES upper hierarchy: `1` (default) or `5`. It must
 #'   match `DEhierarchy` in the data.
 #'
+#' @details
+#' When the DE ratio or the totals ratio measures x on a stage (`at`), every
+#' stage below it must be raised. Otherwise x covers whole units while the
+#' numbers cover only their sampled part.
+#'
 #' @return An object of class `RDBESRaisingScheme`: a list with `SA`,
-#'   `stages` (one resolved entry per stage, with the actual column names)
-#'   and `DE`.
+#'   `stages` (one resolved entry per stage, with the actual column names),
+#'   `DE` and `totals`.
 #' @seealso [stageRaising()], [deRaising()], [externalAux()]
 #' @export
 #'
@@ -254,9 +328,13 @@ externalAux <- function(data, by, col) {
 #' raisingScheme(OS = stageRaising("count"), LE = stageRaising("aux"),
 #'               DE = deRaising("ratio"), hierarchy = 5)
 raisingScheme <- function(..., SA = sampleRaising("weight"),
-                          DE = deRaising("none"), hierarchy = 1) {
+                          DE = deRaising("none"), totals = NULL,
+                          hierarchy = 1) {
   if (!inherits(SA, "RDBESSampleRaising")) {
     stop("SA must be made with sampleRaising().", call. = FALSE)
+  }
+  if (!is.null(totals) && !inherits(totals, "RDBESTotalsRaising")) {
+    stop("totals must be made with totalsRaising().", call. = FALSE)
   }
   spec <- hierarchySpec(hierarchy)
   hierarchy <- spec$hierarchy
@@ -287,6 +365,11 @@ raisingScheme <- function(..., SA = sampleRaising("weight"),
          ". Use \"SA\" or one of: ", paste(allowed, collapse = ", "), ".",
          call. = FALSE)
   }
+  if (!is.null(totals) && !totals$at %in% c("SA", allowed)) {
+    stop("totals at = \"", totals$at, "\" is not a stage of hierarchy ",
+         hierarchy, ". Use \"SA\" or one of: ",
+         paste(allowed, collapse = ", "), ".", call. = FALSE)
+  }
   for (nm in names(given)) {
     if (!inherits(given[[nm]], "RDBESStageRaising")) {
       stop("Stage ", nm, " must be made with stageRaising().", call. = FALSE)
@@ -304,13 +387,19 @@ raisingScheme <- function(..., SA = sampleRaising("weight"),
 
   notRaised <- stages[vapply(resolved, function(s) s$method == "none",
                              logical(1))]
-  if (DE$method == "none" && length(notRaised) > 0) {
-    stop("With DE = \"none\" every stage must be raised to its population, ",
-         "but these stages are \"none\": ", paste(notRaised, collapse = ", "),
-         ". Use \"count\" (it gives 1 when all units were sampled) or a DE ",
-         "ratio.", call. = FALSE)
+  if (DE$method == "none" && is.null(totals) && length(notRaised) > 0) {
+    stop("With DE = \"none\" and no totals every stage must be raised to its ",
+         "population, but these stages are \"none\": ",
+         paste(notRaised, collapse = ", "), ". Use \"count\" (it gives 1 ",
+         "when all units were sampled), a DE ratio or totals.", call. = FALSE)
   }
-  structure(list(SA = SA, stages = resolved, DE = DE, hierarchy = hierarchy),
+  for (step in list(list(name = "DE", s = DE), list(name = "totals",
+                                                     s = totals))) {
+    if (is.null(step$s) || step$s$method == "none") next
+    checkStagesBelowRaised(step$s$at, stages, notRaised, step$name)
+  }
+  structure(list(SA = SA, stages = resolved, DE = DE, totals = totals,
+                 hierarchy = hierarchy),
             class = "RDBESRaisingScheme")
 }
 
@@ -330,6 +419,26 @@ resolveStageRaising <- function(s, tb) {
   if (s$method == "prob") s$value <- paste0(tb, "incProb")
   if (identical(s$strata, "design")) s$strata <- paste0(tb, "stratumName")
   s
+}
+
+#' Check that every stage below a stage-level x is raised
+#'
+#' A ratio with x measured on stage `at` compares whole units (x) with the
+#' sampled part of them (y) when a stage below `at` is "none".
+#' @keywords internal
+#' @noRd
+checkStagesBelowRaised <- function(at, stages, notRaised, name) {
+  if (identical(at, "SA") || !at %in% stages) return(invisible(TRUE))
+  below <- stages[seq_along(stages) > match(at, stages)]
+  bad <- intersect(below, notRaised)
+  if (length(bad) > 0) {
+    stop(name, " ratio with x measured on ", at, ": the stage(s) below it ",
+         "must be raised, but ", paste(bad, collapse = ", "), " is \"none\". ",
+         "Otherwise x covers whole ", at, " units while the numbers cover ",
+         "only their sampled part. Use \"count\" (1 when all units were ",
+         "sampled) or measure x on SA.", call. = FALSE)
+  }
+  invisible(TRUE)
 }
 
 #' Check that a value measured on the samples is used with at = "SA"
@@ -402,5 +511,11 @@ print.RDBESRaisingScheme <- function(x, ...) {
         "| strata:", tp$strata)
   }
   cat("\n")
+  tt <- x$totals
+  if (!is.null(tt)) {
+    cat("  totals: ratio | total:", describeRaisingArg(tt$total),
+        "| value:", describeRaisingArg(tt$value), "at", tt$at,
+        "| strata:", paste(tt$strata, collapse = " x "), "\n")
+  }
   invisible(x)
 }

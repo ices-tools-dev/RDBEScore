@@ -8,6 +8,7 @@ raisingScheme(
   ...,
   SA = sampleRaising("weight"),
   DE = deRaising("none"),
+  totals = NULL,
   hierarchy = 1
 )
 }
@@ -21,13 +22,16 @@ Default \code{sampleRaising("weight")}.}
 
 \item{DE}{The raising to the DE stratum, made with \code{\link[=deRaising]{deRaising()}}.}
 
+\item{totals}{Optional raising to totals you supply, made with
+\code{\link[=totalsRaising]{totalsRaising()}}. Applied after the DE step. Default \code{NULL} (none).}
+
 \item{hierarchy}{The RDBES upper hierarchy: \code{1} (default) or \code{5}. It must
 match \code{DEhierarchy} in the data.}
 }
 \value{
 An object of class \code{RDBESRaisingScheme}: a list with \code{SA},
-\code{stages} (one resolved entry per stage, with the actual column names)
-and \code{DE}.
+\code{stages} (one resolved entry per stage, with the actual column names),
+\code{DE} and \code{totals}.
 }
 \description{
 Combines the raising method of every sampling stage and of the DE step into
@@ -44,6 +48,10 @@ Hierarchies 1 and 5 are implemented. In hierarchy 5 the stages are OS
 (onshore event) and LE (landing event). FT is an optional stage under LE:
 name it (\code{FT = stageRaising(...)}) when the SS records of the data link to
 FT. If the data use FT and the scheme does not name it, FT is \code{"none"}.
+
+When the DE ratio or the totals ratio measures x on a stage (\code{at}), every
+stage below it must be raised. Otherwise x covers whole units while the
+numbers cover only their sampled part.
 }
 \examples{
 raisingScheme(FO = stageRaising("count"),

@@ -31,11 +31,12 @@ tables of \code{at}).}
 }
 \value{
 A \code{data.table} with the domain
-variables, \code{stratum} (the DE stratum), \code{class}, raised \code{N}, \code{NW}, \code{W},
-\code{NL}, \code{L}, \code{nFish}, and \code{sumX} (weighted sample live weight, kg), \code{X}
-(estimated live weight, kg) and \code{ratio} (DE ratio, 1 for \code{"none"}).
-Attributes: \code{"deRatios"}, \code{"domainSummary"}, \code{"target"},
-\code{"domainVars"} and \code{"ratioLog"}.
+variables, \code{stratum} (the DE stratum, not when there are totals),
+\code{class}, raised \code{N}, \code{NW}, \code{W}, \code{NL}, \code{L}, \code{nFish}, and \code{sumX}
+(weighted sample live weight, kg), \code{X} (estimated live weight, kg) and
+\code{ratio} (DE ratio, 1 for \code{"none"}, or the combined factor with totals).
+Attributes: \code{"deRatios"}, \code{"totalsRatios"} (\code{NULL} without totals),
+\code{"domainSummary"}, \code{"target"}, \code{"domainVars"} and \code{"ratioLog"}.
 }
 \description{
 Last raising step of stage-wise raising (see \code{\link[=raisingScheme]{raisingScheme()}}). Each
@@ -53,6 +54,16 @@ without the species stay in the sum.
 \details{
 The ratio is formed per DE stratum and shared by all domains (quarter,
 area, métier, ...) of that stratum.
+
+\strong{Totals.} When the scheme has \code{totals} (\code{\link[=totalsRaising]{totalsRaising()}}), a second
+ratio follows per totals stratum \eqn{g}:
+\eqn{r_g = T_g / \sum_{j \in g} w_j r_{h(j)} x_j}, with \eqn{T_g} from
+your table. Each sample is multiplied by \eqn{r_h r_g}. A totals stratum
+with sampled units but no total stops the run (usually codes that do not
+match). A total without sampled units is logged as a warning and not
+raised. The rows are then per domain and class, without the DE stratum,
+because totals strata can cut across DE strata, and \code{ratio} is the
+combined factor \eqn{X / sumX} of the domain.
 
 \code{X_kg} in the result is the \strong{estimated} live weight of the species per
 domain, \eqn{r_h \sum w x} with x the sampled live weight. The SOP check in
