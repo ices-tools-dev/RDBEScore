@@ -4,12 +4,20 @@
 \alias{raisingScheme}
 \title{Stage-wise raising scheme}
 \usage{
-raisingScheme(..., DE = deRaising("none"), hierarchy = 1)
+raisingScheme(
+  ...,
+  SA = sampleRaising("weight"),
+  DE = deRaising("none"),
+  hierarchy = 1
+)
 }
 \arguments{
 \item{...}{Stage raising methods, named by stage (\code{VS}, \code{FT}, \code{FO} in
 hierarchy 1, \code{OS}, \code{LE}, \code{FT} in hierarchy 5), each made with
 \code{\link[=stageRaising]{stageRaising()}}.}
+
+\item{SA}{The raising within the sample, made with \code{\link[=sampleRaising]{sampleRaising()}}.
+Default \code{sampleRaising("weight")}.}
 
 \item{DE}{The raising to the DE stratum, made with \code{\link[=deRaising]{deRaising()}}.}
 
@@ -17,8 +25,9 @@ hierarchy 1, \code{OS}, \code{LE}, \code{FT} in hierarchy 5), each made with
 match \code{DEhierarchy} in the data.}
 }
 \value{
-An object of class \code{RDBESRaisingScheme}: a list with \code{stages} (one
-resolved entry per stage, with the actual column names) and \code{DE}.
+An object of class \code{RDBESRaisingScheme}: a list with \code{SA},
+\code{stages} (one resolved entry per stage, with the actual column names)
+and \code{DE}.
 }
 \description{
 Combines the raising method of every sampling stage and of the DE step into

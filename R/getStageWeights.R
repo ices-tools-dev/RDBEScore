@@ -61,6 +61,14 @@ getStageWeights <- function(RDBESDataObj, sampleUnits, scheme,
          "are hierarchy ", hier, ". Use raisingScheme(..., hierarchy = ",
          hier, ").", call. = FALSE)
   }
+  wsData <- attr(sampleUnits, "withinSample")
+  if (is.null(wsData)) wsData <- "weight"
+  wsScheme <- if (is.null(scheme$SA)) "weight" else scheme$SA$method
+  if (!identical(wsData, wsScheme)) {
+    stop("sampleUnits were made with withinSample = sampleRaising(\"", wsData,
+         "\") but the scheme has SA = sampleRaising(\"", wsScheme, "\"). ",
+         "Run getSampleUnits() with withinSample = scheme$SA.", call. = FALSE)
+  }
   sc <- ratioStageChain(RDBESDataObj)
   chain <- sc$chain
   stages <- sc$stages

@@ -101,6 +101,11 @@ doRatioEstimation <- function(RDBESDataObj,
   sampleUnits <- getSampleUnits(RDBESDataObj, species = species,
                                 catchCat = catchCat,
                                 areaLookup = areaLookup, strict = strict,
+                                withinSample = if (is.null(raising$SA)) {
+                                  sampleRaising("weight")
+                                } else {
+                                  raising$SA
+                                },
                                 verbose = verbose)
   expanded <- expandWithinSample(RDBESDataObj, sampleUnits, target = target,
                                  lengthType = lengthType,

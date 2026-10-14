@@ -14,13 +14,23 @@
 #'   the selection method, its design class ([classifySelectionMethod()]),
 #'   stratum, `numTotal` and `numSamp` of every stage,
 #' * the SA sub-sample tree: `topSAid`, `SAlevel` and `raiseFactor`, the
-#'   product of `SAtotalWtMes / SAsampWtMes` from the lowest-level SA up to
-#'   the top SA,
+#'   product of the within-sample factors from the lowest-level SA up to the
+#'   top SA (see `withinSample`),
 #' * the domain variables `year`, `quarter`, `month`, `area`, `statRect` and
 #'   `metier6`,
 #' * `x`, the live weight (kg) of the catch fraction the lowest-level SA
-#'   represents. This is the auxiliary variable of the ratio estimators.
+#'   represents: the sampled live weight times `raiseFactor`. This is the
+#'   default auxiliary variable of the ratio estimators.
 #' * `include` and `excludeReason`.
+#'
+#' **Within-sample factor.** With `sampleRaising("weight")` (default) each SA
+#' record gives `SAtotalWtMes / SAsampWtMes`, with `"count"`
+#' `SAnumTotal / SAnumSamp`, and with `"none"` 1. With `"weight"`, `x` is the
+#' live total weight of the top-level SA fraction. With `"count"` and
+#' `"none"`, `x` is `raiseFactor` times the live sampled weight of the
+#' lowest-level SA (`SAsampWtMes`), and may be missing when that is not
+#' filled. It is only needed when the DE or totals ratio uses
+#' `"speciesLiveWeight"`.
 #'
 #' **Live weight.** `SAtotalWtLive` is used when present, otherwise
 #' `SAtotalWtMes * SAconFacMeasLive`. A missing conversion factor is taken as
@@ -63,11 +73,14 @@
 #'   recode areas before defining domains.
 #' @param strict Passed to [filterRDBESDataObject()], which validates the
 #'   object. Default `TRUE`.
+#' @param withinSample The within-sample raising, made with
+#'   [sampleRaising()]. Default `sampleRaising("weight")`. It must be the
+#'   same as `SA` in the scheme used later.
 #' @param verbose Logical. Print log entries as messages. Default `FALSE`.
 #'
 #' @return A `data.table`, one row per lowest-level SA. The assumptions and exclusions
 #'   log is attached as attribute `"ratioLog"`. The attributes `"species"`,
-#'   `"catchCat"` and `"hierarchy"` hold the selection.
+#'   `"catchCat"`, `"hierarchy"` and `"withinSample"` hold the selection.
 #' @seealso [doRatioEstimation()], [expandWithinSample()]
 #' @export
 getSampleUnits <- function(RDBESDataObj,
@@ -75,9 +88,14 @@ getSampleUnits <- function(RDBESDataObj,
                            catchCat = "Lan",
                            areaLookup = NULL,
                            strict = TRUE,
+                           withinSample = sampleRaising("weight"),
                            verbose = FALSE) {
   step <- "getSampleUnits"
   log <- newRatioLog()
+  if (!inherits(withinSample, "RDBESSampleRaising")) {
+    stop("withinSample must be made with sampleRaising().", call. = FALSE)
+  }
+  wsMethod <- withinSample$method
 
   if (!identical(catchCat, "Lan")) {
     stop("Only catchCat = 'Lan' (landings) is supported in this version.",
@@ -143,7 +161,13 @@ getSampleUnits <- function(RDBESDataObj,
   sa[, WliveNode := data.table::fifelse(!is.na(SAtotalWtLive),
                                         as.numeric(SAtotalWtLive),
                                         as.numeric(SAtotalWtMes) * convFac)]
-  sa[, fNode := as.numeric(SAtotalWtMes) / as.numeric(SAsampWtMes)]
+  if (wsMethod == "weight") {
+    sa[, fNode := as.numeric(SAtotalWtMes) / as.numeric(SAsampWtMes)]
+  } else if (wsMethod == "count") {
+    sa[, fNode := as.numeric(SAnumTotal) / as.numeric(SAnumSamp)]
+  } else {
+    sa[, fNode := 1]
+  }
   sa[!is.finite(fNode), fNode := NA_real_]
 
   # Walk up the tree from every node: raising factor of the ancestors,
@@ -164,7 +188,12 @@ getSampleUnits <- function(RDBESDataObj,
   }
   sa[, notSampledInTree := notSampled]
   sa[, raiseFactor := ancFactor * fNode]
-  sa[, x := WliveNode * ancFactor / 1000]
+  if (wsMethod == "weight") {
+    sa[, x := WliveNode * ancFactor / 1000]
+  } else {
+    # x = f x m, with m the live sampled weight of this SA
+    sa[, x := raiseFactor * as.numeric(SAsampWtMes) * convFac / 1000]
+  }
 
   # Top-level SA and sub-sample level, as in createRDBESEstObject()
   lookup <- prepareSubSampleLevelLookup(sa[, .(SAid, SAparentID = parentSAid)])
@@ -285,13 +314,19 @@ getSampleUnits <- function(RDBESDataObj,
   # A total weight of 0 records that the species was looked for and not
   # found (e.g. rows made by generateZerosUsingSL()). It adds nothing to the
   # estimate, and its haul counts as sampled with zero catch.
-  su[!is.na(x) & x == 0, excludeReason := zeroSampleReason()]
+  # Zeros are read from the total weight, whatever the within-sample factor
+  su[!is.na(WliveNode) & WliveNode == 0, excludeReason := zeroSampleReason()]
   su[is.na(excludeReason) & notSampledInTree == TRUE,
      excludeReason := "SAsamp is N (not sampled)"]
   su[is.na(excludeReason) & SAlowHierarchy == "D",
      excludeReason := "lower hierarchy D (no measurements)"]
-  su[is.na(excludeReason) & (is.na(raiseFactor) | is.na(x)),
-     excludeReason := "missing SAtotalWtMes or SAsampWtMes in the SA tree"]
+  if (wsMethod == "weight") {
+    su[is.na(excludeReason) & (is.na(raiseFactor) | is.na(x)),
+       excludeReason := "missing SAtotalWtMes or SAsampWtMes in the SA tree"]
+  } else if (wsMethod == "count") {
+    su[is.na(excludeReason) & is.na(raiseFactor),
+       excludeReason := "missing SAnumTotal or SAnumSamp in the SA tree"]
+  }
   # Measured SA without fish records would add weight to the auxiliary total
   # but no fish to the numerator: lower hierarchies A and B need FM, C needs BV
   saWithFM <- RDBESDataObj$FM$SAid
@@ -336,6 +371,7 @@ getSampleUnits <- function(RDBESDataObj,
   attr(out, "species") <- species
   attr(out, "catchCat") <- catchCat
   attr(out, "hierarchy") <- spec$hierarchy
+  attr(out, "withinSample") <- wsMethod
   attr(out, "ratioLog") <- log
   out[]
 }

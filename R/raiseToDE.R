@@ -82,12 +82,10 @@ raiseToDE <- function(expanded, stageWeights, RDBESDataObj,
       verbose)
   } else {
     if (deStep$at == "SA") {
-      xu <- su[, .(.id = SAid, DEid, wUnit = w, x)]
-      if (!identical(deStep$value, "speciesLiveWeight")) {
-        r <- resolveRaisingArg(su, deStep$value, ".x", step, verbose)
-        xu[, x := r$units$.x[match(xu$.id, r$units$SAid)]]
-        log <- rbind(log, r$log)
-      }
+      xs <- sampleX(su, expanded, deStep$value, step, verbose)
+      log <- rbind(log, xs$log)
+      xu <- su[, .(.id = SAid, DEid, wUnit = w)]
+      xu[, x := xs$x[match(xu$.id, xs$SAid)]]
     } else {
       uw <- attr(stageWeights, "unitWeights")[[deStep$at]]
       if (is.null(uw)) {
@@ -173,4 +171,54 @@ raiseToDE <- function(expanded, stageWeights, RDBESDataObj,
   attr(out, "domainVars") <- domainVars
   attr(out, "ratioLog") <- log
   out[]
+}
+
+#' x per sample for a ratio measured on the samples (at = "SA")
+#'
+#' `"speciesLiveWeight"` is `x` from [getSampleUnits()]. `"fishWeight"` and
+#' `"fishCount"` come from the expanded fish, so they carry the same
+#' within-sample factor as the numbers at age. Any other value is an SA
+#' column or a function of the sample table.
+#' @return A list with `SAid`, `x` and `log`.
+#' @keywords internal
+#' @noRd
+sampleX <- function(su, expanded, value, step, verbose) {
+  log <- newRatioLog()
+  if (identical(value, "speciesLiveWeight")) {
+    out <- su[, .(SAid, x)]
+    noX <- out[is.na(x), SAid]
+    if (length(noX) > 0) {
+      stop(step, ": the live weight of the species is missing for ",
+           length(noX), " sample(s) (SAid ", paste(utils::head(noX, 10),
+                                                   collapse = ", "),
+           "). With sampleRaising(\"count\") or (\"none\") it needs ",
+           "SAsampWtMes. Fill it or use value = \"fishWeight\".",
+           call. = FALSE)
+    }
+    return(list(SAid = out$SAid, x = out$x, log = log))
+  }
+  if (identical(value, "fishWeight") || identical(value, "fishCount")) {
+    e <- expanded[SAid %in% su$SAid,
+                  .(n = sum(yN), nW = sum(yNW), sW = sum(yW)), by = SAid]
+    if (identical(value, "fishCount")) {
+      return(list(SAid = e$SAid, x = e$n, log = log))
+    }
+    noW <- e[nW <= 0, SAid]
+    if (length(noW) > 0) {
+      stop(step, ": value = \"fishWeight\" but ", length(noW),
+           " sample(s) have no weighed fish (SAid ",
+           paste(utils::head(noW, 10), collapse = ", "), ").",
+           call. = FALSE)
+    }
+    part <- e[nW < n - 1e-9, .N]
+    if (part > 0) {
+      log <- addToRatioLog(log, step, "assumption",
+        paste0("fishWeight: fish without a weight get the mean weight of the ",
+               "weighed fish of their sample"), part, verbose)
+    }
+    # g to kg, scaled up for the fish without a weight
+    return(list(SAid = e$SAid, x = e$sW * e$n / e$nW / 1000, log = log))
+  }
+  r <- resolveRaisingArg(su, value, ".x", step, verbose)
+  list(SAid = r$units$SAid, x = r$units$.x, log = r$log)
 }

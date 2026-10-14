@@ -18,10 +18,22 @@ deRaising(
 \item{total}{Total per DE stratum: a DE column (default \code{"DEauxVarTot"})
 or an \code{\link[=externalAux]{externalAux()}} object keyed by \code{DEstratumName} or \code{DEid}.}
 
-\item{value}{The quantity x measured on the sampled units:
-\code{"speciesLiveWeight"} (the live weight of the species in each lowest-level
-SA, with \code{at = "SA"}), a column name of the stage table given by \code{at}, a
-function of that table, or an \code{\link[=externalAux]{externalAux()}} object.}
+\item{value}{The quantity x measured on the sampled units. With
+\code{at = "SA"}:
+\itemize{
+\item \code{"speciesLiveWeight"} (default): the live weight of the species in the
+catch fraction of each lowest-level SA, i.e. the sampled live weight
+times the factor of \code{\link[=sampleRaising]{sampleRaising()}},
+\item \code{"fishWeight"}: the summed live weight (kg) of the fish counted in the
+numbers at age or length, from \code{\link[=expandWithinSample]{expandWithinSample()}}. Fish without a
+weight get the mean weight of the weighed fish of their sample
+(logged),
+\item \code{"fishCount"}: the number of fish counted, from \code{\link[=expandWithinSample]{expandWithinSample()}},
+\item an SA column or a function of the sample table.
+}
+
+Otherwise a column name of the stage table given by \code{at}, a function of
+that table, or an \code{\link[=externalAux]{externalAux()}} object.}
 
 \item{at}{Stage on which \code{value} is measured: \code{"SA"} or a stage of the
 hierarchy (\code{"VS"}, \code{"FT"} or \code{"FO"} in hierarchy 1, \code{"OS"}, \code{"LE"} or

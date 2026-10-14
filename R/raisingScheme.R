@@ -77,6 +77,39 @@ stageRaising <- function(method = c("none", "count", "aux", "ratio",
             class = "RDBESStageRaising")
 }
 
+#' Raising within the sample
+#'
+#' Says how the measured fish of a sample are scaled to the catch fraction of
+#' the SA record. Given as `SA = ` in [raisingScheme()]. The factor is per SA
+#' record. With sub-samples it is the product along the SA chain.
+#'
+#' | method | factor per SA record |
+#' |---|---|
+#' | `"weight"` (default) | `SAtotalWtMes / SAsampWtMes` |
+#' | `"count"` | `SAnumTotal / SAnumSamp` |
+#' | `"none"` | 1: the measured fish are the sample, not scaled |
+#'
+#' The auxiliary x of the DE or totals ratio is scaled with the same factor,
+#' so x and the numbers at age stay consistent.
+#'
+#' @param method `"weight"`, `"count"` or `"none"`.
+#'
+#' @return An object of class `RDBESSampleRaising`.
+#' @seealso [raisingScheme()]
+#' @export
+#'
+#' @examples
+#' sampleRaising("none")
+sampleRaising <- function(method = c("weight", "count", "none")) {
+  method <- match.arg(method)
+  structure(list(method = method), class = "RDBESSampleRaising")
+}
+
+#' Values of x that are measured on the samples themselves
+#' @keywords internal
+#' @noRd
+samplePresets <- function() c("speciesLiveWeight", "fishWeight", "fishCount")
+
 #' Raising to the DE stratum
 #'
 #' Says how the weighted sample is raised to the whole DE stratum, the
@@ -90,10 +123,20 @@ stageRaising <- function(method = c("none", "count", "aux", "ratio",
 #' @param method `"none"` or `"ratio"`.
 #' @param total Total per DE stratum: a DE column (default `"DEauxVarTot"`)
 #'   or an [externalAux()] object keyed by `DEstratumName` or `DEid`.
-#' @param value The quantity x measured on the sampled units:
-#'   `"speciesLiveWeight"` (the live weight of the species in each lowest-level
-#'   SA, with `at = "SA"`), a column name of the stage table given by `at`, a
-#'   function of that table, or an [externalAux()] object.
+#' @param value The quantity x measured on the sampled units. With
+#'   `at = "SA"`:
+#'   * `"speciesLiveWeight"` (default): the live weight of the species in the
+#'     catch fraction of each lowest-level SA, i.e. the sampled live weight
+#'     times the factor of [sampleRaising()],
+#'   * `"fishWeight"`: the summed live weight (kg) of the fish counted in the
+#'     numbers at age or length, from [expandWithinSample()]. Fish without a
+#'     weight get the mean weight of the weighed fish of their sample
+#'     (logged),
+#'   * `"fishCount"`: the number of fish counted, from [expandWithinSample()],
+#'   * an SA column or a function of the sample table.
+#'
+#'   Otherwise a column name of the stage table given by `at`, a function of
+#'   that table, or an [externalAux()] object.
 #' @param at Stage on which `value` is measured: `"SA"` or a stage of the
 #'   hierarchy (`"VS"`, `"FT"` or `"FO"` in hierarchy 1, `"OS"`, `"LE"` or
 #'   `"FT"` in hierarchy 5). [raisingScheme()] checks it against the
@@ -118,10 +161,7 @@ deRaising <- function(method = c("none", "ratio"), total = "DEauxVarTot",
     stop("at must be \"SA\" or a stage table name such as \"FT\" or \"LE\".",
          call. = FALSE)
   }
-  if (identical(value, "speciesLiveWeight") && at != "SA") {
-    stop("value = \"speciesLiveWeight\" is measured on SA: use at = \"SA\".",
-         call. = FALSE)
-  }
+  checkSamplePresetAt(value, at)
   if (!(is.character(strata) && length(strata) == 1)) {
     stop("strata must be a DE column name.", call. = FALSE)
   }
@@ -194,12 +234,15 @@ externalAux <- function(data, by, col) {
 #' @param ... Stage raising methods, named by stage (`VS`, `FT`, `FO` in
 #'   hierarchy 1, `OS`, `LE`, `FT` in hierarchy 5), each made with
 #'   [stageRaising()].
+#' @param SA The raising within the sample, made with [sampleRaising()].
+#'   Default `sampleRaising("weight")`.
 #' @param DE The raising to the DE stratum, made with [deRaising()].
 #' @param hierarchy The RDBES upper hierarchy: `1` (default) or `5`. It must
 #'   match `DEhierarchy` in the data.
 #'
-#' @return An object of class `RDBESRaisingScheme`: a list with `stages` (one
-#'   resolved entry per stage, with the actual column names) and `DE`.
+#' @return An object of class `RDBESRaisingScheme`: a list with `SA`,
+#'   `stages` (one resolved entry per stage, with the actual column names)
+#'   and `DE`.
 #' @seealso [stageRaising()], [deRaising()], [externalAux()]
 #' @export
 #'
@@ -210,7 +253,11 @@ externalAux <- function(data, by, col) {
 #' # Hierarchy 5: auction days counted, landings raised by landed weight
 #' raisingScheme(OS = stageRaising("count"), LE = stageRaising("aux"),
 #'               DE = deRaising("ratio"), hierarchy = 5)
-raisingScheme <- function(..., DE = deRaising("none"), hierarchy = 1) {
+raisingScheme <- function(..., SA = sampleRaising("weight"),
+                          DE = deRaising("none"), hierarchy = 1) {
+  if (!inherits(SA, "RDBESSampleRaising")) {
+    stop("SA must be made with sampleRaising().", call. = FALSE)
+  }
   spec <- hierarchySpec(hierarchy)
   hierarchy <- spec$hierarchy
   given <- list(...)
@@ -263,7 +310,7 @@ raisingScheme <- function(..., DE = deRaising("none"), hierarchy = 1) {
          ". Use \"count\" (it gives 1 when all units were sampled) or a DE ",
          "ratio.", call. = FALSE)
   }
-  structure(list(stages = resolved, DE = DE, hierarchy = hierarchy),
+  structure(list(SA = SA, stages = resolved, DE = DE, hierarchy = hierarchy),
             class = "RDBESRaisingScheme")
 }
 
@@ -283,6 +330,18 @@ resolveStageRaising <- function(s, tb) {
   if (s$method == "prob") s$value <- paste0(tb, "incProb")
   if (identical(s$strata, "design")) s$strata <- paste0(tb, "stratumName")
   s
+}
+
+#' Check that a value measured on the samples is used with at = "SA"
+#' @keywords internal
+#' @noRd
+checkSamplePresetAt <- function(value, at) {
+  if (is.character(value) && length(value) == 1 &&
+      value %in% samplePresets() && at != "SA") {
+    stop("value = \"", value, "\" is measured on the samples: use at = \"SA\".",
+         call. = FALSE)
+  }
+  invisible(TRUE)
 }
 
 #' Check a total or value argument of a raising constructor
@@ -321,6 +380,8 @@ describeRaisingArg <- function(x) {
 #' @export
 print.RDBESRaisingScheme <- function(x, ...) {
   cat("RDBES raising scheme (hierarchy ", x$hierarchy, ")\n", sep = "")
+  saMethod <- if (is.null(x$SA)) "weight" else x$SA$method
+  cat("  SA (within sample): ", saMethod, "\n", sep = "")
   cat("  SS: always 1\n")
   for (s in x$stages) {
     cat("  ", s$stage, ": ", s$method, sep = "")

@@ -10,6 +10,7 @@ getSampleUnits(
   catchCat = "Lan",
   areaLookup = NULL,
   strict = TRUE,
+  withinSample = sampleRaising("weight"),
   verbose = FALSE
 )
 }
@@ -31,12 +32,16 @@ recode areas before defining domains.}
 \item{strict}{Passed to \code{\link[=filterRDBESDataObject]{filterRDBESDataObject()}}, which validates the
 object. Default \code{TRUE}.}
 
+\item{withinSample}{The within-sample raising, made with
+\code{\link[=sampleRaising]{sampleRaising()}}. Default \code{sampleRaising("weight")}. It must be the
+same as \code{SA} in the scheme used later.}
+
 \item{verbose}{Logical. Print log entries as messages. Default \code{FALSE}.}
 }
 \value{
 A \code{data.table}, one row per lowest-level SA. The assumptions and exclusions
 log is attached as attribute \code{"ratioLog"}. The attributes \code{"species"},
-\code{"catchCat"} and \code{"hierarchy"} hold the selection.
+\code{"catchCat"}, \code{"hierarchy"} and \code{"withinSample"} hold the selection.
 }
 \description{
 First step of the ratio estimation workflow (see \code{\link[=doRatioEstimation]{doRatioEstimation()}}).
@@ -54,14 +59,24 @@ hierarchy 5) with
 the selection method, its design class (\code{\link[=classifySelectionMethod]{classifySelectionMethod()}}),
 stratum, \code{numTotal} and \code{numSamp} of every stage,
 \item the SA sub-sample tree: \code{topSAid}, \code{SAlevel} and \code{raiseFactor}, the
-product of \code{SAtotalWtMes / SAsampWtMes} from the lowest-level SA up to
-the top SA,
+product of the within-sample factors from the lowest-level SA up to the
+top SA (see \code{withinSample}),
 \item the domain variables \code{year}, \code{quarter}, \code{month}, \code{area}, \code{statRect} and
 \code{metier6},
 \item \code{x}, the live weight (kg) of the catch fraction the lowest-level SA
-represents. This is the auxiliary variable of the ratio estimators.
+represents: the sampled live weight times \code{raiseFactor}. This is the
+default auxiliary variable of the ratio estimators.
 \item \code{include} and \code{excludeReason}.
 }
+
+\strong{Within-sample factor.} With \code{sampleRaising("weight")} (default) each SA
+record gives \code{SAtotalWtMes / SAsampWtMes}, with \code{"count"}
+\code{SAnumTotal / SAnumSamp}, and with \code{"none"} 1. With \code{"weight"}, \code{x} is the
+live total weight of the top-level SA fraction. With \code{"count"} and
+\code{"none"}, \code{x} is \code{raiseFactor} times the live sampled weight of the
+lowest-level SA (\code{SAsampWtMes}), and may be missing when that is not
+filled. It is only needed when the DE or totals ratio uses
+\code{"speciesLiveWeight"}.
 
 \strong{Live weight.} \code{SAtotalWtLive} is used when present, otherwise
 \code{SAtotalWtMes * SAconFacMeasLive}. A missing conversion factor is taken as
