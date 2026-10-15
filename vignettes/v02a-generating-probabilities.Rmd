@@ -204,6 +204,6 @@ for (i in seq_along(vignettes$Rmd)) {
 }
 ```
 
+*Last review: 09/10/2026*
+
 #END
-
-
