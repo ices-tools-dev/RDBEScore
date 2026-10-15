@@ -14,6 +14,7 @@ export(doEstimationForAllStrata)
 export(doEstimationRatio)
 export(estim)
 export(estimMC)
+export(estimateSrsworTotal)
 export(exportEstimationResultsToInterCatchFormat)
 export(filterAndTidyRDBESDataObject)
 export(filterRDBESDataObject)
@@ -35,14 +36,10 @@ export(updateSAwithTaxonFromSL)
 export(validateRDBESDataObject)
 export(validateRDBESEstObject)
 import(data.table)
-importFrom(stats,
-  formula,
-  na.omit,
-  rnorm,
-  setNames
-)
-importFrom(utils,
-  file_test,
-  packageDescription,
-  tail
-)
+importFrom(stats,formula)
+importFrom(stats,na.omit)
+importFrom(stats,rnorm)
+importFrom(stats,setNames)
+importFrom(utils,file_test)
+importFrom(utils,packageDescription)
+importFrom(utils,tail)

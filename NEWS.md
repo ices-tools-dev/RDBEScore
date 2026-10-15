@@ -1,4 +1,5 @@
 # RDBEScore 0.4.0
+- Estimation: added `estimateSrsworTotal()` with analytical and Preston rescaled-bootstrap variance for SRSWOR/census stages, plus an agricultural vignette and separate H8 design example (#278). Missing responses and non-census singleton groups produce explicit warnings. Human review is pending.
 - Documentation: revised function examples to run with packaged or small synthetic data, retaining `\dontrun` for examples that demonstrate strict validation errors (#272).
 - Breaking: `getLinkedDataFromLevel()` now returns the requested field and target-table columns in both directions, without adding intermediate hierarchy ids (#268). Non-id requested fields are retained when going down the hierarchy. `getLowerTableSubsets()` avoids duplicated requested-field columns.
 - Package README updated with AI usage guidelines

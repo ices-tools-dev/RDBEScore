@@ -113,6 +113,7 @@ Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 Suggests:
+    ggplot2,
     knitr,
     rmarkdown,
     testthat
@@ -122,3 +123,4 @@ Imports:
     data.table
 VignetteBuilder: knitr
 Config/roxygen2/version: 8.1.1
+RoxygenNote: 7.3.2

@@ -1,0 +1,366 @@
+---
+title: "03c Estimating totals with analytical and rescaled bootstrap variance"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{03c Estimating totals with analytical and rescaled bootstrap variance}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(RDBEScore)
+library(ggplot2)
+theme_set(theme_bw())
+```
+
+## Introduction
+
+`estimateSrsworTotal()` estimates a population total and its variance for
+stratified multistage simple random sampling without replacement (SRSWOR).
+It can also calculate variance using Preston's rescaled bootstrap. This
+vignette compares the two approaches using complete packaged agricultural
+datasets and shows separately why the packaged H8 fisheries example does not
+satisfy this estimator's assumptions.
+
+The inputs are `RDBESEstObject`s made with `createRDBESEstObject()`. The outputs
+are a table of totals, variances, standard errors and confidence intervals,
+optional bootstrap totals, and the checked mapping of sampling stages. No
+source dataset is changed. The examples use default strict validation.
+
+The implemented scope requires SRSWOR or census sampling at every stage,
+finite numeric observed responses at the terminal stage, and recorded sample
+and population sizes that agree with the observed units. Unequal probability
+sampling, sampling with replacement and explicit RDBES clustering are outside
+this scope. Missing responses are omitted with a warning and no nonresponse
+adjustment. A non-census group with only one sampled unit cannot supply an
+estimated within-group variance. Its own variance contribution is set to
+zero with a warning by default. Both conventions can understate uncertainty.
+The agricultural examples below have complete responses and no non-census
+singletons.
+
+## What is calculated?
+
+For a single SRSWOR sample with values \(y_1,\ldots,y_n\) from a population of
+size \(N\), the familiar estimates are
+
+\[
+\widehat{T}=N\overline{y},\qquad
+\widehat{V}(\widehat{T})=N^2\left(1-\frac{n}{N}\right)\frac{s_y^2}{n}.
+\]
+
+For a multistage design, the calculation works upwards from the terminal
+responses. Within a parent and stratum, child totals \(t_i\) and their
+estimated variances \(v_i\) give
+
+\[
+\widehat{T}_{\mathrm{parent}}=\frac{N}{n}\sum_i t_i,\qquad
+\widehat{V}_{\mathrm{parent}}=
+ N^2\left(1-\frac{n}{N}\right)\frac{s_t^2}{n}
+ +\frac{N}{n}\sum_i v_i.
+\]
+
+Independent strata are added within each parent. A census has no variance
+from selecting its own units, but retains any variance from sampling below
+those units.
+
+The bootstrap resamples within each parent and stratum using SRSWOR
+subsamples of size \(\lfloor n/2\rfloor\), with finite population corrections
+and Preston's additive multistage weight recurrence. The bootstrap variance
+is the sample variance of the replicate totals. `set.seed()` makes a run
+reproducible. Increasing `nBoot` reduces Monte Carlo variation in the bootstrap
+variance, but cannot repair unsuitable sampling assumptions.
+
+Both methods report the original estimated total. Their confidence intervals
+are normal-approximation intervals,
+\(\widehat{T}\mathbin{\pm}z_{(1+c)/2}\widehat{\mathrm{SE}}\), where \(c\)
+is `confidenceLevel`. The bootstrap interval is therefore a Wald interval,
+rather than an interval from the quantiles of the replicate totals. An
+adequate normal approximation is needed for either interval.
+
+## One-stage agricultural example
+
+`Pckg_SDAResources_agsrs_H1` contains the complete 300-county SRS example
+converted from `SDAResources::agsrs`. The real sampling stage is represented
+by VS. The response `SAsampWtMes` contains agricultural acreage (`acres92`),
+so the estimated total is in acres. These fields do not describe vessel
+weights in this teaching dataset. The lower tables are artificial census
+links needed to represent the data in hierarchy 1.
+
+```{r agsrs-input}
+H1SrsDataObj <- Pckg_SDAResources_agsrs_H1
+H1SrsEstObj <- createRDBESEstObject(H1SrsDataObj, 1, stopTable = "SA")
+
+unique(as.data.frame(H1SrsDataObj$VS)[
+  c("VSselectMeth", "VSnumSamp", "VSnumTotal")
+])
+```
+
+The packaged FO table declares a census of ten units for each FT, while only
+one FO link is present. The dataset preparation identifies these as dummy
+tables, rather than an additional agricultural sampling stage. We therefore
+explicitly identify FO as a one-to-one census link with `censusLinks = "FO"`.
+The resulting warning remains visible. This option changes the effective
+counts for estimation and preserves the source data and declared counts in
+the returned design. It should only be used when this interpretation is
+documented, never to bypass an incomplete real census.
+
+```{r agsrs-estimation}
+set.seed(278)
+srsResult <- estimateSrsworTotal(
+  H1SrsEstObj, "SAsampWtMes", nBoot = 499,
+  censusLinks = "FO"
+)
+knitr::kable(srsResult$estimates, digits = 2)
+
+unique(srsResult$design[
+  c("table", "n", "N", "originaln", "originalN", "method")
+])
+```
+
+We can check the analytical result directly against the one-stage formula.
+There is one terminal observation per sampled county. This relationship is
+checked explicitly before using the flattened estimation object.
+
+```{r agsrs-reference}
+srsValues <- as.data.frame(H1SrsEstObj)
+stopifnot(!anyDuplicated(srsValues$VSid),
+          nrow(srsValues) == unique(srsValues$su1numSamp),
+          length(unique(srsValues$su1numTotal)) == 1)
+
+y <- srsValues$SAsampWtMes
+n <- length(y)
+N <- unique(srsValues$su1numTotal)
+referenceTotal <- N * mean(y)
+referenceVariance <- N^2 * (1 - n / N) * stats::var(y) / n
+
+mc <- estimMC(y, rep(n, n), rep(N, n), method = "SRSWOR")
+existingSrs <- doEstimationForAllStrata(H1SrsEstObj, "SAsampWtMes")
+existingSrs <- existingSrs[existingSrs$recType == "VS", ]
+
+srsComparison <- data.frame(
+  method = c("Direct SRSWOR formula", "estimMC",
+             "doEstimationForAllStrata", "estimateSrsworTotal"),
+  total = c(referenceTotal, mc$est.total,
+            existingSrs$est.total, srsResult$estimates$est.total[1]),
+  variance = c(referenceVariance, mc$var.total,
+               existingSrs$se.total^2, srsResult$estimates$var.total[1])
+)
+stopifnot(isTRUE(all.equal(srsComparison$total,
+                          rep(referenceTotal, nrow(srsComparison)))),
+          isTRUE(all.equal(srsComparison$variance,
+                          rep(referenceVariance, nrow(srsComparison)))))
+knitr::kable(srsComparison, digits = 2)
+```
+
+The comparison uses only the genuine VS sampling stage from the existing
+estimator. The complete dataset is passed to both workflows.
+
+## Stratified agricultural example
+
+`Pckg_SDAResources_agstrat_H1` is the complete stratified 300-county example.
+VS identifies the four regional strata, and `SAsampWtMes` again contains
+acreage. Its artificial census links have consistent one-to-one counts and
+need no explicit override.
+
+```{r agstrat-estimation}
+H1StratDataObj <- Pckg_SDAResources_agstrat_H1
+H1StratEstObj <- createRDBESEstObject(H1StratDataObj, 1, stopTable = "SA")
+set.seed(279)
+stratResult <- estimateSrsworTotal(
+  H1StratEstObj, "SAsampWtMes", nBoot = 499
+)
+knitr::kable(stratResult$estimates, digits = 2)
+```
+
+A direct stratified calculation adds \(N_h\overline{y}_h\) and
+\(N_h^2(1-n_h/N_h)s_h^2/n_h\) across the independent regional strata.
+
+```{r agstrat-reference}
+stratValues <- as.data.frame(H1StratEstObj)
+stopifnot(!anyDuplicated(stratValues$VSid))
+byStratum <- split(stratValues, stratValues$su1stratumName, drop = TRUE)
+stratReference <- do.call(rbind, lapply(names(byStratum), function(stratum) {
+  d <- byStratum[[stratum]]
+  n <- nrow(d)
+  N <- unique(d$su1numTotal)
+  stopifnot(length(N) == 1, n == unique(d$su1numSamp))
+  data.frame(stratum = stratum, n = n, N = N,
+             total = N * mean(d$SAsampWtMes),
+             variance = N^2 * (1 - n / N) * stats::var(d$SAsampWtMes) / n)
+}))
+stopifnot(isTRUE(all.equal(sum(stratReference$total),
+                          stratResult$estimates$est.total[1])),
+          isTRUE(all.equal(sum(stratReference$variance),
+                          stratResult$estimates$var.total[1])))
+knitr::kable(stratReference, digits = 2)
+```
+
+The bootstrap totals show variation from resampling the observed sample
+under the specified design. The vertical line is the original total.
+
+```{r bootstrap-distribution, fig.width = 6, fig.height = 3.5}
+ggplot(data.frame(total = stratResult$replicates / 1e6), aes(x = total)) +
+  geom_histogram(bins = 25, fill = "steelblue", colour = "white") +
+  geom_vline(xintercept = stratResult$estimates$est.total[1] / 1e6,
+             linetype = "dashed") +
+  labs(x = "Bootstrap total (million acres)", y = "Number of replicates")
+```
+
+Exact analytical agreement with a reference calculation checks the
+implementation for these examples. A bootstrap variance based on a finite
+number of replicates will generally differ from the analytical variance.
+Neither agreement nor successful rendering establishes confidence-interval
+coverage for a particular scientific application.
+
+## Multistage verification and available examples
+
+The agricultural examples have one genuine sampling stage. Their artificial
+census links do not demonstrate sampling at several stages. The current
+packaged datasets do not provide an unchanged, complete-response multistage
+example meeting all the restrictions above. The closest candidate,
+`Pckg_survey_apiclus2_H1`, samples districts and then schools by SRSWOR, but
+contains **six** missing enrollment responses, although its help page reports
+four. It also requires the documented artificial FO census-link treatment.
+Other candidates require explicit clustering or have unknown population
+sizes. The H8 example below has a replacement stage.
+
+The regression tests therefore include an independent complete synthetic
+three-stage design. Every parent samples two of four units at each stage.
+The eight terminal responses are `c(1, 3, 4, 8, 2, 6, 10, 20)`. Hand
+calculation gives a total of 432 and a variance estimate of 25,344. The tests
+enumerate all 128 equally likely bootstrap outcomes and verify their mean
+and variance against those values. This checks the recurrence beyond two
+stages. Selecting a complete real multistage reference for scientific review
+remains open.
+
+## H8 as a separate example
+
+The complete `H8ExampleEE1` object represents an Estonian sprat sampling
+example. Its commercial sampling data, vessel details and species lists
+passed RDBES upload screening and were downloaded on 2026-10-14. CL and CE
+were attached locally and have not passed upload checks. The existing
+unbiased-estimation vignette describes this example in more detail.
+
+First inspect its actual stage metadata, without recoding the sampling
+methods or removing records.
+
+```{r h8-design}
+H8DataObj <- H8ExampleEE1
+validateRDBESDataObject(H8DataObj, checkDataTypes = TRUE)
+H8EstObj <- createRDBESEstObject(H8DataObj, 8, stopTable = "SA")
+
+h8Design <- do.call(rbind, lapply(c("TE", "VS", "LE", "SS", "SA"),
+                                function(tableName) {
+  d <- as.data.frame(H8DataObj[[tableName]])
+  unique(data.frame(table = tableName,
+                    method = d[[paste0(tableName, "selectMeth")]],
+                    n = d[[paste0(tableName, "numSamp")]],
+                    N = d[[paste0(tableName, "numTotal")]]))
+}))
+knitr::kable(h8Design, row.names = FALSE)
+```
+
+TE uses SRSWOR, but VS uses **SRSWR**, which is outside the new estimator's
+scope. SA also contains non-census singleton samples. The default zero
+variance convention cannot resolve the unsupported VS sampling method.
+Changing the VS code to SRSWOR would change the assumed design and is not
+justified by the packaged data. This call deliberately demonstrates the
+informative error,
+which is caught so that the vignette remains runnable.
+
+```{r h8-scope-error}
+tryCatch(
+  estimateSrsworTotal(H8EstObj, "SAsampWtMes", nBoot = 99),
+  error = function(e) cat("Cannot use the SRSWOR estimator:",
+                           conditionMessage(e), "\n")
+)
+```
+
+The existing `doEstimationForAllStrata()` supports more selection methods.
+It can be run on the complete H8 input independently of the new estimator.
+Here the response is converted from grammes to tonnes in a copy of the
+estimation object. Only the display is restricted to TE month strata after
+estimation. Any warnings remain visible.
+
+```{r h8-existing-estimator}
+H8TonnesEstObj <- data.table::copy(H8EstObj)
+H8TonnesEstObj$SAsampWtMes <- H8TonnesEstObj$SAsampWtMes / 1e6
+h8Existing <- doEstimationForAllStrata(H8TonnesEstObj, "SAsampWtMes")
+h8Months <- h8Existing[h8Existing$recType == "TE",
+                       c("stratumName", "est.total", "se.total")]
+h8Months <- h8Months[order(match(h8Months$stratumName, month.name)), ]
+knitr::kable(h8Months, digits = 3, row.names = FALSE,
+             caption = "Existing estimator results by month, in tonnes.")
+```
+
+These are outputs from the existing workflow, not a validation of its
+uncertainty estimates for this design. In particular, a non-census singleton
+does not identify its own within-group sampling variance. No bootstrap
+comparison or confidence interval from `estimateSrsworTotal()` is supplied
+for this H8 example.
+
+## Choosing an implementation
+
+The investigation of [IEOstats](https://github.com/joel-ieo/IEOstats)
+motivated this restricted implementation. The relevant concepts are
+analytical recursion for SRSWOR/census totals and the multistage rescaled
+bootstrap. They are implemented directly with base R and the existing
+`data.table` dependency, rather than adding IEOstats as a package dependency.
+This keeps the supported assumptions and the mapping from RDBES stages
+explicit. The bootstrap follows the additive recurrence in Preston (2009),
+including the finite population corrections at successive stages.
+
+The source inspection used IEOstats commit
+[`f16a367`](https://github.com/joel-ieo/IEOstats/commit/f16a367976c9d5aebd0e613208e7b1ee8c72ae03).
+In that snapshot, `svy_total()` converts caller data with `setDT()` and
+manages temporary columns by reference. Its default method vector reaches
+a scalar `if` condition without being reduced to one method. Analytical
+intervals use a Student's *t* quantile with the original row count minus one
+as degrees of freedom. Bootstrap intervals use replicate quantiles.
+[Inspected `svy_total()` source](https://github.com/joel-ieo/IEOstats/blob/f16a367976c9d5aebd0e613208e7b1ee8c72ae03/R/svy_total.R).
+The new workflow preserves input tables, selects bootstrap execution through
+`nBoot`, and explicitly labels its normal-approximation intervals.
+
+The upstream cumulative weight-ratio update also differs from Preston's
+equations after two stages. Writing \(A_r\) for the cumulative adjustment
+through stage \(r\), it accumulates \(1/(A_1A_2)\) after stage two instead of
+\(1/A_2\). The three-stage combined weight consequently has an extra division
+by \(A_1\).
+[Inspected bootstrap source](https://github.com/joel-ieo/IEOstats/blob/f16a367976c9d5aebd0e613208e7b1ee8c72ae03/R/rs_boot_iteration.R).
+Computing the combined adjustment directly avoids these intermediate
+divisions. The exhaustive three-stage check above verifies the resulting
+bootstrap moments against independently calculated values.
+
+Missing response contributions are omitted from point and bootstrap totals
+with a warning, while the original design counts and sampling units are
+retained. No nonresponse weighting adjustment is made. This convention does
+not establish that the missing values are true zeroes, and the result may
+not estimate the full population total. Analytical variance, standard error
+and interval limits are unavailable (`NA`) if any responses are missing.
+Bootstrap variance describes the retained response contributions and does
+not account for nonresponse uncertainty. The two uncertainty methods need
+not agree for incomplete responses. An entirely missing response vector is
+rejected.
+
+For non-census singleton groups, the default `singleton = "zero"` produces a
+warning and sets their own variance contributions to zero. Variance from
+sampled descendants is retained. This convention can understate uncertainty.
+Use `singleton = "fail"` to stop instead and require the design problem to
+be resolved before estimation. Neither convention makes SRSWR or unequal
+probability designs supported. These defaults were selected for this
+workflow, rather than inferred to be scientifically appropriate for every
+dataset.
+
+This vignette and the new estimator were developed with AI assistance.
+Human review of the new method, implementation and examples is pending.
+
+## References
+
+Preston, J. (2009). Rescaled bootstrap for stratified multistage sampling.
+*Survey Methodology*, **35**(2), 227-234.
+[Statistics Canada paper](https://www150.statcan.gc.ca/n1/pub/12-001-x/2009002/article/11044-eng.pdf).
+
+The [survey package implementation of the multistage rescaled bootstrap](https://github.com/cran/survey/blob/master/R/mrb.R)
+provides an additional reference implementation for this method.
