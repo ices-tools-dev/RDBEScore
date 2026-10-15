@@ -14,7 +14,8 @@ raisingScheme(
 }
 \arguments{
 \item{...}{Stage raising methods, named by stage (\code{VS}, \code{FT}, \code{FO} in
-hierarchy 1, \code{FT}, \code{FO} in hierarchy 2, \code{OS}, \code{LE}, \code{FT} in hierarchy 5),
+hierarchy 1, \code{FT}, \code{FO} in hierarchy 2, \code{OS}, \code{LE}, \code{FT} in hierarchy 5,
+\code{OS} in hierarchy 7, \code{FO} in hierarchy 13),
 each made with
 \code{\link[=stageRaising]{stageRaising()}}.}
 
@@ -45,11 +46,13 @@ by the DE ratio.
 Stages not given are \code{"none"} (pooled). The species selection (SS) is
 always 1: a species list with more species gets no extra weight.
 
-Hierarchies 1, 2 and 5 are implemented. Hierarchy 2 has the stages FT
-and FO (trips are sampled directly). In hierarchy 5 the stages are OS
+Hierarchies 1, 2, 5, 7 and 13 are implemented. Hierarchy 2 has the stages
+FT and FO (trips are sampled directly). In hierarchy 5 the stages are OS
 (onshore event) and LE (landing event). FT is an optional stage under LE:
 name it (\code{FT = stageRaising(...)}) when the SS records of the data link to
 FT. If the data use FT and the scheme does not name it, FT is \code{"none"}.
+Hierarchy 7 has one stage, OS. Hierarchy 13 has one stage, FO (hauls
+sampled directly).
 
 When the DE ratio or the totals ratio measures x on a stage (\code{at}), every
 stage below it must be raised. Otherwise x covers whole units while the

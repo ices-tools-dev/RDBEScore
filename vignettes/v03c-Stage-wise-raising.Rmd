@@ -46,10 +46,12 @@ The factors of all stages are multiplied, so each sample gets one weight
 `wStages`. The estimate of numbers at age is the sum of `wStages` times
 the numbers at age in the samples.
 
-The same functions work for hierarchy 2 (trips sampled directly) and
-hierarchy 5 (onshore sampling), see [Hierarchy 2](#hierarchy-2) and
-[Hierarchy 5](#hierarchy-5) below. Other hierarchies are not implemented
-yet.
+The same functions work for hierarchy 2 (trips sampled directly),
+hierarchy 5 (onshore sampling), hierarchy 7 (onshore events only) and
+hierarchy 13 (hauls sampled directly), see [Hierarchy 2](#hierarchy-2),
+[Hierarchy 5](#hierarchy-5), [Hierarchy 7](#hierarchy-7) and
+[Hierarchy 13](#hierarchy-13) below. Other hierarchies are not
+implemented yet.
 
 ```{r}
 library(RDBEScore)
@@ -470,6 +472,45 @@ What differs from hierarchy 1:
     without FT stops, and so do data where some SS records link to LE
     and others to FT.
 
+## Hierarchy 7 {#hierarchy-7}
+
+Hierarchy 7 is onshore sampling without trips: design stratum (DE),
+onshore event (OS), species selection (SS) and sample (SA). OS is the
+only raising stage. LE is not a sampling unit here. It hangs under SS
+(`LE$SSid`) and says when, where and with which métier the sampled
+landing was caught.
+
+```{r, eval = FALSE}
+# Onshore events counted within their OS stratum, then a ratio to the DE
+# total
+sc7 <- raisingScheme(OS = stageRaising("count"), DE = deRaising("ratio"),
+                     hierarchy = 7)
+res7 <- doRatioEstimation(myH7Object, species = 127143, raising = sc7)
+```
+
+-   The domain date is `LEdate`, else `OSsamDate`. Area, rectangle and
+    métier come from LE when the SA value is blank. More than one LE per
+    SS is logged, and the first LE is used.
+-   Without LE, area and métier come from SA only, and are NA when SA is
+    blank.
+-   The sample count in `res$domains` is `nOnshoreEvents`.
+
+## Hierarchy 13 {#hierarchy-13}
+
+Hierarchy 13 is at-sea sampling of hauls without vessels or trips:
+design stratum (DE), fishing operation (FO), species selection (SS) and
+sample (SA). FO is the only raising stage, and `FOnumTotal` is the number
+of hauls in the population of the FO stratum.
+
+```{r, eval = FALSE}
+sc13 <- raisingScheme(FO = stageRaising("count"), DE = deRaising("ratio"),
+                      hierarchy = 13)
+res13 <- doRatioEstimation(myH13Object, species = 127143, raising = sc13)
+```
+
+Domains come from FO, as in hierarchy 1, but there is no `FTarvDate` to
+fall back on. The sample count in `res$domains` is `nHauls`.
+
 ## Checks
 
 The run stops with a message when the information does not fit the
@@ -506,4 +547,4 @@ scheme, for example:
     raised fish weights with the raised sample weights. A value of 1
     does not prove the weights are right.
 -   Not covered yet: variance, sub-sampling of BV, hierarchies other
-    than 1, 2 and 5, and discards.
+    than 1, 2, 5, 7 and 13, and discards.

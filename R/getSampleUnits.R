@@ -1,4 +1,4 @@
-#' Build the table of sample units for ratio estimation (hierarchies 1, 2 and 5)
+#' Build the table of sample units for ratio estimation (hierarchies 1, 2, 5, 7 and 13)
 #'
 #' First step of the ratio estimation workflow (see [doRatioEstimation()]).
 #' It returns one row per **lowest-level Sample (SA) record** of the requested
@@ -38,12 +38,15 @@
 #' 1 and logged. A presentation other than `WHL` with a factor of 1 is logged
 #' as suspicious.
 #'
-#' **Domain variables.** Date in hierarchies 1 and 2: `FOendDate`, else
-#' `FOstartDate`, else `FTarvDate`. In hierarchy 5: `LEdate`, else
-#' `FTarvDate` (when FT is used), else `OSsamDate`. Area, rectangle and
-#' métier: the SA value when filled, else the FO value (hierarchy 1) or the
-#' LE value (hierarchy 5). `areaLookup` recodes areas (for example divisions
-#' to sub-areas).
+#' **Domain variables.** Date in hierarchies 1, 2 and 13: `FOendDate`, else
+#' `FOstartDate`, else `FTarvDate` (not in 13). In hierarchy 5: `LEdate`,
+#' else `FTarvDate` (when FT is used), else `OSsamDate`. In hierarchy 7:
+#' `LEdate`, else `OSsamDate`. Area, rectangle and métier: the SA value when
+#' filled, else the FO value (hierarchies 1, 2 and 13) or the LE value
+#' (hierarchies 5 and 7). In hierarchy 7, LE is not a sampling unit: it links
+#' to SS (`LE$SSid`) and describes the sampled landing. More than one LE per
+#' SS is logged and the first is used. Without LE, area and métier come from
+#' SA only. `areaLookup` recodes areas (for example divisions to sub-areas).
 #'
 #' **Recorded zeros.** An SA with a total or sampled weight of 0 records that
 #' the species was looked for and not found. [generateZerosUsingSL()] writes
@@ -61,11 +64,11 @@
 #' estimate. A haul whose samples of the species are all excluded is treated
 #' as not sampled (non-response) by [getStageWeights()].
 #'
-#' Upper hierarchies 1, 2 and 5 are implemented. The object must hold one
+#' Upper hierarchies 1, 2, 5, 7 and 13 are implemented. The object must hold one
 #' hierarchy. Clustering (`XXclustering` other than `"N"`) is logged. It does
 #' not affect the point estimates.
 #'
-#' @param RDBESDataObj A valid `RDBESDataObject` of hierarchy 1, 2 or 5.
+#' @param RDBESDataObj A valid `RDBESDataObject` of hierarchy 1, 2, 5, 7 or 13.
 #' @param species Species to estimate, as AphiaID(s) (WoRMS), matched to
 #'   `SAspeCode`, for example `127143` for plaice. Several values are allowed.
 #'   FAO 3-alpha codes are not accepted: rows added by
@@ -261,6 +264,31 @@ getSampleUnits <- function(RDBESDataObj,
   su <- merge(su, path, by = "SSid", all.x = TRUE)
   su[, SAselectionClass := classifySelectionMethod(SAselectMeth)]
 
+  # Tables that describe the sample but are not sampling units (LE under SS
+  # in H7): their domain columns, one row per link
+  for (tb in names(spec$info)) {
+    link <- spec$info[[tb]]
+    tbl <- RDBESDataObj[[tb]]
+    cols <- intersect(domainSourceCols[substr(domainSourceCols, 1, 2) == tb],
+                      names(tbl))
+    if (is.null(tbl) || nrow(tbl) == 0 || !link %in% names(tbl) ||
+        length(cols) == 0) {
+      next
+    }
+    info <- tbl[!is.na(get(link)) & get(link) %in% su[[link]],
+                c(link, cols), with = FALSE]
+    nPer <- info[, .N, by = link]
+    nMulti <- nPer[N > 1, .N]
+    if (nMulti > 0) {
+      log <- addToRatioLog(log, step, "warning",
+        paste0("More than one ", tb, " per ", link,
+               ": the domain is taken from the first ", tb), nMulti, verbose)
+    }
+    info <- info[, .SD[1], by = link]
+    su[, (intersect(cols, names(su))) := NULL]
+    su <- merge(su, info, by = link, all.x = TRUE)
+  }
+
   # Design classes and clustering, logged per stage
   for (tb in c(stages, "SA")) {
     cl <- paste0(tb, "selectionClass")
@@ -306,17 +334,9 @@ getSampleUnits <- function(RDBESDataObj,
              ": quarter and month are NA for these samples"),
       nNoDate, verbose)
   }
-  fallback <- function(saCol, upCol) {
-    up <- if (upCol %in% names(su)) {
-      as.character(su[[upCol]])
-    } else {
-      rep(NA_character_, nrow(su))
-    }
-    data.table::fifelse(!isBlank(su[[saCol]]), as.character(su[[saCol]]), up)
-  }
-  su[, area := fallback("SAarea", spec$areaCol)]
-  su[, statRect := fallback("SAstatRect", spec$statRectCol)]
-  su[, metier6 := fallback("SAmetier6", spec$metierCol)]
+  su[, area := firstValue(su, c("SAarea", spec$areaCol))]
+  su[, statRect := firstValue(su, c("SAstatRect", spec$statRectCol))]
+  su[, metier6 := firstValue(su, c("SAmetier6", spec$metierCol))]
   if (!is.null(areaLookup)) {
     al <- data.table::as.data.table(areaLookup)
     if (!all(c("from", "to") %in% names(al))) {

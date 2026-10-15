@@ -497,9 +497,6 @@ unitStrata <- function(RDBESDataObj, at, ids, cols, areaLookup, step) {
                all.x = TRUE, allow.cartesian = TRUE,
                suffixes = c("", paste0(".", tb)))
   }
-  firstCol <- function(cl) {
-    if (cl %in% names(w)) as.character(w[[cl]]) else rep(NA_character_, nrow(w))
-  }
   dom <- list()
   date <- firstDate(w, spec$dateCols)
   dom$year <- as.integer(format(date, "%Y"))
@@ -508,14 +505,14 @@ unitStrata <- function(RDBESDataObj, at, ids, cols, areaLookup, step) {
   }
   dom$month <- as.integer(format(date, "%m"))
   dom$quarter <- (dom$month - 1L) %/% 3L + 1L
-  dom$area <- firstCol(spec$areaCol)
+  dom$area <- firstValue(w, spec$areaCol)
   if (!is.null(areaLookup)) {
     al <- data.table::as.data.table(areaLookup)
     hit <- match(dom$area, al$from)
     dom$area[!is.na(hit)] <- al$to[hit[!is.na(hit)]]
   }
-  dom$statRect <- firstCol(spec$statRectCol)
-  dom$metier6 <- firstCol(spec$metierCol)
+  dom$statRect <- firstValue(w, spec$statRectCol)
+  dom$metier6 <- firstValue(w, spec$metierCol)
 
   out <- data.table::data.table(id = ids)
   for (cl in cols) {

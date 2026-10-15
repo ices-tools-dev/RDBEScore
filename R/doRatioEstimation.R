@@ -1,4 +1,4 @@
-#' Stage-wise estimation of numbers at age or length (hierarchies 1, 2 and 5, landings)
+#' Stage-wise estimation of numbers at age or length (hierarchies 1, 2, 5, 7 and 13, landings)
 #'
 #' Estimates numbers, mean weight and mean length at age or at length per
 #' domain (for example year x quarter x area x métier). The samples are
@@ -29,10 +29,11 @@
 #' Selection methods are not used to compute weights. Non-probabilistic
 #' designs are logged as assumptions.
 #'
-#' Implemented for upper hierarchies 1, 2 and 5. The scheme must be made for the
-#' hierarchy of the data (`raisingScheme(..., hierarchy = 5)`).
+#' Implemented for upper hierarchies 1, 2, 5, 7 and 13. The scheme must be
+#' made for the hierarchy of the data (`raisingScheme(..., hierarchy = 5)`).
 #'
-#' Not in this version: variance, hierarchies other than 1, 2 and 5, discards.
+#' Not in this version: variance, hierarchies other than 1, 2, 5, 7 and 13,
+#' discards.
 #'
 #' @inheritParams getSampleUnits
 #' @inheritParams expandWithinSample

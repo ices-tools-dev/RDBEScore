@@ -47,7 +47,7 @@ ratioFieldCodeTypes <- function() {
 #' Upper hierarchies supported by stage-wise raising
 #' @keywords internal
 #' @noRd
-supportedHierarchies <- function() c(1L, 2L, 5L)
+supportedHierarchies <- function() c(1L, 2L, 5L, 7L, 13L)
 
 #' What stage-wise raising needs to know about one upper hierarchy
 #'
@@ -60,8 +60,12 @@ supportedHierarchies <- function() c(1L, 2L, 5L)
 #'     table of hierarchies
 #'   * `optional`: optional stages that can be used for raising, as a named
 #'     character vector stage = parent stage (FT under LE in H5)
+#'   * `info`: tables that are not sampling units but describe the sample,
+#'     as a named character vector table = link column (LE under SS in H7).
+#'     Their columns can be domain sources.
 #'   * `dateCols`: date columns, in order of preference
-#'   * `areaCol`, `statRectCol`, `metierCol`: used when the SA value is blank
+#'   * `areaCol`, `statRectCol`, `metierCol`: used when the SA value is
+#'     blank, in order of preference (none in H7 without LE)
 #'   * `unitLabels`: names of the sample counts per stage
 #' @keywords internal
 #' @noRd
@@ -93,7 +97,21 @@ hierarchySpec <- function(hierarchy) {
                areaCol = "LEarea", statRectCol = "LEstatRect",
                metierCol = "LEmetier6",
                unitLabels = c(OS = "nOnshoreEvents", LE = "nLandingEvents",
-                              FT = "nTrips")))
+                              FT = "nTrips")),
+    # Onshore events only. LE is not a sampling unit here: it hangs under SS
+    # and says where and when the sampled landing was caught
+    "7" = list(optional = character(0), info = c(LE = "SSid"),
+               dateCols = c("LEdate", "OSsamDate"),
+               areaCol = "LEarea", statRectCol = "LEstatRect",
+               metierCol = "LEmetier6",
+               unitLabels = c(OS = "nOnshoreEvents")),
+    # Hauls sampled directly in SD, no vessel or trip stage
+    "13" = list(optional = character(0),
+                dateCols = c("FOendDate", "FOstartDate"),
+                areaCol = "FOarea", statRectCol = "FOstatRect",
+                metierCol = "FOmetier6",
+                unitLabels = c(FO = "nHauls")))
+  if (is.null(spec$info)) spec$info <- character(0)
   c(list(hierarchy = h, stages = setdiff(chain, c("DE", "SD", "SS", "SA"))),
     spec)
 }
@@ -364,6 +382,19 @@ firstDate <- function(d, cols) {
     miss <- is.na(out)
     if (!any(miss)) break
     out[miss] <- parseRDBESDate(d[[cl]])[miss]
+  }
+  out
+}
+
+#' First non-blank value over columns, in order of preference
+#' @keywords internal
+#' @noRd
+firstValue <- function(d, cols) {
+  out <- rep(NA_character_, nrow(d))
+  for (cl in intersect(cols, names(d))) {
+    v <- as.character(d[[cl]])
+    take <- isBlank(out) & !isBlank(v)
+    out[take] <- v[take]
   }
   out
 }

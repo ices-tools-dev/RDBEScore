@@ -2,7 +2,7 @@
 % Please edit documentation in R/getSampleUnits.R
 \name{getSampleUnits}
 \alias{getSampleUnits}
-\title{Build the table of sample units for ratio estimation (hierarchies 1, 2 and 5)}
+\title{Build the table of sample units for ratio estimation (hierarchies 1, 2, 5, 7 and 13)}
 \usage{
 getSampleUnits(
   RDBESDataObj,
@@ -15,7 +15,7 @@ getSampleUnits(
 )
 }
 \arguments{
-\item{RDBESDataObj}{A valid \code{RDBESDataObject} of hierarchy 1, 2 or 5.}
+\item{RDBESDataObj}{A valid \code{RDBESDataObject} of hierarchy 1, 2, 5, 7 or 13.}
 
 \item{species}{Species to estimate, as AphiaID(s) (WoRMS), matched to
 \code{SAspeCode}, for example \code{127143} for plaice. Several values are allowed.
@@ -84,12 +84,15 @@ filled. It is only needed when the DE or totals ratio uses
 1 and logged. A presentation other than \code{WHL} with a factor of 1 is logged
 as suspicious.
 
-\strong{Domain variables.} Date in hierarchies 1 and 2: \code{FOendDate}, else
-\code{FOstartDate}, else \code{FTarvDate}. In hierarchy 5: \code{LEdate}, else
-\code{FTarvDate} (when FT is used), else \code{OSsamDate}. Area, rectangle and
-métier: the SA value when filled, else the FO value (hierarchy 1) or the
-LE value (hierarchy 5). \code{areaLookup} recodes areas (for example divisions
-to sub-areas).
+\strong{Domain variables.} Date in hierarchies 1, 2 and 13: \code{FOendDate}, else
+\code{FOstartDate}, else \code{FTarvDate} (not in 13). In hierarchy 5: \code{LEdate},
+else \code{FTarvDate} (when FT is used), else \code{OSsamDate}. In hierarchy 7:
+\code{LEdate}, else \code{OSsamDate}. Area, rectangle and métier: the SA value when
+filled, else the FO value (hierarchies 1, 2 and 13) or the LE value
+(hierarchies 5 and 7). In hierarchy 7, LE is not a sampling unit: it links
+to SS (\code{LE$SSid}) and describes the sampled landing. More than one LE per
+SS is logged and the first is used. Without LE, area and métier come from
+SA only. \code{areaLookup} recodes areas (for example divisions to sub-areas).
 
 \strong{Recorded zeros.} An SA with a total or sampled weight of 0 records that
 the species was looked for and not found. \code{\link[=generateZerosUsingSL]{generateZerosUsingSL()}} writes
@@ -106,7 +109,7 @@ B, no BV for C) are flagged \code{include = FALSE}. They add nothing to the
 estimate. A haul whose samples of the species are all excluded is treated
 as not sampled (non-response) by \code{\link[=getStageWeights]{getStageWeights()}}.
 
-Upper hierarchies 1, 2 and 5 are implemented. The object must hold one
+Upper hierarchies 1, 2, 5, 7 and 13 are implemented. The object must hold one
 hierarchy. Clustering (\code{XXclustering} other than \code{"N"}) is logged. It does
 not affect the point estimates.
 }
