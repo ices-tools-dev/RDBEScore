@@ -4,16 +4,19 @@
 #' @param verbose (Optional) Set to TRUE if you want informative text printed
 #' out, or FALSE if you don't.  The default is FALSE.
 #'
-#' @return Whoever revises this function please specify what it returns here
+#' @return The validated input object, invisibly. Stops if validation fails.
 #'
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' myH1RawObject <-
-#' importRDBESDataCSV(rdbesExtractPath = "tests/testthat/h1_v_1_19")
-#' myEStObj <- createRDBESEstObject(myH1RawObject,1)
-#' validateRDBESEstObject(myEStObj)}
+#' H1DataObj <- Pckg_survey_apistrat_H1
+#' H1EstObj <- createRDBESEstObject(H1DataObj, 1, stopTable = "SA")
+#' validateRDBESEstObject(H1EstObj)
+#'
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: rix133
+#' - Notes/scope: examples running only
 validateRDBESEstObject <- function(objectToCheck, verbose = FALSE){
 
   validRDBESEstObject <- TRUE

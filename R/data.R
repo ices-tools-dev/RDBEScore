@@ -110,7 +110,6 @@
 
 #' The default files names when you download data from the RDBES.
 #'
-#'
 #' @format A list containing the default file names for each RDBES table
 #' @source \url{https://rdbes.ices.dk/}
 "DefaultFileNames"
@@ -156,15 +155,17 @@
 #'   \item{IS}{the Individual Species table}
 
 #' }
-#' #' @source Richard Meitern @ Estonian Marine Institute, 2025
+#' @source Richard Meitern @ Estonian Marine Institute, 2025
 "H7Example"
 
 #' A dataset containing test RDBES data for H8 in the RDBESDataObject structure
 #'
-#' This dataset does not have passed the RDBES upload checks,
-#'  hence the object might be somewhat invalid, however it resembles real data
-#'  from the Estonian Baltic Trawling fleet for 2022 sprat total landings and
-#'  commercial sampling
+#' This example represents commercial sampling and sprat landings from the
+#' Estonian Baltic trawling fleet in 2022. CS, vessel details and species lists
+#' passed RDBES upload screening and were downloaded on 2026-10-14 under test
+#' country ZW. CL and CE were attached locally and have not passed upload checks.
+#' The preparation script replaces database IDs with sequential table IDs,
+#' preserving foreign-key links and ordering sampling records by sequence number.
 #'
 #' @format A list containing entries required for H8 RDBES data:
 #' \describe{
@@ -182,7 +183,7 @@
 #'   \item{CL}{the Commertial Landing data table}
 #'   \item{CE}{the Commertial Effort data table}
 #' }
-#' #' @source Richard Meitern @ Estonian Marine Institute, 2025
+#' @source Richard Meitern @ Estonian Marine Institute, 2025
 "H8ExampleEE1"
 
 #' A dataset containing test RDBES data for H5 in the RDBESDataObject structure

@@ -26,17 +26,22 @@ filtered it is possible to introduce orphan records.
 The direction of the cleanup is effectively downstream.
 The function does not remove parent rows because a child disappeared.
 }
-\examples{
-\dontrun{
+\section{Development review}{
 
-myH1RawObject <-
-importRDBESDataCSV(rdbesExtractPath = "tests\\\\testthat\\\\h1_v_1_19")
-myFields <- c("SDctry","VDctry","VDflgCtry","FTarvLoc")
-myValues <- c("ZW","ZWBZH","ZWVFA" )
-myFilteredObject <- filterRDBESDataObject(myH1RawObject,
-                                        fieldsToFilter = myFields,
-                                        valuesToFilter = myValues )
-myObjectNoOrphans <- findAndKillOrphans(objectToCheck = myFilteredObject,
-                                       verbose = FALSE)
+\itemize{
+\item AI-assisted: Yes
+\item Review: rix133
+\item Notes/scope: examples only
 }
+}
+
+\examples{
+H1DataObj <- H1Example
+# Filtering a design leaves unlinked records downstream
+H1DataObjFiltered <- filterRDBESDataObject(
+  H1DataObj, "DEstratumName", "Pckg_SDAResources_agstrat_H1"
+)
+H1DataObjNoOrphans <- findAndKillOrphans(H1DataObjFiltered)
+c(before = nrow(H1DataObjFiltered$SA), after = nrow(H1DataObjNoOrphans$SA))
+
 }

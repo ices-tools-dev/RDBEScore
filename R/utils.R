@@ -10,7 +10,7 @@ usedVars <- c("mapColNamesFieldR",
               "..varsNeeded", "|>", "parentTableID", "est.total",
               "recType", "parentTableStratum", "stratumName",
               "parentIDandStratum", "studyVariable", "..myColNames",
-              "..methColNames", "tblName", "all_of", "SLid","SAid",
+              "..methColNames", "tblName", "SLid","SAid",
               "..myLevel","parentTable",".", "id", "i.id" )
 
 moreUsedVars  <- c("..clustFields", "DEyear", "SAcatchCat",
@@ -79,7 +79,7 @@ globalVariables(unique(c(usedVars, moreUsedVars, evenMoreUsedVars,
 #' @return a vector of integers or doubles
 #' @importFrom stats na.omit
 #' @keywords internal
-
+#' @exportS3Method NULL
 as.integer.or.dbl <- function(x){
   # we apply as.numeric in case it is a character vector
   # we apply as.omit because that causes an error
@@ -97,10 +97,14 @@ as.integer.or.dbl <- function(x){
 #' @param dt A data table to check
 #' @param col A character string specifying the name of the column to check
 #' @return  nothing if the column exists and has unique values, otherwise an error is thrown
+#'
 #' @examples
-#' \dontrun{
-#'   RDBEScore:::check_key_column(H1Example$DE, "DEid")
-#' }
+#' RDBEScore:::check_key_column(H1Example$DE, "DEid")
+#'
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: rix133
+#' - Notes/scope: examples only
 check_key_column <- function(dt, col) {
   # Check if column exists in data table
   if (!col %in% colnames(dt)) {
@@ -172,66 +176,77 @@ convert.col.names <- function(table, new.names = "R.name"){
   return(nms.new)
 }
 
-# Convert all elements of a list of data.frames into data.tables
-# Leaves existing NULL elements as NULL
+#' makeDT
+#'
+#' Converts one element of a list of data.frames into a data.table, leaving
+#' `NULL` elements as `NULL`. Used for each RDBES table in
+#' `importRDBESDataDFS()`.
+#'
+#' @param x A data.frame, or `NULL`.
+#'
+#' @return A data.table, or `NULL` if `x` is `NULL`.
+#' @keywords internal
 makeDT <- function(x){
   if(is.null(x)) return(NULL)
   data.table::as.data.table(x)
 }
 
 
-# Gets data from higher in the hierarchy for the given input `table`. Only SS
-# explicitly supported for now, but could update in the future to support any
-# table (in theory).
-#
-# `object` = an RDBESDataObject
-#
-# `table` = The table from which to start and go up the hierarchy (e.g. `"SS"`)
-#
-# `field` = The data (column name) to extract from any other table higher in the
-# hierarchy, e.g. `"DEyear"` or `"SDctry"`.
-#
-# At present will not work with data which contains more than one hierarchy.
-# Also bypasses any optional tables (e.g. FT in H5).
-# e.g.  extractHigherFields(myRDBESObject, "SS", "DEyear")
-
+#' extractHigherFields
+#'
+#' Gets data from higher in the hierarchy for the given input `table`. Only SS
+#' explicitly supported for now, but could update in the future to support any
+#' table (in theory).
+#'
+#' At present will not work with data which contains more than one hierarchy.
+#' Also bypasses any optional tables (e.g. FT in H5).
+#'
+#' @param object An RDBESDataObject.
+#' @param table The table from which to start and go up the hierarchy
+#'   (e.g. `"SS"`).
+#' @param field The data (column name) to extract from any other table higher
+#'   in the hierarchy, e.g. `"DEyear"` or `"SDctry"`.
+#'
+#' @return One value per row of `table`, in the same order. Rows that are not
+#'   linked to the table holding `field` get `NA` (e.g. orphans left by
+#'   filtering DE before `findAndKillOrphans()` runs in
+#'   `filterAndTidyRDBESDataObject()`).
+#'
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Human review: rix133
+#'
+#' - Notes/scope:
+#'
+#' @keywords internal
+#'
+#' @examples
+#' head(RDBEScore:::extractHigherFields(H1Example, "SS", "DEyear"))
 extractHigherFields <- function(object, table, field){
 
   # Check for a single hierarchy
-  if(length(unique(object$DE$DEhierarchy)) == 1)
-    hierarchy <- paste0("H", unique(object$DE$DEhierarchy)) else
-      stop("Multiple Upper Hierarchies found.")
+  hierarchy <- unique(object$DE$DEhierarchy)
+  if (length(hierarchy) != 1) stop("Multiple Upper Hierarchies found.")
 
-  # object hierarchy
-  h <- paste0("H", unique(object$DE$DEhierarchy))
+  # path from DE to the input table, without optional and lower hierarchy tables
+  path.to.table <- getTablesInRDBESHierarchy(hierarchy,
+                                             includeOptTables = FALSE,
+                                             includeLowHierTables = FALSE)
+  path.to.table <- path.to.table[match("DE", path.to.table):match(table, path.to.table)]
+  missingTables <- path.to.table[sapply(object[path.to.table], is.null)]
+  if (length(missingTables) > 0) stop("Tables not found in the object: ", paste(missingTables, collapse = ", "))
 
-  # get path from DE to input table
-  h.all <- tablesInRDBESHierarchies |>
-    dplyr::filter(h == hierarchy) |>
-    dplyr::arrange(sortOrder) |>
-    dplyr::filter(FALSE == optional) |>
-    dplyr::filter(FALSE == lowerHierarchy)
-  path.to.table <- h.all$table
-  path.to.table <- path.to.table[match("DE", path.to.table):match(table, path.to.table)] # path to SS
-
-  # Always start with joining DE and SD
-  joined_tbl <- dplyr::left_join(object$SD, # 2nd table
-                                 object$DE, # 1st table
-                                 by = "DEid",
-                                 suffix = c('', '.y')) # ensures the second table names are not changed, otherwise the next join might fail
-
-  for(i in 3:length(path.to.table)){ # 3 since first 2 tables always DE and SD
-
-    # Join to next table in path
-    joined_tbl <- dplyr::inner_join(object[[path.to.table[i]]], # next table
-                                    joined_tbl,
-                                    by = paste0(path.to.table[i-1], "id"), # previous table id column
-                                    suffix = c('', '.y'))
+  # Walk up the path from `table`, following each row to its parent row with
+  # match(), until reaching the first table that has the field
+  rows <- seq_len(nrow(object[[table]]))
+  for (i in rev(seq_along(path.to.table))) {
+    tbl <- object[[path.to.table[i]]]
+    if (field %in% names(tbl)) return(tbl[[field]][rows])
+    if (i == 1) break
+    parentId <- paste0(path.to.table[i - 1], "id")
+    parentIds <- object[[path.to.table[i - 1]]][[parentId]]
+    if (anyDuplicated(parentIds) > 0) stop("Duplicated ", parentId, " values in table ", path.to.table[i - 1])
+    rows <- match(tbl[[parentId]][rows], parentIds, incomparables = NA)
   }
-
-  # Output column
-  if(!(field %in% names(joined_tbl))) stop("'field' not found in higher tables column names") else
-    output <- joined_tbl[[which(names(joined_tbl) == field)]]
-
-  return(output)
+  stop("'field' not found in higher tables column names")
 }

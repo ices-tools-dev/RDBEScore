@@ -24,24 +24,24 @@
 #'   to the biological data. If `combineStrata` is `TRUE`, strata columns from the `CS` data are collapsed using a vertical bar (`|`). The function
 #'   currently supports only biological data at the "C" hierarchy level.
 #'
-#' @examples
-#' \dontrun{
-#' strataListCS <- list(LEarea="27.3.d.28.1",
-#'                      LEmetier6 = "OTM_SPF_16-31_0_0",
-#'                      TEstratumName = month.name[1:3],
-#'                      SAspeCodeFAO = "SPR")
-#' strataListCL <- list(CLarea="27.3.d.28.1",
-#'                      CLquar = 1,
-#'                      CLmetier6 = "OTM_SPF_16-31_0_0",
-#'                      CLspecFAO = "SPR")
-#' biolCL <- addCLtoLowerCS(rdbesObject, strataListCS, strataListCL,
-#'                          combineStrata = TRUE,
-#'                          lowerHierarchy = "C",
-#'                          CLfields = c("CLoffWeight"))
-#' }
-#'
 #' @seealso \code{\link{getLowerTableSubsets}}, \code{\link{upperTblData}}
 #' @export
+#'
+#' @examples
+#' H8DataObj <- H8ExampleEE1
+#' # Add first-quarter sprat landings to biological measurements
+#' strataCS <- list(TEstratumName = month.name[1:3], SAspeCodeFAO = "SPR")
+#' strataCL <- list(CLarea = "27.3.d.28.1", CLquar = 1,
+#'                  CLmetier6 = "OTM_SPF_16-31_0_0", CLspecFAO = "SPR")
+#' # A warning reports that the three months are pooled into one stratum
+#' biolCL <- addCLtoLowerCS(H8DataObj, strataCS, strataCL,
+#'                        CLfields = "CLoffWeight")
+#' unique(biolCL[, c("CLquar", "sumCLoffWeight")])
+#'
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: rix133
+#' - Notes/scope: examples only
 addCLtoLowerCS <- function(rdbes, strataListCS, strataListCL, combineStrata =T, lowerHierarchy = "C", CLfields = c("CLoffWeight"), verbose = FALSE){
 
   # Function to subset data.table based on criteria list

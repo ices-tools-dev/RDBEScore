@@ -4,6 +4,7 @@
 ^\.Rproj\.user$
 ^data-raw$
 ^README\.Rmd$
+^AGENTS\.md$
 ^WGRDBES-EST$
 ^.pre-commit-config.yaml$
 ^codecov.yml$

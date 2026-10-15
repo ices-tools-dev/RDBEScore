@@ -25,7 +25,17 @@
 #' \code{\link{generateProbs}}
 #'
 #' @examples
-#' # To be added
+#' H1DataObj <- Pckg_survey_apistrat_H1
+#' # Suppress the per-record progress messages
+#' invisible(capture.output(
+#'   H1DataObjWithProbs <- applyGenerateProbs(H1DataObj, probType = "inclusion")
+#' ))
+#' head(H1DataObjWithProbs$VS[, c("VSstratumName", "VSincProb")])
+#'
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: rix133
+#' - Notes/scope: examples only
 
 applyGenerateProbs <- function(x, probType, overwrite,
                                runInitialProbChecks = TRUE,

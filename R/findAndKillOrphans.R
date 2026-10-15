@@ -17,18 +17,18 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
+#' H1DataObj <- H1Example
+#' # Filtering a design leaves unlinked records downstream
+#' H1DataObjFiltered <- filterRDBESDataObject(
+#'   H1DataObj, "DEstratumName", "Pckg_SDAResources_agstrat_H1"
+#' )
+#' H1DataObjNoOrphans <- findAndKillOrphans(H1DataObjFiltered)
+#' c(before = nrow(H1DataObjFiltered$SA), after = nrow(H1DataObjNoOrphans$SA))
 #'
-#' myH1RawObject <-
-#' importRDBESDataCSV(rdbesExtractPath = "tests\\testthat\\h1_v_1_19")
-#' myFields <- c("SDctry","VDctry","VDflgCtry","FTarvLoc")
-#' myValues <- c("ZW","ZWBZH","ZWVFA" )
-#' myFilteredObject <- filterRDBESDataObject(myH1RawObject,
-#'                                         fieldsToFilter = myFields,
-#'                                         valuesToFilter = myValues )
-#' myObjectNoOrphans <- findAndKillOrphans(objectToCheck = myFilteredObject,
-#'                                        verbose = FALSE)
-#' }
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: rix133
+#' - Notes/scope: examples only
 findAndKillOrphans <- function(objectToCheck,
                                verbose = FALSE,
                                strict = TRUE) {

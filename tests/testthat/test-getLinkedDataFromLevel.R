@@ -1,3 +1,6 @@
+# AI-assisted: Yes
+# Review: rix133
+capture.output({  ## suppresses printing of console output when running test()
 
 # Test for Example 1: Going up in the table hierarchy to retrieve data from the DE table
 test_that("Retrieve data from DE based on BVid", {
@@ -30,11 +33,31 @@ test_that("Retrieve data from VS based on BVfishId", {
   # Check that the result is a data.table (or other expected data structure)
   expect_s3_class(result, "data.table")
 
-  # Check that the result contains data (you can adjust this depending on known expected results)
+  expect_equal(nrow(result), 2)
+  expect_setequal(result$BVfishId, c("410472143", "410472144"))
+
+})
+
+test_that("optional source tables can be linked to required tables", {
+  result <- getLinkedDataFromLevel(
+    "FTid",
+    H5Example$FT$FTid[1],
+    H5Example,
+    "DE"
+  )
+
+  expect_s3_class(result, "data.table")
   expect_equal(nrow(result), 1)
+})
 
-  # Optionally, check for specific values in the result
+test_that("error when a required table is missing", {
+  h5 <- data.table::copy(H5Example)
+  h5[["SD"]] <- NULL
 
+  expect_error(
+    getLinkedDataFromLevel("DEid", c(1), h5, "BV"),
+    "Missing required tables in the RDBESDataObject: SD"
+  )
 })
 
 test_that("Error when rdbesTables is not of class RDBESDataObject", {
@@ -56,6 +79,20 @@ test_that("Error when level is not found in rdbesTables", {
   )
 })
 
+test_that("Error when mixed hierarchy in rdbesTables", {
+  obj <- data.table::copy(H8ExampleEE1)
+  # Add a DE row from a different hierarchy
+  obj[["DE"]] <- rbind(obj[["DE"]], H1Example[["DE"]][1])
+
+
+  expect_error(
+    suppressWarnings(
+      getLinkedDataFromLevel("BVid", c(1), obj, "TE")
+    ),
+    "Mixed hierarchy RDBESDataObject!"
+  )
+})
+
 test_that("Retrieve data from VS based on BVfishId if There is an empty intermedate FM table", {
   h8 <- H8ExampleEE1
 
@@ -69,8 +106,8 @@ test_that("Retrieve data from VS based on BVfishId if There is an empty intermed
   # Check that the result is a data.table (or other expected data structure)
   expect_s3_class(result, "data.table")
 
-  # Check that the result contains data (you can adjust this depending on known expected results)
-  expect_equal(nrow(result), 1)
+  expect_equal(nrow(result), 2)
+  expect_setequal(result$BVfishId, c("410472143", "410472144"))
 
   #check also downwards direction
   res2 <- getLinkedDataFromLevel("DEid", c(1), h8, "BV")
@@ -79,7 +116,85 @@ test_that("Retrieve data from VS based on BVfishId if There is an empty intermed
   expect_equal(nrow(res2), 3995)
 })
 
+test_that("Retrieve data from DE based on BVid retains the BVid field", {
+  result <- getLinkedDataFromLevel("BVid", c(1), H8ExampleEE1, "DE")
 
+  # Check that the result is a data.table (or other expected data structure)
+  expect_s3_class(result, "data.table")
+
+  # Check that the result has 1 row, as expected
+  expect_equal(nrow(result), 1)
+
+  # Check that the result has the correct field
+  expect_true("BVid" %in% names(result))
+
+  # Check that the BVid field has the correct value
+  expect_equal(result$BVid, 1)
+})
+
+test_that("Retrieve data from TE based on DEid retains the DEid field", {
+  result <- getLinkedDataFromLevel("DEid", c(1), H8ExampleEE1, "TE")
+
+  # Check that the result is a data.table (or other expected data structure)
+  expect_s3_class(result, "data.table")
+
+  # Check that the result has 1 row, as expected
+  expect_equal(nrow(result), 11)
+
+  # Check that the result has the correct field
+  expect_true("DEid" %in% names(result))
+
+  # Check that the DEid field has the correct value
+  expect_equal(result$DEid, c(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1))
+})
+
+test_that("Retrieve data from FO based on DEid retains the DEid field", {
+  result <- getLinkedDataFromLevel("DEid", c(5351,5393), H1Example, "FO")
+
+  # Check that the result is a data.table (or other expected data structure)
+  expect_s3_class(result, "data.table")
+
+  # Check that the result has 1 row, as expected
+  expect_equal(nrow(result), 320)
+
+  # Check that the result has the correct field
+  expect_true("DEid" %in% names(result))
+
+  # Check that the DEid field has the correct value
+  expect_equal(result$DEid, c(rep(5351, 300), rep(5393, 20)))
+})
+
+test_that("Both traversal directions return the requested field and the target columns only", {
+  # downwards: requested field is not an id
+  down <- getLinkedDataFromLevel("TEstratumName", c("January", "February"),
+                                 H8ExampleEE1, "SA")
+  expect_setequal(names(down), c("TEstratumName", names(H8ExampleEE1$SA)))
+  expect_equal(nrow(down), 6)
+  expect_equal(sort(unique(down$TEstratumName)), c("February", "January"))
+  expect_equal(anyDuplicated(down[, c("TEstratumName", "SAid")]), 0)
+
+  # upwards
+  up <- getLinkedDataFromLevel("SAid", c(1, 2), H8ExampleEE1, "TE")
+  expect_setequal(names(up), c("SAid", names(H8ExampleEE1$TE)))
+  expect_equal(up$SAid, c(1, 2))
+  expect_equal(up$TEid, c(1, 1))
+})
+
+test_that("Same-level queries follow the same output convention", {
+  result <- getLinkedDataFromLevel("TEstratumName", c("January", "February"),
+                                   H8ExampleEE1, "TE")
+
+  expect_setequal(names(result), names(H8ExampleEE1$TE))
+  expect_equal(anyDuplicated(names(result)), 0)
+  expect_equal(nrow(result), 4)
+})
+
+test_that("Linked data does not contain intermediate hierarchy ids", {
+  result <- getLinkedDataFromLevel("DEid", c(1), H8ExampleEE1, "SA")
+
+  expect_setequal(names(result), unique(c("DEid", names(H8ExampleEE1$SA))))
+})
+})
 
 
 

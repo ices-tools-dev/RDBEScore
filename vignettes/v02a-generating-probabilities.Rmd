@@ -46,11 +46,11 @@ The functions that generate probabilities do not yet deal with lower hierarchies
 
 ```{r}
 # Temp fixes to change data to lower hierarchy C - function won't deal with A, or B yet
-myH1DataObject[["BV"]] <- dplyr::distinct(myH1DataObject[["BV"]], FMid, .keep_all = TRUE)
-temp <- dplyr::left_join(myH1DataObject[["BV"]][,c("BVid","FMid")], 
-                         myH1DataObject[["FM"]][,c("FMid","SAid")], 
-                         by="FMid")
-myH1DataObject[["BV"]]$SAid <- temp$SAid
+# keep the first BV row of each FMid
+myH1DataObject[["BV"]] <- unique(myH1DataObject[["BV"]], by = "FMid")
+# link BV directly to SA using the SAid of its FM row
+myH1DataObject[["BV"]]$SAid <- myH1DataObject[["FM"]]$SAid[
+  match(myH1DataObject[["BV"]]$FMid, myH1DataObject[["FM"]]$FMid)]
 myH1DataObject[["BV"]]$FMid <- NA
 myH1DataObject[["SA"]]$SAlowHierarchy <- "C"
 myH1DataObject[["BV"]]$BVnumTotal <- 10

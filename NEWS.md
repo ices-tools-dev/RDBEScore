@@ -1,35 +1,9 @@
-# RDBEScore (development version)
-
-- New stage-wise estimation for upper hierarchy 1 (landings): `doRatioEstimation(obj, species, raising = raisingScheme(...))` estimates numbers, mean weight and mean length at age or length per domain. The samples are raised within the sample, then stage by stage (vessels, trips, hauls) with a method chosen per stage: `"none"`, `"count"` (N / n), `"aux"` (RDBES auxiliary fields), `"ratio"` (any columns or a function), `"external"` (user tables via `externalAux()`) or `"prob"` (reported inclusion probabilities), within design strata. The top is raised to the DE totals (`DEauxVarTot` per DE stratum) or not at all. Selection methods are logged, not used. Species selection (SS) is always 1.
-- Each step is exported and returns an inspectable table: `getSampleUnits()`, `expandWithinSample()`, `getUnitTable()`, `computeStageFactors()`, `getStageWeights()`, `raiseToDE()`, `summariseRatioEstimates()`, `summariseRatioDomains()`. Schemes are built with `raisingScheme()`, `stageRaising()`, `sampleRaising()`, `deRaising()`, `totalsRaising()` and `externalAux()`. Assumptions and exclusions are collected in a log, read with `getRatioLog()`.
-- `getSampleUnits()` and `doRatioEstimation()` take species as AphiaIDs only (`SAspeCode`), so that the zero and NA rows of `generateZerosUsingSL()` and `generateNAsUsingSL()` are found.
-- `summariseRatioEstimates()` columns carry units: `meanWeight_g`, `meanLength_mm`, `totalWeight_kg`, `lengthClass_mm`.
-- The result of `doRatioEstimation()` is a list of tables, each named by what one row of it is: `estimates` (domain × class), `domains` (domain), `ratios$DE` (DE stratum), `ratios$totals` (totals stratum), `samples` (lowest-level SA, key columns first), `stageUnits` (one table per stage), `fishBySample` (sample × class) and `byStratum` (domain × DE stratum × class). The per-domain columns moved from `estimates` to `domains`, made by the new `summariseRatioDomains()`. Old element names: `sampleUnits` and `stageWeights` are now `samples`, `expanded` is `fishBySample`, `raised` is `byStratum`, and the attributes `deRatios`, `totalsRatios` and `unitWeights` are `ratios$DE`, `ratios$totals` and `stageUnits`.
-- The totals step is its own exported function, `raiseToTotals(raised, expanded, stageWeights, obj)`, run after `raiseToDE()` when the scheme has `totals`. `raiseToDE()` now does the DE step only. `doRatioEstimation()` runs both, the results do not change.
-- Stage-wise raising now also works for upper hierarchy 2 (DE - SD - FT - FO - SS - SA): trips sampled directly, raised by `raisingScheme(FT = ..., FO = ..., hierarchy = 2)`. VD fields can be used at FT. Other hierarchies than 1, 2 and 5 stop with "not implemented yet".
-- New `ratioOutputGuide()` explains every column of the `doRatioEstimation()` result: element, what one row is, unit and meaning. A test checks that every output column is in it.
-- Columns renamed so that multipliers start with `f` (one step), `w` (product of steps) or `r` (ratio), and fixed units are in the name:
-
-  | Old | New |
-  |---|---|
-  | `raiseFactor` | `fSample` |
-  | `x` (per sample) | `xSample` |
-  | `factor` (`computeStageFactors()`, unit weights) | `fStage` |
-  | `wUnit` | `wCumulative` |
-  | `w` | `wStages` |
-  | `ratio` (DE ratios) | `rDE` |
-  | `ratio` (totals ratios) | `rTotals` |
-  | `ratio` (per domain) | `rApplied` |
-  | `T` | `total` |
-  | `sumWX` | `xWeightedStratum` |
-  | `sumX`, `sumX_kg` | `liveWeightSampled_kg` |
-  | `X`, `X_kg` | `liveWeightEst_kg` |
-  | `yW`, `yL` | `yW_g`, `yL_mm` |
-  | `W`, `L` | `W_g`, `L_mm` |
-  | `stratum` | `DEstratumName` |
-- `getSampleUnits()` excludes, and logs, lowest-level SA records of lower hierarchy A or B without FM, or C without BV. An SA with total weight 0 (e.g. from `generateZerosUsingSL()`) is a recorded zero. `getStageWeights()` keeps sampled hauls without the species, or with a recorded zero, as zero catch, and treats a sampled haul whose samples of the species are all excluded as non-response, which cascades to trips and vessels.
-- New vignette "03c Estimating numbers at age with stage-wise raising", with the simulated example data `H1StageRaisingExample` and its true numbers at age `H1StageRaisingTruth` (built in `data-raw/create_H1StageRaising_ExampleData.R`).
-- New `getRDBESCodeList()` and `checkRDBESCodes()` check coded fields against the live ICES code lists (`icesVocab`, now in Imports). `classifySelectionMethod()` classifies selection methods by design quality.
+# RDBEScore 0.4.0
+- Documentation: revised function examples to run with packaged or small synthetic data, retaining `\dontrun` for examples that demonstrate strict validation errors (#272).
+- Breaking: `getLinkedDataFromLevel()` now returns the requested field and target-table columns in both directions, without adding intermediate hierarchy ids (#268). Non-id requested fields are retained when going down the hierarchy. `getLowerTableSubsets()` avoids duplicated requested-field columns.
+- Package README updated with AI usage guidelines
+- Dependencies: removed `dplyr` from Imports. Joins now use the internal `data.table` helper `joinDT()`, which keeps dplyr's row order, column order and `.x`/`.y` suffixes, so results are unchanged; `filterRDBESEstObject()` and the vignette use base R/`data.table` instead of dplyr.
+- Bug fix: addressed [#259](https://github.com/ices-tools-dev/RDBEScore/issues/259) selecting multiple strata with `addCLtoLowerCS()`
 
 # RDBEScore 0.3.5
 

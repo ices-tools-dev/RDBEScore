@@ -21,6 +21,11 @@
 #' the values from each subset in the upper tables. It then ensures that only unique rows are returned,
 #' based on the ID column of the target table.
 #'
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: rix133
+#' @keywords internal
+#'
 getLowerTableSubsets <- function(subsets, tblName, rdbesTables, combineStrata = TRUE, verbose = FALSE) {
   res <- list()
   # Process each subset
@@ -66,8 +71,13 @@ getLowerTableSubsets <- function(subsets, tblName, rdbesTables, combineStrata = 
    stop("combineStrata must be TRUE for now")
   }
 
+  # Linked data carries the requested fields - replace them by the strata values below
+  addedFields <- setdiff(names(subsets), names(rdbesTables[[tblName]]))
+  res <- res[, setdiff(names(res), addedFields), with = FALSE]
+  subsets <- subsets[addedFields]
+
   # Combine the data with the strata subsets
-  res <- cbind(res, as.data.frame(subsets))
+  if(length(subsets) > 0) res <- cbind(res, as.data.frame(subsets))
 
   return(res)
 }

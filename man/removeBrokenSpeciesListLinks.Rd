@@ -2,9 +2,7 @@
 % Please edit documentation in R/removeBrokenSpeciesListLinks.R
 \name{removeBrokenSpeciesListLinks}
 \alias{removeBrokenSpeciesListLinks}
-\title{Remove rows which are not pointing to a valid SpecliestListDetails (SL)
-records i.e.those rows which have a value of SpeciesListName that does not
-exist in the SL table.}
+\title{Remove SS rows with broken species-list links}
 \usage{
 removeBrokenSpeciesListLinks(objectToCheck, verbose = FALSE, strict = TRUE)
 }
@@ -12,34 +10,34 @@ removeBrokenSpeciesListLinks(objectToCheck, verbose = FALSE, strict = TRUE)
 \item{objectToCheck}{an RDBESDataObject.}
 
 \item{verbose}{(Optional) If set to TRUE more detailed text will be printed
-out by the function.  Default is TRUE.}
+out by the function.  Default is FALSE.}
 
 \item{strict}{(Optional) This function validates its input data - should
 the validation be strict? The default is TRUE.}
 }
 \value{
-an RDBESDataObject with any records with an invalid SpeciesListName
-rows removed
+an RDBESDataObject with SS rows without a matching SL record removed.
 }
 \description{
-Remove rows which are not pointing to a valid SpecliestListDetails (SL)
-records i.e.those rows which have a value of SpeciesListName that does not
-exist in the SL table.
+A species-list link matches the list name, catch fraction, design year
+and sampling country against the SL table.
 }
-\examples{
-\dontrun{
+\section{Development review}{
 
-myH1RawObject <-
-  importRDBESDataCSV(rdbesExtractPath = "tests\\\\testthat\\\\h1_v_1_19")
-myFields <- c("SLspeclistName")
-myValues <- c("WGRDBES-EST TEST 5 - sprat data")
-myFilteredObject <- filterRDBESDataObject(myH1RawObject,
-  fieldsToFilter = myFields,
-  valuesToFilter = myValues
-)
-myObjectValidSpeciesListLinks <- removeBrokenSpeciesListLinks(
-  objectToCheck = myFilteredObject,
-  verbose = FALSE
-)
+\itemize{
+\item AI-assisted: Yes
+\item Review: rix133
+\item Notes/scope:
 }
+}
+
+\examples{
+H1DataObj <- H1Example
+# Retain one species list, leaving selections linked to other lists
+H1DataObjFiltered <- filterRDBESDataObject(
+  H1DataObj, "SLspeclistName", "ZW_1965_SpeciesList2"
+)
+H1DataObjCleaned <- removeBrokenSpeciesListLinks(H1DataObjFiltered)
+c(before = nrow(H1DataObjFiltered$SS), after = nrow(H1DataObjCleaned$SS))
+
 }

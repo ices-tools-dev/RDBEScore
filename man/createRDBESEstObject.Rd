@@ -40,6 +40,14 @@ estimation
 \description{
 Creates an RDBESEstObject from RDBES data
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: No
+\item Human review: rix133
+}
+}
+
 \examples{
 myH1EstObj <- createRDBESEstObject(H1Example, 1, "SA")
 }

@@ -13,10 +13,21 @@
 #' the validation be strict? The default is TRUE.
 #'
 #' @return A data table of SS data with any missing rows added
+#' 
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: rix133
+#' - Notes/scope: examples only
+#'
 #' @export
 #'
 #' @examples
-#' # To follow
+#' H1DataObj <- data.table::copy(Pckg_survey_apistrat_H1)
+#' # Simulate operations reporting all catch with only landing selections present
+#' H1DataObj$FO$FOcatReg <- "All"
+#' SSWithMissingRows <- generateMissingSSRows(H1DataObj, H1DataObj$SL$SLspeclistName[1])
+#' head(SSWithMissingRows[, c("SSid", "FOid", "SScatchFra")])
+#'
 generateMissingSSRows <- function(RDBESDataObject,
                                   speciesListName,
                                   verbose = FALSE,
@@ -76,11 +87,12 @@ generateMissingSSRows <- function(RDBESDataObject,
   # Get the unique combinations of SL country, year, and list names
   mySLUnique <- unique(mySL[,c("SLcou","SLyear","SLspeclistName")])
 
-  mySSSLUnique <- dplyr::inner_join(mySSUnique,
-                                   mySLUnique,
-                                   by = c("SSyear" = "SLyear",
-                                          "SSctry" = "SLcou",
-                                          "SSspecListName" = "SLspeclistName"))
+  mySSSLUnique <- joinDT(mySSUnique,
+                         mySLUnique,
+                         by = c("SSyear" = "SLyear",
+                                "SSctry" = "SLcou",
+                                "SSspecListName" = "SLspeclistName"),
+                         type = "inner")
 
   if (nrow(mySSSLUnique) < 1){
     stop(paste0("The requested species list is not compatible with the ",
@@ -252,7 +264,7 @@ getMissingSSCatchFraction <- function(FOdata, SSdata, catchFra, verbose) {
     myFOFraction[myFOFraction$FOcatReg == catchFra, "FOcatReg"] <- "Catch"
   }
 
-  myFOSS <- dplyr::left_join(
+  myFOSS <- joinDT(
     myFOFraction,
     SSdata,
     by = c(

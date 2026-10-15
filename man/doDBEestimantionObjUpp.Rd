@@ -17,10 +17,19 @@ The upper hierarchy tables in the DBE estimation object
 \description{
 Generates the DBE estimation object for the upper hierarchy tables
 }
-\examples{
-\dontrun{
-H1 <-
-readRDS("./WKRDB-EST2/testData/output/DBErawObj/DBErawObj_DK_1966_H1.rds")
-H1out <- doDBEestimantionObjUpp(H1)
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: rix133
+\item Notes/scope: examples only
 }
+}
+
+\examples{
+# This legacy helper expects data.frames and no NULL table entries
+H1Tables <- lapply(Filter(Negate(is.null), Pckg_survey_apistrat_H1), as.data.frame)
+upper <- RDBEScore:::doDBEestimantionObjUpp(H1Tables)
+upper$expectedTables
+
 }

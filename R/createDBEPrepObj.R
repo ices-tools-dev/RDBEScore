@@ -7,13 +7,17 @@
 #'
 #' @return .Rdata files
 #'
-#' @examples
-#' \dontrun{
-#' input <- "WKRDB-EST2/testData/output/DBErawObj/"
-#' output <- "WKRDB-EST2/subGroup1/personal/John/PreparedOutputs/"
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: rix133
+#' - Notes/scope: examples only
 #'
-#' createDBEPrepObj(input = input, output = output)
-#' }
+#' @details
+#' This legacy internal helper requires the workshop script
+#' `WKRDB-EST2/subGroup1/personal/John/generateProbs_John.r`
+#' and may prompt for user input. It is not a self-contained package workflow.
+#' Use [applyGenerateProbs()] to prepare probabilities in an RDBESDataObject.
+#' @keywords internal
 createDBEPrepObj <- function(input, output) {
 
   # get file list

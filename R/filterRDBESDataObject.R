@@ -27,30 +27,18 @@
 #' @md
 #'
 #' @examples
-#' \dontrun{
-#'
-#' myH1RawObject <-
-#'   importRDBESDataCSV(rdbesExtractPath = "tests\\testthat\\h1_v_1_19")
-#'
-#' myFields <- c("SDctry", "VDctry", "VDflgCtry", "FTarvLoc")
-#' myValues <- c("ZW", "ZWBZH", "ZWVFA")
-#'
-#' myFilteredObject <- filterRDBESDataObject(myH1RawObject,
-#'   fieldsToFilter = myFields,
-#'   valuesToFilter = myValues
+#' H1DataObj <- H1Example
+#' # Select one named design together with its linked sampling records
+#' H1DataObjFiltered <- filterRDBESDataObject(
+#'   H1DataObj, fieldsToFilter = "DEstratumName",
+#'   valuesToFilter = "Pckg_SDAResources_agstrat_H1", killOrphans = TRUE
 #' )
+#' summary(H1DataObjFiltered)
 #'
-#' # Inverse filtering (exclude certain values)
-#' # Example: keep all DE rows except those with DEid in `excludedValues`
-#' # Compute the complement of the excluded set using setdiff
-#' allValues <- unique(myH1RawObject$DE$DEid)
-#' excludedValues <- c(5351)
-#' myInverseFiltered <- filterRDBESDataObject(
-#'   myH1RawObject,
-#'   fieldsToFilter = "DEid",
-#'   valuesToFilter = setdiff(allValues, excludedValues)
-#' )
-#' }
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: rix133
+#' - Notes/scope: examples only
 filterRDBESDataObject <- function(RDBESDataObjectToFilter,
                                  fieldsToFilter,
                                  valuesToFilter,

@@ -33,6 +33,18 @@ remits to the 1st taxa in a species list and not - as it would be expected -
 to the species list itself. This function fixes this by creating a new
 SLtaxaId variable in SL and assigning all taxa in a species to a single SSid.
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: rix133
+\item Notes/scope: examples only
+}
+}
+
 \examples{
-# To add
+H1DataObj <- Pckg_survey_apistrat_H1
+H1DataObjFixed <- fixSLids(H1DataObj)
+H1DataObjFixed$IS[, c("ISid", "SLid", "IStaxaId")]
+
 }

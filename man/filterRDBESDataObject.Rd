@@ -45,29 +45,22 @@ although the field \code{FOid} exists in \code{FT} table.
 \code{killOrphans} allows you to remove orphaned rows if set to \code{TRUE}. The
 default is \code{FALSE}.
 }
-\examples{
-\dontrun{
+\section{Development review}{
 
-myH1RawObject <-
-  importRDBESDataCSV(rdbesExtractPath = "tests\\\\testthat\\\\h1_v_1_19")
-
-myFields <- c("SDctry", "VDctry", "VDflgCtry", "FTarvLoc")
-myValues <- c("ZW", "ZWBZH", "ZWVFA")
-
-myFilteredObject <- filterRDBESDataObject(myH1RawObject,
-  fieldsToFilter = myFields,
-  valuesToFilter = myValues
-)
-
-# Inverse filtering (exclude certain values)
-# Example: keep all DE rows except those with DEid in `excludedValues`
-# Compute the complement of the excluded set using setdiff
-allValues <- unique(myH1RawObject$DE$DEid)
-excludedValues <- c(5351)
-myInverseFiltered <- filterRDBESDataObject(
-  myH1RawObject,
-  fieldsToFilter = "DEid",
-  valuesToFilter = setdiff(allValues, excludedValues)
-)
+\itemize{
+\item AI-assisted: Yes
+\item Review: rix133
+\item Notes/scope: examples only
 }
+}
+
+\examples{
+H1DataObj <- H1Example
+# Select one named design together with its linked sampling records
+H1DataObjFiltered <- filterRDBESDataObject(
+  H1DataObj, fieldsToFilter = "DEstratumName",
+  valuesToFilter = "Pckg_SDAResources_agstrat_H1", killOrphans = TRUE
+)
+summary(H1DataObjFiltered)
+
 }

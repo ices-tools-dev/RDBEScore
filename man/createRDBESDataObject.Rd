@@ -96,7 +96,31 @@ passed the data integrity checks performed when you upload to RDBES!
 This \code{input} produces an empty \code{RDBESDataObject}, i.e. all tables with
 correct data classes but the tables will be empty.
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: rix133
+\item Notes/scope: examples only
+}
+}
+
 \examples{
 # Create an empty object
-myEmptyRDBESObject <- createRDBESDataObject(input = NULL)
+emptyDataObj <- createRDBESDataObject(input = NULL)
+summary(emptyDataObj)
+
+# Import a named list of packaged tables
+H1DataObj <- Pckg_survey_apistrat_H1
+# NULL entries must be omitted from a list of input tables
+H1Tables <- Filter(Negate(is.null), data.table::copy(H1DataObj))
+# Local table input warns that it bypasses the RDBES upload checks
+H1DataObjFromTables <- createRDBESDataObject(input = H1Tables)
+summary(H1DataObjFromTables)
+
+# Import the example ZIP distributed with the package
+zipPath <- system.file("extdata", "H1_Example.zip", package = "RDBEScore")
+H1DataObjFromZip <- createRDBESDataObject(input = zipPath)
+summary(H1DataObjFromZip)
+
 }

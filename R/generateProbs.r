@@ -14,19 +14,25 @@
 #' probabilities are set to 1. Probabilities for selection methods UPSWR and
 #' UPSWOR are not calculated (they need to be supplied by the user). The same
 #' happens with regards to non-probabilistic methods
-#' @return A vector or probabilities
+#' @return A data.table with the requested probability column updated.
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' generateProbs(x = Pckg_SDAResources_agstrat_H1[["VS"]], probType = ("inclusion"))
-#' # population size
-#' a<-generateProbs(x = Pckg_SDAResources_agstrat_H1[["VS"]], probType = ("inclusion"))
-#' sum(1/a$VSincProb)
-#' # returns error
-#' generateProbs(x = Pckg_SDAResources_agstrat_H1[["VS"]], probType = ("selection"))
+#' H1DataObj <- Pckg_SDAResources_agstrat_H1
+#' # Inclusion probabilities for stratified sampling without replacement
+#' VSWithProbs <- generateProbs(data.table::copy(H1DataObj$VS), "inclusion")
+#' head(VSWithProbs$VSincProb)
 #'
-#' }
+#' # Selection probabilities for sampling with replacement
+#' units <- data.table::data.table(VSselectMeth = "SRSWR",
+#'                                 VSnumSamp = 2, VSnumTotal = 10,
+#'                                 VSselProb = NA_real_)
+#' generateProbs(units, "selection")$VSselProb
+#'
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: pending
+#' - Notes/scope:
 generateProbs <- function(x,
                           probType,
                           verbose = FALSE) {

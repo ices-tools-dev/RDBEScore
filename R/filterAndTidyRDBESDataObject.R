@@ -19,22 +19,18 @@
 #' @md
 #'
 #' @examples
-#' \dontrun{
-#'
-#' myH1RawObject <- createRDBESDataObject(rdbesExtractPath = "tests\\testthat\\h1_v_1_19_13")
-#'
-#' # To check how removeBrokenVesselLinks() works
-#' myH1RawObject$VD$VDlenCat[which(myH1RawObject$VD$VDencrVessCode=="VDcode_10")] <- "VL40XX"
-#'
-#' myFields <- c("VSencrVessCode", "VDlenCat")
-#' myValues <- c("VDcode_1","VDcode_2", "VDcode_10","VL1518","VL2440")
-#'
-#' myFilteredObject <- filterAndTidyRDBESDataObject(myH1RawObject,
-#'   fieldsToFilter = myFields,
-#'   valuesToFilter = myValues,
-#'   killOrphans = TRUE, verboseBrokenVesselLinks = TRUE
+#' H1DataObj <- H1Example
+#' # Keep a named design and remove the records no longer linked to it
+#' H1DataObjFiltered <- filterAndTidyRDBESDataObject(
+#'   H1DataObj, fieldsToFilter = "DEstratumName",
+#'   valuesToFilter = "Pckg_SDAResources_agstrat_H1"
 #' )
-#' }
+#' summary(H1DataObjFiltered)
+#'
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: rix133
+#' - Notes/scope: examples only
 filterAndTidyRDBESDataObject <- function(RDBESDataObjectToFilterAndTidy,
                                  fieldsToFilter,
                                  valuesToFilter,

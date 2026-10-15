@@ -10,22 +10,17 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
+#' H1DataObj <- Pckg_survey_apistrat_H1
+#' H1EstObj <- createRDBESEstObject(H1DataObj, 1, stopTable = "SA")
+#' estimates <- doEstimationForAllStrata(H1EstObj, targetValue = "SAsampWtMes")
+#' # Show estimates at the vessel-selection level
+#' estimates[estimates$recType == "VS",
+#'           c("recType", "stratumName", "est.total", "var.total")]
 #'
-#' myH1RawObject <-
-#'   importRDBESDataCSV(rdbesExtractPath = "tests\\testthat\\h1_v_1_19")
-#'
-#' # Update our test data with some random sample measurements
-#' myH1RawObject[["SA"]]$SAsampWtLive <-
-#'   round(runif(n = nrow(myH1RawObject[["SA"]]), min = 1, max = 100))
-#'
-#' myH1EstObj <- createRDBESEstObject(myH1RawObject, 1)
-#'
-#' myStrataEst <- doEstimationForAllStrata(
-#'   RDBESDataObjectForEstim = myH1EstObj,
-#'   targetValue = 'SAsampWtLive'
-#' )
-#' }
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: rix133
+#' - Notes/scope: examples only
 doEstimationForAllStrata <- function(RDBESEstObjectForEstim,
                                      targetValue,
                                      verbose = FALSE) {

@@ -4,7 +4,15 @@
 \alias{lowerTblData}
 \title{Get lower table data from upper table id}
 \usage{
-lowerTblData(field, values, tbls, level, verbose = FALSE, path_order = NULL)
+lowerTblData(
+  field,
+  values,
+  tbls,
+  level,
+  verbose = FALSE,
+  requestedField = field,
+  requestedValues = values
+)
 }
 \arguments{
 \item{field}{A character string specifying the name of the upper table field.}
@@ -17,13 +25,16 @@ lowerTblData(field, values, tbls, level, verbose = FALSE, path_order = NULL)
 
 \item{verbose}{A logical value indicating whether to print intermediate levels during recursion.}
 
-\item{path_order}{Internal: character vector tracking the traversal path of IDs during
-recursion to preserve a stable column order in the returned result. Users should not
-normally set this; it is maintained by recursive calls (default NULL).}
+\item{requestedField}{Internal: the originally requested field, carried
+through the recursion (default \code{field}).}
+
+\item{requestedValues}{Internal: the originally requested value belonging to
+each element of \code{values}, carried through the recursion (default \code{values}).}
 }
 \value{
-A data frame containing the rows of the target lower level table that are associated with
-the given values of the upper table field.
+A data.table with the originally requested field and all columns of
+the \code{level} table. No intermediate hierarchy IDs are added. It has one row
+per unique requested value and linked \code{level} record.
 }
 \description{
 This function takes an upper table field name, values for that field, a list of tables,
@@ -32,6 +43,14 @@ that are associated with the given values of the upper table field.
 NB! running on the RDBESDataObject will work properly if it is sorted by default the tables are not
 in the correct order for a specific hierarchy.
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: rix133
+}
+}
+
 \examples{
 # it is important to run the function only on the sorted RDBESDataObject
 RDBEScore:::lowerTblData("TEid", c(4), sort(H8ExampleEE1), "SA", TRUE)

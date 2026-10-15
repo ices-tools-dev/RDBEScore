@@ -165,3 +165,19 @@ The three lower hierarchies differ in which tables are present:
 \item \strong{LH C}: \code{SA -> BV} only.
 }
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: rix133
+\item Notes/scope: examples only
+}
+}
+
+\examples{
+H8DataObj <- data.table::copy(H8ExampleEE1)
+composition <- doEstimationRatio(H8DataObj, targetValue = "LengthComp",
+                                 classBreaks = c(50, 200, 10))
+head(composition[, c("SAid", "LengthClass", "NumbersAtLength", "MeanWeightAtLength")])
+
+}

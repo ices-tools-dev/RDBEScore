@@ -19,7 +19,6 @@ export(doBVestimCANUM)
 export(doEstimationForAllStrata)
 export(doEstimationRatio)
 export(doRatioEstimation)
-export(downloadRDBESDataZip)
 export(estim)
 export(estimMC)
 export(expandWithinSample)
@@ -59,14 +58,17 @@ export(updateSAwithTaxonFromSL)
 export(validateRDBESDataObject)
 export(validateRDBESEstObject)
 import(data.table)
-importFrom(icesRDBES,rdbes_download_data)
 importFrom(icesVocab,getCodeList)
-importFrom(stats,formula)
-importFrom(stats,na.omit)
-importFrom(stats,rnorm)
-importFrom(stats,setNames)
-importFrom(utils,file_test)
-importFrom(utils,head)
-importFrom(utils,menu)
-importFrom(utils,packageDescription)
-importFrom(utils,tail)
+importFrom(stats,
+  formula,
+  na.omit,
+  rnorm,
+  setNames
+)
+importFrom(utils,
+  file_test,
+  head,
+  menu,
+  packageDescription,
+  tail
+)

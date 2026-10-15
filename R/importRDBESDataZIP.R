@@ -21,10 +21,15 @@
 #' @md
 #'
 #' @examples
-#' \dontrun{
-#' rdbesExtractPath <- "./2022_FPN_FPE_H7.zip"
-#' obj <- importRDBESDataZIP(rdbesExtractPath)
-#' }
+#' # Import the example ZIP distributed with the package
+#' zipPath <- system.file("extdata", "H1_Example.zip", package = "RDBEScore")
+#' object <- RDBEScore:::importRDBESDataZIP(zipPath)
+#' summary(object)
+#'
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: rix133
+#' - Notes/scope: examples only
 
 importRDBESDataZIP <- function(filenames,
                                castToCorrectDataTypes = TRUE,

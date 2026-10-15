@@ -8,24 +8,20 @@
 #' the validation be strict? The default is TRUE.
 #'
 #' @return an RDBESDataObject with any records with an invalid VDid removed
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Human review: rix133
+#' - Notes/scope:
+#'
 #' @export
 #'
 #' @examples
-#' \dontrun{
+#' H1DataObj <- Pckg_survey_apistrat_H1
+#' # Retain a vessel-length category, leaving sampling records for other vessels
+#' H1DataObjFiltered <- filterRDBESDataObject(H1DataObj, "VDlenCat", "VL1012")
+#' H1DataObjCleaned <- removeBrokenVesselLinks(H1DataObjFiltered, verbose = FALSE)
+#' c(before = nrow(H1DataObjFiltered$VS), after = nrow(H1DataObjCleaned$VS))
 #'
-#' myH1RawObject <-
-#'   importRDBESDataCSV(rdbesExtractPath = "tests\\testthat\\h1_v_1_19")
-#' myFields <- c("VDlenCat")
-#' myValues <- c("18-<24")
-#' myFilteredObject <- filterRDBESDataObject(myH1RawObject,
-#'   fieldsToFilter = myFields,
-#'   valuesToFilter = myValues
-#' )
-#' myObjectValidVesselLinks <- removeBrokenVesselLinks(
-#'   objectToCheck = myFilteredObject,
-#'   verbose = FALSE
-#' )
-#' }
 removeBrokenVesselLinks <- function(objectToCheck,
                                     verbose = FALSE,
                                     strict = TRUE) {
@@ -82,9 +78,10 @@ removeBrokenVesselLinks <- function(objectToCheck,
       myOrphanResults[, "vdExists"] <- FALSE
 
       # Inner join to the VD table
-      joinedTables <- dplyr::inner_join(myTable,
+      joinedTables <- joinDT(myTable,
         objectToCheck[["VD"]],
-        by = "VDid"
+        by = "VDid",
+        type = "inner"
       )
 
       # Update the results for any matches we found

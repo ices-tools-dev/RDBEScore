@@ -17,10 +17,15 @@
 #' @seealso \code{\link{applyGenerateProbs}}
 #' \code{\link{generateProbs}}
 #'
-#' examples for now see
-#' https://github.com/ices-eg/WK_RDBES/tree/master/WKRDB-EST2/chairs/Nuno
+#' @examples
+#' H1DataObj <- Pckg_survey_apistrat_H1
+#' # Suppress per-record progress messages. Invalid designs still stop.
+#' invisible(capture.output(runChecksOnSelectionAndProbs(H1DataObj)))
 #'
-
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: rix133
+#' - Notes/scope: examples only
 
 runChecksOnSelectionAndProbs <- function(x,
                                          verbose = FALSE,

@@ -21,11 +21,19 @@ Load raw object and create prepared object
 Function relies on the data being
 correctly named following established hierarchy
 }
-\examples{
-\dontrun{
-input <- "WKRDB-EST2/testData/output/DBErawObj/"
-output <- "WKRDB-EST2/subGroup1/personal/John/PreparedOutputs/"
+\details{
+This legacy internal helper requires the workshop script
+\code{WKRDB-EST2/subGroup1/personal/John/generateProbs_John.r}
+and may prompt for user input. It is not a self-contained package workflow.
+Use \code{\link[=applyGenerateProbs]{applyGenerateProbs()}} to prepare probabilities in an RDBESDataObject.
+}
+\section{Development review}{
 
-createDBEPrepObj(input = input, output = output)
+\itemize{
+\item AI-assisted: Yes
+\item Review: rix133
+\item Notes/scope: examples only
 }
 }
+
+\keyword{internal}

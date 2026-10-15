@@ -8,29 +8,37 @@
 #' @param level A character string specifying the target table level from which to retrieve linked data. This must be one of the names within the `rdbesTables` object.
 #' @param verbose Logical flag indicating whether to print detailed information about the data retrieval process. Default is `FALSE`.
 #'
-#' @return  The subset of the table at the specified `level`.
+#' @return A data.table containing the requested `field` and all columns of the
+#'   table at `level`, with one row per unique requested value and linked record.
+#'   Intermediate hierarchy IDs are not added. Column order is not guaranteed.
+#'
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: rix133
+#' - Notes/scope: examples only
+#'
+#' @export
 #'
 #' @examples
-#' \dontrun{
-#' # Example 1: Going up in the table hierarchy to retrieve data from the DE table
-#' # Retrieve data from the DE level based on BVid from the BV table
-#' # This returns 1 row from the DE table
-#' getLinkedDataFromLevel("BVid", c(1), H8ExampleEE1, "DE", TRUE)
+#' H8DataObj <- H8ExampleEE1
+#' # Go up from a biological measurement to its design
+#' linkedDesign <- getLinkedDataFromLevel("BVid", 1, H8DataObj, "DE")
+#' linkedDesign[, c("BVid", "DEid", "DEstratumName")]
 #'
-#' # Example 2: Going down in the table hierarchy to retrieve data from the SA table
-#' # Retrieve data from the SA level based on DEid from the DE table
-#' # This returns 15 rows from the SA table
-#' getLinkedDataFromLevel("DEid", c(1), H8ExampleEE1, "SA", TRUE)
+#' # Go down from a design to its samples
+#' linkedSamples <- getLinkedDataFromLevel("DEid", 1, H8DataObj, "SA")
+#' head(linkedSamples[, c("DEid", "SAid", "SAspeCode")])
 #'
-#' # Example 3: Going up in the table hierarchy to see the Vessel that caught a specific fish
-#' # Retrieve data from the VS level based on BVfishId from the BV table
-#' getLinkedDataFromLevel("BVfishId", c("410472143", "410472144"), H8ExampleEE1, "VS", TRUE)
-#' }
-#' @export
+#' # Link a fish identifier to its vessel selection record
+#' linkedVessels <- getLinkedDataFromLevel("BVfishId", H8DataObj$BV$BVfishId[1],
+#'                                        H8DataObj, "VS")
+#' linkedVessels[, c("BVfishId", "VSid", "VDid")]
+#'
 getLinkedDataFromLevel <- function(field, values, rdbesTables, level, verbose = FALSE){
 
   # Check if rdbesTables is of class "RDBESDataObject"
   if(inherits(rdbesTables, "RDBESDataObject")) {
+    availableTblNames <- names(rdbesTables)
     rdbesTables <- sort(rdbesTables)
   } else {
     stop("rdbesTables must be of class RDBESDataObject")
@@ -44,8 +52,34 @@ getLinkedDataFromLevel <- function(field, values, rdbesTables, level, verbose = 
   # Extract the source table abbreviation from the field name
   sourceTbl <- substr(field, 1, 2)
 
-  # Get the list of table names
-  tblNames <- names(rdbesTables)
+  #get the hierarchy of the source table
+  summary_values <- summary(rdbesTables)
+  hierarchy <- NA
+  if(!is.null(summary_values$hierarchy)){
+    if(length(summary_values$hierarchy)>1){
+      stop("Mixed hierarchy RDBESDataObject!", call.=FALSE)
+    }
+    hierarchy <- summary_values$hierarchy
+  } else {
+    stop(paste0("No hierarchy, RDBESdataObject:\n "))
+  }
+
+  # Get the list of table names with optional if needed
+  tblNames <- getTablesInRDBESHierarchy(hierarchy)
+  requiredTblNames <- getTablesInRDBESHierarchy(
+    hierarchy,
+    includeOptTables = FALSE
+  )
+
+  keepTblNames <- c(requiredTblNames, sourceTbl, level)
+  tblNames <- tblNames[tblNames %in% keepTblNames]
+
+  #stop if tables in the data are missing required tables
+  missingTbls <- requiredTblNames[!requiredTblNames %in% availableTblNames]
+  if(length(missingTbls) > 0){
+    stop(paste0("Missing required tables in the RDBESDataObject: ",
+                paste(missingTbls, collapse = ", ")))
+  }
 
   # Determine the positions of sourceTbl and target level in the table list
   sourcePos <- which(tblNames == sourceTbl)
