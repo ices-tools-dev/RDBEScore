@@ -10,51 +10,50 @@ AphiaRecordsByAphiaIDs <- "https://www.marinespecies.org/rest/AphiaRecordsByAphi
 
 # How many aphiaids shall we ask for in each request (max is 50 apparently)
 maxNumberAphiaIds <- 40
-# Work out how many times we need to call the web services
-totalCalls <- nrow(RDBEScore::icesSpecWoRMS)%/%maxNumberAphiaIds
-totalCalls <- totalCalls + 1
 
-# We'll store our results in wormsAphiaRecord
-wormsAphiaRecord <- NULL
+allAphiaIDs <- unique(stats::na.omit(RDBEScore::icesSpecWoRMS$Key))
 
-# For testing
-#totalCalls <-3
-
-for(i in 1:(totalCalls)){
-
-  startIndex <- ((i-1)*maxNumberAphiaIds)+1
-  endIndex <- startIndex + (maxNumberAphiaIds-1)
-  print(i)
-  #print(startIndex)
-  #print(endIndex)
-
-  # Get a subset of the aphiaids from ICES
-  AphiaIDs<-RDBEScore::icesSpecWoRMS[startIndex:endIndex,"Key"]
-  # Remove any NAs (should only be relevent when we're at the end of the vector)
-  AphiaIDs<-AphiaIDs[!is.na(AphiaIDs)]
-
-  # Format the aphiaids to use as URL parameters
-  aphiaURLParam <- paste0("aphiaids%5B%5D=",AphiaIDs)
-  aphiaURLParam <- paste(aphiaURLParam, collapse ="&")
-  #print(aphiaURLParam)
-
-  #Build the URL to get the data from
-  url <- paste0(AphiaRecordsByAphiaIDs,aphiaURLParam);
-  #print(url)
-
-  # Get the actual data from the URL
-  responseData <- fromJSON(url)
-
-  # Store our results
-  if(is.null(wormsAphiaRecord)){
-    wormsAphiaRecord <- responseData
-  } else {
-    wormsAphiaRecord <- rbind(wormsAphiaRecord,responseData)
+# Request the records for a set of aphiaids, retrying on failure
+getAphiaRecords <- function(AphiaIDs, retries = 3) {
+  aphiaURLParam <- paste(paste0("aphiaids%5B%5D=", AphiaIDs), collapse = "&")
+  url <- paste0(AphiaRecordsByAphiaIDs, aphiaURLParam)
+  for (attempt in seq_len(retries)) {
+    responseData <- tryCatch(fromJSON(url), error = function(e) NULL)
+    if (is.data.frame(responseData) && nrow(responseData) > 0) {
+      # The service returns NULL for aphiaids it can't find, so drop empty rows
+      return(responseData[!is.na(responseData$AphiaID), , drop = FALSE])
+    }
+    Sys.sleep(5)
   }
+  NULL
+}
 
+# We'll store our results in a list and combine them at the end
+# (fill = TRUE in rbindlist means differing columns between requests don't drop rows)
+batches <- split(allAphiaIDs, ceiling(seq_along(allAphiaIDs) / maxNumberAphiaIds))
+results <- vector("list", length(batches))
+for (i in seq_along(batches)) {
+  print(i)
+  results[[i]] <- getAphiaRecords(batches[[i]])
   # Pause so we don't hammer the Worms server constantly
   Sys.sleep(5)
+}
+wormsAphiaRecord <- as.data.frame(data.table::rbindlist(results, fill = TRUE))
 
+# Check that every requested aphiaid was returned and retry any that are missing
+missingIDs <- setdiff(allAphiaIDs, as.character(wormsAphiaRecord$AphiaID))
+if (length(missingIDs) > 0) {
+  extra <- do.call(rbind, lapply(missingIDs, function(id) {
+    Sys.sleep(1)
+    getAphiaRecords(id)
+  }))
+  if (!is.null(extra)) {
+    wormsAphiaRecord <- as.data.frame(data.table::rbindlist(list(wormsAphiaRecord, extra), fill = TRUE))
+  }
+  missingIDs <- setdiff(allAphiaIDs, as.character(wormsAphiaRecord$AphiaID))
+  if (length(missingIDs) > 0) {
+    warning("No WoRMS record found for aphiaids: ", paste(missingIDs, collapse = ", "))
+  }
 }
 
 # Add a date field
