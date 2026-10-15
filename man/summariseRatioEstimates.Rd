@@ -7,7 +7,7 @@
 summariseRatioEstimates(raised, plusGroup = NULL)
 }
 \arguments{
-\item{raised}{Output of \code{\link[=raiseToDE]{raiseToDE()}}.}
+\item{raised}{Output of \code{\link[=raiseToDE]{raiseToDE()}} or \code{\link[=raiseToTotals]{raiseToTotals()}}.}
 
 \item{plusGroup}{Optional age. Ages greater than or equal to it are
 combined. Only for \code{target = "Age"}.}
@@ -20,9 +20,10 @@ variables, \code{age} or \code{lengthClass_mm} (lower bound of the class), \code
 }
 \description{
 Last step of the ratio estimation workflow (see \code{\link[=doRatioEstimation]{doRatioEstimation()}}).
-Sums the raised quantities from \code{\link[=raiseToDE]{raiseToDE()}} over strata, applies an
-optional plus group and derives the means. Mean weight and mean length are
-ratios of raised totals, never averages of sample means.
+Sums the raised quantities from \code{\link[=raiseToDE]{raiseToDE()}} or \code{\link[=raiseToTotals]{raiseToTotals()}} over
+strata, applies an optional plus group and derives the means. Mean weight
+and mean length are ratios of raised totals, never averages of sample
+means.
 }
 \details{
 The values that belong to a whole domain (estimated live weight, SOP,

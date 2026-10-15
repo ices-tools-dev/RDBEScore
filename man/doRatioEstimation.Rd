@@ -85,7 +85,8 @@ named by what one row of it is:
 \item \code{domains}: one row per domain, from \code{\link[=summariseRatioDomains]{summariseRatioDomains()}}:
 estimated live weight, the factor applied, SOP and sample counts.
 \item \code{ratios}: a list with \code{DE} (one row per DE stratum) and \code{totals} (one
-row per totals stratum, \code{NULL} without totals), from \code{\link[=raiseToDE]{raiseToDE()}}.
+row per totals stratum, \code{NULL} without totals), from \code{\link[=raiseToDE]{raiseToDE()}} and
+\code{\link[=raiseToTotals]{raiseToTotals()}}.
 \item \code{samples}: one row per lowest-level SA, from \code{\link[=getStageWeights]{getStageWeights()}}:
 ids, domain, inclusion, the factors and \code{wStages} first, the design
 columns copied from the data last.
@@ -94,7 +95,8 @@ unit with its factor, from \code{\link[=getStageWeights]{getStageWeights()}}.
 \item \code{fishBySample}: one row per sample and class, the fish of each sample
 scaled to its catch fraction, from \code{\link[=expandWithinSample]{expandWithinSample()}}.
 \item \code{byStratum}: one row per domain, DE stratum and class, the raised
-fish before the strata are summed, from \code{\link[=raiseToDE]{raiseToDE()}}.
+fish before the strata are summed, from \code{\link[=raiseToDE]{raiseToDE()}}. With totals one
+row per domain and class, from \code{\link[=raiseToTotals]{raiseToTotals()}}.
 \item \code{codeCheck}, \code{log} and \code{settings}.
 }
 
@@ -123,6 +125,8 @@ fraction (lower hierarchies A, B and C).
 each lowest-level SA.
 \item \code{\link[=raiseToDE]{raiseToDE()}}: weighted sums per DE stratum and domain, with the DE
 ratio (optional).
+\item \code{\link[=raiseToTotals]{raiseToTotals()}}: only when the scheme has \code{totals}. The ratio to
+your own totals, and the sums per domain again.
 \item \code{\link[=summariseRatioEstimates]{summariseRatioEstimates()}} and \code{\link[=summariseRatioDomains]{summariseRatioDomains()}}: the
 estimates per domain and class, and per domain (SOP, sample counts).
 }
@@ -148,5 +152,6 @@ res$log
 }
 \seealso{
 \code{\link[=raisingScheme]{raisingScheme()}}, \code{\link[=getSampleUnits]{getSampleUnits()}}, \code{\link[=expandWithinSample]{expandWithinSample()}},
-\code{\link[=getStageWeights]{getStageWeights()}}, \code{\link[=raiseToDE]{raiseToDE()}}, \code{\link[=summariseRatioEstimates]{summariseRatioEstimates()}}
+\code{\link[=getStageWeights]{getStageWeights()}}, \code{\link[=raiseToDE]{raiseToDE()}}, \code{\link[=raiseToTotals]{raiseToTotals()}},
+\code{\link[=summariseRatioEstimates]{summariseRatioEstimates()}}
 }

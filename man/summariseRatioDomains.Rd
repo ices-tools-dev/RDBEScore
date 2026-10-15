@@ -7,7 +7,7 @@
 summariseRatioDomains(raised)
 }
 \arguments{
-\item{raised}{Output of \code{\link[=raiseToDE]{raiseToDE()}}.}
+\item{raised}{Output of \code{\link[=raiseToDE]{raiseToDE()}} or \code{\link[=raiseToTotals]{raiseToTotals()}}.}
 }
 \value{
 A \code{data.table} with one row per domain: the domain variables,

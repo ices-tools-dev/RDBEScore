@@ -250,5 +250,57 @@ test_that("totals work in hierarchy 5, on samples and on landing events", {
   expect_equal(res2$ratios$totals$rTotals,
                rep(1, nrow(tot)), tolerance = 1e-9)
 })
+# ---------------------------------------------------------------------------
+# raiseToDE() and raiseToTotals() as separate steps
+# ---------------------------------------------------------------------------
+
+test_that("raiseToDE() then raiseToTotals() equals doRatioEstimation()", {
+  sim <- simT(lowHierarchy = "C", haulsPerTrip = 3, sampledHaulsPerTrip = 1)
+  obj <- sim$obj
+  sc <- raisingScheme(FO = stageRaising("count"), DE = deRaising("ratio"),
+                      totals = totalsOf(clTotals(obj)))
+  su <- getSampleUnits(obj, species = 127143)
+  ex <- expandWithinSample(obj, su, target = "Age")
+  sw <- getStageWeights(obj, su, sc)
+  rDE <- raiseToDE(ex, sw, obj)
+  # raiseToDE() leaves the totals alone: rows per DE stratum, DE ratio only
+  expect_true("DEstratumName" %in% names(rDE))
+  expect_null(attr(rDE, "totalsRatios"))
+  expect_true(all(rDE$rApplied == attr(rDE, "deRatios")$rDE))
+  expect_true(any(grepl("applied by raiseToTotals",
+                        getRatioLog(rDE)$message)))
+  rT <- raiseToTotals(rDE, ex, sw, obj)
+  expect_false("DEstratumName" %in% names(rT))
+  expect_false(is.null(attr(rT, "totalsRatios")))
+  sr <- attr(rT, "sampleRatios")
+  expect_equal(names(sr), c("SAid", "rDE", "rTotals"))
+  # the log holds both steps
+  expect_true(all(c("raiseToDE", "raiseToTotals") %in%
+                    sub(" .*", "", getRatioLog(rT)$step)))
+  res <- estT(obj, sc)
+  expect_equal(summariseRatioEstimates(rT), res$estimates)
+  expect_equal(summariseRatioDomains(rT), res$domains)
+  expect_equal(attr(rT, "totalsRatios"), res$ratios$totals)
+})
+
+test_that("raiseToTotals() checks its input", {
+  sim <- simT(lowHierarchy = "C")
+  obj <- sim$obj
+  scNo <- raisingScheme(DE = deRaising("ratio"))
+  su <- getSampleUnits(obj, species = 127143)
+  ex <- expandWithinSample(obj, su, target = "Age")
+  sw <- getStageWeights(obj, su, scNo)
+  rDE <- raiseToDE(ex, sw, obj)
+  expect_error(raiseToTotals(rDE, ex, sw, obj), "has no totals")
+  sc <- raisingScheme(DE = deRaising("ratio"),
+                      totals = totalsOf(clTotals(obj)))
+  expect_error(raiseToTotals(data.table::data.table(a = 1), ex, sw, obj,
+                             scheme = sc), "output of raiseToDE")
+  # other samples than the ones raiseToDE() saw
+  ex2 <- data.table::copy(ex)
+  attr(rDE, "sampleRatios") <- attr(rDE, "sampleRatios")[-1]
+  expect_error(raiseToTotals(rDE, ex2, sw, obj, scheme = sc),
+               "does not match these samples")
+})
 
 }) ## end capture.output

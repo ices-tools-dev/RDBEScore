@@ -1,8 +1,8 @@
 #' Raise the weighted samples to the DE stratum
 #'
-#' Last raising step of stage-wise raising (see [raisingScheme()]). Each
-#' expanded sample from [expandWithinSample()] is multiplied by its stage
-#' weight `wStages` from [getStageWeights()], and summed per DE stratum,
+#' Raising step of stage-wise raising (see [raisingScheme()]), after
+#' [getStageWeights()]. Each expanded sample from [expandWithinSample()] is
+#' multiplied by its stage weight `wStages`, and summed per DE stratum,
 #' domain and class:
 #' \deqn{\hat N_{d,a} = r_h \sum_{i \in d} w_i y_{i,a}}
 #' With DE `"none"`, \eqn{r_h = 1}. With DE `"ratio"`,
@@ -15,15 +15,8 @@
 #' The ratio is formed per DE stratum and shared by all domains (quarter,
 #' area, métier, ...) of that stratum.
 #'
-#' **Totals.** When the scheme has `totals` ([totalsRaising()]), a second
-#' ratio follows per totals stratum \eqn{g}:
-#' \eqn{r_g = T_g / \sum_{j \in g} w_j r_{h(j)} x_j}, with \eqn{T_g} from
-#' your table. Each sample is multiplied by \eqn{r_h r_g}. A totals stratum
-#' with sampled units but no total stops the run (usually codes that do not
-#' match). A total without sampled units is logged as a warning and not
-#' raised. The rows are then per domain and class, without the DE stratum,
-#' because totals strata can cut across DE strata, and `rApplied` is the
-#' combined factor `liveWeightEst_kg / liveWeightSampled_kg` of the domain.
+#' Totals you supply ([totalsRaising()]) are applied by the next step,
+#' [raiseToTotals()], which takes the output of this function.
 #'
 #' `liveWeightEst_kg` is the **estimated** live weight of the species per
 #' domain, \eqn{r_h \sum w x} with x the sampled live weight (`xSample`).
@@ -35,26 +28,24 @@
 #' @param RDBESDataObj The `RDBESDataObject` (for DE totals and the unit
 #'   tables of `at`).
 #' @param scheme The scheme from [raisingScheme()]. Default: the one stored in
-#'   `stageWeights`.
+#'   `stageWeights`. Its `totals` are not used here, see [raiseToTotals()].
 #' @param domainVars Domain variables. Default
 #'   `c("year", "quarter", "area", "metier6")`.
 #' @param verbose Logical. Print log entries as messages. Default `FALSE`.
 #'
 #' @return A `data.table` with one row per domain, DE stratum and class: the
-#'   domain variables, `DEstratumName` (not when there are totals), `class`,
-#'   the raised `N`, `NW` (numbers with a weight), `W_g`, `NL` (numbers with
-#'   a length), `L_mm`, `nFish`, and `liveWeightSampled_kg` (sum of
-#'   `wStages * xSample`, before the ratios), `liveWeightEst_kg` (after the
-#'   ratios) and `rApplied` (the DE ratio, 1 for `"none"`, or the combined
-#'   factor with totals). Attributes:
+#'   domain variables, `DEstratumName`, `class`, the raised `N`, `NW`
+#'   (numbers with a weight), `W_g`, `NL` (numbers with a length), `L_mm`,
+#'   `nFish`, and `liveWeightSampled_kg` (sum of `wStages * xSample`, before
+#'   the ratio), `liveWeightEst_kg` (after the ratio) and `rApplied` (the DE
+#'   ratio, 1 for `"none"`). Attributes:
 #'   * `"deRatios"`: one row per DE stratum, with `DEstratumName`, `rDE`,
 #'     `total` (the DE total) and `xWeightedStratum` (sum of w x over the
 #'     stratum). Only `DEstratumName` and `rDE` for DE `"none"`.
-#'   * `"totalsRatios"`: one row per totals stratum, with the strata columns,
-#'     `rTotals`, `total`, `xWeightedStratum` and `nUnits`. `NULL` without
-#'     totals.
+#'   * `"sampleRatios"`: one row per sample, with `SAid` and `rDE`. Used by
+#'     [raiseToTotals()].
 #'   * `"domainSummary"`, `"target"`, `"domainVars"` and `"ratioLog"`.
-#' @seealso [getStageWeights()], [summariseRatioEstimates()]
+#' @seealso [getStageWeights()], [raiseToTotals()], [summariseRatioEstimates()]
 #' @export
 raiseToDE <- function(expanded, stageWeights, RDBESDataObj,
                       scheme = attr(stageWeights, "scheme"),
@@ -68,26 +59,11 @@ raiseToDE <- function(expanded, stageWeights, RDBESDataObj,
   log <- newRatioLog()
   deStep <- scheme$DE
   stratCol <- deStep$strata
-
-  su <- data.table::copy(stageWeights[include == TRUE &
-                                        SAid %in% unique(expanded$SAid)])
-  if (nrow(su) == 0) stop("No included samples with expanded data.")
-  for (v in domainVars) {
-    if (v %in% c("year", "quarter", "month")) su[, (v) := as.integer(get(v))]
-    else su[, (v) := as.character(get(v))]
-  }
+  prep <- prepareRaising(expanded, stageWeights, RDBESDataObj, domainVars,
+                         stratCol)
+  su <- prep$su
+  deLab <- prep$deLab
   de <- data.table::copy(RDBESDataObj$DE)
-  if (!stratCol %in% names(de)) {
-    stop("DE strata column '", stratCol, "' not in DE.", call. = FALSE)
-  }
-  # One stratum per DE record. The label is the strata column, with the
-  # DEid added when a label is used by more than one DE record (for example
-  # several years or sampling schemes in one object).
-  labs <- as.character(de[[stratCol]])
-  dupLab <- labs %in% labs[duplicated(labs)]
-  labs[dupLab] <- paste0(labs[dupLab], " [DEid ", de$DEid[dupLab], "]")
-  deLab <- data.table::data.table(DEid = de$DEid, .stratum = labs)
-  su <- merge(su, deLab, by = "DEid", all.x = TRUE)
 
   # ---------------------------------------------------------------------------
   # DE ratio per DE stratum
@@ -143,24 +119,168 @@ raiseToDE <- function(expanded, stageWeights, RDBESDataObj,
       paste0("DE ratio per ", stratCol, " with x measured on ", deStep$at),
       nrow(ratios), verbose)
   }
-
-  # Multiplier of each sample: the DE ratio, then the totals ratio
-  su[, mult := ratios$ratio[match(.stratum, ratios$.stratum)]]
-  tot <- scheme$totals
-  totalsRatios <- NULL
-  if (!is.null(tot)) {
-    tr <- raiseToTotals(su, expanded, stageWeights, RDBESDataObj, tot,
-                        deLab, ratios, deStep$method, step, verbose)
-    su[, mult := mult * tr$factor[match(SAid, tr$SAid)]]
-    log <- rbind(log, tr$log)
-    totalsRatios <- tr$ratios
+  if (!is.null(scheme$totals)) {
+    log <- addToRatioLog(log, step, "info",
+      "The scheme has totals: they are applied by raiseToTotals()", NA,
+      verbose)
   }
 
-  # ---------------------------------------------------------------------------
-  # Weighted sums per domain x class, and per DE stratum when there are no
-  # totals (totals strata can cut across DE strata)
-  # ---------------------------------------------------------------------------
-  byS <- if (is.null(tot)) c(domainVars, ".stratum") else domainVars
+  # Multiplier of each sample: its DE ratio
+  su[, mult := ratios$ratio[match(.stratum, ratios$.stratum)]]
+  out <- sumsPerDomain(expanded, su, c(domainVars, ".stratum"))
+  out[, rApplied := ratios$ratio[match(.stratum, ratios$.stratum)]]
+  data.table::setnames(out, ".stratum", "DEstratumName")
+  out <- orderRaised(out, c(domainVars, "DEstratumName", "class"))
+
+  domSum <- domainSummaryOf(su, RDBESDataObj, domainVars)
+  log <- addToRatioLog(log, step, "info", "Domains estimated",
+                       nrow(domSum), verbose)
+  deRatios <- data.table::copy(ratios)
+  data.table::setnames(deRatios, c(".stratum", "ratio", "T", "sumWX"),
+                       c("DEstratumName", "rDE", "total", "xWeightedStratum"),
+                       skip_absent = TRUE)
+  data.table::setkey(deRatios, NULL)
+  attr(out, "deRatios") <- deRatios[]
+  attr(out, "sampleRatios") <- su[, .(SAid, rDE = mult)]
+  attr(out, "domainSummary") <- domSum
+  attr(out, "target") <- attr(expanded, "target")
+  attr(out, "domainVars") <- domainVars
+  attr(out, "ratioLog") <- log
+  out[]
+}
+
+#' Raise to totals you supply
+#'
+#' Optional raising step after [raiseToDE()], when the scheme has `totals`
+#' ([totalsRaising()]). Per totals stratum \eqn{g} it forms
+#' \deqn{r_g = T_g / \sum_{j \in g} w_j r_{h(j)} x_j}
+#' with \eqn{T_g} from your table, \eqn{w_j r_{h(j)}} the weight of unit
+#' \eqn{j} after the stages and the DE ratio, and \eqn{x_j} the same quantity
+#' as \eqn{T_g} measured on it. Each sample is then multiplied by
+#' \eqn{r_h r_g}, and the fish are summed again per domain and class.
+#'
+#' The totals ratio is applied per sample, before the sums per domain,
+#' because a totals stratum can cut across domains and DE strata. That is
+#' why this step takes the samples (`expanded`, `stageWeights`) as well as
+#' the output of [raiseToDE()].
+#'
+#' A totals stratum with sampled units but no total stops the run (usually
+#' codes that do not match). A total without sampled units is logged as a
+#' warning and not raised.
+#'
+#' @param raised Output of [raiseToDE()].
+#' @param expanded Output of [expandWithinSample()], the same as given to
+#'   [raiseToDE()].
+#' @param stageWeights Output of [getStageWeights()], the same as given to
+#'   [raiseToDE()].
+#' @param RDBESDataObj The `RDBESDataObject` (for the strata and the unit
+#'   tables of `at`).
+#' @param scheme The scheme from [raisingScheme()], with `totals`. Default:
+#'   the one stored in `stageWeights`.
+#' @param verbose Logical. Print log entries as messages. Default `FALSE`.
+#'
+#' @return A `data.table` with one row per domain and class (no DE stratum,
+#'   because totals strata can cut across DE strata), with the same columns
+#'   as [raiseToDE()] except `DEstratumName`. `rApplied` is the combined
+#'   factor `liveWeightEst_kg / liveWeightSampled_kg` of the domain.
+#'   Attributes: `"deRatios"` (from [raiseToDE()]), `"totalsRatios"` (one
+#'   row per totals stratum, with the strata columns, `rTotals`, `total`,
+#'   `xWeightedStratum` and `nUnits`), `"sampleRatios"` (`SAid`, `rDE`,
+#'   `rTotals`), `"domainSummary"`, `"target"`, `"domainVars"` and
+#'   `"ratioLog"` (the log of [raiseToDE()] followed by this step).
+#' @seealso [raiseToDE()], [totalsRaising()], [summariseRatioEstimates()]
+#' @export
+raiseToTotals <- function(raised, expanded, stageWeights, RDBESDataObj,
+                          scheme = attr(stageWeights, "scheme"),
+                          verbose = FALSE) {
+  if (is.null(attr(raised, "sampleRatios")) ||
+      is.null(attr(raised, "deRatios"))) {
+    stop("raised must be the output of raiseToDE().", call. = FALSE)
+  }
+  if (!inherits(scheme, "RDBESRaisingScheme")) {
+    stop("scheme must be made with raisingScheme().", call. = FALSE)
+  }
+  if (is.null(scheme$totals)) {
+    stop("The scheme has no totals. Add them with ",
+         "raisingScheme(totals = totalsRaising(...)), or use the output of ",
+         "raiseToDE() as it is.", call. = FALSE)
+  }
+  step <- "raiseToTotals"
+  domainVars <- attr(raised, "domainVars")
+  prep <- prepareRaising(expanded, stageWeights, RDBESDataObj, domainVars,
+                         scheme$DE$strata)
+  su <- prep$su
+  sr <- attr(raised, "sampleRatios")
+  su[, mult := sr$rDE[match(SAid, sr$SAid)]]
+  if (anyNA(su$mult)) {
+    stop("raised does not match these samples. Use the same expanded and ",
+         "stageWeights as in raiseToDE().", call. = FALSE)
+  }
+  deR <- attr(raised, "deRatios")
+  ratios <- data.table::data.table(.stratum = deR$DEstratumName,
+                                   ratio = deR$rDE)
+
+  tr <- totalsFactors(su, expanded, stageWeights, RDBESDataObj, scheme$totals,
+                      prep$deLab, ratios, scheme$DE$method, step, verbose)
+  su[, rTotals := tr$factor[match(SAid, tr$SAid)]]
+  su[, mult := mult * rTotals]
+  log <- tr$log
+
+  out <- sumsPerDomain(expanded, su, domainVars)
+  # the combined factor of the DE and totals ratios in the domain
+  out[, rApplied := liveWeightEst_kg / liveWeightSampled_kg]
+  out <- orderRaised(out, c(domainVars, "class"))
+
+  domSum <- domainSummaryOf(su, RDBESDataObj, domainVars)
+  log <- addToRatioLog(log, step, "info", "Domains estimated",
+                       nrow(domSum), verbose)
+  attr(out, "deRatios") <- deR
+  attr(out, "totalsRatios") <- tr$ratios
+  attr(out, "sampleRatios") <- su[, .(SAid, rDE = mult / rTotals, rTotals)]
+  attr(out, "domainSummary") <- domSum
+  attr(out, "target") <- attr(raised, "target")
+  attr(out, "domainVars") <- domainVars
+  attr(out, "ratioLog") <- rbind(getRatioLog(raised), log)
+  out[]
+}
+
+#' Included samples with their DE stratum, ready for raising
+#'
+#' The included samples of `stageWeights` that have expanded fish, with the
+#' domain variables in a fixed type and the DE stratum label `.stratum`.
+#' One stratum per DE record. The label is the strata column, with the DEid
+#' added when a label is used by more than one DE record (for example
+#' several years or sampling schemes in one object).
+#' @return A list with `su` and `deLab` (`DEid`, `.stratum`).
+#' @keywords internal
+#' @noRd
+prepareRaising <- function(expanded, stageWeights, RDBESDataObj, domainVars,
+                           stratCol) {
+  su <- data.table::copy(stageWeights[include == TRUE &
+                                        SAid %in% unique(expanded$SAid)])
+  if (nrow(su) == 0) stop("No included samples with expanded data.")
+  for (v in domainVars) {
+    if (v %in% c("year", "quarter", "month")) su[, (v) := as.integer(get(v))]
+    else su[, (v) := as.character(get(v))]
+  }
+  de <- RDBESDataObj$DE
+  if (!stratCol %in% names(de)) {
+    stop("DE strata column '", stratCol, "' not in DE.", call. = FALSE)
+  }
+  labs <- as.character(de[[stratCol]])
+  dupLab <- labs %in% labs[duplicated(labs)]
+  labs[dupLab] <- paste0(labs[dupLab], " [DEid ", de$DEid[dupLab], "]")
+  deLab <- data.table::data.table(DEid = de$DEid, .stratum = labs)
+  su <- merge(su, deLab, by = "DEid", all.x = TRUE)
+  list(su = su, deLab = deLab)
+}
+
+#' Weighted sums of the fish and the live weight, per group and class
+#'
+#' Each sample counts `wStages * mult`, where `mult` holds the ratios.
+#' @keywords internal
+#' @noRd
+sumsPerDomain <- function(expanded, su, byS) {
   ys <- merge(expanded, su[, c("SAid", "wStages", "mult", byS), with = FALSE],
               by = "SAid")[
     , .(N = sum(wStages * mult * yN), NW = sum(wStages * mult * yNW),
@@ -170,21 +290,24 @@ raiseToDE <- function(expanded, stageWeights, RDBESDataObj,
   # Live weight of the species in the samples, before and after the ratios
   xs <- su[, .(liveWeightSampled_kg = sum(wStages * xSample),
                liveWeightEst_kg = sum(wStages * mult * xSample)), by = byS]
-  out <- merge(ys, xs, by = byS)
-  if (is.null(tot)) {
-    out[, rApplied := ratios$ratio[match(.stratum, ratios$.stratum)]]
-    data.table::setnames(out, ".stratum", "DEstratumName")
-  } else {
-    # the combined factor of the DE and totals ratios in the domain
-    out[, rApplied := liveWeightEst_kg / liveWeightSampled_kg]
-  }
-  lead <- c(domainVars, if (is.null(tot)) "DEstratumName", "class")
+  merge(ys, xs, by = byS)
+}
+
+#' Columns and row order of a raised table
+#' @keywords internal
+#' @noRd
+orderRaised <- function(out, lead) {
   out <- out[, c(lead, "N", "NW", "W_g", "NL", "L_mm", "nFish",
                  "liveWeightSampled_kg", "liveWeightEst_kg", "rApplied"),
              with = FALSE]
   data.table::setorderv(out, lead)
+  out
+}
 
-  # Domain summary
+#' Per domain: samples, live weight and sampled units per stage
+#' @keywords internal
+#' @noRd
+domainSummaryOf <- function(su, RDBESDataObj, domainVars) {
   # Number of sampled units per stage, e.g. nVessels or nLandingEvents
   sc <- ratioStageChain(RDBESDataObj)
   labels <- sc$spec$unitLabels[sc$stages]
@@ -198,33 +321,18 @@ raiseToDE <- function(expanded, stageWeights, RDBESDataObj,
                    lapply(.SD, data.table::uniqueN)),
                by = domainVars, .SDcols = idCols]
   data.table::setnames(domSum, idCols, unname(labels))
-
-  log <- addToRatioLog(log, step, "info", "Domains estimated",
-                       nrow(domSum), verbose)
-  deRatios <- data.table::copy(ratios)
-  data.table::setnames(deRatios, c(".stratum", "ratio", "T", "sumWX"),
-                       c("DEstratumName", "rDE", "total", "xWeightedStratum"),
-                       skip_absent = TRUE)
-  data.table::setkey(deRatios, NULL)
-  attr(out, "deRatios") <- deRatios[]
-  attr(out, "totalsRatios") <- totalsRatios
-  attr(out, "domainSummary") <- domSum
-  attr(out, "target") <- attr(expanded, "target")
-  attr(out, "domainVars") <- domainVars
-  attr(out, "ratioLog") <- log
-  out[]
+  domSum
 }
 
-#' The totals step: a ratio to user totals per totals stratum
+#' The totals ratio per totals stratum, and its factor per sample
 #'
 #' Units (samples for at = "SA", stage units otherwise) carry their weight
 #' after the stages and the DE step, their x and their totals stratum.
 #' Returns the factor per sample, the ratios per stratum and the log.
 #' @keywords internal
 #' @noRd
-raiseToTotals <- function(su, expanded, stageWeights, RDBESDataObj, tot,
+totalsFactors <- function(su, expanded, stageWeights, RDBESDataObj, tot,
                           deLab, ratios, deMethod, step, verbose) {
-  step <- paste0(step, " (totals)")
   log <- newRatioLog()
   cols <- tot$strata
   if (tot$at == "SA") {

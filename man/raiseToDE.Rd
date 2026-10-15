@@ -22,7 +22,7 @@ raiseToDE(
 tables of \code{at}).}
 
 \item{scheme}{The scheme from \code{\link[=raisingScheme]{raisingScheme()}}. Default: the one stored in
-\code{stageWeights}.}
+\code{stageWeights}. Its \code{totals} are not used here, see \code{\link[=raiseToTotals]{raiseToTotals()}}.}
 
 \item{domainVars}{Domain variables. Default
 \code{c("year", "quarter", "area", "metier6")}.}
@@ -31,26 +31,24 @@ tables of \code{at}).}
 }
 \value{
 A \code{data.table} with one row per domain, DE stratum and class: the
-domain variables, \code{DEstratumName} (not when there are totals), \code{class},
-the raised \code{N}, \code{NW} (numbers with a weight), \code{W_g}, \code{NL} (numbers with
-a length), \code{L_mm}, \code{nFish}, and \code{liveWeightSampled_kg} (sum of
-\code{wStages * xSample}, before the ratios), \code{liveWeightEst_kg} (after the
-ratios) and \code{rApplied} (the DE ratio, 1 for \code{"none"}, or the combined
-factor with totals). Attributes:
+domain variables, \code{DEstratumName}, \code{class}, the raised \code{N}, \code{NW}
+(numbers with a weight), \code{W_g}, \code{NL} (numbers with a length), \code{L_mm},
+\code{nFish}, and \code{liveWeightSampled_kg} (sum of \code{wStages * xSample}, before
+the ratio), \code{liveWeightEst_kg} (after the ratio) and \code{rApplied} (the DE
+ratio, 1 for \code{"none"}). Attributes:
 \itemize{
 \item \code{"deRatios"}: one row per DE stratum, with \code{DEstratumName}, \code{rDE},
 \code{total} (the DE total) and \code{xWeightedStratum} (sum of w x over the
 stratum). Only \code{DEstratumName} and \code{rDE} for DE \code{"none"}.
-\item \code{"totalsRatios"}: one row per totals stratum, with the strata columns,
-\code{rTotals}, \code{total}, \code{xWeightedStratum} and \code{nUnits}. \code{NULL} without
-totals.
+\item \code{"sampleRatios"}: one row per sample, with \code{SAid} and \code{rDE}. Used by
+\code{\link[=raiseToTotals]{raiseToTotals()}}.
 \item \code{"domainSummary"}, \code{"target"}, \code{"domainVars"} and \code{"ratioLog"}.
 }
 }
 \description{
-Last raising step of stage-wise raising (see \code{\link[=raisingScheme]{raisingScheme()}}). Each
-expanded sample from \code{\link[=expandWithinSample]{expandWithinSample()}} is multiplied by its stage
-weight \code{wStages} from \code{\link[=getStageWeights]{getStageWeights()}}, and summed per DE stratum,
+Raising step of stage-wise raising (see \code{\link[=raisingScheme]{raisingScheme()}}), after
+\code{\link[=getStageWeights]{getStageWeights()}}. Each expanded sample from \code{\link[=expandWithinSample]{expandWithinSample()}} is
+multiplied by its stage weight \code{wStages}, and summed per DE stratum,
 domain and class:
 \deqn{\hat N_{d,a} = r_h \sum_{i \in d} w_i y_{i,a}}
 With DE \code{"none"}, \eqn{r_h = 1}. With DE \code{"ratio"},
@@ -64,15 +62,8 @@ without the species stay in the sum.
 The ratio is formed per DE stratum and shared by all domains (quarter,
 area, métier, ...) of that stratum.
 
-\strong{Totals.} When the scheme has \code{totals} (\code{\link[=totalsRaising]{totalsRaising()}}), a second
-ratio follows per totals stratum \eqn{g}:
-\eqn{r_g = T_g / \sum_{j \in g} w_j r_{h(j)} x_j}, with \eqn{T_g} from
-your table. Each sample is multiplied by \eqn{r_h r_g}. A totals stratum
-with sampled units but no total stops the run (usually codes that do not
-match). A total without sampled units is logged as a warning and not
-raised. The rows are then per domain and class, without the DE stratum,
-because totals strata can cut across DE strata, and \code{rApplied} is the
-combined factor \code{liveWeightEst_kg / liveWeightSampled_kg} of the domain.
+Totals you supply (\code{\link[=totalsRaising]{totalsRaising()}}) are applied by the next step,
+\code{\link[=raiseToTotals]{raiseToTotals()}}, which takes the output of this function.
 
 \code{liveWeightEst_kg} is the \strong{estimated} live weight of the species per
 domain, \eqn{r_h \sum w x} with x the sampled live weight (\code{xSample}).
@@ -80,5 +71,5 @@ The SOP check in \code{\link[=summariseRatioDomains]{summariseRatioDomains()}} t
 weights with the raised sample weights.
 }
 \seealso{
-\code{\link[=getStageWeights]{getStageWeights()}}, \code{\link[=summariseRatioEstimates]{summariseRatioEstimates()}}
+\code{\link[=getStageWeights]{getStageWeights()}}, \code{\link[=raiseToTotals]{raiseToTotals()}}, \code{\link[=summariseRatioEstimates]{summariseRatioEstimates()}}
 }

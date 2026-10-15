@@ -21,7 +21,9 @@
 #'    each lowest-level SA.
 #' 5. [raiseToDE()]: weighted sums per DE stratum and domain, with the DE
 #'    ratio (optional).
-#' 6. [summariseRatioEstimates()] and [summariseRatioDomains()]: the
+#' 6. [raiseToTotals()]: only when the scheme has `totals`. The ratio to
+#'    your own totals, and the sums per domain again.
+#' 7. [summariseRatioEstimates()] and [summariseRatioDomains()]: the
 #'    estimates per domain and class, and per domain (SOP, sample counts).
 #'
 #' Selection methods are not used to compute weights. Non-probabilistic
@@ -49,7 +51,8 @@
 #'   * `domains`: one row per domain, from [summariseRatioDomains()]:
 #'     estimated live weight, the factor applied, SOP and sample counts.
 #'   * `ratios`: a list with `DE` (one row per DE stratum) and `totals` (one
-#'     row per totals stratum, `NULL` without totals), from [raiseToDE()].
+#'     row per totals stratum, `NULL` without totals), from [raiseToDE()] and
+#'     [raiseToTotals()].
 #'   * `samples`: one row per lowest-level SA, from [getStageWeights()]:
 #'     ids, domain, inclusion, the factors and `wStages` first, the design
 #'     columns copied from the data last.
@@ -58,12 +61,14 @@
 #'   * `fishBySample`: one row per sample and class, the fish of each sample
 #'     scaled to its catch fraction, from [expandWithinSample()].
 #'   * `byStratum`: one row per domain, DE stratum and class, the raised
-#'     fish before the strata are summed, from [raiseToDE()].
+#'     fish before the strata are summed, from [raiseToDE()]. With totals one
+#'     row per domain and class, from [raiseToTotals()].
 #'   * `codeCheck`, `log` and `settings`.
 #'
 #'   [ratioOutputGuide()] explains every column.
 #' @seealso [raisingScheme()], [getSampleUnits()], [expandWithinSample()],
-#'   [getStageWeights()], [raiseToDE()], [summariseRatioEstimates()]
+#'   [getStageWeights()], [raiseToDE()], [raiseToTotals()],
+#'   [summariseRatioEstimates()]
 #' @export
 #'
 #' @examples
@@ -136,6 +141,10 @@ doRatioEstimation <- function(RDBESDataObj,
                                   verbose = verbose)
   raised <- raiseToDE(expanded, stageWeights, RDBESDataObj, scheme = raising,
                       domainVars = domainVars, verbose = verbose)
+  if (!is.null(raising$totals)) {
+    raised <- raiseToTotals(raised, expanded, stageWeights, RDBESDataObj,
+                            scheme = raising, verbose = verbose)
+  }
   estimates <- summariseRatioEstimates(raised, plusGroup = plusGroup)
   domains <- summariseRatioDomains(raised)
 

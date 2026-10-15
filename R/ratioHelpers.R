@@ -1,6 +1,6 @@
 # Internal helpers for the ratio estimation function family:
 # getSampleUnits(), expandWithinSample(), getStageWeights(), raiseToDE(),
-# summariseRatioEstimates() and doRatioEstimation().
+# raiseToTotals(), summariseRatioEstimates() and doRatioEstimation().
 
 # Session cache for ICES code lists downloaded by getRDBESCodeList()
 .rdbesCodeListCache <- new.env(parent = emptyenv())
@@ -331,7 +331,7 @@ addToRatioLog <- function(log, step, level, message, n = NA_integer_,
 #' exclusions, warnings and information to its output. This returns it.
 #'
 #' @param x The output of [getSampleUnits()], [expandWithinSample()],
-#'   [getStageWeights()] or [raiseToDE()].
+#'   [getStageWeights()], [raiseToDE()] or [raiseToTotals()].
 #'
 #' @return A `data.table` with columns `step`, `level` (`"info"`,
 #'   `"assumption"`, `"exclusion"` or `"warning"`), `message` and `n`

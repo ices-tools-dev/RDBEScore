@@ -8,7 +8,7 @@ getRatioLog(x)
 }
 \arguments{
 \item{x}{The output of \code{\link[=getSampleUnits]{getSampleUnits()}}, \code{\link[=expandWithinSample]{expandWithinSample()}},
-\code{\link[=getStageWeights]{getStageWeights()}} or \code{\link[=raiseToDE]{raiseToDE()}}.}
+\code{\link[=getStageWeights]{getStageWeights()}}, \code{\link[=raiseToDE]{raiseToDE()}} or \code{\link[=raiseToTotals]{raiseToTotals()}}.}
 }
 \value{
 A \code{data.table} with columns \code{step}, \code{level} (\code{"info"},

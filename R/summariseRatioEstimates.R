@@ -1,14 +1,15 @@
 #' Summarise raised ratio estimates per domain and class
 #'
 #' Last step of the ratio estimation workflow (see [doRatioEstimation()]).
-#' Sums the raised quantities from [raiseToDE()] over strata, applies an
-#' optional plus group and derives the means. Mean weight and mean length are
-#' ratios of raised totals, never averages of sample means.
+#' Sums the raised quantities from [raiseToDE()] or [raiseToTotals()] over
+#' strata, applies an optional plus group and derives the means. Mean weight
+#' and mean length are ratios of raised totals, never averages of sample
+#' means.
 #'
 #' The values that belong to a whole domain (estimated live weight, SOP,
 #' sample counts) are in [summariseRatioDomains()].
 #'
-#' @param raised Output of [raiseToDE()].
+#' @param raised Output of [raiseToDE()] or [raiseToTotals()].
 #' @param plusGroup Optional age. Ages greater than or equal to it are
 #'   combined. Only for `target = "Age"`.
 #'
@@ -50,7 +51,7 @@ summariseRatioEstimates <- function(raised, plusGroup = NULL) {
 #' out. `weightCoverage` is the share of the estimated numbers that had an
 #' individual weight.
 #'
-#' @param raised Output of [raiseToDE()].
+#' @param raised Output of [raiseToDE()] or [raiseToTotals()].
 #'
 #' @return A `data.table` with one row per domain: the domain variables,
 #'   `liveWeightEst_kg` (estimated live weight of the species),
@@ -87,7 +88,8 @@ summariseRatioDomains <- function(raised) {
 checkRaisedInput <- function(raised) {
   target <- attr(raised, "target")
   if (is.null(target) || is.null(attr(raised, "domainVars"))) {
-    stop("raised must be the output of raiseToDE().", call. = FALSE)
+    stop("raised must be the output of raiseToDE() or raiseToTotals().",
+         call. = FALSE)
   }
   target
 }

@@ -232,13 +232,15 @@ unique(sw[, .(VSid, FTid, f_VS, f_FT, f_FO, wStages)])
 ```
 
 **5. Raising to the DE stratum.** Weighted sums per DE stratum, domain
-and age, with the DE ratio `DEauxVarTot / sum(w x)` (and the totals
-ratio when the scheme has totals).
+and age, with the DE ratio `DEauxVarTot / sum(w x)`.
 
 ```{r}
 raised <- raiseToDE(ex, sw, obj)
 attr(raised, "deRatios")   # rDE = total / xWeightedStratum
 ```
+
+When the scheme has totals of your own, `raiseToTotals(raised, ex, sw,
+obj)` follows (see [Raising to your own totals](#own-totals)).
 
 **6. Summary.** Numbers, mean weight and mean length per domain and age,
 and per domain the estimated live weight and the sum-of-products check.
@@ -340,11 +342,14 @@ are. The x of the DE or totals ratio can be `"speciesLiveWeight"`
 (default), `"fishWeight"` (the summed weight of the fish counted) or
 `"fishCount"`.
 
-## Raising to your own totals
+## Raising to your own totals {#own-totals}
 
 The DE total covers the sampling frame. Often you also have totals that
 the frame does not, such as all landings in CL, or effort in CE. A
 `totalsRaising()` step raises the estimate to them, after the DE step.
+`doRatioEstimation()` then runs `raiseToTotals()` after `raiseToDE()`.
+It applies the totals ratio to every sample before summing per domain,
+because a totals stratum can cut across domains and DE strata.
 You supply the totals as a table, and its key columns are the strata.
 They can be any column the samples carry: the domain variables, an SA
 column such as `SAcommCat`, or a column of a stage table.
