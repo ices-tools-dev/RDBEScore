@@ -40,4 +40,35 @@ test_that("removeBrokenSpeciesListLinks runs without errors
                                     ,NA)
 })
 
+test_that("removeBrokenSpeciesListLinks keeps all SS rows when SL links are valid", {
+  myObj <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
+  res <- removeBrokenSpeciesListLinks(myObj, verbose = FALSE)
+  expect_equal(nrow(res[["SS"]]), nrow(myObj[["SS"]]))
+})
+
+test_that("removeBrokenSpeciesListLinks removes all SS rows when no SL rows remain", {
+  myObj <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
+  filtered <- filterRDBESDataObject(myObj, c("SLspeclistName"), c("xxx"))
+  res <- removeBrokenSpeciesListLinks(filtered, verbose = FALSE)
+  expect_equal(nrow(res[["SS"]]), 0)
+})
+
+test_that("removeBrokenSpeciesListLinks removes SS rows when SL catch fraction does not match", {
+  myObj <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
+  expect_gt(nrow(myObj[["SS"]]), 0)
+  myObj[["SL"]]$SLcatchFrac <- "xxx"
+  res <- removeBrokenSpeciesListLinks(myObj, verbose = FALSE)
+  expect_equal(nrow(res[["SS"]]), 0)
+})
+
+test_that("removeBrokenSpeciesListLinks removes SS rows when SL year or country does not match", {
+  myObj <- importRDBESDataCSV(rdbesExtractPath = "./h1_v_20250211")
+  objYear <- myObj
+  objYear[["SL"]]$SLyear[] <- NA
+  expect_equal(nrow(removeBrokenSpeciesListLinks(objYear, verbose = FALSE)[["SS"]]), 0)
+  objCou <- myObj
+  objCou[["SL"]]$SLcou[] <- NA
+  expect_equal(nrow(removeBrokenSpeciesListLinks(objCou, verbose = FALSE)[["SS"]]), 0)
+})
+
 }) ## end capture.output
