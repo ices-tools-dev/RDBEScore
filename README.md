@@ -123,7 +123,7 @@ The main package directories are:
 
 2. **Start from the latest `dev` branch.** Work directly on `dev` if you can ensure that you never commit code that has failing tests. If you are unsure you can always create your own development branch based on `dev` and work there. Wherever you work remember to pull frequently so your code does not deviate too far from others. The `main` branch is protected and only accepts changes through pull requests.
 
-3. **Write or modify the code and tests.** You can do this manually or with AI coding tools. New functions should include *roxygen2* documentation and appropriate tests. Add or update examples and vignettes when relevant. Aim to keep changes related to one issue together.
+3. **Write or modify the code, tests and vignettes.** You can do this manually or with AI coding tools. New functions should include *roxygen2* documentation and appropriate tests. Add or update examples and vignettes when relevant. Aim to keep changes related to one issue together.
 
 4. **Document AI involvement and human review.** Add the information described in Section 3 to every new or substantially modified function and test(s).
 
@@ -197,6 +197,13 @@ When another person reviews the code or test and approves it without changes, ad
 If a reviewer wants to modify the code substantially, they are expected to raise an issue to inform others about it. Previous reviewers should be assigned to that issue and informed about the new issue. 
 
 Review for functions and tests are maintained separately. A change to one does not automatically invalidate approval of the other, unless its correctness is affected.
+
+**Vignettes**
+Add an index to the remaining vignettes and the date of last review at the end of the vignettes:
+
+```
+# "last review: 30/10/2025" 
+```
 
 **Major changes**
 Major changes (Sensu changes to multiple functions, that take time to review) should only be done after a plenary discussion. To the extent possible, the previous reviewers are informed ahead of those changes and allowed enough time to form an opinion.
