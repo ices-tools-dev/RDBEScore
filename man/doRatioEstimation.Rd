@@ -97,6 +97,8 @@ scaled to its catch fraction, from \code{\link[=expandWithinSample]{expandWithin
 fish before the strata are summed, from \code{\link[=raiseToDE]{raiseToDE()}}.
 \item \code{codeCheck}, \code{log} and \code{settings}.
 }
+
+\code{\link[=ratioOutputGuide]{ratioOutputGuide()}} explains every column.
 }
 \description{
 Estimates numbers, mean weight and mean length at age or at length per

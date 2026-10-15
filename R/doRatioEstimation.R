@@ -59,6 +59,8 @@
 #'   * `byStratum`: one row per domain, DE stratum and class, the raised
 #'     fish before the strata are summed, from [raiseToDE()].
 #'   * `codeCheck`, `log` and `settings`.
+#'
+#'   [ratioOutputGuide()] explains every column.
 #' @seealso [raisingScheme()], [getSampleUnits()], [expandWithinSample()],
 #'   [getStageWeights()], [raiseToDE()], [summariseRatioEstimates()]
 #' @export
@@ -235,6 +237,7 @@ print.RDBESRatioEstimate <- function(x, ...) {
     cat(sprintf("  $%-14s %-48s %s\n", r[1], r[2],
                 if (r[3] == "") "" else paste(r[3], "rows")))
   }
+  cat("  What each column means: ratioOutputGuide()\n")
   cat("\nFirst rows of $estimates:\n")
   print(utils::head(x$estimates, 10))
   invisible(x)
