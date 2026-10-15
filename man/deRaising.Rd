@@ -36,7 +36,8 @@ Otherwise a column name of the stage table given by \code{at}, a function of
 that table, or an \code{\link[=externalAux]{externalAux()}} object.}
 
 \item{at}{Stage on which \code{value} is measured: \code{"SA"} or a stage of the
-hierarchy (\code{"VS"}, \code{"FT"} or \code{"FO"} in hierarchy 1, \code{"OS"}, \code{"LE"} or
+hierarchy (\code{"VS"}, \code{"FT"} or \code{"FO"} in hierarchy 1, \code{"FT"} or \code{"FO"} in
+hierarchy 2, \code{"OS"}, \code{"LE"} or
 \code{"FT"} in hierarchy 5). \code{\link[=raisingScheme]{raisingScheme()}} checks it against the
 hierarchy. When it is not \code{"SA"}, sampled units without the species stay
 in the sum of x.}

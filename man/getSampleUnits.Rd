@@ -2,7 +2,7 @@
 % Please edit documentation in R/getSampleUnits.R
 \name{getSampleUnits}
 \alias{getSampleUnits}
-\title{Build the table of sample units for ratio estimation (hierarchies 1 and 5)}
+\title{Build the table of sample units for ratio estimation (hierarchies 1, 2 and 5)}
 \usage{
 getSampleUnits(
   RDBESDataObj,
@@ -15,7 +15,7 @@ getSampleUnits(
 )
 }
 \arguments{
-\item{RDBESDataObj}{A valid \code{RDBESDataObject} of hierarchy 1 or 5.}
+\item{RDBESDataObj}{A valid \code{RDBESDataObject} of hierarchy 1, 2 or 5.}
 
 \item{species}{Species to estimate, as AphiaID(s) (WoRMS), matched to
 \code{SAspeCode}, for example \code{127143} for plaice. Several values are allowed.
@@ -54,7 +54,8 @@ the fish were measured. Parent SA records are used only for their weights.
 \details{
 \itemize{
 \item the path through the upper hierarchy (\code{VSid}, \code{FTid}, \code{FOid}, \code{SSid} in
-hierarchy 1, \code{OSid}, \code{LEid}, optionally \code{FTid}, and \code{SSid} in
+hierarchy 1, \code{FTid}, \code{FOid} and \code{SSid} in hierarchy 2, \code{OSid}, \code{LEid},
+optionally \code{FTid}, and \code{SSid} in
 hierarchy 5) with
 the selection method, its design class (\code{\link[=classifySelectionMethod]{classifySelectionMethod()}}),
 stratum, \code{numTotal} and \code{numSamp} of every stage,
@@ -83,7 +84,7 @@ filled. It is only needed when the DE or totals ratio uses
 1 and logged. A presentation other than \code{WHL} with a factor of 1 is logged
 as suspicious.
 
-\strong{Domain variables.} Date in hierarchy 1: \code{FOendDate}, else
+\strong{Domain variables.} Date in hierarchies 1 and 2: \code{FOendDate}, else
 \code{FOstartDate}, else \code{FTarvDate}. In hierarchy 5: \code{LEdate}, else
 \code{FTarvDate} (when FT is used), else \code{OSsamDate}. Area, rectangle and
 métier: the SA value when filled, else the FO value (hierarchy 1) or the
@@ -102,7 +103,7 @@ B, no BV for C) are flagged \code{include = FALSE}. They add nothing to the
 estimate. A haul whose samples of the species are all excluded is treated
 as not sampled (non-response) by \code{\link[=getStageWeights]{getStageWeights()}}.
 
-Upper hierarchies 1 and 5 are implemented. The object must hold one
+Upper hierarchies 1, 2 and 5 are implemented. The object must hold one
 hierarchy. Clustering (\code{XXclustering} other than \code{"N"}) is logged. It does
 not affect the point estimates.
 }

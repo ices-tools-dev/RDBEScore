@@ -7,9 +7,10 @@
 getUnitTable(RDBESDataObj, stage, fields = NULL, verbose = FALSE)
 }
 \arguments{
-\item{RDBESDataObj}{An \code{RDBESDataObject} of hierarchy 1 or 5.}
+\item{RDBESDataObj}{An \code{RDBESDataObject} of hierarchy 1, 2 or 5.}
 
-\item{stage}{Stage table name: \code{"VS"}, \code{"FT"} or \code{"FO"} in hierarchy 1,
+\item{stage}{Stage table name: \code{"VS"}, \code{"FT"} or \code{"FO"} in hierarchy 1, \code{"FT"} or \code{"FO"} in
+hierarchy 2,
 \code{"OS"}, \code{"LE"} or (when SS links to FT) \code{"FT"} in hierarchy 5.}
 
 \item{fields}{Optional extra columns of the stage table, or of VD (for

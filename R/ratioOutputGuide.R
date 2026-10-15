@@ -57,7 +57,7 @@ ratioGuideTable <- function() {
     row("year", "", "Domain: year of the sample date"),
     row("quarter", "", "Domain: quarter of the sample date"),
     row("month", "", "Domain: month of the sample date"),
-    row("area", "", "Domain: area (SA, else FO in H1 or LE in H5)"),
+    row("area", "", "Domain: area (SA, else FO in H1 and H2, or LE in H5)"),
     row("statRect", "", "Domain: ICES rectangle (SA, else FO or LE)"),
     row("metier6", "", "Domain: metier level 6 (SA, else FO or LE)")))
   fish <- data.table::rbindlist(list(
@@ -65,8 +65,8 @@ ratioGuideTable <- function() {
   counts <- data.table::rbindlist(list(
     row("nSamples", "samples", "Lowest-level samples used in the domain"),
     row("nVessels", "units", "Sampled vessels in the domain (H1)"),
-    row("nTrips", "units", "Sampled trips in the domain (H1, or H5 with FT)"),
-    row("nHauls", "units", "Sampled hauls in the domain (H1)"),
+    row("nTrips", "units", "Sampled trips in the domain (H1, H2, or H5 with FT)"),
+    row("nHauls", "units", "Sampled hauls in the domain (H1, H2)"),
     row("nOnshoreEvents", "units", "Sampled onshore events in the domain (H5)"),
     row("nLandingEvents", "units",
         "Sampled landing events in the domain (H5)")))
@@ -117,7 +117,7 @@ ratioGuideTable <- function() {
       row("SAid", "", "The lowest-level SA, where the fish were measured"),
       row("topSAid", "", "The top SA of its sub-sample tree"),
       row("SAlevel", "", "Sub-sample level, 1 without sub-sampling"),
-      row("XXid", "", "Ids of the path up the hierarchy (SS, FO, FT, VS or SS, FT, LE, OS)"),
+      row("XXid", "", "Ids of the path up the hierarchy (SS, FO, FT, VS in H1, SS, FO, FT in H2, SS, FT, LE, OS in H5)"),
       row("DEid", "", "The DE record of the sample"),
       row("DEstratumName", "", "The DE stratum of the sample"),
       domain,

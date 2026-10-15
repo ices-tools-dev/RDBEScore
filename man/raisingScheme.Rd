@@ -14,7 +14,8 @@ raisingScheme(
 }
 \arguments{
 \item{...}{Stage raising methods, named by stage (\code{VS}, \code{FT}, \code{FO} in
-hierarchy 1, \code{OS}, \code{LE}, \code{FT} in hierarchy 5), each made with
+hierarchy 1, \code{FT}, \code{FO} in hierarchy 2, \code{OS}, \code{LE}, \code{FT} in hierarchy 5),
+each made with
 \code{\link[=stageRaising]{stageRaising()}}.}
 
 \item{SA}{The raising within the sample, made with \code{\link[=sampleRaising]{sampleRaising()}}.
@@ -25,7 +26,7 @@ Default \code{sampleRaising("weight")}.}
 \item{totals}{Optional raising to totals you supply, made with
 \code{\link[=totalsRaising]{totalsRaising()}}. Applied after the DE step. Default \code{NULL} (none).}
 
-\item{hierarchy}{The RDBES upper hierarchy: \code{1} (default) or \code{5}. It must
+\item{hierarchy}{The RDBES upper hierarchy: \code{1} (default), \code{2} or \code{5}. It must
 match \code{DEhierarchy} in the data.}
 }
 \value{
@@ -44,7 +45,8 @@ by the DE ratio.
 Stages not given are \code{"none"} (pooled). The species selection (SS) is
 always 1: a species list with more species gets no extra weight.
 
-Hierarchies 1 and 5 are implemented. In hierarchy 5 the stages are OS
+Hierarchies 1, 2 and 5 are implemented. Hierarchy 2 has the stages FT
+and FO (trips are sampled directly). In hierarchy 5 the stages are OS
 (onshore event) and LE (landing event). FT is an optional stage under LE:
 name it (\code{FT = stageRaising(...)}) when the SS records of the data link to
 FT. If the data use FT and the scheme does not name it, FT is \code{"none"}.

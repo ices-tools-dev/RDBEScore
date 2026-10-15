@@ -1,7 +1,8 @@
 #' Stage weights of the sample units
 #'
 #' Step of stage-wise raising (see [raisingScheme()]). For every stage of the
-#' stage (VS, FT, FO in hierarchy 1, OS, LE and optionally FT in hierarchy 5)
+#' stage (VS, FT, FO in hierarchy 1, FT, FO in hierarchy 2, OS, LE and
+#' optionally FT in hierarchy 5)
 #' it builds the unit table ([getUnitTable()]), resolves the total and value
 #' chosen by the user (RDBES column, function or [externalAux()] table), and
 #' computes a factor per sampled unit within parent x stratum
@@ -17,7 +18,7 @@
 #' Selection methods are not used for the factors. They are logged per stage.
 #'
 #' **Zeros and non-response.** A sampled unit of the lowest stage (a haul in
-#' hierarchy 1, a landing event or trip in hierarchy 5) can be:
+#' hierarchies 1 and 2, a landing event or trip in hierarchy 5) can be:
 #' * with an included sample of the species: its fish count,
 #' * with a recorded zero (an SA with total weight 0, see
 #'   [getSampleUnits()]): zero catch, logged as information,
@@ -36,7 +37,7 @@
 #' without sampled hauls) is treated as not sampled in the same way. All of
 #' this is logged.
 #'
-#' @param RDBESDataObj An `RDBESDataObject` of hierarchy 1 or 5.
+#' @param RDBESDataObj An `RDBESDataObject` of hierarchy 1, 2 or 5.
 #' @param sampleUnits Output of [getSampleUnits()].
 #' @param scheme A scheme made with [raisingScheme()], for the same
 #'   hierarchy as the data.

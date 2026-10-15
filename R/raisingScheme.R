@@ -138,7 +138,8 @@ samplePresets <- function() c("speciesLiveWeight", "fishWeight", "fishCount")
 #'   Otherwise a column name of the stage table given by `at`, a function of
 #'   that table, or an [externalAux()] object.
 #' @param at Stage on which `value` is measured: `"SA"` or a stage of the
-#'   hierarchy (`"VS"`, `"FT"` or `"FO"` in hierarchy 1, `"OS"`, `"LE"` or
+#'   hierarchy (`"VS"`, `"FT"` or `"FO"` in hierarchy 1, `"FT"` or `"FO"` in
+#'   hierarchy 2, `"OS"`, `"LE"` or
 #'   `"FT"` in hierarchy 5). [raisingScheme()] checks it against the
 #'   hierarchy. When it is not `"SA"`, sampled units without the species stay
 #'   in the sum of x.
@@ -293,20 +294,22 @@ externalAux <- function(data, by, col) {
 #' Stages not given are `"none"` (pooled). The species selection (SS) is
 #' always 1: a species list with more species gets no extra weight.
 #'
-#' Hierarchies 1 and 5 are implemented. In hierarchy 5 the stages are OS
+#' Hierarchies 1, 2 and 5 are implemented. Hierarchy 2 has the stages FT
+#' and FO (trips are sampled directly). In hierarchy 5 the stages are OS
 #' (onshore event) and LE (landing event). FT is an optional stage under LE:
 #' name it (`FT = stageRaising(...)`) when the SS records of the data link to
 #' FT. If the data use FT and the scheme does not name it, FT is `"none"`.
 #'
 #' @param ... Stage raising methods, named by stage (`VS`, `FT`, `FO` in
-#'   hierarchy 1, `OS`, `LE`, `FT` in hierarchy 5), each made with
+#'   hierarchy 1, `FT`, `FO` in hierarchy 2, `OS`, `LE`, `FT` in hierarchy 5),
+#'   each made with
 #'   [stageRaising()].
 #' @param SA The raising within the sample, made with [sampleRaising()].
 #'   Default `sampleRaising("weight")`.
 #' @param DE The raising to the DE stratum, made with [deRaising()].
 #' @param totals Optional raising to totals you supply, made with
 #'   [totalsRaising()]. Applied after the DE step. Default `NULL` (none).
-#' @param hierarchy The RDBES upper hierarchy: `1` (default) or `5`. It must
+#' @param hierarchy The RDBES upper hierarchy: `1` (default), `2` or `5`. It must
 #'   match `DEhierarchy` in the data.
 #'
 #' @details

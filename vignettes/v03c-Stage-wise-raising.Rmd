@@ -46,8 +46,10 @@ The factors of all stages are multiplied, so each sample gets one weight
 `wStages`. The estimate of numbers at age is the sum of `wStages` times the numbers
 at age in the samples.
 
-The same functions work for hierarchy 5 (onshore sampling), see
-[Hierarchy 5](#hierarchy-5) below.
+The same functions work for hierarchy 2 (trips sampled directly) and
+hierarchy 5 (onshore sampling), see [Hierarchy 2](#hierarchy-2) and
+[Hierarchy 5](#hierarchy-5) below. Other hierarchies are not implemented
+yet.
 
 ```{r}
 library(RDBEScore)
@@ -396,6 +398,28 @@ $\hat N_a = \sum_c n_{a,c} \, W_c / \sum_{j \in c} \mathrm{wt}_j$: the
 landed weight of the category divided by the weight of the measured
 fish, times the fish of age $a$ among them.
 
+## Hierarchy 2 {#hierarchy-2}
+
+Hierarchy 2 is at-sea sampling without the vessel stage: design stratum
+(DE), trip (FT), fishing operation (FO), species selection (SS) and
+sample (SA). Trips are sampled directly in SD, so FT is raised to the DE
+stratum. `FTnumTotal` is the number of trips in the population of the FT
+stratum. The vessel of a trip is in VD, through the `VDid` of FT.
+
+The scheme names FT and FO and says `hierarchy = 2`:
+
+```{r, eval = FALSE}
+# Trips and hauls counted, then a ratio to the DE total
+sc2 <- raisingScheme(FT = stageRaising("count"),
+                     FO = stageRaising("count"),
+                     DE = deRaising("ratio"),
+                     hierarchy = 2)
+res2 <- doRatioEstimation(myH2Object, species = 127143, raising = sc2)
+```
+
+Domains come from FO, as in hierarchy 1. The sample counts in
+`res$domains` are `nTrips` and `nHauls`. Naming VS in an H2 scheme stops.
+
 ## Hierarchy 5 {#hierarchy-5}
 
 Hierarchy 5 is onshore sampling: design stratum (DE), onshore event (OS,
@@ -474,4 +498,4 @@ scheme, for example:
     weights with the raised sample weights. A value of 1 does not prove
     the weights are right.
 -   Not covered yet: variance, sub-sampling of BV, hierarchies other
-    than 1 and 5, and discards.
+    than 1, 2 and 5, and discards.

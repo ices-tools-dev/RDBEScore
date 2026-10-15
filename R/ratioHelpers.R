@@ -47,7 +47,7 @@ ratioFieldCodeTypes <- function() {
 #' Upper hierarchies supported by stage-wise raising
 #' @keywords internal
 #' @noRd
-supportedHierarchies <- function() c(1L, 5L)
+supportedHierarchies <- function() c(1L, 2L, 5L)
 
 #' What stage-wise raising needs to know about one upper hierarchy
 #'
@@ -82,6 +82,12 @@ hierarchySpec <- function(hierarchy) {
                metierCol = "FOmetier6",
                unitLabels = c(VS = "nVessels", FT = "nTrips",
                               FO = "nHauls")),
+    # As H1 without the vessel stage: trips are sampled directly in SD
+    "2" = list(optional = character(0),
+               dateCols = c("FOendDate", "FOstartDate", "FTarvDate"),
+               areaCol = "FOarea", statRectCol = "FOstatRect",
+               metierCol = "FOmetier6",
+               unitLabels = c(FT = "nTrips", FO = "nHauls")),
     "5" = list(optional = c(FT = "LE"),
                dateCols = c("LEdate", "FTarvDate", "OSsamDate"),
                areaCol = "LEarea", statRectCol = "LEstatRect",

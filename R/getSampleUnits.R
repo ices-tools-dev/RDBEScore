@@ -1,4 +1,4 @@
-#' Build the table of sample units for ratio estimation (hierarchies 1 and 5)
+#' Build the table of sample units for ratio estimation (hierarchies 1, 2 and 5)
 #'
 #' First step of the ratio estimation workflow (see [doRatioEstimation()]).
 #' It returns one row per **lowest-level Sample (SA) record** of the requested
@@ -9,7 +9,8 @@
 #'
 #'
 #' * the path through the upper hierarchy (`VSid`, `FTid`, `FOid`, `SSid` in
-#'   hierarchy 1, `OSid`, `LEid`, optionally `FTid`, and `SSid` in
+#'   hierarchy 1, `FTid`, `FOid` and `SSid` in hierarchy 2, `OSid`, `LEid`,
+#'   optionally `FTid`, and `SSid` in
 #'   hierarchy 5) with
 #'   the selection method, its design class ([classifySelectionMethod()]),
 #'   stratum, `numTotal` and `numSamp` of every stage,
@@ -37,7 +38,7 @@
 #' 1 and logged. A presentation other than `WHL` with a factor of 1 is logged
 #' as suspicious.
 #'
-#' **Domain variables.** Date in hierarchy 1: `FOendDate`, else
+#' **Domain variables.** Date in hierarchies 1 and 2: `FOendDate`, else
 #' `FOstartDate`, else `FTarvDate`. In hierarchy 5: `LEdate`, else
 #' `FTarvDate` (when FT is used), else `OSsamDate`. Area, rectangle and
 #' métier: the SA value when filled, else the FO value (hierarchy 1) or the
@@ -57,11 +58,11 @@
 #' estimate. A haul whose samples of the species are all excluded is treated
 #' as not sampled (non-response) by [getStageWeights()].
 #'
-#' Upper hierarchies 1 and 5 are implemented. The object must hold one
+#' Upper hierarchies 1, 2 and 5 are implemented. The object must hold one
 #' hierarchy. Clustering (`XXclustering` other than `"N"`) is logged. It does
 #' not affect the point estimates.
 #'
-#' @param RDBESDataObj A valid `RDBESDataObject` of hierarchy 1 or 5.
+#' @param RDBESDataObj A valid `RDBESDataObject` of hierarchy 1, 2 or 5.
 #' @param species Species to estimate, as AphiaID(s) (WoRMS), matched to
 #'   `SAspeCode`, for example `127143` for plaice. Several values are allowed.
 #'   FAO 3-alpha codes are not accepted: rows added by

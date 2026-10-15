@@ -145,7 +145,7 @@ test_that("constructors reject wrong input", {
                "needs an externalAux")
   expect_error(deRaising("ratio", value = "speciesLiveWeight", at = "FT"),
                "use at = \"SA\"")
-  expect_error(raisingScheme(hierarchy = 2), "not implemented yet")
+  expect_error(raisingScheme(hierarchy = 3), "not implemented yet")
   expect_error(deRaising("ratio", value = "x", at = "fo"), "stage table")
   expect_error(raisingScheme(DE = deRaising("ratio", value = "x",
                                               at = "LE")),

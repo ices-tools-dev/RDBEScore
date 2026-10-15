@@ -16,7 +16,8 @@ A \code{data.table} with one row per domain: the domain variables,
 weights, before the DE and totals ratios), \code{rApplied}
 (\code{liveWeightEst_kg / liveWeightSampled_kg}, the factor applied), \code{SOP},
 \code{weightCoverage}, \code{nSamples} and the number of sampled units per stage:
-\code{nVessels}, \code{nTrips} and \code{nHauls} in hierarchy 1, \code{nOnshoreEvents},
+\code{nVessels}, \code{nTrips} and \code{nHauls} in hierarchy 1, \code{nTrips} and \code{nHauls} in
+hierarchy 2, \code{nOnshoreEvents},
 \code{nLandingEvents} (and \code{nTrips} when FT is a stage) in hierarchy 5.
 }
 \description{

@@ -62,6 +62,16 @@ test_that("every output column is in ratioOutputGuide() (H5 with FT)", {
   expect_equal(undocumented(res), character(0))
 })
 
+test_that("every output column is in ratioOutputGuide() (H2)", {
+  sim <- suppressWarnings(simulateH2RatioData(haulsPerTrip = 2))
+  res <- doRatioEstimation(sim$obj, species = 127143,
+                           raising = raisingScheme(FT = stageRaising("count"),
+                                                   FO = stageRaising("count"),
+                                                   hierarchy = 2),
+                           checkCodes = FALSE)
+  expect_equal(undocumented(res), character(0))
+})
+
 test_that("ratioOutputGuide() filters by element and checks names", {
   g <- ratioOutputGuide("domains")
   expect_equal(unique(g$element), "domains")

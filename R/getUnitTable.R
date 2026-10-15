@@ -15,8 +15,9 @@
 #' least one record in the stage below. Units marked sampled without records
 #' below are logged and treated as not sampled.
 #'
-#' @param RDBESDataObj An `RDBESDataObject` of hierarchy 1 or 5.
-#' @param stage Stage table name: `"VS"`, `"FT"` or `"FO"` in hierarchy 1,
+#' @param RDBESDataObj An `RDBESDataObject` of hierarchy 1, 2 or 5.
+#' @param stage Stage table name: `"VS"`, `"FT"` or `"FO"` in hierarchy 1, `"FT"` or `"FO"` in
+#'   hierarchy 2,
 #'   `"OS"`, `"LE"` or (when SS links to FT) `"FT"` in hierarchy 5.
 #' @param fields Optional extra columns of the stage table, or of VD (for
 #'   stage tables with a `VDid`, such as VS and LE, joined through `VDid`).

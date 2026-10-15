@@ -58,7 +58,8 @@ summariseRatioEstimates <- function(raised, plusGroup = NULL) {
 #'   weights, before the DE and totals ratios), `rApplied`
 #'   (`liveWeightEst_kg / liveWeightSampled_kg`, the factor applied), `SOP`,
 #'   `weightCoverage`, `nSamples` and the number of sampled units per stage:
-#'   `nVessels`, `nTrips` and `nHauls` in hierarchy 1, `nOnshoreEvents`,
+#'   `nVessels`, `nTrips` and `nHauls` in hierarchy 1, `nTrips` and `nHauls` in
+#'   hierarchy 2, `nOnshoreEvents`,
 #'   `nLandingEvents` (and `nTrips` when FT is a stage) in hierarchy 5.
 #' @seealso [doRatioEstimation()], [summariseRatioEstimates()]
 #' @export
