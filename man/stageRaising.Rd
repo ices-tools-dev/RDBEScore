@@ -52,6 +52,15 @@ sampled units. The methods are presets of that one formula:\tabular{llll}{
 \code{XX} is the stage prefix, filled in by \code{\link[=raisingScheme]{raisingScheme()}}. The selection
 method (\code{XXselectMeth}) is never used to compute a factor.
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: pending
+\item Notes/scope:
+}
+}
+
 \examples{
 stageRaising("count")
 stageRaising("ratio", total = "FTauxVarTot", value = "FTauxVarValue")

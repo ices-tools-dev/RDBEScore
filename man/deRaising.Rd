@@ -57,6 +57,15 @@ raised to its population. \code{"ratio"} multiplies by
 external total per DE stratum) and \eqn{x} the same quantity measured on
 the sampled units.
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: pending
+\item Notes/scope:
+}
+}
+
 \examples{
 deRaising("ratio", value = "speciesLiveWeight", at = "SA")
 }

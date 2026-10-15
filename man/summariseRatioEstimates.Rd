@@ -29,6 +29,15 @@ means.
 The values that belong to a whole domain (estimated live weight, SOP,
 sample counts) are in \code{\link[=summariseRatioDomains]{summariseRatioDomains()}}.
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: pending
+\item Notes/scope:
+}
+}
+
 \seealso{
 \code{\link[=doRatioEstimation]{doRatioEstimation()}}, \code{\link[=summariseRatioDomains]{summariseRatioDomains()}}
 }

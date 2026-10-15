@@ -39,6 +39,10 @@
 #'   columns, `n` (sampled units in the group), `total`, `sumValue` and
 #'   `fStage`. The log is attached as attribute `"ratioLog"`.
 #' @seealso [raisingScheme()], [getRatioLog()]
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: pending
+#' - Notes/scope:
 #' @export
 #'
 #' @examples

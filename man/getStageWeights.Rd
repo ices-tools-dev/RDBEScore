@@ -63,6 +63,15 @@ A unit without any sampled unit below it left (for example a trip
 without sampled hauls) is treated as not sampled in the same way. All of
 this is logged.
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: pending
+\item Notes/scope:
+}
+}
+
 \seealso{
 \code{\link[=raisingScheme]{raisingScheme()}}, \code{\link[=raiseToDE]{raiseToDE()}}
 }

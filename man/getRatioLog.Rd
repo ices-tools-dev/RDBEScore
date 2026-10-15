@@ -19,6 +19,15 @@ A \code{data.table} with columns \code{step}, \code{level} (\code{"info"},
 Every step of \code{\link[=doRatioEstimation]{doRatioEstimation()}} attaches a log of its assumptions,
 exclusions, warnings and information to its output. This returns it.
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: pending
+\item Notes/scope:
+}
+}
+
 \examples{
 \dontrun{
 su <- getSampleUnits(myH1Object, species = 127143)

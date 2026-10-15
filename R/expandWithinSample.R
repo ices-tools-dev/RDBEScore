@@ -52,6 +52,10 @@
 #'   fraction, and `nFish` (fish actually measured or aged in that class).
 #'   Attributes: `"target"`, `"classWidth"` and the log `"ratioLog"`.
 #' @seealso [getSampleUnits()], [getStageWeights()]
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: pending
+#' - Notes/scope:
 #' @export
 expandWithinSample <- function(RDBESDataObj,
                                sampleUnits,

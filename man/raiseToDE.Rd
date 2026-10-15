@@ -70,6 +70,15 @@ domain, \eqn{r_h \sum w x} with x the sampled live weight (\code{xSample}).
 The SOP check in \code{\link[=summariseRatioDomains]{summariseRatioDomains()}} then compares the raised fish
 weights with the raised sample weights.
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: pending
+\item Notes/scope:
+}
+}
+
 \seealso{
 \code{\link[=getStageWeights]{getStageWeights()}}, \code{\link[=raiseToTotals]{raiseToTotals()}}, \code{\link[=summariseRatioEstimates]{summariseRatioEstimates()}}
 }

@@ -110,6 +110,15 @@ Upper hierarchies 1, 2 and 5 are implemented. The object must hold one
 hierarchy. Clustering (\code{XXclustering} other than \code{"N"}) is logged. It does
 not affect the point estimates.
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: pending
+\item Notes/scope:
+}
+}
+
 \seealso{
 \code{\link[=doRatioEstimation]{doRatioEstimation()}}, \code{\link[=expandWithinSample]{expandWithinSample()}}
 }

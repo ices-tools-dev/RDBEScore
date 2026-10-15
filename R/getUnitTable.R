@@ -26,6 +26,10 @@
 #' @return A `data.table`, one row per unit. The log is attached as
 #'   attribute `"ratioLog"`.
 #' @seealso [getStageWeights()], [computeStageFactors()]
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: pending
+#' - Notes/scope:
 #' @export
 getUnitTable <- function(RDBESDataObj, stage, fields = NULL,
                          verbose = FALSE) {

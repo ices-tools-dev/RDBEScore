@@ -17,6 +17,10 @@
 #'   `table`, `field`, `codeType`, `value`, `n` (number of records), `valid`
 #'   (value is in the ICES code list) and `deprecated`.
 #' @seealso [getRDBESCodeList()]
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: pending
+#' - Notes/scope:
 #' @export
 #'
 #' @examples

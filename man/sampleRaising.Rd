@@ -29,6 +29,15 @@ record. With sub-samples it is the product along the SA chain.
 The auxiliary x of the DE or totals ratio is scaled with the same factor,
 so x and the numbers at age stay consistent.
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: pending
+\item Notes/scope:
+}
+}
+
 \examples{
 sampleRaising("none")
 }

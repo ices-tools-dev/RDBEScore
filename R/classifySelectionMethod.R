@@ -19,6 +19,10 @@
 #'
 #' @return Character vector of the same length as `x`. `NA` where `x` is
 #'   `NA` or empty.
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: pending
+#' - Notes/scope:
 #' @export
 #'
 #' @examples

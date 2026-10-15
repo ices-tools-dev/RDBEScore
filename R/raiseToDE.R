@@ -46,6 +46,10 @@
 #'     [raiseToTotals()].
 #'   * `"domainSummary"`, `"target"`, `"domainVars"` and `"ratioLog"`.
 #' @seealso [getStageWeights()], [raiseToTotals()], [summariseRatioEstimates()]
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: pending
+#' - Notes/scope:
 #' @export
 raiseToDE <- function(expanded, stageWeights, RDBESDataObj,
                       scheme = attr(stageWeights, "scheme"),
@@ -189,6 +193,10 @@ raiseToDE <- function(expanded, stageWeights, RDBESDataObj,
 #'   `rTotals`), `"domainSummary"`, `"target"`, `"domainVars"` and
 #'   `"ratioLog"` (the log of [raiseToDE()] followed by this step).
 #' @seealso [raiseToDE()], [totalsRaising()], [summariseRatioEstimates()]
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: pending
+#' - Notes/scope:
 #' @export
 raiseToTotals <- function(raised, expanded, stageWeights, RDBESDataObj,
                           scheme = attr(stageWeights, "scheme"),

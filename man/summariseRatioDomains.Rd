@@ -36,6 +36,15 @@ not prove the weights are right: a consistent presentation error cancels
 out. \code{weightCoverage} is the share of the estimated numbers that had an
 individual weight.
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: pending
+\item Notes/scope:
+}
+}
+
 \seealso{
 \code{\link[=doRatioEstimation]{doRatioEstimation()}}, \code{\link[=summariseRatioEstimates]{summariseRatioEstimates()}}
 }

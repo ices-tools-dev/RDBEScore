@@ -25,6 +25,15 @@ RDBES upload, for example logbook landings per trip, VMS fishing hours per
 haul or national landings per DE stratum. Use it as \code{total} or \code{value} in
 \code{\link[=stageRaising]{stageRaising()}} or \code{\link[=deRaising]{deRaising()}}.
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: pending
+\item Notes/scope:
+}
+}
+
 \examples{
 logbook <- data.frame(FTunitName = c("T1", "T2"), landKg = c(5200, 3100))
 externalAux(logbook, by = "FTunitName", col = "landKg")

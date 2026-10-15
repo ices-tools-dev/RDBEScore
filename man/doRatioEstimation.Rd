@@ -139,6 +139,15 @@ hierarchy of the data (\code{raisingScheme(..., hierarchy = 5)}).
 
 Not in this version: variance, hierarchies other than 1, 2 and 5, discards.
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: pending
+\item Notes/scope:
+}
+}
+
 \examples{
 \dontrun{
 scheme <- raisingScheme(FO = stageRaising("count"),

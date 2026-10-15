@@ -337,6 +337,10 @@ addToRatioLog <- function(log, step, level, message, n = NA_integer_,
 #'   `"assumption"`, `"exclusion"` or `"warning"`), `message` and `n`
 #'   (number of records concerned). Empty if `x` has no log.
 #' @seealso [doRatioEstimation()], whose result holds all logs in `$log`.
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: pending
+#' - Notes/scope:
 #' @export
 #'
 #' @examples

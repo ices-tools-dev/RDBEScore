@@ -26,6 +26,10 @@
 #' @return A `data.table` with columns `element`, `column`, `rowUnit` (what
 #'   one row of the element is), `unit` and `meaning`.
 #' @seealso [doRatioEstimation()]
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: pending
+#' - Notes/scope:
 #' @export
 #'
 #' @examples

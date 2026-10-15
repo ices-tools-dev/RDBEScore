@@ -22,6 +22,10 @@
 #' @return A `data.table` with columns `Key`, `Description` and `Deprecated`.
 #' @seealso [checkRDBESCodes()]
 #' @importFrom icesVocab getCodeList
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: pending
+#' - Notes/scope:
 #' @export
 #'
 #' @examples

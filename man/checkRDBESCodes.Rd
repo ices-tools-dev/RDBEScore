@@ -35,6 +35,15 @@ methods, lower hierarchy, catch category, presentation, state of
 processing, sampling unit, measurement type, accuracy, unit or scale and
 yes/no fields) with the live ICES code lists from \code{\link[=getRDBESCodeList]{getRDBESCodeList()}}.
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: pending
+\item Notes/scope:
+}
+}
+
 \examples{
 \dontrun{
 codeCheck <- checkRDBESCodes(H1Example)

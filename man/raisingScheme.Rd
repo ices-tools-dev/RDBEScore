@@ -55,6 +55,15 @@ When the DE ratio or the totals ratio measures x on a stage (\code{at}), every
 stage below it must be raised. Otherwise x covers whole units while the
 numbers cover only their sampled part.
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: pending
+\item Notes/scope:
+}
+}
+
 \examples{
 raisingScheme(FO = stageRaising("count"),
               FT = stageRaising("count"),

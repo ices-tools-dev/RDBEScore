@@ -32,6 +32,15 @@ remaining selection was made)
 Codes not in this mapping return \code{"Unrecognised"}. The classification is
 an RDBEScore convention, not part of the ICES vocabulary.
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: pending
+\item Notes/scope:
+}
+}
+
 \examples{
 classifySelectionMethod(c("SRSWOR", "NPQSRSWOR", "NPCS", "CENSUS"))
 }

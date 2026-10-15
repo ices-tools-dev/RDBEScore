@@ -71,6 +71,15 @@ of 0,
 Logged: groups whose number of sampled units differs from \code{numSamp},
 and groups whose total is smaller than the sum of the values.
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: pending
+\item Notes/scope:
+}
+}
+
 \examples{
 hauls <- data.frame(FOid = 1:5, FTid = c(1, 1, 1, 2, 2),
                     FOnumTotal = c(6, 6, 6, 4, 4))

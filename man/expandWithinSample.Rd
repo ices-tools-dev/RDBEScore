@@ -84,6 +84,15 @@ weights only gutted and no \code{gutToLive} stops the function, unless
 from \code{FMaccuracy}. \code{classWidth} (mm) must be a multiple of every FM
 accuracy. Class labels are the lower bound in mm.
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: pending
+\item Notes/scope:
+}
+}
+
 \seealso{
 \code{\link[=getSampleUnits]{getSampleUnits()}}, \code{\link[=getStageWeights]{getStageWeights()}}
 }

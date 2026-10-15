@@ -48,6 +48,10 @@
 #'   table per stage (unit id, ancestor ids, `fStage` and cumulative weight
 #'   `wCumulative` of every sampled unit), `"scheme"` and `"ratioLog"`.
 #' @seealso [raisingScheme()], [raiseToDE()]
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: pending
+#' - Notes/scope:
 #' @export
 getStageWeights <- function(RDBESDataObj, sampleUnits, scheme,
                             verbose = FALSE) {

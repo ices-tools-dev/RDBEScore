@@ -40,6 +40,10 @@
 #'
 #' @return An object of class `RDBESStageRaising`.
 #' @seealso [raisingScheme()], [deRaising()], [externalAux()]
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: pending
+#' - Notes/scope:
 #' @export
 #'
 #' @examples
@@ -96,6 +100,10 @@ stageRaising <- function(method = c("none", "count", "aux", "ratio",
 #'
 #' @return An object of class `RDBESSampleRaising`.
 #' @seealso [raisingScheme()]
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: pending
+#' - Notes/scope:
 #' @export
 #'
 #' @examples
@@ -148,6 +156,10 @@ samplePresets <- function() c("speciesLiveWeight", "fishWeight", "fishCount")
 #'
 #' @return An object of class `RDBESDERaising`.
 #' @seealso [raisingScheme()]
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: pending
+#' - Notes/scope:
 #' @export
 #'
 #' @examples
@@ -201,6 +213,10 @@ deRaising <- function(method = c("none", "ratio"), total = "DEauxVarTot",
 #'
 #' @return An object of class `RDBESTotalsRaising`.
 #' @seealso [raisingScheme()], [deRaising()]
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: pending
+#' - Notes/scope:
 #' @export
 #'
 #' @examples
@@ -254,6 +270,10 @@ totalsRaising <- function(total, strata = NULL, value = "speciesLiveWeight",
 #'
 #' @return An object of class `RDBESExternalAux`.
 #' @seealso [stageRaising()], [deRaising()]
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: pending
+#' - Notes/scope:
 #' @export
 #'
 #' @examples
@@ -321,6 +341,10 @@ externalAux <- function(data, by, col) {
 #'   `stages` (one resolved entry per stage, with the actual column names),
 #'   `DE` and `totals`.
 #' @seealso [stageRaising()], [deRaising()], [externalAux()]
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: pending
+#' - Notes/scope:
 #' @export
 #'
 #' @examples

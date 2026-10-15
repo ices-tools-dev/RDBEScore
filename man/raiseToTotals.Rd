@@ -60,6 +60,15 @@ A totals stratum with sampled units but no total stops the run (usually
 codes that do not match). A total without sampled units is logged as a
 warning and not raised.
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: pending
+\item Notes/scope:
+}
+}
+
 \seealso{
 \code{\link[=raiseToDE]{raiseToDE()}}, \code{\link[=totalsRaising]{totalsRaising()}}, \code{\link[=summariseRatioEstimates]{summariseRatioEstimates()}}
 }

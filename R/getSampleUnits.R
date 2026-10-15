@@ -86,6 +86,10 @@
 #'   log is attached as attribute `"ratioLog"`. The attributes `"species"`,
 #'   `"catchCat"`, `"hierarchy"` and `"withinSample"` hold the selection.
 #' @seealso [doRatioEstimation()], [expandWithinSample()]
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: pending
+#' - Notes/scope:
 #' @export
 getSampleUnits <- function(RDBESDataObj,
                            species,

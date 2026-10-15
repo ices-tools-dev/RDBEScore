@@ -39,6 +39,15 @@ A unit counts as \strong{sampled} when \code{XXsamp} is not \code{"N"} and it ha
 least one record in the stage below. Units marked sampled without records
 below are logged and treated as not sampled.
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: pending
+\item Notes/scope:
+}
+}
+
 \seealso{
 \code{\link[=getStageWeights]{getStageWeights()}}, \code{\link[=computeStageFactors]{computeStageFactors()}}
 }

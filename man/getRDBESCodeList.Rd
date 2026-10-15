@@ -32,6 +32,15 @@ Code types relevant to the RDBES include \code{SelectionMethod},
 An internet connection to vocab.ices.dk is needed the first time a list is
 requested in a session.
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: pending
+\item Notes/scope:
+}
+}
+
 \examples{
 \dontrun{
 getRDBESCodeList("SelectionMethod")

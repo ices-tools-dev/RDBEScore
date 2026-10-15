@@ -69,6 +69,10 @@
 #' @seealso [raisingScheme()], [getSampleUnits()], [expandWithinSample()],
 #'   [getStageWeights()], [raiseToDE()], [raiseToTotals()],
 #'   [summariseRatioEstimates()]
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: pending
+#' - Notes/scope:
 #' @export
 #'
 #' @examples

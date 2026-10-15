@@ -18,6 +18,10 @@
 #'   (numbers), `meanWeight_g` (live), `meanLength_mm`, `totalWeight_kg`
 #'   (`N` times `meanWeight_g`) and `nFish` (fish measured or aged).
 #' @seealso [doRatioEstimation()], [summariseRatioDomains()]
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: pending
+#' - Notes/scope:
 #' @export
 summariseRatioEstimates <- function(raised, plusGroup = NULL) {
   target <- checkRaisedInput(raised)
@@ -63,6 +67,10 @@ summariseRatioEstimates <- function(raised, plusGroup = NULL) {
 #'   hierarchy 2, `nOnshoreEvents`,
 #'   `nLandingEvents` (and `nTrips` when FT is a stage) in hierarchy 5.
 #' @seealso [doRatioEstimation()], [summariseRatioEstimates()]
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: pending
+#' - Notes/scope:
 #' @export
 summariseRatioDomains <- function(raised) {
   target <- checkRaisedInput(raised)

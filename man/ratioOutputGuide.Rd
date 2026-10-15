@@ -38,6 +38,15 @@ In the column names, \code{XX} stands for a stage table prefix (for example
 \code{FO} in \code{FOselectMeth}). Domain variables are the ones chosen in
 \code{domainVars}.
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: pending
+\item Notes/scope:
+}
+}
+
 \examples{
 ratioOutputGuide("domains")
 ratioOutputGuide()[column == "wStages"]

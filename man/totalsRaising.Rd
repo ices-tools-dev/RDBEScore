@@ -41,6 +41,15 @@ With the same x in the DE step and here, and every totals stratum inside
 one DE stratum, the DE ratio cancels: the result equals raising to the
 totals alone. It matters when a totals stratum spans several DE strata.
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: pending
+\item Notes/scope:
+}
+}
+
 \examples{
 landings <- data.frame(quarter = 1:4, metier6 = "OTB_DEF_70-99_0_0",
                        kg = c(1200, 900, 1500, 1100))
