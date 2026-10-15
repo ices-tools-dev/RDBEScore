@@ -15,8 +15,8 @@ getSampleUnits(
 )
 }
 \arguments{
-\item{RDBESDataObj}{A valid \code{RDBESDataObject} of hierarchy 1, 2, 3, 5,
-7, 8, 10 or 13.}
+\item{RDBESDataObj}{A valid \code{RDBESDataObject} of any hierarchy except 6
+and 11.}
 
 \item{species}{Species to estimate, as AphiaID(s) (WoRMS), matched to
 \code{SAspeCode}, for example \code{127143} for plaice. Several values are allowed.
@@ -87,14 +87,21 @@ as suspicious.
 
 \strong{Domain variables.} Date in hierarchies 1, 2, 3, 10 and 13:
 \code{FOendDate}, else \code{FOstartDate}, else \code{FTarvDate} (not in 13). In
-hierarchy 5: \code{LEdate}, else \code{FTarvDate} (when FT is used), else
-\code{OSsamDate}. In hierarchy 7: \code{LEdate}, else \code{OSsamDate}. In hierarchy 8:
-\code{LEdate}. Area, rectangle and métier: the SA value when filled, else the
-FO value (hierarchies 1, 2, 3, 10 and 13) or the LE value (hierarchies 5,
-7 and 8). TE (temporal event) gives no domain. In hierarchy 7, LE is not a sampling unit: it links
-to SS (\code{LE$SSid}) and describes the sampled landing. More than one LE per
-SS is logged and the first is used. Without LE, area and métier come from
-SA only. \code{areaLookup} recodes areas (for example divisions to sub-areas).
+hierarchies 4 and 5: \code{LEdate}, else \code{FTarvDate} (in 5 when FT is used),
+else \code{OSsamDate}. In hierarchy 7: \code{LEdate}, else \code{OSsamDate}. In
+hierarchies 8, 9 and 12: \code{LEdate}. Area, rectangle and métier: the SA
+value when filled, else the FO value (hierarchies 1, 2, 3, 10 and 13) or
+the LE value (all others). TE (temporal event) and LO (location) give no
+domain.
+
+In hierarchies 7 and 9, LE is not a sampling unit but describes the
+sampled landing. In hierarchy 7 it links to SS (\code{LE$SSid}). In
+hierarchy 9 it links to the sample (\code{LE$SAid}, the lowest-level SA or
+its top-level SA), else to SS. More than one LE per SS is logged and the
+first is used. Without LE, area and métier come from SA only, and in
+hierarchy 9 there is no date: quarter and month are NA and logged, and
+the year comes from DE. \code{areaLookup} recodes areas (for example
+divisions to sub-areas).
 
 \strong{Recorded zeros.} An SA with a total or sampled weight of 0 records that
 the species was looked for and not found. \code{\link[=generateZerosUsingSL]{generateZerosUsingSL()}} writes
@@ -111,8 +118,8 @@ B, no BV for C) are flagged \code{include = FALSE}. They add nothing to the
 estimate. A haul whose samples of the species are all excluded is treated
 as not sampled (non-response) by \code{\link[=getStageWeights]{getStageWeights()}}.
 
-Upper hierarchies 1, 2, 3, 5, 7, 8, 10 and 13 are implemented. The object
-must hold one hierarchy. Clustering (\code{XXclustering} other than \code{"N"}) is
+All upper hierarchies except 6 and 11 are implemented. The object must
+hold one hierarchy. Clustering (\code{XXclustering} other than \code{"N"}) is
 logged. It does not affect the point estimates.
 }
 \section{Development review}{

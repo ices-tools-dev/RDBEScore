@@ -46,13 +46,11 @@ The factors of all stages are multiplied, so each sample gets one weight
 `wStages`. The estimate of numbers at age is the sum of `wStages` times
 the numbers at age in the samples.
 
-The same functions work for hierarchy 2 (trips sampled directly),
-hierarchy 5 (onshore sampling), hierarchy 7 (onshore events only),
-hierarchy 13 (hauls sampled directly) and hierarchies 3, 8 and 10 (with
-temporal events), see [Hierarchy 2](#hierarchy-2),
-[Hierarchy 5](#hierarchy-5), [Hierarchy 7](#hierarchy-7),
-[Hierarchy 13](#hierarchy-13) and [Temporal events](#temporal-events)
-below. Hierarchies 4, 6, 9, 11 and 12 are not implemented yet.
+The same functions work for all hierarchies except 6 and 11, see
+[Hierarchy 2](#hierarchy-2), [Hierarchy 5](#hierarchy-5),
+[Hierarchy 7](#hierarchy-7), [Hierarchy 13](#hierarchy-13),
+[Temporal events](#temporal-events), [Hierarchy 4](#hierarchy-4) and
+[Locations](#locations) below.
 
 ```{r}
 library(RDBEScore)
@@ -542,6 +540,47 @@ recorded `XXnumSamp`. In `H8ExampleEE1` some weeks have two vessel
 records that each say `VSnumSamp = 1`. Their vessel factor is then
 `VSnumTotal / 2`.
 
+## Hierarchy 4 {#hierarchy-4}
+
+Hierarchy 4 is onshore sampling of trips: onshore event (OS), the trips
+landed there (FT) and their landing events (LE). Domains come from LE:
+the date is `LEdate`, else `FTarvDate`, else `OSsamDate`.
+
+```{r, eval = FALSE}
+sc4 <- raisingScheme(OS = stageRaising("count"),
+                     FT = stageRaising("count"),
+                     LE = stageRaising("count"), hierarchy = 4)
+```
+
+## Locations: hierarchies 9 and 12 {#locations}
+
+A location (LO) is a sampled place, for example a landing site. Below it
+are temporal events (TE). Like TE, LO is raised as any other stage and
+gives no domain.
+
+| Hierarchy | Stages | Domains from |
+|---|---|---|
+| 12 | LO > TE > LE | LE |
+| 9 | LO > TE | LE linked to the sample |
+
+In hierarchy 9, SS hangs directly under TE. LE is not a sampling unit:
+it links to the sample (`LE$SAid`) and SS, and gives the date, area and
+métier. The LE of the sample is used first, then the LE of its top-level
+SA, then an LE linked by SS only. Without LE there is no date in
+hierarchy 9: quarter and month are NA, the log says so, and the year
+comes from DE.
+
+```{r, eval = FALSE}
+sc9 <- raisingScheme(LO = stageRaising("count"),
+                     TE = stageRaising("count"), hierarchy = 9)
+sc12 <- raisingScheme(LO = stageRaising("count"),
+                      TE = stageRaising("count"),
+                      LE = stageRaising("count"), hierarchy = 12)
+```
+
+There is no package data for hierarchies 4, 9 and 12. They are tested on
+simulated data only.
+
 ## Checks
 
 The run stops with a message when the information does not fit the
@@ -577,5 +616,5 @@ scheme, for example:
     the species from the sample weights. SOP therefore compares the
     raised fish weights with the raised sample weights. A value of 1
     does not prove the weights are right.
--   Not covered yet: variance, sub-sampling of BV, hierarchies 4, 6, 9,
-    11 and 12, and discards.
+-   Not covered yet: variance, sub-sampling of BV, hierarchies 6 and 11,
+    and discards.

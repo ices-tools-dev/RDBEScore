@@ -47,7 +47,9 @@ ratioFieldCodeTypes <- function() {
 #' Upper hierarchies supported by stage-wise raising
 #' @keywords internal
 #' @noRd
-supportedHierarchies <- function() c(1L, 2L, 3L, 5L, 7L, 8L, 10L, 13L)
+supportedHierarchies <- function() {
+  c(1L, 2L, 3L, 4L, 5L, 7L, 8L, 9L, 10L, 12L, 13L)
+}
 
 #' What stage-wise raising needs to know about one upper hierarchy
 #'
@@ -61,8 +63,8 @@ supportedHierarchies <- function() c(1L, 2L, 3L, 5L, 7L, 8L, 10L, 13L)
 #'   * `optional`: optional stages that can be used for raising, as a named
 #'     character vector stage = parent stage (FT under LE in H5)
 #'   * `info`: tables that are not sampling units but describe the sample,
-#'     as a named character vector table = link column (LE under SS in H7).
-#'     Their columns can be domain sources.
+#'     as a named list table = link columns in order of preference (LE under
+#'     SS in H7, under SA or SS in H9). Their columns can be domain sources.
 #'   * `dateCols`: date columns, in order of preference
 #'   * `areaCol`, `statRectCol`, `metierCol`: used when the SA value is
 #'     blank, in order of preference (none in H7 without LE)
@@ -99,6 +101,13 @@ hierarchySpec <- function(hierarchy) {
                metierCol = "FOmetier6",
                unitLabels = c(TE = "nTemporalEvents", VS = "nVessels",
                               FT = "nTrips", FO = "nHauls")),
+    # Onshore events, the trips landed there and their landing events
+    "4" = list(optional = character(0),
+               dateCols = c("LEdate", "FTarvDate", "OSsamDate"),
+               areaCol = "LEarea", statRectCol = "LEstatRect",
+               metierCol = "LEmetier6",
+               unitLabels = c(OS = "nOnshoreEvents", FT = "nTrips",
+                              LE = "nLandingEvents")),
     "5" = list(optional = c(FT = "LE"),
                dateCols = c("LEdate", "FTarvDate", "OSsamDate"),
                areaCol = "LEarea", statRectCol = "LEstatRect",
@@ -107,7 +116,7 @@ hierarchySpec <- function(hierarchy) {
                               FT = "nTrips")),
     # Onshore events only. LE is not a sampling unit here: it hangs under SS
     # and says where and when the sampled landing was caught
-    "7" = list(optional = character(0), info = c(LE = "SSid"),
+    "7" = list(optional = character(0), info = list(LE = "SSid"),
                dateCols = c("LEdate", "OSsamDate"),
                areaCol = "LEarea", statRectCol = "LEstatRect",
                metierCol = "LEmetier6",
@@ -119,6 +128,20 @@ hierarchySpec <- function(hierarchy) {
                metierCol = "LEmetier6",
                unitLabels = c(TE = "nTemporalEvents", VS = "nVessels",
                               LE = "nLandingEvents")),
+    # Locations and temporal events. LE is not a sampling unit here: it
+    # links to the sample (SA) and SS, and says where and when it was caught
+    "9" = list(optional = character(0), info = list(LE = c("SAid", "SSid")),
+               dateCols = "LEdate",
+               areaCol = "LEarea", statRectCol = "LEstatRect",
+               metierCol = "LEmetier6",
+               unitLabels = c(LO = "nLocations", TE = "nTemporalEvents")),
+    # Locations, temporal events and the landing events in them
+    "12" = list(optional = character(0),
+                dateCols = "LEdate",
+                areaCol = "LEarea", statRectCol = "LEstatRect",
+                metierCol = "LEmetier6",
+                unitLabels = c(LO = "nLocations", TE = "nTemporalEvents",
+                               LE = "nLandingEvents")),
     # As H1 with temporal events (TE) between the vessels and their trips
     "10" = list(optional = character(0),
                 dateCols = c("FOendDate", "FOstartDate", "FTarvDate"),
@@ -132,7 +155,7 @@ hierarchySpec <- function(hierarchy) {
                 areaCol = "FOarea", statRectCol = "FOstatRect",
                 metierCol = "FOmetier6",
                 unitLabels = c(FO = "nHauls")))
-  if (is.null(spec$info)) spec$info <- character(0)
+  if (is.null(spec$info)) spec$info <- list()
   c(list(hierarchy = h, stages = setdiff(chain, c("DE", "SD", "SS", "SA"))),
     spec)
 }

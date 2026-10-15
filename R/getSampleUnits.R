@@ -40,14 +40,21 @@
 #'
 #' **Domain variables.** Date in hierarchies 1, 2, 3, 10 and 13:
 #' `FOendDate`, else `FOstartDate`, else `FTarvDate` (not in 13). In
-#' hierarchy 5: `LEdate`, else `FTarvDate` (when FT is used), else
-#' `OSsamDate`. In hierarchy 7: `LEdate`, else `OSsamDate`. In hierarchy 8:
-#' `LEdate`. Area, rectangle and métier: the SA value when filled, else the
-#' FO value (hierarchies 1, 2, 3, 10 and 13) or the LE value (hierarchies 5,
-#' 7 and 8). TE (temporal event) gives no domain. In hierarchy 7, LE is not a sampling unit: it links
-#' to SS (`LE$SSid`) and describes the sampled landing. More than one LE per
-#' SS is logged and the first is used. Without LE, area and métier come from
-#' SA only. `areaLookup` recodes areas (for example divisions to sub-areas).
+#' hierarchies 4 and 5: `LEdate`, else `FTarvDate` (in 5 when FT is used),
+#' else `OSsamDate`. In hierarchy 7: `LEdate`, else `OSsamDate`. In
+#' hierarchies 8, 9 and 12: `LEdate`. Area, rectangle and métier: the SA
+#' value when filled, else the FO value (hierarchies 1, 2, 3, 10 and 13) or
+#' the LE value (all others). TE (temporal event) and LO (location) give no
+#' domain.
+#'
+#' In hierarchies 7 and 9, LE is not a sampling unit but describes the
+#' sampled landing. In hierarchy 7 it links to SS (`LE$SSid`). In
+#' hierarchy 9 it links to the sample (`LE$SAid`, the lowest-level SA or
+#' its top-level SA), else to SS. More than one LE per SS is logged and the
+#' first is used. Without LE, area and métier come from SA only, and in
+#' hierarchy 9 there is no date: quarter and month are NA and logged, and
+#' the year comes from DE. `areaLookup` recodes areas (for example
+#' divisions to sub-areas).
 #'
 #' **Recorded zeros.** An SA with a total or sampled weight of 0 records that
 #' the species was looked for and not found. [generateZerosUsingSL()] writes
@@ -65,12 +72,12 @@
 #' estimate. A haul whose samples of the species are all excluded is treated
 #' as not sampled (non-response) by [getStageWeights()].
 #'
-#' Upper hierarchies 1, 2, 3, 5, 7, 8, 10 and 13 are implemented. The object
-#' must hold one hierarchy. Clustering (`XXclustering` other than `"N"`) is
+#' All upper hierarchies except 6 and 11 are implemented. The object must
+#' hold one hierarchy. Clustering (`XXclustering` other than `"N"`) is
 #' logged. It does not affect the point estimates.
 #'
-#' @param RDBESDataObj A valid `RDBESDataObject` of hierarchy 1, 2, 3, 5,
-#'   7, 8, 10 or 13.
+#' @param RDBESDataObj A valid `RDBESDataObject` of any hierarchy except 6
+#'   and 11.
 #' @param species Species to estimate, as AphiaID(s) (WoRMS), matched to
 #'   `SAspeCode`, for example `127143` for plaice. Several values are allowed.
 #'   FAO 3-alpha codes are not accepted: rows added by
@@ -267,28 +274,41 @@ getSampleUnits <- function(RDBESDataObj,
   su[, SAselectionClass := classifySelectionMethod(SAselectMeth)]
 
   # Tables that describe the sample but are not sampling units (LE under SS
-  # in H7): their domain columns, one row per link
+  # in H7, under SA or SS in H9): their domain columns. The links are tried
+  # in order. A link by SAid matches the sample, else its top-level SA.
   for (tb in names(spec$info)) {
-    link <- spec$info[[tb]]
     tbl <- RDBESDataObj[[tb]]
     cols <- intersect(domainSourceCols[substr(domainSourceCols, 1, 2) == tb],
                       names(tbl))
-    if (is.null(tbl) || nrow(tbl) == 0 || !link %in% names(tbl) ||
-        length(cols) == 0) {
-      next
-    }
-    info <- tbl[!is.na(get(link)) & get(link) %in% su[[link]],
-                c(link, cols), with = FALSE]
-    nPer <- info[, .N, by = link]
-    nMulti <- nPer[N > 1, .N]
-    if (nMulti > 0) {
-      log <- addToRatioLog(log, step, "warning",
-        paste0("More than one ", tb, " per ", link,
-               ": the domain is taken from the first ", tb), nMulti, verbose)
-    }
-    info <- info[, .SD[1], by = link]
+    if (is.null(tbl) || nrow(tbl) == 0 || length(cols) == 0) next
     su[, (intersect(cols, names(su))) := NULL]
-    su <- merge(su, info, by = link, all.x = TRUE)
+    found <- rep(FALSE, nrow(su))
+    vals <- lapply(cols, function(cl) rep(NA_character_, nrow(su)))
+    names(vals) <- cols
+    for (link in spec$info[[tb]]) {
+      if (!link %in% names(tbl)) next
+      info <- tbl[!is.na(get(link)), c(link, cols), with = FALSE]
+      if (nrow(info) == 0) next
+      multi <- info[, .N, by = link][N > 1][[link]]
+      info <- info[, .SD[1], by = link]
+      keys <- if (link == "SAid") c("SAid", "topSAid") else link
+      used <- c()
+      for (k in intersect(keys, names(su))) {
+        m <- match(su[[k]], info[[link]])
+        take <- !found & !is.na(m)
+        for (cl in cols) vals[[cl]][take] <- as.character(info[[cl]][m[take]])
+        used <- c(used, info[[link]][m[take]])
+        found <- found | take
+      }
+      nMulti <- length(intersect(multi, used))
+      if (nMulti > 0) {
+        log <- addToRatioLog(log, step, "warning",
+          paste0("More than one ", tb, " per ", link,
+                 ": the domain is taken from the first ", tb), nMulti,
+          verbose)
+      }
+    }
+    su[, (cols) := vals]
   }
 
   # Design classes and clustering, logged per stage
