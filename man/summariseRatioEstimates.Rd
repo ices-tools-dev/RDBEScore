@@ -13,15 +13,10 @@ summariseRatioEstimates(raised, plusGroup = NULL)
 combined. Only for \code{target = "Age"}.}
 }
 \value{
-A \code{data.table} with the domain variables, \code{age} or
-\code{lengthClass_mm} (lower bound of the class), \code{N} (numbers),
-\code{meanWeight_g} (live), \code{meanLength_mm}, \code{totalWeight_kg}, \code{nFish} (fish
-measured or aged), and per domain \code{X_kg} (estimated live weight of the
-species), \code{SOP}, \code{weightCoverage}, \code{nSamples}, \code{sumX_kg} (weighted live
-weight of the samples before the DE ratio) and the number of sampled
-units per stage: \code{nVessels}, \code{nTrips} and \code{nHauls} in hierarchy 1,
-\code{nOnshoreEvents}, \code{nLandingEvents} (and \code{nTrips} when FT is a stage) in
-hierarchy 5.
+A \code{data.table} with one row per domain and class: the domain
+variables, \code{age} or \code{lengthClass_mm} (lower bound of the class), \code{N}
+(numbers), \code{meanWeight_g} (live), \code{meanLength_mm}, \code{totalWeight_kg}
+(\code{N} times \code{meanWeight_g}) and \code{nFish} (fish measured or aged).
 }
 \description{
 Last step of the ratio estimation workflow (see \code{\link[=doRatioEstimation]{doRatioEstimation()}}).
@@ -30,15 +25,9 @@ optional plus group and derives the means. Mean weight and mean length are
 ratios of raised totals, never averages of sample means.
 }
 \details{
-The sum-of-products check is
-\eqn{SOP = \sum_a N_a \bar w_a / X}, where X is the estimated live weight
-of the species from the sample weights (see \code{\link[=raiseToDE]{raiseToDE()}}). It compares
-the raised fish weights (BV) with the raised sample weights (SA), and flags
-unit or weight-presentation errors when it is far from 1. A value of 1 does
-not prove the weights are right: a consistent presentation error cancels
-out. \code{weightCoverage} is the share of the estimated numbers that had an
-individual weight. SOP is only meaningful when it is close to 1.
+The values that belong to a whole domain (estimated live weight, SOP,
+sample counts) are in \code{\link[=summariseRatioDomains]{summariseRatioDomains()}}.
 }
 \seealso{
-\code{\link[=doRatioEstimation]{doRatioEstimation()}}
+\code{\link[=doRatioEstimation]{doRatioEstimation()}}, \code{\link[=summariseRatioDomains]{summariseRatioDomains()}}
 }

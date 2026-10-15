@@ -81,7 +81,7 @@ test_that("fishWeight with factor none is direct raising on the fish weights", {
   res <- estS(obj, sc)
   fs <- fishOfSA(obj)
   sumKg <- sum(fs$wt) / 1000
-  expect_equal(attr(res$raised, "deRatios")$sumWX, sumKg)
+  expect_equal(res$ratios$DE$sumWX, sumKg)
   # N_a = T x n_a / sum of fish weights (kg)
   ages <- obj$BV[BVtypeMeas == "Age", .(n = .N),
                  by = .(age = as.numeric(BVvalueMeas))]
@@ -97,7 +97,7 @@ test_that("fishCount uses the number of fish as x", {
   sc <- raisingScheme(SA = sampleRaising("none"),
                       DE = deRaising("ratio", value = "fishCount"))
   res <- estS(sim$obj, sc)
-  expect_equal(attr(res$raised, "deRatios")$sumWX,
+  expect_equal(res$ratios$DE$sumWX,
                sum(fishOfSA(sim$obj)$n))
   # the estimated numbers then add up to the DE total
   expect_equal(sum(res$estimates$N), sim$obj$DE$DEauxVarTot)
@@ -117,7 +117,7 @@ test_that("fishWeight gives fish without a weight the sample mean weight", {
   nAll <- obj$BV[BVtypeMeas == "Age", .N, by = SAid]
   fs[, n := nAll$N[match(SAid, nAll$SAid)]]
   fs[SAid == sa1, wt := wt * 20 / 15]
-  expect_equal(attr(res$raised, "deRatios")$sumWX, sum(fs$wt) / 1000)
+  expect_equal(res$ratios$DE$sumWX, sum(fs$wt) / 1000)
 })
 
 test_that("values measured on the samples need at = SA", {

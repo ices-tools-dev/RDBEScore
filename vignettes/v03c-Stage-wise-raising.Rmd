@@ -152,13 +152,24 @@ because the zero and NA rows added by `generateZerosUsingSL()` and
 `checkCodes = FALSE` skips the check of coded fields against the ICES
 code lists, which needs internet access.
 
-The result holds every intermediate table. The estimates are per domain
-(year, quarter, area and métier by default) and age:
+The result is a list of tables, each named by what one row of it is.
+Printing the result lists them. The estimates are per domain (year,
+quarter, area and métier by default) and age:
 
 ```{r}
-head(res$estimates[, .(year, quarter, area, age, N, meanWeight_g,
-                       meanLength_mm, totalWeight_kg, SOP)])
+head(res$estimates)
 ```
+
+What belongs to a whole domain, such as the estimated live weight of the
+species, the sum-of-products check and the sample counts, is in
+`res$domains`:
+
+```{r}
+res$domains
+```
+
+The DE ratios are in `res$ratios$DE`, the samples with their factors in
+`res$samples`.
 
 Assumptions and exclusions are collected in the log:
 
@@ -223,10 +234,11 @@ attr(raised, "deRatios")
 ```
 
 **6. Summary.** Numbers, mean weight and mean length per domain and age,
-with the sum-of-products check.
+and per domain the estimated live weight and the sum-of-products check.
 
 ```{r}
 head(summariseRatioEstimates(raised, plusGroup = 8))
+summariseRatioDomains(raised)
 ```
 
 ## Why the method per stage matters
@@ -344,7 +356,7 @@ withTotals <- raisingScheme(
 withTotals
 resT <- doRatioEstimation(obj, species = 127143, raising = withTotals,
                           checkCodes = FALSE)
-attr(resT$raised, "totalsRatios")
+resT$ratios$totals
 ```
 
 In this simulated object the DE total equals the CL landings, so the
@@ -414,7 +426,7 @@ What differs from hierarchy 1:
     SA value is blank.
 -   VD fields can be used at LE (through the `VDid` of LE, as at VS in
     hierarchy 1), for example `value = "VDlen"`.
--   The sample counts in the estimates are `nOnshoreEvents`,
+-   The sample counts in `res$domains` are `nOnshoreEvents`,
     `nLandingEvents` and, with FT, `nTrips`.
 -   If the data use FT and the scheme does not name it, FT is pooled
     (`"none"`) and this is logged. A scheme that names FT on data
@@ -452,7 +464,7 @@ scheme, for example:
     strata when that is too coarse.
 -   Totals strata without samples are not raised. Borrowing from a
     coarser stratum is not automatic.
--   `X_kg` in the estimates is the estimated live weight of the species
+-   `X_kg` in `res$domains` is the estimated live weight of the species
     from the sample weights. SOP therefore compares the raised fish
     weights with the raised sample weights. A value of 1 does not prove
     the weights are right.

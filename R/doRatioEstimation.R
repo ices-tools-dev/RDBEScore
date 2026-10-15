@@ -20,7 +20,8 @@
 #'    each lowest-level SA.
 #' 5. [raiseToDE()]: weighted sums per DE stratum and domain, with the DE
 #'    ratio (optional).
-#' 6. [summariseRatioEstimates()]: final table with SOP and sample counts.
+#' 6. [summariseRatioEstimates()] and [summariseRatioDomains()]: the
+#'    estimates per domain and class, and per domain (SOP, sample counts).
 #'
 #' Selection methods are not used to compute weights. Non-probabilistic
 #' designs are logged as assumptions.
@@ -40,9 +41,24 @@
 #' @param checkCodes Logical. Run [checkRDBESCodes()] (needs internet access
 #'   to vocab.ices.dk). Default `TRUE`.
 #'
-#' @return An object of class `RDBESRatioEstimate`, a list with
-#'   `estimates`, `sampleUnits`, `expanded`, `stageWeights`, `raised`,
-#'   `codeCheck`, `log` and `settings`.
+#' @return An object of class `RDBESRatioEstimate`, a list. Each element is
+#'   named by what one row of it is:
+#'   * `estimates`: one row per domain and age (or length class), from
+#'     [summariseRatioEstimates()]. The result.
+#'   * `domains`: one row per domain, from [summariseRatioDomains()]:
+#'     estimated live weight, the factor applied, SOP and sample counts.
+#'   * `ratios`: a list with `DE` (one row per DE stratum) and `totals` (one
+#'     row per totals stratum, `NULL` without totals), from [raiseToDE()].
+#'   * `samples`: one row per lowest-level SA, from [getStageWeights()]:
+#'     ids, domain, inclusion, the factors and `w` first, the design
+#'     columns copied from the data last.
+#'   * `stageUnits`: a list with one table per stage, one row per sampled
+#'     unit with its factor, from [getStageWeights()].
+#'   * `fishBySample`: one row per sample and class, the fish of each sample
+#'     scaled to its catch fraction, from [expandWithinSample()].
+#'   * `byStratum`: one row per domain, DE stratum and class, the raised
+#'     fish before the strata are summed, from [raiseToDE()].
+#'   * `codeCheck`, `log` and `settings`.
 #' @seealso [raisingScheme()], [getSampleUnits()], [expandWithinSample()],
 #'   [getStageWeights()], [raiseToDE()], [summariseRatioEstimates()]
 #' @export
@@ -118,6 +134,7 @@ doRatioEstimation <- function(RDBESDataObj,
   raised <- raiseToDE(expanded, stageWeights, RDBESDataObj, scheme = raising,
                       domainVars = domainVars, verbose = verbose)
   estimates <- summariseRatioEstimates(raised, plusGroup = plusGroup)
+  domains <- summariseRatioDomains(raised)
 
   log <- data.table::rbindlist(list(log, getRatioLog(sampleUnits),
                                     getRatioLog(expanded),
@@ -129,11 +146,46 @@ doRatioEstimation <- function(RDBESDataObj,
                    classWidth = attr(expanded, "classWidth"),
                    ageRoute = ageRoute, gutToLive = gutToLive,
                    plusGroup = plusGroup)
-  structure(list(estimates = estimates, sampleUnits = sampleUnits,
-                 expanded = expanded, stageWeights = stageWeights,
-                 raised = raised, codeCheck = codeCheck, log = log,
-                 settings = settings),
+  # Every table as a list element, named by what one row is. The step
+  # outputs keep their attributes, the result does not need them.
+  structure(list(estimates = estimates,
+                 domains = domains,
+                 ratios = list(DE = attr(raised, "deRatios"),
+                               totals = attr(raised, "totalsRatios")),
+                 samples = sampleColumnsFirst(stripAttributes(stageWeights)),
+                 stageUnits = attr(stageWeights, "unitWeights"),
+                 fishBySample = stripAttributes(expanded),
+                 byStratum = stripAttributes(raised),
+                 codeCheck = codeCheck, log = log, settings = settings),
             class = "RDBESRatioEstimate")
+}
+
+#' Drop the attributes a step adds (log, settings) from a data.table
+#' @keywords internal
+#' @noRd
+stripAttributes <- function(d) {
+  d <- data.table::copy(d)
+  keep <- c("names", "row.names", "class", ".internal.selfref")
+  for (a in setdiff(names(attributes(d)), keep)) data.table::setattr(d, a, NULL)
+  d
+}
+
+#' Put the key columns of the sample table first
+#'
+#' Ids, DE, domain, inclusion, factors and x first, the design columns
+#' copied from the data (selection method, stratum, numTotal, ...) last.
+#' @keywords internal
+#' @noRd
+sampleColumnsFirst <- function(d) {
+  ids <- c("SAid", "topSAid", "SAlevel",
+           grep("^[A-Z]{2}id$", names(d), value = TRUE))
+  lead <- c(ids, "DEid", "DEstratumName",
+            "year", "quarter", "month", "area", "statRect", "metier6",
+            "include", "excludeReason", "raiseFactor", "x",
+            grep("^f_[A-Z]{2}$", names(d), value = TRUE), "w")
+  lead <- unique(intersect(lead, names(d)))
+  data.table::setcolorder(d, c(lead, setdiff(names(d), lead)))
+  d
 }
 
 #' Print an RDBESRatioEstimate
@@ -144,19 +196,18 @@ doRatioEstimation <- function(RDBESDataObj,
 #' @export
 print.RDBESRatioEstimate <- function(x, ...) {
   s <- x$settings
-  est <- x$estimates
   dv <- s$domainVars
-  nDom <- nrow(unique(est[, dv, with = FALSE]))
+  classLabel <- if (identical(s$target, "Age")) "age" else "length class"
   cat("RDBES stage-wise estimate (hierarchy ", s$raising$hierarchy, ")\n",
       sep = "")
   cat("  species:", paste(s$species, collapse = ", "),
       "| target:", s$target, "\n")
   print(s$raising)
+  nDom <- nrow(x$domains)
   cat("  domains estimated:", nDom, "| by", paste(dv, collapse = " x "), "\n")
   if (nDom > 0) {
-    sop <- unique(est[, c(dv, "SOP"), with = FALSE])$SOP
-    cat("  SOP range:", paste(format(range(sop, na.rm = TRUE), digits = 3),
-                              collapse = " - "), "\n")
+    cat("  SOP range:", paste(format(range(x$domains$SOP, na.rm = TRUE),
+                                     digits = 3), collapse = " - "), "\n")
   }
   lv <- table(x$log$level)
   cat("  log:", paste(names(lv), lv, sep = " = ", collapse = ", "),
@@ -164,7 +215,27 @@ print.RDBESRatioEstimate <- function(x, ...) {
   if (!is.null(x$codeCheck)) {
     cat("  invalid ICES codes:", x$codeCheck[valid == FALSE, .N], "\n")
   }
+  # What each element holds, one row of it, and how many rows
+  nr <- function(d) if (is.null(d)) "-" else nrow(d)
+  cat("\nElements (one row per ...):\n")
+  rows <- list(
+    c("estimates", paste("domain x", classLabel), nr(x$estimates)),
+    c("domains", "domain", nr(x$domains)),
+    c("ratios$DE", "DE stratum", nr(x$ratios$DE)),
+    c("ratios$totals", "totals stratum", nr(x$ratios$totals)),
+    c("samples", "lowest-level sample (SA)", nr(x$samples)),
+    c("stageUnits", paste0("sampled unit, one table per stage (",
+                           paste(names(x$stageUnits), collapse = ", "), ")"),
+      ""),
+    c("fishBySample", paste("sample x", classLabel), nr(x$fishBySample)),
+    c("byStratum", paste("domain x DE stratum x", classLabel),
+      nr(x$byStratum)),
+    c("log", "log entry", nr(x$log)))
+  for (r in rows) {
+    cat(sprintf("  $%-14s %-48s %s\n", r[1], r[2],
+                if (r[3] == "") "" else paste(r[3], "rows")))
+  }
   cat("\nFirst rows of $estimates:\n")
-  print(utils::head(est, 10))
+  print(utils::head(x$estimates, 10))
   invisible(x)
 }

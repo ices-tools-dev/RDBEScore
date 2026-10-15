@@ -77,9 +77,26 @@ object. Default \code{TRUE}.}
 \item{verbose}{Logical. Print log entries as messages. Default \code{FALSE}.}
 }
 \value{
-An object of class \code{RDBESRatioEstimate}, a list with
-\code{estimates}, \code{sampleUnits}, \code{expanded}, \code{stageWeights}, \code{raised},
-\code{codeCheck}, \code{log} and \code{settings}.
+An object of class \code{RDBESRatioEstimate}, a list. Each element is
+named by what one row of it is:
+\itemize{
+\item \code{estimates}: one row per domain and age (or length class), from
+\code{\link[=summariseRatioEstimates]{summariseRatioEstimates()}}. The result.
+\item \code{domains}: one row per domain, from \code{\link[=summariseRatioDomains]{summariseRatioDomains()}}:
+estimated live weight, the factor applied, SOP and sample counts.
+\item \code{ratios}: a list with \code{DE} (one row per DE stratum) and \code{totals} (one
+row per totals stratum, \code{NULL} without totals), from \code{\link[=raiseToDE]{raiseToDE()}}.
+\item \code{samples}: one row per lowest-level SA, from \code{\link[=getStageWeights]{getStageWeights()}}:
+ids, domain, inclusion, the factors and \code{w} first, the design
+columns copied from the data last.
+\item \code{stageUnits}: a list with one table per stage, one row per sampled
+unit with its factor, from \code{\link[=getStageWeights]{getStageWeights()}}.
+\item \code{fishBySample}: one row per sample and class, the fish of each sample
+scaled to its catch fraction, from \code{\link[=expandWithinSample]{expandWithinSample()}}.
+\item \code{byStratum}: one row per domain, DE stratum and class, the raised
+fish before the strata are summed, from \code{\link[=raiseToDE]{raiseToDE()}}.
+\item \code{codeCheck}, \code{log} and \code{settings}.
+}
 }
 \description{
 Estimates numbers, mean weight and mean length at age or at length per
@@ -103,7 +120,8 @@ fraction (lower hierarchies A, B and C).
 each lowest-level SA.
 \item \code{\link[=raiseToDE]{raiseToDE()}}: weighted sums per DE stratum and domain, with the DE
 ratio (optional).
-\item \code{\link[=summariseRatioEstimates]{summariseRatioEstimates()}}: final table with SOP and sample counts.
+\item \code{\link[=summariseRatioEstimates]{summariseRatioEstimates()}} and \code{\link[=summariseRatioDomains]{summariseRatioDomains()}}: the
+estimates per domain and class, and per domain (SOP, sample counts).
 }
 
 Selection methods are not used to compute weights. Non-probabilistic

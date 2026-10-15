@@ -29,7 +29,7 @@ test_that("a census design reproduces numbers and mean weight at age", {
   expect_equal(m$N.est, m$N.true)
   mw <- merge(res$estimates, sim$truthAge, by = c(domainKey, "age"))
   expect_equal(mw$meanWeight_g, mw$W / mw$N.y)
-  expect_equal(unique(res$estimates$SOP), rep(1, 4), tolerance = 1e-5)
+  expect_equal(unique(res$domains$SOP), rep(1, 4), tolerance = 1e-5)
 })
 
 
@@ -130,9 +130,9 @@ test_that("LH D and not-sampled SAs are excluded from numerator and auxiliary to
   expect_false(su[SAid == 1, include])
   res <- doRatioEstimation(obj, species = 127143, raising = pooled,
                            checkCodes = FALSE)
-  used <- unique(res$expanded$SAid)
+  used <- unique(res$fishBySample$SAid)
   expect_false(any(used %in% su[include == FALSE, SAid]))
-  expect_equal(sum(res$raised[, .(sumX = sumX[1]),
+  expect_equal(sum(res$byStratum[, .(sumX = sumX[1]),
                               by = c(domainKey, "stratum")]$sumX),
                su[SAid %in% used, sum(x)])
   expect_true(any(res$log$level == "exclusion"))
@@ -160,7 +160,7 @@ test_that("lowest-level SAs without fish records are excluded and logged", {
   res <- doRatioEstimation(obj, species = 127143, raising = pooled,
                            target = "Length",
                            checkCodes = FALSE)
-  expect_false(1 %in% res$expanded$SAid)
+  expect_false(1 %in% res$fishBySample$SAid)
 })
 
 
@@ -173,7 +173,7 @@ test_that("gutted BV weights need gutToLive, and then match the live truth", {
                            gutToLive = 1 / 0.88)
   mw <- merge(res$estimates, sim$truthAge, by = c(domainKey, "age"))
   expect_equal(mw$meanWeight_g, mw$W / mw$N.y, tolerance = 1e-3)
-  expect_equal(unique(res$estimates$SOP), rep(1, 4), tolerance = 1e-3)
+  expect_equal(unique(res$domains$SOP), rep(1, 4), tolerance = 1e-3)
 })
 
 test_that("non-probabilistic selection is logged as an assumption, not stopped", {
@@ -184,7 +184,7 @@ test_that("non-probabilistic selection is logged as an assumption, not stopped",
   a <- res$log[level == "assumption", message]
   expect_true(any(grepl("VS selection is Non-probabilistic", a)))
   expect_true(any(grepl("FT selection is Quasi-probabilistic", a)))
-  expect_equal(unique(res$sampleUnits$VSselectionClass), "Non-probabilistic")
+  expect_equal(unique(res$samples$VSselectionClass), "Non-probabilistic")
 })
 
 
@@ -226,7 +226,7 @@ test_that("pooled and counted hauls on a sampled design are close to the truth",
                              checkCodes = FALSE)
     m <- compareToTruth(res$estimates, sim$truthAge)
     expect_lt(abs(sum(m$N.est) / sum(m$N.true) - 1), 0.05)
-    expect_equal(unique(res$estimates$SOP), rep(1, 4), tolerance = 0.02)
+    expect_equal(unique(res$domains$SOP), rep(1, 4), tolerance = 0.02)
   }
 })
 
@@ -261,6 +261,34 @@ test_that("checkRDBESCodes flags values that are not in the ICES lists", {
   expect_equal(chk[valid == FALSE, value], "RANDOMISH")
   expect_warning(doRatioEstimation(obj, species = 127143, raising = pooled),
                  "RANDOMISH")
+})
+
+test_that("the result holds one table per row unit, without attributes", {
+  sim <- simulate(haulsPerTrip = 3, sampledHaulsPerTrip = 1)
+  res <- doRatioEstimation(sim$obj, species = 127143,
+                           raising = raisingScheme(FO = stageRaising("count"),
+                                                   DE = deRaising("ratio")),
+                           checkCodes = FALSE)
+  expect_equal(names(res), c("estimates", "domains", "ratios", "samples",
+                             "stageUnits", "fishBySample", "byStratum",
+                             "codeCheck", "log", "settings"))
+  key <- c("year", "quarter", "area", "metier6")
+  # estimates: one row per domain x age, no per-domain columns
+  expect_equal(anyDuplicated(res$estimates[, c(key, "age"), with = FALSE]), 0L)
+  expect_false(any(c("SOP", "X_kg", "nSamples") %in% names(res$estimates)))
+  # domains: one row per domain, the factor applied is X / sumX
+  expect_equal(nrow(res$domains), nrow(unique(res$estimates[, ..key])))
+  expect_equal(res$domains$ratio, res$domains$X_kg / res$domains$sumX_kg)
+  expect_equal(res$domains$ratio, rep(res$ratios$DE$ratio, nrow(res$domains)))
+  expect_null(res$ratios$totals)
+  # samples: key columns first, no step attributes
+  expect_equal(names(res$samples)[1:3], c("SAid", "topSAid", "SAlevel"))
+  expect_lt(match("w", names(res$samples)),
+            match("VSselectMeth", names(res$samples)))
+  expect_null(attr(res$samples, "ratioLog"))
+  expect_null(attr(res$byStratum, "deRatios"))
+  expect_equal(names(res$stageUnits), c("VS", "FT", "FO"))
+  expect_output(print(res), "fishBySample")
 })
 
 }) ## end capture.output

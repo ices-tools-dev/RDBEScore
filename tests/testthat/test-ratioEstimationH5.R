@@ -47,7 +47,7 @@ test_that("on a census design every method reproduces the truth in H5", {
   }
   expect_output(print(res), "hierarchy 5")
   expect_true(all(c("nOnshoreEvents", "nLandingEvents") %in%
-                    names(res$estimates)))
+                    names(res$domains)))
 })
 
 test_that("domains come from LEdate and LEarea when SA is blank", {
@@ -72,10 +72,10 @@ test_that("count raising of auction days and landings equals the hand expansion"
   sc <- raisingScheme(OS = stageRaising("count"), LE = stageRaising("count"),
                       hierarchy = 5)
   res <- estimate5(sim$obj, sc)
-  sw <- res$stageWeights[include == TRUE]
+  sw <- res$samples[include == TRUE]
   expect_true(all(sw$f_OS == 2))
   expect_true(all(sw$f_LE == 2))
-  hand <- merge(res$expanded, sw[, .(SAid, w)], by = "SAid")[, sum(w * yN)]
+  hand <- merge(res$fishBySample, sw[, .(SAid, w)], by = "SAid")[, sum(w * yN)]
   expect_equal(sum(res$estimates$N), hand)
 })
 
@@ -96,7 +96,7 @@ test_that("aux raising of landing events adds up to the OS aux total", {
                    sampledHaulsPerTrip = c(1, 1, 0), vesselsInPopulation = 4)
   sc <- raisingScheme(OS = stageRaising("aux"), LE = stageRaising("aux"),
                       hierarchy = 5)
-  sw <- estimate5(sim$obj, sc)$stageWeights[include == TRUE]
+  sw <- estimate5(sim$obj, sc)$samples[include == TRUE]
   expect_equal(sum(sw$w * sw$x), unique(sim$obj$OS$OSauxVarTot))
 })
 
@@ -129,7 +129,7 @@ test_that("FT under LE is a stage when SS links to FT", {
   res <- estimate5(obj, sc)
   m <- vsTruth5(res, sim$truthAge)
   expect_equal(m$N.est, m$N.true, tolerance = 1e-6)
-  expect_true("nTrips" %in% names(res$estimates))
+  expect_true("nTrips" %in% names(res$domains))
 
   # FT not named: pooled, logged, and only allowed with a DE ratio
   scDE <- raisingScheme(LE = stageRaising("count"),

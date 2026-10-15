@@ -206,7 +206,7 @@ test_that("on a census design every method reproduces the truth", {
     res <- estimate(sim$obj, schemes[[nm]])
     m <- vsTruth(res, sim$truthAge)
     expect_equal(m$N.est, m$N.true, tolerance = 1e-6, label = nm)
-    expect_s3_class(res$stageWeights, "data.table")
+    expect_s3_class(res$samples, "data.table")
   }
 })
 
@@ -216,10 +216,10 @@ test_that("count raising with no DE ratio equals the hand-computed expansion", {
   sc <- raisingScheme(FO = stageRaising("count"), FT = stageRaising("count"),
                       VS = stageRaising("count"))
   res <- estimate(sim$obj, sc)
-  sw <- res$stageWeights
+  sw <- res$samples
   # VS 8 / 4, FT 2 / 2, FO 4 / 2
   expect_true(all(sw[include == TRUE, w] == 4))
-  hand <- merge(res$expanded, sw[, .(SAid, w)], by = "SAid")[, sum(w * yN)]
+  hand <- merge(res$fishBySample, sw[, .(SAid, w)], by = "SAid")[, sum(w * yN)]
   expect_equal(sum(res$estimates$N), hand)
   expect_true(any(grepl("selection method", res$log$message)))
 })
@@ -230,7 +230,7 @@ test_that("aux raising adds the sampled weights up to the aux total", {
   sc <- raisingScheme(FO = stageRaising("aux"), FT = stageRaising("aux"),
                       VS = stageRaising("aux"))
   res <- estimate(sim$obj, sc)
-  sw <- res$stageWeights[include == TRUE]
+  sw <- res$samples[include == TRUE]
   expect_equal(sum(sw$w * sw$x), unique(sim$obj$VS$VSauxVarTot))
 })
 
@@ -269,8 +269,8 @@ test_that("a DE ratio on trips keeps trips without the species in the sum", {
   scSA <- raisingScheme(DE = deRaising("ratio"))
   rFT <- estimate(obj, scFT)
   rSA <- estimate(obj, scSA)
-  expect_equal(attr(rFT$raised, "deRatios")$sumWX, sum(obj$FT$FTauxVarValue))
-  expect_lt(attr(rSA$raised, "deRatios")$sumWX, sum(obj$FT$FTauxVarValue))
+  expect_equal(rFT$ratios$DE$sumWX, sum(obj$FT$FTauxVarValue))
+  expect_lt(rSA$ratios$DE$sumWX, sum(obj$FT$FTauxVarValue))
   expect_true(any(grepl("counted as zero catch", rFT$log$message)))
 })
 
