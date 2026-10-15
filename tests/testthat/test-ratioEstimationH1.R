@@ -69,11 +69,11 @@ test_that("sub-sample chain raising factor is the product of W/w along the chain
   parent <- sa[SSid == child$SSid & SAseqNum == child$SAparSequNum]
   expected <- (parent$SAtotalWtMes / parent$SAsampWtMes) *
     (child$SAtotalWtMes / child$SAsampWtMes)
-  expect_equal(lowest$raiseFactor, expected)
+  expect_equal(lowest$fSample, expected)
   expect_equal(lowest$topSAid, parent$SAid)
   expect_equal(lowest$SAlevel, 2L)
   # x is the live weight of the top-level fraction
-  expect_equal(lowest$x, parent$SAtotalWtMes / 1000)
+  expect_equal(lowest$xSample, parent$SAtotalWtMes / 1000)
   # one row per lowest-level SA: SA records that are nobody's parent
   parents <- sa[sa, on = .(SSid, SAseqNum = SAparSequNum), x.SAid,
                 nomatch = NULL]
@@ -91,13 +91,13 @@ test_that("LH A sample ALK expansion matches a hand calculation", {
   bv[, mL := .N, by = FMid]
   hand <- bv[, .(yN = sum(FMnumAtUnit / mL)),
              by = .(class = as.numeric(BVvalueMeas))]
-  hand[, yN := yN * su$raiseFactor[1]]
+  hand[, yN := yN * su$fSample[1]]
   got <- ex[SAid == sid, .(class, yN)]
   m <- merge(hand, got, by = "class")
   expect_equal(nrow(m), nrow(hand))
   expect_equal(m$yN.x, m$yN.y)
   # total numbers at age equal the FM total of the sample
-  expect_equal(sum(got$yN), sum(fm$FMnumAtUnit) * su$raiseFactor[1])
+  expect_equal(sum(got$yN), sum(fm$FMnumAtUnit) * su$fSample[1])
 })
 
 test_that("pooled ALK fill keeps all measured fish when classes lack aged fish", {
@@ -111,7 +111,7 @@ test_that("pooled ALK fill keeps all measured fish when classes lack aged fish",
   fill <- expandWithinSample(obj, su, target = "Age",
                              ageRoute = "sampleFillPooled")
   sid <- su$SAid[1]
-  fmTot <- sum(obj$FM[SAid == sid, FMnumAtUnit]) * su[SAid == sid, raiseFactor]
+  fmTot <- sum(obj$FM[SAid == sid, FMnumAtUnit]) * su[SAid == sid, fSample]
   expect_lt(sum(own[SAid == sid, yN]), fmTot)
   expect_equal(sum(fill[SAid == sid, yN]), fmTot)
   expect_true(any(grepl("lost", getRatioLog(own)$message)))
@@ -132,9 +132,9 @@ test_that("LH D and not-sampled SAs are excluded from numerator and auxiliary to
                            checkCodes = FALSE)
   used <- unique(res$fishBySample$SAid)
   expect_false(any(used %in% su[include == FALSE, SAid]))
-  expect_equal(sum(res$byStratum[, .(sumX = sumX[1]),
-                              by = c(domainKey, "stratum")]$sumX),
-               su[SAid %in% used, sum(x)])
+  expect_equal(sum(res$byStratum[, .(sumX = liveWeightSampled_kg[1]),
+                              by = c(domainKey, "DEstratumName")]$sumX),
+               su[SAid %in% used, sum(xSample)])
   expect_true(any(res$log$level == "exclusion"))
 })
 
@@ -275,16 +275,24 @@ test_that("the result holds one table per row unit, without attributes", {
   key <- c("year", "quarter", "area", "metier6")
   # estimates: one row per domain x age, no per-domain columns
   expect_equal(anyDuplicated(res$estimates[, c(key, "age"), with = FALSE]), 0L)
-  expect_false(any(c("SOP", "X_kg", "nSamples") %in% names(res$estimates)))
-  # domains: one row per domain, the factor applied is X / sumX
-  expect_equal(nrow(res$domains), nrow(unique(res$estimates[, ..key])))
-  expect_equal(res$domains$ratio, res$domains$X_kg / res$domains$sumX_kg)
-  expect_equal(res$domains$ratio, rep(res$ratios$DE$ratio, nrow(res$domains)))
+  expect_false(any(c("SOP", "liveWeightEst_kg", "nSamples") %in%
+                     names(res$estimates)))
+  # domains: one row per domain, the factor applied is estimated / sampled
+  d <- res$domains
+  expect_equal(nrow(d), nrow(unique(res$estimates[, ..key])))
+  expect_equal(d$rApplied, d$liveWeightEst_kg / d$liveWeightSampled_kg)
+  expect_equal(d$rApplied, rep(res$ratios$DE$rDE, nrow(d)))
+  expect_equal(names(res$ratios$DE),
+               c("DEstratumName", "rDE", "total", "xWeightedStratum"))
   expect_null(res$ratios$totals)
   # samples: key columns first, no step attributes
   expect_equal(names(res$samples)[1:3], c("SAid", "topSAid", "SAlevel"))
-  expect_lt(match("w", names(res$samples)),
+  expect_lt(match("wStages", names(res$samples)),
             match("VSselectMeth", names(res$samples)))
+  expect_true(all(c("fStage", "wCumulative") %in% names(res$stageUnits$FO)))
+  expect_true(all(c("yW_g", "yL_mm") %in% names(res$fishBySample)))
+  expect_true(all(c("W_g", "L_mm", "DEstratumName", "rApplied") %in%
+                    names(res$byStratum)))
   expect_null(attr(res$samples, "ratioLog"))
   expect_null(attr(res$byStratum, "deRatios"))
   expect_equal(names(res$stageUnits), c("VS", "FT", "FO"))

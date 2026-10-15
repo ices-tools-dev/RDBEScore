@@ -48,8 +48,8 @@ mean weights are not estimated. Default \code{TRUE}.}
 \value{
 A \code{data.table} with one row per lowest-level SA (\code{SAid}) and class:
 \code{class} (age in years, or length class lower bound in mm), \code{yN} (numbers),
-\code{yNW} (numbers with a weight), \code{yW} (live weight, g), \code{yNL} (numbers
-with a length), \code{yL} (sum of lengths, mm), all expanded to the catch
+\code{yNW} (numbers with a weight), \code{yW_g} (live weight, g), \code{yNL} (numbers
+with a length), \code{yL_mm} (sum of lengths, mm), all expanded to the catch
 fraction, and \code{nFish} (fish actually measured or aged in that class).
 Attributes: \code{"target"}, \code{"classWidth"} and the log \code{"ratioLog"}.
 }
@@ -57,7 +57,7 @@ Attributes: \code{"target"}, \code{"classWidth"} and the log \code{"ratioLog"}.
 Second step of the ratio estimation workflow (see \code{\link[=doRatioEstimation]{doRatioEstimation()}}).
 For every included lowest-level SA from \code{\link[=getSampleUnits]{getSampleUnits()}} the length or age
 composition measured in FM and BV is expanded to the catch fraction of the
-top-level SA, using the sample's \code{raiseFactor}. Nothing is raised to the
+top-level SA, using the sample's \code{fSample}. Nothing is raised to the
 population yet.
 }
 \details{

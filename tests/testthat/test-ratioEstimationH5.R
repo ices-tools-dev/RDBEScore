@@ -75,7 +75,7 @@ test_that("count raising of auction days and landings equals the hand expansion"
   sw <- res$samples[include == TRUE]
   expect_true(all(sw$f_OS == 2))
   expect_true(all(sw$f_LE == 2))
-  hand <- merge(res$fishBySample, sw[, .(SAid, w)], by = "SAid")[, sum(w * yN)]
+  hand <- merge(res$fishBySample, sw[, .(SAid, w = wStages)], by = "SAid")[, sum(w * yN)]
   expect_equal(sum(res$estimates$N), hand)
 })
 
@@ -88,7 +88,7 @@ test_that("OS design strata are used for the OS factor", {
   f <- attr(sw, "unitWeights")$OS
   expect_true(all(c("A", "B") %in% sim$obj$OS$OSstratumName))
   # each stratum: 2 sampled of 6
-  expect_true(all(f$factor == 3))
+  expect_true(all(f$fStage == 3))
 })
 
 test_that("aux raising of landing events adds up to the OS aux total", {
@@ -97,7 +97,7 @@ test_that("aux raising of landing events adds up to the OS aux total", {
   sc <- raisingScheme(OS = stageRaising("aux"), LE = stageRaising("aux"),
                       hierarchy = 5)
   sw <- estimate5(sim$obj, sc)$samples[include == TRUE]
-  expect_equal(sum(sw$w * sw$x), unique(sim$obj$OS$OSauxVarTot))
+  expect_equal(sum(sw$wStages * sw$xSample), unique(sim$obj$OS$OSauxVarTot))
 })
 
 test_that("VD fields can be used at LE", {
@@ -111,7 +111,7 @@ test_that("VD fields can be used at LE", {
   le[, VDlen := vd$VDlen[match(VDid, vd$VDid)]]
   hand <- le[, .(f = LEauxVarTot[1] / sum(VDlen)), by = OSid]
   f <- attr(sw, "unitWeights")$LE
-  expect_equal(f$factor, hand$f[match(f$OSid, hand$OSid)])
+  expect_equal(f$fStage, hand$f[match(f$OSid, hand$OSid)])
 })
 
 # ---------------------------------------------------------------------------

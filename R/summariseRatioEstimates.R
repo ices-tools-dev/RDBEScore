@@ -41,7 +41,8 @@ summariseRatioEstimates <- function(raised, plusGroup = NULL) {
 #' the sum-of-products check and the number of samples and sampled units.
 #'
 #' The sum-of-products check is
-#' \eqn{SOP = \sum_a N_a \bar w_a / X}, where X is the estimated live weight
+#' \eqn{SOP = \sum_a N_a \bar w_a / X}, where X (`liveWeightEst_kg`) is the
+#' estimated live weight
 #' of the species from the sample weights (see [raiseToDE()]). It compares
 #' the raised fish weights (BV) with the raised sample weights (SA), and flags
 #' unit or weight-presentation errors when it is far from 1. A value of 1 does
@@ -52,9 +53,10 @@ summariseRatioEstimates <- function(raised, plusGroup = NULL) {
 #' @param raised Output of [raiseToDE()].
 #'
 #' @return A `data.table` with one row per domain: the domain variables,
-#'   `X_kg` (estimated live weight of the species), `sumX_kg` (weighted live
-#'   weight of the samples before the DE and totals ratios), `ratio`
-#'   (`X_kg / sumX_kg`, the factor applied to the domain), `SOP`,
+#'   `liveWeightEst_kg` (estimated live weight of the species),
+#'   `liveWeightSampled_kg` (live weight of the samples weighted by the stage
+#'   weights, before the DE and totals ratios), `rApplied`
+#'   (`liveWeightEst_kg / liveWeightSampled_kg`, the factor applied), `SOP`,
 #'   `weightCoverage`, `nSamples` and the number of sampled units per stage:
 #'   `nVessels`, `nTrips` and `nHauls` in hierarchy 1, `nOnshoreEvents`,
 #'   `nLandingEvents` (and `nTrips` when FT is a stage) in hierarchy 5.
@@ -68,12 +70,11 @@ summariseRatioDomains <- function(raised) {
                  weightCoverage = sum(NW) / sum(N)), by = domainVars]
   dom <- merge(dom, attr(raised, "domainSummary"), by = domainVars,
                all.x = TRUE)
-  dom[, SOP := sop / X]
+  dom[, SOP := sop / liveWeightEst_kg]
   dom[, sop := NULL]
-  dom[, ratio := X / sumX]
-  data.table::setnames(dom, c("X", "sumX"), c("X_kg", "sumX_kg"))
-  lead <- c(domainVars, "X_kg", "sumX_kg", "ratio", "SOP", "weightCoverage",
-            "nSamples")
+  dom[, rApplied := liveWeightEst_kg / liveWeightSampled_kg]
+  lead <- c(domainVars, "liveWeightEst_kg", "liveWeightSampled_kg", "rApplied",
+            "SOP", "weightCoverage", "nSamples")
   data.table::setcolorder(dom, c(lead, setdiff(names(dom), lead)))
   data.table::setorderv(dom, domainVars)
   dom[]
@@ -99,8 +100,8 @@ classTotals <- function(raised, domainVars, target, plusGroup) {
     if (target != "Age") stop("plusGroup is only used for target = 'Age'.")
     r[class >= plusGroup, class := plusGroup]
   }
-  est <- r[, .(N = sum(N), NW = sum(NW), W = sum(W), NL = sum(NL),
-               L = sum(L), nFish = sum(nFish)), by = c(domainVars, "class")]
+  est <- r[, .(N = sum(N), NW = sum(NW), W = sum(W_g), NL = sum(NL),
+               L = sum(L_mm), nFish = sum(nFish)), by = c(domainVars, "class")]
   est[, meanWeight := data.table::fifelse(NW > 0, W / NW, NA_real_)]
   est[, meanLength := data.table::fifelse(NL > 0, L / NL, NA_real_)]
   est[, totalWeight := N * meanWeight / 1000]

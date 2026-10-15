@@ -37,7 +37,7 @@
 #'
 #' @return A `data.table` with one row per sampled unit: `id`, the `by`
 #'   columns, `n` (sampled units in the group), `total`, `sumValue` and
-#'   `factor`. The log is attached as attribute `"ratioLog"`.
+#'   `fStage`. The log is attached as attribute `"ratioLog"`.
 #' @seealso [raisingScheme()], [getRatioLog()]
 #' @export
 #'
@@ -90,7 +90,7 @@ computeStageFactors <- function(units, id, by = NULL, total = NULL,
   if (nrow(s) == 0) stop(step, ": no sampled units.", call. = FALSE)
 
   if (method == "none") {
-    s[, `:=`(n = .N, .T = NA_real_, sumValue = NA_real_, factor = 1),
+    s[, `:=`(n = .N, .T = NA_real_, sumValue = NA_real_, fStage = 1),
       by = grpCols]
   }
 
@@ -101,7 +101,7 @@ computeStageFactors <- function(units, id, by = NULL, total = NULL,
            nrow(bad), " unit(s): ", paste(utils::head(bad[[id]], 10),
                                           collapse = ", "), call. = FALSE)
     }
-    s[, `:=`(n = .N, .T = NA_real_, sumValue = NA_real_, factor = 1 / .v),
+    s[, `:=`(n = .N, .T = NA_real_, sumValue = NA_real_, fStage = 1 / .v),
       by = grpCols]
   }
 
@@ -141,7 +141,7 @@ computeStageFactors <- function(units, id, by = NULL, total = NULL,
         paste0("'", total, "' is smaller than the sum of the sampled ",
                "values: factor below 1"), nrow(small), verbose)
     }
-    g[, factor := data.table::fifelse(sumValue > 0, .T / sumValue, 0)]
+    g[, fStage := data.table::fifelse(sumValue > 0, .T / sumValue, 0)]
     s <- merge(s[, setdiff(names(s), c(".T")), with = FALSE],
                g, by = grpCols)
   }
@@ -159,7 +159,7 @@ computeStageFactors <- function(units, id, by = NULL, total = NULL,
     }
   }
 
-  out <- s[, c(id, by, "n", ".T", "sumValue", "factor"), with = FALSE]
+  out <- s[, c(id, by, "n", ".T", "sumValue", "fStage"), with = FALSE]
   data.table::setnames(out, ".T", "total")
   data.table::setorderv(out, c(by, id))
   attr(out, "ratioLog") <- log

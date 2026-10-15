@@ -17,10 +17,10 @@ hierarchy as the data.}
 \item{verbose}{Logical. Print log entries as messages. Default \code{FALSE}.}
 }
 \value{
-\code{sampleUnits} with the columns \code{f_XX} (one per stage), \code{w}, \code{DEid}
+\code{sampleUnits} with the columns \code{f_XX} (one per stage), \code{wStages}, \code{DEid}
 and \code{DEstratumName} added. Attributes: \code{"unitWeights"}, a list with one
-table per stage (unit id, ancestor ids, \code{factor} and cumulative weight
-\code{wUnit} of every sampled unit), \code{"scheme"} and \code{"ratioLog"}.
+table per stage (unit id, ancestor ids, \code{fStage} and cumulative weight
+\code{wCumulative} of every sampled unit), \code{"scheme"} and \code{"ratioLog"}.
 }
 \description{
 Step of stage-wise raising (see \code{\link[=raisingScheme]{raisingScheme()}}). For every stage of the
@@ -30,7 +30,7 @@ chosen by the user (RDBES column, function or \code{\link[=externalAux]{external
 computes a factor per sampled unit within parent x stratum
 (\code{\link[=computeStageFactors]{computeStageFactors()}}). The factors are multiplied down the hierarchy,
 so every unit gets a cumulative weight, and every lowest-level SA gets
-\code{w}, the product of the stage factors (for example
+\code{wStages}, the product of the stage factors (for example
 \code{f_VS * f_FT * f_FO}. SS is always 1).
 }
 \details{

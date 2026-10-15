@@ -287,7 +287,7 @@ externalAux <- function(data, by, col) {
 #' Combines the raising method of every sampling stage and of the DE step into
 #' one scheme for [doRatioEstimation()]. Every stage gives each sampled unit
 #' a factor. The factors are multiplied along the path, so each lowest-level
-#' SA gets one weight `w`. Estimates are \eqn{\sum w y}, optionally followed
+#' SA gets one weight `wStages`. Estimates are \eqn{\sum w y}, optionally followed
 #' by the DE ratio.
 #'
 #' Stages not given are `"none"` (pooled). The species selection (SS) is

@@ -11,9 +11,10 @@ summariseRatioDomains(raised)
 }
 \value{
 A \code{data.table} with one row per domain: the domain variables,
-\code{X_kg} (estimated live weight of the species), \code{sumX_kg} (weighted live
-weight of the samples before the DE and totals ratios), \code{ratio}
-(\code{X_kg / sumX_kg}, the factor applied to the domain), \code{SOP},
+\code{liveWeightEst_kg} (estimated live weight of the species),
+\code{liveWeightSampled_kg} (live weight of the samples weighted by the stage
+weights, before the DE and totals ratios), \code{rApplied}
+(\code{liveWeightEst_kg / liveWeightSampled_kg}, the factor applied), \code{SOP},
 \code{weightCoverage}, \code{nSamples} and the number of sampled units per stage:
 \code{nVessels}, \code{nTrips} and \code{nHauls} in hierarchy 1, \code{nOnshoreEvents},
 \code{nLandingEvents} (and \code{nTrips} when FT is a stage) in hierarchy 5.
@@ -25,7 +26,8 @@ the sum-of-products check and the number of samples and sampled units.
 }
 \details{
 The sum-of-products check is
-\eqn{SOP = \sum_a N_a \bar w_a / X}, where X is the estimated live weight
+\eqn{SOP = \sum_a N_a \bar w_a / X}, where X (\code{liveWeightEst_kg}) is the
+estimated live weight
 of the species from the sample weights (see \code{\link[=raiseToDE]{raiseToDE()}}). It compares
 the raised fish weights (BV) with the raised sample weights (SA), and flags
 unit or weight-presentation errors when it is far from 1. A value of 1 does

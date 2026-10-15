@@ -2,8 +2,8 @@
 #'
 #' Last raising step of stage-wise raising (see [raisingScheme()]). Each
 #' expanded sample from [expandWithinSample()] is multiplied by its stage
-#' weight `w` from [getStageWeights()], and summed per DE stratum, domain and
-#' class:
+#' weight `wStages` from [getStageWeights()], and summed per DE stratum,
+#' domain and class:
 #' \deqn{\hat N_{d,a} = r_h \sum_{i \in d} w_i y_{i,a}}
 #' With DE `"none"`, \eqn{r_h = 1}. With DE `"ratio"`,
 #' \eqn{r_h = T_h / \sum_{j \in h} w_j x_j} per DE stratum \eqn{h}, where
@@ -22,13 +22,13 @@
 #' with sampled units but no total stops the run (usually codes that do not
 #' match). A total without sampled units is logged as a warning and not
 #' raised. The rows are then per domain and class, without the DE stratum,
-#' because totals strata can cut across DE strata, and `ratio` is the
-#' combined factor \eqn{X / sumX} of the domain.
+#' because totals strata can cut across DE strata, and `rApplied` is the
+#' combined factor `liveWeightEst_kg / liveWeightSampled_kg` of the domain.
 #'
-#' `X_kg` in the result is the **estimated** live weight of the species per
-#' domain, \eqn{r_h \sum w x} with x the sampled live weight. The SOP check in
-#' [summariseRatioEstimates()] then compares the raised fish weights with the
-#' raised sample weights.
+#' `liveWeightEst_kg` is the **estimated** live weight of the species per
+#' domain, \eqn{r_h \sum w x} with x the sampled live weight (`xSample`).
+#' The SOP check in [summariseRatioDomains()] then compares the raised fish
+#' weights with the raised sample weights.
 #'
 #' @param expanded Output of [expandWithinSample()].
 #' @param stageWeights Output of [getStageWeights()].
@@ -40,13 +40,20 @@
 #'   `c("year", "quarter", "area", "metier6")`.
 #' @param verbose Logical. Print log entries as messages. Default `FALSE`.
 #'
-#' @return A `data.table` with the domain
-#'   variables, `stratum` (the DE stratum, not when there are totals),
-#'   `class`, raised `N`, `NW`, `W`, `NL`, `L`, `nFish`, and `sumX`
-#'   (weighted sample live weight, kg), `X` (estimated live weight, kg) and
-#'   `ratio` (DE ratio, 1 for `"none"`, or the combined factor with totals).
-#'   Attributes: `"deRatios"`, `"totalsRatios"` (`NULL` without totals),
-#'   `"domainSummary"`, `"target"`, `"domainVars"` and `"ratioLog"`.
+#' @return A `data.table` with one row per domain, DE stratum and class: the
+#'   domain variables, `DEstratumName` (not when there are totals), `class`,
+#'   the raised `N`, `NW` (numbers with a weight), `W_g`, `NL` (numbers with
+#'   a length), `L_mm`, `nFish`, and `liveWeightSampled_kg` (sum of
+#'   `wStages * xSample`, before the ratios), `liveWeightEst_kg` (after the
+#'   ratios) and `rApplied` (the DE ratio, 1 for `"none"`, or the combined
+#'   factor with totals). Attributes:
+#'   * `"deRatios"`: one row per DE stratum, with `DEstratumName`, `rDE`,
+#'     `total` (the DE total) and `xWeightedStratum` (sum of w x over the
+#'     stratum). Only `DEstratumName` and `rDE` for DE `"none"`.
+#'   * `"totalsRatios"`: one row per totals stratum, with the strata columns,
+#'     `rTotals`, `total`, `xWeightedStratum` and `nUnits`. `NULL` without
+#'     totals.
+#'   * `"domainSummary"`, `"target"`, `"domainVars"` and `"ratioLog"`.
 #' @seealso [getStageWeights()], [summariseRatioEstimates()]
 #' @export
 raiseToDE <- function(expanded, stageWeights, RDBESDataObj,
@@ -95,7 +102,7 @@ raiseToDE <- function(expanded, stageWeights, RDBESDataObj,
     if (deStep$at == "SA") {
       xs <- sampleX(su, expanded, deStep$value, step, verbose)
       log <- rbind(log, xs$log)
-      xu <- su[, .(.id = SAid, DEid, wUnit = w)]
+      xu <- su[, .(.id = SAid, DEid, wCumulative = wStages)]
       xu[, x := xs$x[match(xu$.id, xs$SAid)]]
     } else {
       uw <- attr(stageWeights, "unitWeights")[[deStep$at]]
@@ -111,11 +118,11 @@ raiseToDE <- function(expanded, stageWeights, RDBESDataObj,
                             verbose = verbose)
       r <- resolveRaisingArg(units, deStep$value, ".x", step, verbose)
       log <- rbind(log, r$log)
-      xu <- merge(uw[, c(idCol, "DEid", "wUnit"), with = FALSE],
+      xu <- merge(uw[, c(idCol, "DEid", "wCumulative"), with = FALSE],
                   r$units[, c(idCol, ".x"), with = FALSE], by = idCol)
       data.table::setnames(xu, c(idCol, ".x"), c(".id", "x"))
     }
-    xu[, .v := wUnit * x]
+    xu[, .v := wCumulative * x]
 
     r <- resolveRaisingArg(de, deStep$total, ".total", step, verbose)
     log <- rbind(log, r$log)
@@ -130,7 +137,7 @@ raiseToDE <- function(expanded, stageWeights, RDBESDataObj,
                              total = ".total", value = ".v",
                              step = paste0(step, " (DE)"), verbose = verbose)
     log <- rbind(log, getRatioLog(f))
-    ratios <- unique(f[, .(.stratum, ratio = factor, T = total,
+    ratios <- unique(f[, .(.stratum, ratio = fStage, T = total,
                            sumWX = sumValue)])
     log <- addToRatioLog(log, step, "info",
       paste0("DE ratio per ", stratCol, " with x measured on ", deStep$at),
@@ -154,24 +161,27 @@ raiseToDE <- function(expanded, stageWeights, RDBESDataObj,
   # totals (totals strata can cut across DE strata)
   # ---------------------------------------------------------------------------
   byS <- if (is.null(tot)) c(domainVars, ".stratum") else domainVars
-  ys <- merge(expanded, su[, c("SAid", "w", "mult", byS), with = FALSE],
+  ys <- merge(expanded, su[, c("SAid", "wStages", "mult", byS), with = FALSE],
               by = "SAid")[
-    , .(N = sum(w * mult * yN), NW = sum(w * mult * yNW),
-        W = sum(w * mult * yW), NL = sum(w * mult * yNL),
-        L = sum(w * mult * yL), nFish = sum(nFish)),
+    , .(N = sum(wStages * mult * yN), NW = sum(wStages * mult * yNW),
+        W_g = sum(wStages * mult * yW_g), NL = sum(wStages * mult * yNL),
+        L_mm = sum(wStages * mult * yL_mm), nFish = sum(nFish)),
     by = c(byS, "class")]
-  xs <- su[, .(sumX = sum(w * x), X = sum(w * mult * x)), by = byS]
+  # Live weight of the species in the samples, before and after the ratios
+  xs <- su[, .(liveWeightSampled_kg = sum(wStages * xSample),
+               liveWeightEst_kg = sum(wStages * mult * xSample)), by = byS]
   out <- merge(ys, xs, by = byS)
   if (is.null(tot)) {
-    out[, ratio := ratios$ratio[match(.stratum, ratios$.stratum)]]
-    data.table::setnames(out, ".stratum", "stratum")
+    out[, rApplied := ratios$ratio[match(.stratum, ratios$.stratum)]]
+    data.table::setnames(out, ".stratum", "DEstratumName")
   } else {
     # the combined factor of the DE and totals ratios in the domain
-    out[, ratio := X / sumX]
+    out[, rApplied := liveWeightEst_kg / liveWeightSampled_kg]
   }
-  lead <- c(domainVars, if (is.null(tot)) "stratum", "class")
-  out <- out[, c(lead, "N", "NW", "W", "NL", "L", "nFish", "sumX", "X",
-                 "ratio"), with = FALSE]
+  lead <- c(domainVars, if (is.null(tot)) "DEstratumName", "class")
+  out <- out[, c(lead, "N", "NW", "W_g", "NL", "L_mm", "nFish",
+                 "liveWeightSampled_kg", "liveWeightEst_kg", "rApplied"),
+             with = FALSE]
   data.table::setorderv(out, lead)
 
   # Domain summary
@@ -182,8 +192,9 @@ raiseToDE <- function(expanded, stageWeights, RDBESDataObj,
   keepIds <- idCols %in% names(su)
   idCols <- idCols[keepIds]
   labels <- labels[keepIds]
-  domSum <- su[, c(list(nSamples = .N, sumX = sum(w * x),
-                        X = sum(w * x * mult)),
+  domSum <- su[, c(list(nSamples = .N,
+                        liveWeightSampled_kg = sum(wStages * xSample),
+                        liveWeightEst_kg = sum(wStages * xSample * mult)),
                    lapply(.SD, data.table::uniqueN)),
                by = domainVars, .SDcols = idCols]
   data.table::setnames(domSum, idCols, unname(labels))
@@ -191,7 +202,9 @@ raiseToDE <- function(expanded, stageWeights, RDBESDataObj,
   log <- addToRatioLog(log, step, "info", "Domains estimated",
                        nrow(domSum), verbose)
   deRatios <- data.table::copy(ratios)
-  data.table::setnames(deRatios, ".stratum", "stratum")
+  data.table::setnames(deRatios, c(".stratum", "ratio", "T", "sumWX"),
+                       c("DEstratumName", "rDE", "total", "xWeightedStratum"),
+                       skip_absent = TRUE)
   data.table::setkey(deRatios, NULL)
   attr(out, "deRatios") <- deRatios[]
   attr(out, "totalsRatios") <- totalsRatios
@@ -217,7 +230,8 @@ raiseToTotals <- function(su, expanded, stageWeights, RDBESDataObj, tot,
   if (tot$at == "SA") {
     xs <- sampleX(su, expanded, tot$value, step, verbose)
     log <- rbind(log, xs$log)
-    xu <- data.table::data.table(.id = su$SAid, wUnit = su$w * su$mult)
+    xu <- data.table::data.table(.id = su$SAid,
+                                 wCumulative = su$wStages * su$mult)
     xu[, x := xs$x[match(.id, xs$SAid)]]
     st <- sampleStrata(su, RDBESDataObj, cols, step)
     xu <- cbind(xu, st[match(xu$.id, st$SAid), cols, with = FALSE])
@@ -237,7 +251,7 @@ raiseToTotals <- function(su, expanded, stageWeights, RDBESDataObj, tot,
                           verbose = verbose)
     r <- resolveRaisingArg(units, tot$value, ".x", step, verbose)
     log <- rbind(log, r$log)
-    xu <- merge(uw[, c(idCol, "DEid", "wUnit"), with = FALSE],
+    xu <- merge(uw[, c(idCol, "DEid", "wCumulative"), with = FALSE],
                 r$units[, c(idCol, ".x"), with = FALSE], by = idCol)
     # weight after the DE step: the DE ratio of the unit's DE stratum
     rDE <- ratios$ratio[match(deLab$.stratum[match(xu$DEid, deLab$DEid)],
@@ -247,7 +261,7 @@ raiseToTotals <- function(su, expanded, stageWeights, RDBESDataObj, tot,
       stop(step, ": ", at, " units in DE strata without a DE ratio.",
            call. = FALSE)
     }
-    xu[, wUnit := wUnit * rDE]
+    xu[, wCumulative := wCumulative * rDE]
     st <- unitStrata(RDBESDataObj, at, xu[[idCol]], cols,
                      attr(stageWeights, "areaLookup"), step)
     xu <- merge(xu, st, by = idCol)
@@ -283,12 +297,12 @@ raiseToTotals <- function(su, expanded, stageWeights, RDBESDataObj, tot,
       nrow(noSample), verbose)
   }
   xu[, .total := td$.total[match(.g, td$.g)]]
-  xu[, .v := wUnit * x]
+  xu[, .v := wCumulative * x]
   f <- computeStageFactors(xu, id = ".id", by = ".g", total = ".total",
                            value = ".v", step = step, verbose = verbose)
   log <- rbind(log, getRatioLog(f))
-  ratiosT <- unique(f[, .(.g, ratio = factor, T = total, sumWX = sumValue,
-                          nUnits = n)])
+  ratiosT <- unique(f[, .(.g, rTotals = fStage, total,
+                          xWeightedStratum = sumValue, nUnits = n)])
   ratiosT <- merge(unique(xu[, c(".g", cols), with = FALSE]), ratiosT,
                    by = ".g")
   ratiosT[, .g := NULL]
@@ -297,7 +311,7 @@ raiseToTotals <- function(su, expanded, stageWeights, RDBESDataObj, tot,
     paste0("Totals ratio per ", paste(cols, collapse = " x "),
            " with x measured on ", tot$at),
     nrow(ratiosT), verbose)
-  fac <- f$factor[match(unitOfSA, f$.id)]
+  fac <- f$fStage[match(unitOfSA, f$.id)]
   list(SAid = su$SAid, factor = fac, ratios = ratiosT[], log = log)
 }
 
@@ -414,7 +428,7 @@ unitStrata <- function(RDBESDataObj, at, ids, cols, areaLookup, step) {
 
 #' x per sample for a ratio measured on the samples (at = "SA")
 #'
-#' `"speciesLiveWeight"` is `x` from [getSampleUnits()]. `"fishWeight"` and
+#' `"speciesLiveWeight"` is `xSample` from [getSampleUnits()]. `"fishWeight"` and
 #' `"fishCount"` come from the expanded fish, so they carry the same
 #' within-sample factor as the numbers at age. Any other value is an SA
 #' column or a function of the sample table.
@@ -424,7 +438,7 @@ unitStrata <- function(RDBESDataObj, at, ids, cols, areaLookup, step) {
 sampleX <- function(su, expanded, value, step, verbose) {
   log <- newRatioLog()
   if (identical(value, "speciesLiveWeight")) {
-    out <- su[, .(SAid, x)]
+    out <- su[, .(SAid, x = xSample)]
     noX <- out[is.na(x), SAid]
     if (length(noX) > 0) {
       stop(step, ": the live weight of the species is missing for ",
@@ -438,7 +452,7 @@ sampleX <- function(su, expanded, value, step, verbose) {
   }
   if (identical(value, "fishWeight") || identical(value, "fishCount")) {
     e <- expanded[SAid %in% su$SAid,
-                  .(n = sum(yN), nW = sum(yNW), sW = sum(yW)), by = SAid]
+                  .(n = sum(yN), nW = sum(yNW), sW = sum(yW_g)), by = SAid]
     if (identical(value, "fishCount")) {
       return(list(SAid = e$SAid, x = e$n, log = log))
     }

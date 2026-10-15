@@ -18,10 +18,10 @@ test_that("count gives N / n per parent x stratum", {
   f <- computeStageFactors(hauls, id = "FOid",
                            by = c("FTid", "FOstratumName"),
                            total = "FOnumTotal")
-  expect_equal(f[FOid == 1, factor], 6 / 2)
-  expect_equal(f[FOid == 3, factor], 2 / 1)
-  expect_equal(f[FOid == 4, factor], 4 / 2)
-  expect_equal(f[FOid == 6, factor], 3 / 2)
+  expect_equal(f[FOid == 1, fStage], 6 / 2)
+  expect_equal(f[FOid == 3, fStage], 2 / 1)
+  expect_equal(f[FOid == 4, fStage], 4 / 2)
+  expect_equal(f[FOid == 6, fStage], 3 / 2)
   expect_equal(f$n, c(2, 2, 1, 2, 2, 2, 2))
 })
 
@@ -29,11 +29,11 @@ test_that("aux gives total / sum of sampled values", {
   f <- computeStageFactors(hauls, id = "FOid",
                            by = c("FTid", "FOstratumName"),
                            total = "FOauxVarTot", value = "FOauxVarValue")
-  expect_equal(f[FOid == 1, factor], 30 / (4 + 6))
-  expect_equal(f[FOid == 6, factor], 9 / (2 + 4))
+  expect_equal(f[FOid == 1, fStage], 30 / (4 + 6))
+  expect_equal(f[FOid == 6, fStage], 9 / (2 + 4))
   # weighted values add up to the total in every group
   m <- merge(f, hauls, by = "FOid")
-  chk <- m[, .(est = sum(factor * FOauxVarValue), tot = FOauxVarTot[1]),
+  chk <- m[, .(est = sum(fStage * FOauxVarValue), tot = FOauxVarTot[1]),
            by = .(FTid.x, FOstratumName.x)]
   expect_equal(chk$est, chk$tot)
 })
@@ -42,16 +42,16 @@ test_that("strata = NULL pools the strata of a parent", {
   h <- hauls
   h$FOnumTotal <- c(8, 8, 8, 7, 7, 7, 7)
   f <- computeStageFactors(h, id = "FOid", by = "FTid", total = "FOnumTotal")
-  expect_equal(unique(f[FTid == 1, factor]), 8 / 3)
-  expect_equal(unique(f[FTid == 2, factor]), 7 / 4)
+  expect_equal(unique(f[FTid == 1, fStage]), 8 / 3)
+  expect_equal(unique(f[FTid == 2, fStage]), 7 / 4)
 })
 
 test_that("prob gives 1 / inclusion probability, none gives 1", {
   f <- computeStageFactors(hauls, id = "FOid", by = "FTid",
                            value = "FOincProb", method = "prob")
-  expect_equal(f$factor, 1 / hauls$FOincProb)
+  expect_equal(f$fStage, 1 / hauls$FOincProb)
   f0 <- computeStageFactors(hauls, id = "FOid", by = "FTid", method = "none")
-  expect_true(all(f0$factor == 1))
+  expect_true(all(f0$fStage == 1))
 })
 
 test_that("units not sampled are left out of n but keep the group total", {
@@ -60,7 +60,7 @@ test_that("units not sampled are left out of n but keep the group total", {
   f <- computeStageFactors(h, id = "FOid", by = c("FTid", "FOstratumName"),
                            total = "FOnumTotal", sampled = "sampled")
   expect_false(2 %in% f$FOid)
-  expect_equal(f[FOid == 1, factor], 6 / 1)
+  expect_equal(f[FOid == 1, fStage], 6 / 1)
 })
 
 test_that("a different reported numSamp is logged, not used", {
@@ -68,7 +68,7 @@ test_that("a different reported numSamp is logged, not used", {
   h$FOnumSamp[1:2] <- 3
   f <- computeStageFactors(h, id = "FOid", by = c("FTid", "FOstratumName"),
                            total = "FOnumTotal", numSamp = "FOnumSamp")
-  expect_equal(f[FOid == 1, factor], 6 / 2)
+  expect_equal(f[FOid == 1, fStage], 6 / 2)
   expect_true(any(grepl("differs from 'FOnumSamp'",
                         getRatioLog(f)$message)))
 })
@@ -218,8 +218,8 @@ test_that("count raising with no DE ratio equals the hand-computed expansion", {
   res <- estimate(sim$obj, sc)
   sw <- res$samples
   # VS 8 / 4, FT 2 / 2, FO 4 / 2
-  expect_true(all(sw[include == TRUE, w] == 4))
-  hand <- merge(res$fishBySample, sw[, .(SAid, w)], by = "SAid")[, sum(w * yN)]
+  expect_true(all(sw[include == TRUE, wStages] == 4))
+  hand <- merge(res$fishBySample, sw[, .(SAid, w = wStages)], by = "SAid")[, sum(w * yN)]
   expect_equal(sum(res$estimates$N), hand)
   expect_true(any(grepl("selection method", res$log$message)))
 })
@@ -231,7 +231,7 @@ test_that("aux raising adds the sampled weights up to the aux total", {
                       VS = stageRaising("aux"))
   res <- estimate(sim$obj, sc)
   sw <- res$samples[include == TRUE]
-  expect_equal(sum(sw$w * sw$x), unique(sim$obj$VS$VSauxVarTot))
+  expect_equal(sum(sw$wStages * sw$xSample), unique(sim$obj$VS$VSauxVarTot))
 })
 
 test_that("counting hauls removes the bias of pooling under unequal sampling", {
@@ -269,8 +269,8 @@ test_that("a DE ratio on trips keeps trips without the species in the sum", {
   scSA <- raisingScheme(DE = deRaising("ratio"))
   rFT <- estimate(obj, scFT)
   rSA <- estimate(obj, scSA)
-  expect_equal(rFT$ratios$DE$sumWX, sum(obj$FT$FTauxVarValue))
-  expect_lt(rSA$ratios$DE$sumWX, sum(obj$FT$FTauxVarValue))
+  expect_equal(rFT$ratios$DE$xWeightedStratum, sum(obj$FT$FTauxVarValue))
+  expect_lt(rSA$ratios$DE$xWeightedStratum, sum(obj$FT$FTauxVarValue))
   expect_true(any(grepl("counted as zero catch", rFT$log$message)))
 })
 

@@ -47,7 +47,7 @@ sampled units of the group, compared with the observed number.}
 \value{
 A \code{data.table} with one row per sampled unit: \code{id}, the \code{by}
 columns, \code{n} (sampled units in the group), \code{total}, \code{sumValue} and
-\code{factor}. The log is attached as attribute \code{"ratioLog"}.
+\code{fStage}. The log is attached as attribute \code{"ratioLog"}.
 }
 \description{
 The engine behind stage-wise raising (see \code{\link[=raisingScheme]{raisingScheme()}}). Works on a

@@ -7,7 +7,7 @@
 #' computes a factor per sampled unit within parent x stratum
 #' ([computeStageFactors()]). The factors are multiplied down the hierarchy,
 #' so every unit gets a cumulative weight, and every lowest-level SA gets
-#' `w`, the product of the stage factors (for example
+#' `wStages`, the product of the stage factors (for example
 #' `f_VS * f_FT * f_FO`. SS is always 1).
 #'
 #' The stages come from the data: in hierarchy 5, FT is a stage when the SS
@@ -42,10 +42,10 @@
 #'   hierarchy as the data.
 #' @param verbose Logical. Print log entries as messages. Default `FALSE`.
 #'
-#' @return `sampleUnits` with the columns `f_XX` (one per stage), `w`, `DEid`
+#' @return `sampleUnits` with the columns `f_XX` (one per stage), `wStages`, `DEid`
 #'   and `DEstratumName` added. Attributes: `"unitWeights"`, a list with one
-#'   table per stage (unit id, ancestor ids, `factor` and cumulative weight
-#'   `wUnit` of every sampled unit), `"scheme"` and `"ratioLog"`.
+#'   table per stage (unit id, ancestor ids, `fStage` and cumulative weight
+#'   `wCumulative` of every sampled unit), `"scheme"` and `"ratioLog"`.
 #' @seealso [raisingScheme()], [raiseToDE()]
 #' @export
 getStageWeights <- function(RDBESDataObj, sampleUnits, scheme,
@@ -254,13 +254,13 @@ getStageWeights <- function(RDBESDataObj, sampleUnits, scheme,
     keep <- intersect(c(idCol, parentId, paste0(stages, "id"), "SDid", "DEid",
                         "DEstratumName"), names(units))
     uw <- merge(units[sampled == TRUE, keep, with = FALSE],
-                f[, c(idCol, "factor"), with = FALSE], by = idCol)
+                f[, c(idCol, "fStage"), with = FALSE], by = idCol)
     if (is.null(prevW)) {
-      uw[, wUnit := factor]
+      uw[, wCumulative := fStage]
     } else {
-      uw <- merge(uw, prevW[, c(parentId, "wUnit"), with = FALSE],
+      uw <- merge(uw, prevW[, c(parentId, "wCumulative"), with = FALSE],
                   by = parentId)
-      uw[, wUnit := factor * wUnit]
+      uw[, wCumulative := fStage * wCumulative]
     }
     unitWeights[[tb]] <- uw
     prevW <- uw
@@ -271,13 +271,13 @@ getStageWeights <- function(RDBESDataObj, sampleUnits, scheme,
   for (tb in stages) {
     idCol <- paste0(tb, "id")
     uw <- unitWeights[[tb]]
-    su[, (paste0("f_", tb)) := uw$factor[match(su[[idCol]], uw[[idCol]])]]
+    su[, (paste0("f_", tb)) := uw$fStage[match(su[[idCol]], uw[[idCol]])]]
   }
   lw <- unitWeights[[lowest]]
   m <- match(su[[lowId]], lw[[lowId]])
-  su[, `:=`(w = lw$wUnit[m], DEid = lw$DEid[m],
+  su[, `:=`(wStages = lw$wCumulative[m], DEid = lw$DEid[m],
             DEstratumName = lw$DEstratumName[m])]
-  noW <- su[include == TRUE & is.na(w), .N]
+  noW <- su[include == TRUE & is.na(wStages), .N]
   if (noW > 0) {
     stop(step, ": ", noW, " included sample(s) sit under units that are not ",
          "sampled (XXsamp = \"N\" or no records below). Check the upper ",

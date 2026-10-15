@@ -43,7 +43,7 @@ Raising goes the other way:
     quarter and métier, with strata you choose.
 
 The factors of all stages are multiplied, so each sample gets one weight
-`w`. The estimate of numbers at age is the sum of `w` times the numbers
+`wStages`. The estimate of numbers at age is the sum of `wStages` times the numbers
 at age in the samples.
 
 The same functions work for hierarchy 5 (onshore sampling), see
@@ -119,6 +119,11 @@ measured and $f_k$ the within-sample factor of `sampleRaising()`. The
 auxiliary is scaled the same way, $x_k = f_k \, m_k$, so the ratio
 compares like with like.
 
+In the output, $f_k$ is `fSample`, $x_k$ is `xSample` and $w_k$ is
+`wStages` (all in `res$samples`), $r_H$ is `rDE` (in `res$ratios$DE`),
+$r_g$ is `rTotals` (in `res$ratios$totals`) and $y_{k,a}$ is `yN` (in
+`res$fishBySample`).
+
 With your own totals (`totalsRaising()`), a second ratio follows per
 totals stratum $g$:
 
@@ -184,11 +189,11 @@ run on its own to inspect what happens.
 
 **1. Sample units.** One row per lowest-level SA (the SA with no
 sub-sample below it), with its path through the hierarchy, its domain,
-the raising factor within the sample and its live weight `x` (kg).
+the factor within the sample `fSample` and its live weight `xSample` (kg).
 
 ```{r}
 su <- getSampleUnits(obj, species = 127143)
-head(su[, .(SAid, FOid, FTid, VSid, quarter, area, raiseFactor, x, include)])
+head(su[, .(SAid, FOid, FTid, VSid, quarter, area, fSample, xSample, include)])
 ```
 
 **2. Expansion within the sample.** Numbers (and weights and lengths) at
@@ -196,7 +201,7 @@ age of each sample, raised to the catch fraction it represents.
 
 ```{r}
 ex <- expandWithinSample(obj, su, target = "Age")
-head(ex[, .(SAid, class, yN, yW)])
+head(ex[, .(SAid, class, yN, yW_g)])
 ```
 
 **3. Unit tables and stage factors.** `getUnitTable()` returns all units
@@ -209,7 +214,7 @@ hauls <- getUnitTable(obj, "FO")
 head(hauls[, .(FOid, FTid, FOstratumName, FOnumTotal, FOnumSamp, sampled)])
 f <- computeStageFactors(hauls, id = "FOid", by = c("FTid", "FOstratumName"),
                          total = "FOnumTotal", sampled = "sampled")
-unique(f[, .(FTid, n, total, factor)])
+unique(f[, .(FTid, n, total, fStage)])
 ```
 
 Trips of the young vessels have 1 sampled haul out of 6, so each sampled
@@ -217,11 +222,11 @@ haul counts 6 times. Trips of the old vessels have all hauls sampled, so
 the factor is 1.
 
 **4. Stage weights.** The factors of all stages, multiplied into one
-weight `w` per sample.
+weight `wStages` per sample.
 
 ```{r}
 sw <- getStageWeights(obj, su, scheme)
-unique(sw[, .(VSid, FTid, f_VS, f_FT, f_FO, w)])
+unique(sw[, .(VSid, FTid, f_VS, f_FT, f_FO, wStages)])
 ```
 
 **5. Raising to the DE stratum.** Weighted sums per DE stratum, domain
@@ -230,7 +235,7 @@ ratio when the scheme has totals).
 
 ```{r}
 raised <- raiseToDE(ex, sw, obj)
-attr(raised, "deRatios")
+attr(raised, "deRatios")   # rDE = total / xWeightedStratum
 ```
 
 **6. Summary.** Numbers, mean weight and mean length per domain and age,
@@ -464,7 +469,7 @@ scheme, for example:
     strata when that is too coarse.
 -   Totals strata without samples are not raised. Borrowing from a
     coarser stratum is not automatic.
--   `X_kg` in `res$domains` is the estimated live weight of the species
+-   `liveWeightEst_kg` in `res$domains` is the estimated live weight of the species
     from the sample weights. SOP therefore compares the raised fish
     weights with the raised sample weights. A value of 1 does not prove
     the weights are right.

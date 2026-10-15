@@ -58,22 +58,22 @@ hierarchy 1, \code{OSid}, \code{LEid}, optionally \code{FTid}, and \code{SSid} i
 hierarchy 5) with
 the selection method, its design class (\code{\link[=classifySelectionMethod]{classifySelectionMethod()}}),
 stratum, \code{numTotal} and \code{numSamp} of every stage,
-\item the SA sub-sample tree: \code{topSAid}, \code{SAlevel} and \code{raiseFactor}, the
+\item the SA sub-sample tree: \code{topSAid}, \code{SAlevel} and \code{fSample}, the
 product of the within-sample factors from the lowest-level SA up to the
 top SA (see \code{withinSample}),
 \item the domain variables \code{year}, \code{quarter}, \code{month}, \code{area}, \code{statRect} and
 \code{metier6},
-\item \code{x}, the live weight (kg) of the catch fraction the lowest-level SA
-represents: the sampled live weight times \code{raiseFactor}. This is the
+\item \code{xSample}, the live weight (kg) of the catch fraction the lowest-level SA
+represents: the sampled live weight times \code{fSample}. This is the
 default auxiliary variable of the ratio estimators.
 \item \code{include} and \code{excludeReason}.
 }
 
 \strong{Within-sample factor.} With \code{sampleRaising("weight")} (default) each SA
 record gives \code{SAtotalWtMes / SAsampWtMes}, with \code{"count"}
-\code{SAnumTotal / SAnumSamp}, and with \code{"none"} 1. With \code{"weight"}, \code{x} is the
+\code{SAnumTotal / SAnumSamp}, and with \code{"none"} 1. With \code{"weight"}, \code{xSample} is the
 live total weight of the top-level SA fraction. With \code{"count"} and
-\code{"none"}, \code{x} is \code{raiseFactor} times the live sampled weight of the
+\code{"none"}, \code{xSample} is \code{fSample} times the live sampled weight of the
 lowest-level SA (\code{SAsampWtMes}), and may be missing when that is not
 filled. It is only needed when the DE or totals ratio uses
 \code{"speciesLiveWeight"}.

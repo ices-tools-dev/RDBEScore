@@ -13,21 +13,21 @@
 #'   hierarchy 5) with
 #'   the selection method, its design class ([classifySelectionMethod()]),
 #'   stratum, `numTotal` and `numSamp` of every stage,
-#' * the SA sub-sample tree: `topSAid`, `SAlevel` and `raiseFactor`, the
+#' * the SA sub-sample tree: `topSAid`, `SAlevel` and `fSample`, the
 #'   product of the within-sample factors from the lowest-level SA up to the
 #'   top SA (see `withinSample`),
 #' * the domain variables `year`, `quarter`, `month`, `area`, `statRect` and
 #'   `metier6`,
-#' * `x`, the live weight (kg) of the catch fraction the lowest-level SA
-#'   represents: the sampled live weight times `raiseFactor`. This is the
+#' * `xSample`, the live weight (kg) of the catch fraction the lowest-level SA
+#'   represents: the sampled live weight times `fSample`. This is the
 #'   default auxiliary variable of the ratio estimators.
 #' * `include` and `excludeReason`.
 #'
 #' **Within-sample factor.** With `sampleRaising("weight")` (default) each SA
 #' record gives `SAtotalWtMes / SAsampWtMes`, with `"count"`
-#' `SAnumTotal / SAnumSamp`, and with `"none"` 1. With `"weight"`, `x` is the
+#' `SAnumTotal / SAnumSamp`, and with `"none"` 1. With `"weight"`, `xSample` is the
 #' live total weight of the top-level SA fraction. With `"count"` and
-#' `"none"`, `x` is `raiseFactor` times the live sampled weight of the
+#' `"none"`, `xSample` is `fSample` times the live sampled weight of the
 #' lowest-level SA (`SAsampWtMes`), and may be missing when that is not
 #' filled. It is only needed when the DE or totals ratio uses
 #' `"speciesLiveWeight"`.
@@ -187,12 +187,12 @@ getSampleUnits <- function(RDBESDataObj,
     cur[has] <- idx[cur[has]]
   }
   sa[, notSampledInTree := notSampled]
-  sa[, raiseFactor := ancFactor * fNode]
+  sa[, fSample := ancFactor * fNode]
   if (wsMethod == "weight") {
-    sa[, x := WliveNode * ancFactor / 1000]
+    sa[, xSample := WliveNode * ancFactor / 1000]
   } else {
-    # x = f x m, with m the live sampled weight of this SA
-    sa[, x := raiseFactor * as.numeric(SAsampWtMes) * convFac / 1000]
+    # xSample = f x m, with m the live sampled weight of this SA
+    sa[, xSample := fSample * as.numeric(SAsampWtMes) * convFac / 1000]
   }
 
   # Top-level SA and sub-sample level, as in createRDBESEstObject()
@@ -321,10 +321,10 @@ getSampleUnits <- function(RDBESDataObj,
   su[is.na(excludeReason) & SAlowHierarchy == "D",
      excludeReason := "lower hierarchy D (no measurements)"]
   if (wsMethod == "weight") {
-    su[is.na(excludeReason) & (is.na(raiseFactor) | is.na(x)),
+    su[is.na(excludeReason) & (is.na(fSample) | is.na(xSample)),
        excludeReason := "missing SAtotalWtMes or SAsampWtMes in the SA tree"]
   } else if (wsMethod == "count") {
-    su[is.na(excludeReason) & is.na(raiseFactor),
+    su[is.na(excludeReason) & is.na(fSample),
        excludeReason := "missing SAnumTotal or SAnumSamp in the SA tree"]
   }
   # Measured SA without fish records would add weight to the auxiliary total
@@ -364,7 +364,7 @@ getSampleUnits <- function(RDBESDataObj,
             "SAlowHierarchy", "SAspeCodeFAO", "SAspeCode", "SAcatchCat",
             "SApres", "SAconFacMeasLive",
             "year", "quarter", "month", "area", "statRect", "metier6",
-            "raiseFactor", "x", "include", "excludeReason")
+            "fSample", "xSample", "include", "excludeReason")
   keep <- unique(intersect(keep, names(su)))
   out <- su[, keep, with = FALSE]
   data.table::setorder(out, SAid)

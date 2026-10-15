@@ -3,7 +3,7 @@
 #' Second step of the ratio estimation workflow (see [doRatioEstimation()]).
 #' For every included lowest-level SA from [getSampleUnits()] the length or age
 #' composition measured in FM and BV is expanded to the catch fraction of the
-#' top-level SA, using the sample's `raiseFactor`. Nothing is raised to the
+#' top-level SA, using the sample's `fSample`. Nothing is raised to the
 #' population yet.
 #'
 #' **By lower hierarchy**
@@ -47,8 +47,8 @@
 #'
 #' @return A `data.table` with one row per lowest-level SA (`SAid`) and class:
 #'   `class` (age in years, or length class lower bound in mm), `yN` (numbers),
-#'   `yNW` (numbers with a weight), `yW` (live weight, g), `yNL` (numbers
-#'   with a length), `yL` (sum of lengths, mm), all expanded to the catch
+#'   `yNW` (numbers with a weight), `yW_g` (live weight, g), `yNL` (numbers
+#'   with a length), `yL_mm` (sum of lengths, mm), all expanded to the catch
 #'   fraction, and `nFish` (fish actually measured or aged in that class).
 #'   Attributes: `"target"`, `"classWidth"` and the log `"ratioLog"`.
 #' @seealso [getSampleUnits()], [getStageWeights()]
@@ -69,7 +69,7 @@ expandWithinSample <- function(RDBESDataObj,
   log <- newRatioLog()
 
   su <- sampleUnits[include == TRUE,
-                    .(SAid, SAlowHierarchy, raiseFactor, SApres,
+                    .(SAid, SAlowHierarchy, fSample, SApres,
                       conv = as.numeric(SAconFacMeasLive))]
   su[is.na(conv), conv := 1]
   if (nrow(su) == 0) stop("No included sample units.", call. = FALSE)
@@ -119,7 +119,7 @@ expandWithinSample <- function(RDBESDataObj,
   if (nrow(fm) > 0) {
     fm[, lengthClass := toClass(as.numeric(FMclassMeas))]
     fm[, midLength := as.numeric(FMclassMeas) + accMM / 2]
-    fm <- merge(fm, su[, .(SAid, raiseFactor)], by = "SAid")
+    fm <- merge(fm, su[, .(SAid, fSample)], by = "SAid")
   }
 
   # ---------------------------------------------------------------------------
@@ -148,7 +148,7 @@ expandWithinSample <- function(RDBESDataObj,
     pres <- bv[, .(BVpres = BVpres[1]), by = .(SAidFish, FMidFish, BVfishId)]
     fish <- merge(fish, pres, by = c("SAidFish", "FMidFish", "BVfishId"))
     data.table::setnames(fish, "SAidFish", "SAid")
-    fish <- merge(fish, su[, .(SAid, SAlowHierarchy, raiseFactor, SApres,
+    fish <- merge(fish, su[, .(SAid, SAlowHierarchy, fSample, SApres,
                                conv)], by = "SAid")
     numCol <- function(col) {
       if (col %in% names(fish)) suppressWarnings(as.numeric(fish[[col]]))
@@ -199,7 +199,7 @@ expandWithinSample <- function(RDBESDataObj,
   if (is.null(fish)) {
     fish <- data.table::data.table(SAid = numeric(0), FMidFish = integer(0),
                                    SAlowHierarchy = character(0),
-                                   raiseFactor = numeric(0), age = numeric(0),
+                                   fSample = numeric(0), age = numeric(0),
                                    len = numeric(0), wt = numeric(0),
                                    lengthClass = numeric(0))
   }
@@ -211,8 +211,8 @@ expandWithinSample <- function(RDBESDataObj,
   }
   emptyOut <- data.table::data.table(SAid = numeric(0), class = numeric(0),
                                      yN = numeric(0), yNW = numeric(0),
-                                     yW = numeric(0), yNL = numeric(0),
-                                     yL = numeric(0), nFish = numeric(0))
+                                     yW_g = numeric(0), yNL = numeric(0),
+                                     yL_mm = numeric(0), nFish = numeric(0))
   pieces <- list(emptyOut)
 
   if (target == "Length") {
@@ -220,7 +220,7 @@ expandWithinSample <- function(RDBESDataObj,
     fmAB <- fm[SAid %in% su[SAlowHierarchy %in% c("A", "B"), SAid]]
     if (nrow(fmAB) > 0) {
       lf <- fmAB[, .(n = sum(FMnumAtUnit), sMid = sum(FMnumAtUnit * midLength),
-                     f = raiseFactor[1]), by = .(SAid, lengthClass)]
+                     f = fSample[1]), by = .(SAid, lengthClass)]
       mw <- fishSums(fish[SAlowHierarchy == "A" & !is.na(lengthClass)],
                      c("SAid", "lengthClass"))
       lf <- merge(lf, mw[, .(SAid, lengthClass, nW, sW)],
@@ -230,8 +230,8 @@ expandWithinSample <- function(RDBESDataObj,
       pieces[[length(pieces) + 1L]] <- lf[, .(
         SAid, class = lengthClass, yN = f * n,
         yNW = data.table::fifelse(is.na(meanW), 0, f * n),
-        yW = data.table::fifelse(is.na(meanW), 0, f * n * meanW),
-        yNL = f * n, yL = f * sMid, nFish = n)]
+        yW_g = data.table::fifelse(is.na(meanW), 0, f * n * meanW),
+        yNL = f * n, yL_mm = f * sMid, nFish = n)]
       noW <- lf[is.na(meanW), sum(n)]
       if (useWeights && noW > 0) {
         log <- addToRatioLog(log, step, "info",
@@ -251,11 +251,11 @@ expandWithinSample <- function(RDBESDataObj,
       }
       s <- fishSums(fc[!is.na(lengthClass)], c("SAid", "lengthClass"))
       s <- merge(s, tot, by = "SAid")
-      s <- merge(s, su[, .(SAid, f = raiseFactor)], by = "SAid")
+      s <- merge(s, su[, .(SAid, f = fSample)], by = "SAid")
       s[, k := f * nAll / nHas]
       pieces[[length(pieces) + 1L]] <- s[, .(
-        SAid, class = lengthClass, yN = k * n, yNW = k * nW, yW = k * sW,
-        yNL = k * nL, yL = k * sL, nFish = n)]
+        SAid, class = lengthClass, yN = k * n, yNW = k * nW, yW_g = k * sW,
+        yNL = k * nL, yL_mm = k * sL, nFish = n)]
     }
   } else {
     # ---- LH C: ages directly -------------------------------------------------
@@ -270,17 +270,17 @@ expandWithinSample <- function(RDBESDataObj,
       }
       s <- fishSums(fc[!is.na(age)], c("SAid", "age"))
       s <- merge(s, tot[nAged > 0], by = "SAid")
-      s <- merge(s, su[, .(SAid, f = raiseFactor)], by = "SAid")
+      s <- merge(s, su[, .(SAid, f = fSample)], by = "SAid")
       s[, k := f * nAll / nAged]
       pieces[[length(pieces) + 1L]] <- s[, .(
-        SAid, class = age, yN = k * n, yNW = k * nW, yW = k * sW,
-        yNL = k * nL, yL = k * sL, nFish = n)]
+        SAid, class = age, yN = k * n, yNW = k * nW, yW_g = k * sW,
+        yNL = k * nL, yL_mm = k * sL, nFish = n)]
     }
 
     # ---- LH A: sample ALK ----------------------------------------------------
     suA <- su[SAlowHierarchy == "A", SAid]
     if (length(suA) > 0 && nrow(fm) > 0) {
-      lfA <- fm[SAid %in% suA, .(n = sum(FMnumAtUnit), f = raiseFactor[1]),
+      lfA <- fm[SAid %in% suA, .(n = sum(FMnumAtUnit), f = fSample[1]),
                 by = .(SAid, lengthClass)]
       aged <- fish[SAlowHierarchy == "A" & !is.na(age) & !is.na(lengthClass)]
       alk <- fishSums(aged, c("SAid", "lengthClass", "age"))
@@ -289,8 +289,8 @@ expandWithinSample <- function(RDBESDataObj,
       own <- merge(lfA, alk, by = c("SAid", "lengthClass"))
       pieces[[length(pieces) + 1L]] <- own[, .(
         SAid, class = age, yN = f * n * m / mTot, yNW = f * n * nW / mTot,
-        yW = f * n * sW / mTot, yNL = f * n * nL / mTot,
-        yL = f * n * sL / mTot, nFish = m)]
+        yW_g = f * n * sW / mTot, yNL = f * n * nL / mTot,
+        yL_mm = f * n * sL / mTot, nFish = m)]
 
       gaps <- lfA[!alk, on = .(SAid, lengthClass)]
       if (nrow(gaps) > 0 && ageRoute == "sampleFillPooled") {
@@ -299,7 +299,7 @@ expandWithinSample <- function(RDBESDataObj,
         wA[, mL := .N, by = .(SAid, lengthClass)]
         wA[, rep := f * n / mL]
         wC <- fish[SAlowHierarchy == "C" & !is.na(age) & !is.na(lengthClass)]
-        if (nrow(wC) > 0) wC[, rep := raiseFactor]
+        if (nrow(wC) > 0) wC[, rep := fSample]
         pool <- data.table::rbindlist(list(
           wA[, .(lengthClass, age, wt, len, rep)],
           if (nrow(wC) > 0) wC[, .(lengthClass, age, wt, len, rep)]))
@@ -313,8 +313,8 @@ expandWithinSample <- function(RDBESDataObj,
         filled <- merge(gaps, pk, by = "lengthClass", allow.cartesian = TRUE)
         pieces[[length(pieces) + 1L]] <- filled[, .(
           SAid, class = age, yN = f * n * r / rTot,
-          yNW = f * n * rW / rTot, yW = f * n * sW / rTot,
-          yNL = f * n * rL / rTot, yL = f * n * sL / rTot, nFish = 0)]
+          yNW = f * n * rW / rTot, yW_g = f * n * sW / rTot,
+          yNL = f * n * rL / rTot, yL_mm = f * n * sL / rTot, nFish = 0)]
         log <- addToRatioLog(log, step, "assumption",
           "LH A length classes without aged fish filled from the pooled ALK",
           nrow(gaps[lengthClass %in% pk$lengthClass]), verbose)
@@ -344,15 +344,15 @@ expandWithinSample <- function(RDBESDataObj,
         if (!"meanLength" %in% names(ext)) {
           ext[, meanLength := lengthClass + classWidth / 2]
         }
-        lfB <- fm[SAid %in% suB, .(n = sum(FMnumAtUnit), f = raiseFactor[1]),
+        lfB <- fm[SAid %in% suB, .(n = sum(FMnumAtUnit), f = fSample[1]),
                   by = .(SAid, lengthClass)]
         e <- merge(lfB, ext, by = "lengthClass", allow.cartesian = TRUE)
         pieces[[length(pieces) + 1L]] <- e[, .(
           SAid, class = age, yN = f * n * prop,
           yNW = data.table::fifelse(is.na(meanWeight), 0, f * n * prop),
-          yW = data.table::fifelse(is.na(meanWeight), 0,
+          yW_g = data.table::fifelse(is.na(meanWeight), 0,
                                    f * n * prop * meanWeight),
-          yNL = f * n * prop, yL = f * n * prop * meanLength, nFish = 0)]
+          yNL = f * n * prop, yL_mm = f * n * prop * meanLength, nFish = 0)]
         lost <- lfB[!lengthClass %in% ext$lengthClass, sum(f * n)]
         log <- addToRatioLog(log, step, "assumption",
           "LH B ages from externalALK: assumed to represent the same population",
@@ -367,8 +367,8 @@ expandWithinSample <- function(RDBESDataObj,
   }
 
   out <- data.table::rbindlist(pieces, use.names = TRUE)
-  out <- out[, .(yN = sum(yN), yNW = sum(yNW), yW = sum(yW), yNL = sum(yNL),
-                 yL = sum(yL), nFish = sum(nFish)), by = .(SAid, class)]
+  out <- out[, .(yN = sum(yN), yNW = sum(yNW), yW_g = sum(yW_g), yNL = sum(yNL),
+                 yL_mm = sum(yL_mm), nFish = sum(nFish)), by = .(SAid, class)]
   data.table::setorder(out, SAid, class)
 
   noData <- setdiff(su$SAid, out$SAid)

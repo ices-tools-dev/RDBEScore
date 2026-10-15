@@ -32,8 +32,8 @@ test_that("weight is the default and keeps x as the total live weight", {
   sim <- simS(lowHierarchy = "C", boxFish = 20)
   su <- unitsS(sim$obj, "weight")
   sa <- sim$obj$SA[match(su$SAid, SAid)]
-  expect_equal(su$raiseFactor, sa$SAtotalWtMes / sa$SAsampWtMes)
-  expect_equal(su$x, sa$SAtotalWtMes / 1000)
+  expect_equal(su$fSample, sa$SAtotalWtMes / sa$SAsampWtMes)
+  expect_equal(su$xSample, sa$SAtotalWtMes / 1000)
   expect_equal(attr(su, "withinSample"), "weight")
 })
 
@@ -41,8 +41,8 @@ test_that("none gives factor 1 and x = sampled live weight", {
   sim <- simS(lowHierarchy = "C", boxFish = 20)
   su <- unitsS(sim$obj, "none")
   sa <- sim$obj$SA[match(su$SAid, SAid)]
-  expect_true(all(su$raiseFactor == 1))
-  expect_equal(su$x, sa$SAsampWtMes / 1000)
+  expect_true(all(su$fSample == 1))
+  expect_equal(su$xSample, sa$SAsampWtMes / 1000)
   ex <- suppressWarnings(expandWithinSample(sim$obj, su, target = "Age"))
   # f = 1: the numbers are the fish measured
   expect_equal(ex[, sum(yN)], sum(fishOfSA(sim$obj)$n))
@@ -58,8 +58,8 @@ test_that("count gives SAnumTotal / SAnumSamp and x = f x sampled weight", {
   obj$SA[, SAnumSamp := 20]
   su <- unitsS(obj, "count")
   sa <- obj$SA[match(su$SAid, SAid)]
-  expect_equal(su$raiseFactor, sa$SAnumTotal / 20)
-  expect_equal(su$x, su$raiseFactor * sa$SAsampWtMes / 1000)
+  expect_equal(su$fSample, sa$SAnumTotal / 20)
+  expect_equal(su$xSample, su$fSample * sa$SAsampWtMes / 1000)
   # without the counts the samples are excluded with a clear reason
   su2 <- unitsS(sim$obj, "count")
   expect_true(all(!su2$include))
@@ -81,7 +81,7 @@ test_that("fishWeight with factor none is direct raising on the fish weights", {
   res <- estS(obj, sc)
   fs <- fishOfSA(obj)
   sumKg <- sum(fs$wt) / 1000
-  expect_equal(res$ratios$DE$sumWX, sumKg)
+  expect_equal(res$ratios$DE$xWeightedStratum, sumKg)
   # N_a = T x n_a / sum of fish weights (kg)
   ages <- obj$BV[BVtypeMeas == "Age", .(n = .N),
                  by = .(age = as.numeric(BVvalueMeas))]
@@ -97,7 +97,7 @@ test_that("fishCount uses the number of fish as x", {
   sc <- raisingScheme(SA = sampleRaising("none"),
                       DE = deRaising("ratio", value = "fishCount"))
   res <- estS(sim$obj, sc)
-  expect_equal(res$ratios$DE$sumWX,
+  expect_equal(res$ratios$DE$xWeightedStratum,
                sum(fishOfSA(sim$obj)$n))
   # the estimated numbers then add up to the DE total
   expect_equal(sum(res$estimates$N), sim$obj$DE$DEauxVarTot)
@@ -117,7 +117,7 @@ test_that("fishWeight gives fish without a weight the sample mean weight", {
   nAll <- obj$BV[BVtypeMeas == "Age", .N, by = SAid]
   fs[, n := nAll$N[match(SAid, nAll$SAid)]]
   fs[SAid == sa1, wt := wt * 20 / 15]
-  expect_equal(res$ratios$DE$sumWX, sum(fs$wt) / 1000)
+  expect_equal(res$ratios$DE$xWeightedStratum, sum(fs$wt) / 1000)
 })
 
 test_that("values measured on the samples need at = SA", {

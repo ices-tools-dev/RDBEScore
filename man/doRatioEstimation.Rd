@@ -87,7 +87,7 @@ estimated live weight, the factor applied, SOP and sample counts.
 \item \code{ratios}: a list with \code{DE} (one row per DE stratum) and \code{totals} (one
 row per totals stratum, \code{NULL} without totals), from \code{\link[=raiseToDE]{raiseToDE()}}.
 \item \code{samples}: one row per lowest-level SA, from \code{\link[=getStageWeights]{getStageWeights()}}:
-ids, domain, inclusion, the factors and \code{w} first, the design
+ids, domain, inclusion, the factors and \code{wStages} first, the design
 columns copied from the data last.
 \item \code{stageUnits}: a list with one table per stage, one row per sampled
 unit with its factor, from \code{\link[=getStageWeights]{getStageWeights()}}.
@@ -113,10 +113,10 @@ returned in the result:
 \enumerate{
 \item \code{\link[=checkRDBESCodes]{checkRDBESCodes()}}: coded fields against the live ICES code lists.
 \item \code{\link[=getSampleUnits]{getSampleUnits()}}: one row per lowest-level SA with its path, design
-classes, domain, raising factor and live weight \code{x}.
+classes, domain, within-sample factor \code{fSample} and live weight \code{xSample}.
 \item \code{\link[=expandWithinSample]{expandWithinSample()}}: FM/BV composition expanded to the sampled catch
 fraction (lower hierarchies A, B and C).
-\item \code{\link[=getStageWeights]{getStageWeights()}}: the factor of every stage and the weight \code{w} of
+\item \code{\link[=getStageWeights]{getStageWeights()}}: the factor of every stage and the weight \code{wStages} of
 each lowest-level SA.
 \item \code{\link[=raiseToDE]{raiseToDE()}}: weighted sums per DE stratum and domain, with the DE
 ratio (optional).

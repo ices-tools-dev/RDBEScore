@@ -30,19 +30,28 @@ tables of \code{at}).}
 \item{verbose}{Logical. Print log entries as messages. Default \code{FALSE}.}
 }
 \value{
-A \code{data.table} with the domain
-variables, \code{stratum} (the DE stratum, not when there are totals),
-\code{class}, raised \code{N}, \code{NW}, \code{W}, \code{NL}, \code{L}, \code{nFish}, and \code{sumX}
-(weighted sample live weight, kg), \code{X} (estimated live weight, kg) and
-\code{ratio} (DE ratio, 1 for \code{"none"}, or the combined factor with totals).
-Attributes: \code{"deRatios"}, \code{"totalsRatios"} (\code{NULL} without totals),
-\code{"domainSummary"}, \code{"target"}, \code{"domainVars"} and \code{"ratioLog"}.
+A \code{data.table} with one row per domain, DE stratum and class: the
+domain variables, \code{DEstratumName} (not when there are totals), \code{class},
+the raised \code{N}, \code{NW} (numbers with a weight), \code{W_g}, \code{NL} (numbers with
+a length), \code{L_mm}, \code{nFish}, and \code{liveWeightSampled_kg} (sum of
+\code{wStages * xSample}, before the ratios), \code{liveWeightEst_kg} (after the
+ratios) and \code{rApplied} (the DE ratio, 1 for \code{"none"}, or the combined
+factor with totals). Attributes:
+\itemize{
+\item \code{"deRatios"}: one row per DE stratum, with \code{DEstratumName}, \code{rDE},
+\code{total} (the DE total) and \code{xWeightedStratum} (sum of w x over the
+stratum). Only \code{DEstratumName} and \code{rDE} for DE \code{"none"}.
+\item \code{"totalsRatios"}: one row per totals stratum, with the strata columns,
+\code{rTotals}, \code{total}, \code{xWeightedStratum} and \code{nUnits}. \code{NULL} without
+totals.
+\item \code{"domainSummary"}, \code{"target"}, \code{"domainVars"} and \code{"ratioLog"}.
+}
 }
 \description{
 Last raising step of stage-wise raising (see \code{\link[=raisingScheme]{raisingScheme()}}). Each
 expanded sample from \code{\link[=expandWithinSample]{expandWithinSample()}} is multiplied by its stage
-weight \code{w} from \code{\link[=getStageWeights]{getStageWeights()}}, and summed per DE stratum, domain and
-class:
+weight \code{wStages} from \code{\link[=getStageWeights]{getStageWeights()}}, and summed per DE stratum,
+domain and class:
 \deqn{\hat N_{d,a} = r_h \sum_{i \in d} w_i y_{i,a}}
 With DE \code{"none"}, \eqn{r_h = 1}. With DE \code{"ratio"},
 \eqn{r_h = T_h / \sum_{j \in h} w_j x_j} per DE stratum \eqn{h}, where
@@ -62,13 +71,13 @@ your table. Each sample is multiplied by \eqn{r_h r_g}. A totals stratum
 with sampled units but no total stops the run (usually codes that do not
 match). A total without sampled units is logged as a warning and not
 raised. The rows are then per domain and class, without the DE stratum,
-because totals strata can cut across DE strata, and \code{ratio} is the
-combined factor \eqn{X / sumX} of the domain.
+because totals strata can cut across DE strata, and \code{rApplied} is the
+combined factor \code{liveWeightEst_kg / liveWeightSampled_kg} of the domain.
 
-\code{X_kg} in the result is the \strong{estimated} live weight of the species per
-domain, \eqn{r_h \sum w x} with x the sampled live weight. The SOP check in
-\code{\link[=summariseRatioEstimates]{summariseRatioEstimates()}} then compares the raised fish weights with the
-raised sample weights.
+\code{liveWeightEst_kg} is the \strong{estimated} live weight of the species per
+domain, \eqn{r_h \sum w x} with x the sampled live weight (\code{xSample}).
+The SOP check in \code{\link[=summariseRatioDomains]{summariseRatioDomains()}} then compares the raised fish
+weights with the raised sample weights.
 }
 \seealso{
 \code{\link[=getStageWeights]{getStageWeights()}}, \code{\link[=summariseRatioEstimates]{summariseRatioEstimates()}}

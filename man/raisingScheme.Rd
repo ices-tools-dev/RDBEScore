@@ -37,7 +37,7 @@ An object of class \code{RDBESRaisingScheme}: a list with \code{SA},
 Combines the raising method of every sampling stage and of the DE step into
 one scheme for \code{\link[=doRatioEstimation]{doRatioEstimation()}}. Every stage gives each sampled unit
 a factor. The factors are multiplied along the path, so each lowest-level
-SA gets one weight \code{w}. Estimates are \eqn{\sum w y}, optionally followed
+SA gets one weight \code{wStages}. Estimates are \eqn{\sum w y}, optionally followed
 by the DE ratio.
 }
 \details{

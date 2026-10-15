@@ -60,8 +60,8 @@ test_that("on a census design the totals reproduce the truth", {
              by = c(keyT, "age"), all = TRUE, suffixes = c(".est", ".true"))
   m[is.na(N.est), N.est := 0]
   expect_equal(m$N.est, m$N.true, tolerance = 1e-6)
-  expect_false("stratum" %in% names(res$byStratum))
-  expect_true(all(abs(res$ratios$totals$ratio - 1) < 1e-9))
+  expect_false("DEstratumName" %in% names(res$byStratum))
+  expect_true(all(abs(res$ratios$totals$rTotals - 1) < 1e-9))
 })
 
 test_that("the totals ratio is T_g / sum(w x) per totals stratum", {
@@ -70,12 +70,12 @@ test_that("the totals ratio is T_g / sum(w x) per totals stratum", {
   sc <- raisingScheme(totals = totalsOf(tot))
   res <- estT(sim$obj, sc, domainVars = "quarter")
   sw <- res$samples[include == TRUE]
-  hand <- merge(res$fishBySample, sw[, .(SAid, w, x, quarter)], by = "SAid")
+  hand <- merge(res$fishBySample, sw[, .(SAid, w = wStages, x = xSample, quarter)], by = "SAid")
   hand <- hand[, .(y = sum(w * yN), sx = sum(unique(data.table::data.table(
     SAid, w, x))[, w * x])), by = quarter]
   hand <- merge(hand, tot, by = "quarter")
   est <- res$estimates[, .(N = sum(N)), by = quarter][
-    res$domains[, .(quarter, X = X_kg)], on = "quarter"]
+    res$domains[, .(quarter, X = liveWeightEst_kg)], on = "quarter"]
   est <- merge(est, hand, by = "quarter")
   expect_equal(est$N, est$y * est$kg / est$sx)
   # the estimated live weight adds up to the totals
@@ -89,7 +89,7 @@ test_that("DE then totals equals totals alone when strata nest in DE", {
   b <- estT(sim$obj, raisingScheme(FO = stageRaising("count"),
                                    DE = deRaising("ratio"), totals = tr))
   expect_equal(a$estimates$N, b$estimates$N)
-  expect_false(isTRUE(all.equal(b$ratios$DE$ratio, 1)))
+  expect_false(isTRUE(all.equal(b$ratios$DE$rDE, 1)))
 })
 
 test_that("DE ratios weight the DE strata within a totals stratum", {
@@ -115,10 +115,10 @@ test_that("DE ratios weight the DE strata within a totals stratum", {
   # hand: N_g = T_g * sum(r_h w y) / sum(r_h w x)
   sw <- res$samples[include == TRUE]
   rH <- res$ratios$DE
-  sw[, rh := rH$ratio[match(DEstratumName, rH$stratum)]]
-  y <- merge(res$fishBySample, sw[, .(SAid, quarter, rh, w)], by = "SAid")[
+  sw[, rh := rH$rDE[match(DEstratumName, rH$DEstratumName)]]
+  y <- merge(res$fishBySample, sw[, .(SAid, quarter, rh, w = wStages)], by = "SAid")[
     , .(y = sum(rh * w * yN)), by = quarter]
-  x <- sw[, .(sx = sum(rh * w * x)), by = quarter]
+  x <- sw[, .(sx = sum(rh * wStages * xSample)), by = quarter]
   hand <- merge(merge(y, x, by = "quarter"), tot, by = "quarter")
   est <- merge(res$estimates[, .(N = sum(N)), by = quarter], hand,
                by = "quarter")
@@ -198,8 +198,8 @@ test_that("totals at a stage keep units without the species in the sum", {
   hand <- ft[, .(sx = sum(FTauxVarValue)), by = quarter]
   tr <- merge(tr, hand[, .(quarter = as.character(quarter), sx)],
               by = "quarter")
-  expect_equal(tr$sumWX, tr$sx)
-  expect_equal(tr$ratio, rep(2, nrow(tr)))
+  expect_equal(tr$xWeightedStratum, tr$sx)
+  expect_equal(tr$rTotals, rep(2, nrow(tr)))
 })
 
 test_that("a stage unit with more than one stratum value stops", {
@@ -247,7 +247,7 @@ test_that("totals work in hierarchy 5, on samples and on landing events", {
     externalAux(tot, by = "quarter", col = "kg"), value = "LEauxVarValue",
     at = "LE"), hierarchy = 5)
   res2 <- estT(obj, sc2)
-  expect_equal(res2$ratios$totals$ratio,
+  expect_equal(res2$ratios$totals$rTotals,
                rep(1, nrow(tot)), tolerance = 1e-9)
 })
 

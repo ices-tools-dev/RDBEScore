@@ -13,10 +13,10 @@
 #'
 #' 1. [checkRDBESCodes()]: coded fields against the live ICES code lists.
 #' 2. [getSampleUnits()]: one row per lowest-level SA with its path, design
-#'    classes, domain, raising factor and live weight `x`.
+#'    classes, domain, within-sample factor `fSample` and live weight `xSample`.
 #' 3. [expandWithinSample()]: FM/BV composition expanded to the sampled catch
 #'    fraction (lower hierarchies A, B and C).
-#' 4. [getStageWeights()]: the factor of every stage and the weight `w` of
+#' 4. [getStageWeights()]: the factor of every stage and the weight `wStages` of
 #'    each lowest-level SA.
 #' 5. [raiseToDE()]: weighted sums per DE stratum and domain, with the DE
 #'    ratio (optional).
@@ -50,7 +50,7 @@
 #'   * `ratios`: a list with `DE` (one row per DE stratum) and `totals` (one
 #'     row per totals stratum, `NULL` without totals), from [raiseToDE()].
 #'   * `samples`: one row per lowest-level SA, from [getStageWeights()]:
-#'     ids, domain, inclusion, the factors and `w` first, the design
+#'     ids, domain, inclusion, the factors and `wStages` first, the design
 #'     columns copied from the data last.
 #'   * `stageUnits`: a list with one table per stage, one row per sampled
 #'     unit with its factor, from [getStageWeights()].
@@ -181,8 +181,8 @@ sampleColumnsFirst <- function(d) {
            grep("^[A-Z]{2}id$", names(d), value = TRUE))
   lead <- c(ids, "DEid", "DEstratumName",
             "year", "quarter", "month", "area", "statRect", "metier6",
-            "include", "excludeReason", "raiseFactor", "x",
-            grep("^f_[A-Z]{2}$", names(d), value = TRUE), "w")
+            "include", "excludeReason", "fSample", "xSample",
+            grep("^f_[A-Z]{2}$", names(d), value = TRUE), "wStages")
   lead <- unique(intersect(lead, names(d)))
   data.table::setcolorder(d, c(lead, setdiff(names(d), lead)))
   d
