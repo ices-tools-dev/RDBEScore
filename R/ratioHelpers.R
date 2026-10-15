@@ -48,7 +48,7 @@ ratioFieldCodeTypes <- function() {
 #' @keywords internal
 #' @noRd
 supportedHierarchies <- function() {
-  c(1L, 2L, 3L, 4L, 5L, 7L, 8L, 9L, 10L, 12L, 13L)
+  c(1L, 2L, 3L, 4L, 5L, 7L, 8L, 9L, 10L, 11L, 12L, 13L)
 }
 
 #' What stage-wise raising needs to know about one upper hierarchy
@@ -65,6 +65,9 @@ supportedHierarchies <- function() {
 #'   * `info`: tables that are not sampling units but describe the sample,
 #'     as a named list table = link columns in order of preference (LE under
 #'     SS in H7, under SA or SS in H9). Their columns can be domain sources.
+#'   * `linkStages`: tables on the path between SS and a stage that are not
+#'     sampling units (LE in H11). They are kept in the chain with factor 1
+#'     and cannot be named in a scheme.
 #'   * `dateCols`: date columns, in order of preference
 #'   * `areaCol`, `statRectCol`, `metierCol`: used when the SA value is
 #'     blank, in order of preference (none in H7 without LE)
@@ -135,6 +138,14 @@ hierarchySpec <- function(hierarchy) {
                areaCol = "LEarea", statRectCol = "LEstatRect",
                metierCol = "LEmetier6",
                unitLabels = c(LO = "nLocations", TE = "nTemporalEvents")),
+    # Locations, temporal events and trips. LE is a mandatory table between
+    # FT and SS but not a sampling unit: a link stage with factor 1
+    "11" = list(optional = character(0), linkStages = "LE",
+                dateCols = c("LEdate", "FTarvDate"),
+                areaCol = "LEarea", statRectCol = "LEstatRect",
+                metierCol = "LEmetier6",
+                unitLabels = c(LO = "nLocations", TE = "nTemporalEvents",
+                               FT = "nTrips", LE = "nLandingEvents")),
     # Locations, temporal events and the landing events in them
     "12" = list(optional = character(0),
                 dateCols = "LEdate",
@@ -156,6 +167,7 @@ hierarchySpec <- function(hierarchy) {
                 metierCol = "FOmetier6",
                 unitLabels = c(FO = "nHauls")))
   if (is.null(spec$info)) spec$info <- list()
+  if (is.null(spec$linkStages)) spec$linkStages <- character(0)
   c(list(hierarchy = h, stages = setdiff(chain, c("DE", "SD", "SS", "SA"))),
     spec)
 }

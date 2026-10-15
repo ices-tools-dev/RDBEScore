@@ -15,8 +15,8 @@ getSampleUnits(
 )
 }
 \arguments{
-\item{RDBESDataObj}{A valid \code{RDBESDataObject} of any hierarchy except 6
-and 11.}
+\item{RDBESDataObj}{A valid \code{RDBESDataObject} of any hierarchy except
+6.}
 
 \item{species}{Species to estimate, as AphiaID(s) (WoRMS), matched to
 \code{SAspeCode}, for example \code{127143} for plaice. Several values are allowed.
@@ -89,7 +89,8 @@ as suspicious.
 \code{FOendDate}, else \code{FOstartDate}, else \code{FTarvDate} (not in 13). In
 hierarchies 4 and 5: \code{LEdate}, else \code{FTarvDate} (in 5 when FT is used),
 else \code{OSsamDate}. In hierarchy 7: \code{LEdate}, else \code{OSsamDate}. In
-hierarchies 8, 9 and 12: \code{LEdate}. Area, rectangle and métier: the SA
+hierarchies 8, 9 and 12: \code{LEdate}. In hierarchy 11: \code{LEdate}, else
+\code{FTarvDate}. Area, rectangle and métier: the SA
 value when filled, else the FO value (hierarchies 1, 2, 3, 10 and 13) or
 the LE value (all others). TE (temporal event) and LO (location) give no
 domain.
@@ -118,7 +119,7 @@ B, no BV for C) are flagged \code{include = FALSE}. They add nothing to the
 estimate. A haul whose samples of the species are all excluded is treated
 as not sampled (non-response) by \code{\link[=getStageWeights]{getStageWeights()}}.
 
-All upper hierarchies except 6 and 11 are implemented. The object must
+All upper hierarchies except 6 are implemented. The object must
 hold one hierarchy. Clustering (\code{XXclustering} other than \code{"N"}) is
 logged. It does not affect the point estimates.
 }

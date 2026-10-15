@@ -46,7 +46,7 @@ The factors of all stages are multiplied, so each sample gets one weight
 `wStages`. The estimate of numbers at age is the sum of `wStages` times
 the numbers at age in the samples.
 
-The same functions work for all hierarchies except 6 and 11, see
+The same functions work for all hierarchies except 6, see
 [Hierarchy 2](#hierarchy-2), [Hierarchy 5](#hierarchy-5),
 [Hierarchy 7](#hierarchy-7), [Hierarchy 13](#hierarchy-13),
 [Temporal events](#temporal-events), [Hierarchy 4](#hierarchy-4) and
@@ -552,7 +552,7 @@ sc4 <- raisingScheme(OS = stageRaising("count"),
                      LE = stageRaising("count"), hierarchy = 4)
 ```
 
-## Locations: hierarchies 9 and 12 {#locations}
+## Locations: hierarchies 9, 11 and 12 {#locations}
 
 A location (LO) is a sampled place, for example a landing site. Below it
 are temporal events (TE). Like TE, LO is raised as any other stage and
@@ -561,7 +561,13 @@ gives no domain.
 | Hierarchy | Stages | Domains from |
 |---|---|---|
 | 12 | LO > TE > LE | LE |
+| 11 | LO > TE > FT, LE not raised | LE, else FT for the date |
 | 9 | LO > TE | LE linked to the sample |
+
+In hierarchy 11, LE is a mandatory table between FT and SS, but it is not
+a sampling unit. It is kept on the path with factor 1, so all sampled
+landing events of a trip together stand for the trip, and naming LE in
+the scheme stops.
 
 In hierarchy 9, SS hangs directly under TE. LE is not a sampling unit:
 it links to the sample (`LE$SAid`) and SS, and gives the date, area and
@@ -576,10 +582,13 @@ sc9 <- raisingScheme(LO = stageRaising("count"),
 sc12 <- raisingScheme(LO = stageRaising("count"),
                       TE = stageRaising("count"),
                       LE = stageRaising("count"), hierarchy = 12)
+sc11 <- raisingScheme(LO = stageRaising("count"),
+                      TE = stageRaising("count"),
+                      FT = stageRaising("count"), hierarchy = 11)
 ```
 
-There is no package data for hierarchies 4, 9 and 12. They are tested on
-simulated data only.
+There is no package data for hierarchies 4, 9, 11 and 12. They are
+tested on simulated data only.
 
 ## Checks
 
@@ -616,5 +625,5 @@ scheme, for example:
     the species from the sample weights. SOP therefore compares the
     raised fish weights with the raised sample weights. A value of 1
     does not prove the weights are right.
--   Not covered yet: variance, sub-sampling of BV, hierarchies 6 and 11,
+-   Not covered yet: variance, sub-sampling of BV, hierarchy 6,
     and discards.

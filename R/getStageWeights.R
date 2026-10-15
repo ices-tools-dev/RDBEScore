@@ -93,6 +93,7 @@ getStageWeights <- function(RDBESDataObj, sampleUnits, scheme,
     }
     notRaised <- c(notInScheme, names(scheme$stages)[vapply(
       scheme$stages, function(s) s$method == "none", logical(1))])
+    notRaised <- setdiff(notRaised, sc$spec$linkStages)
     for (st in list(list(name = "DE", s = scheme$DE),
                     list(name = "totals", s = scheme$totals))) {
       if (is.null(st$s) || st$s$method == "none") next

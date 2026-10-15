@@ -314,7 +314,7 @@ externalAux <- function(data, by, col) {
 #' Stages not given are `"none"` (pooled). The species selection (SS) is
 #' always 1: a species list with more species gets no extra weight.
 #'
-#' All hierarchies except 6 and 11 are implemented. The stages, from the top:
+#' All hierarchies except 6 are implemented. The stages, from the top:
 #' * hierarchy 1: VS, FT, FO
 #' * hierarchy 2: FT, FO (trips sampled directly)
 #' * hierarchy 3: TE (temporal event), VS, FT, FO
@@ -326,6 +326,8 @@ externalAux <- function(data, by, col) {
 #' * hierarchy 8: TE, VS, LE
 #' * hierarchy 9: LO (location), TE
 #' * hierarchy 10: VS, TE, FT, FO
+#' * hierarchy 11: LO, TE, FT. LE lies between FT and SS but is not a
+#'   sampling unit: it is not raised (factor 1) and naming it stops.
 #' * hierarchy 12: LO, TE, LE
 #' * hierarchy 13: FO (hauls sampled directly)
 #'
@@ -383,6 +385,12 @@ raisingScheme <- function(..., SA = sampleRaising("weight"),
     stop("SS is always 1 and cannot be raised.", call. = FALSE)
   }
   stages <- spec$stages
+  link <- intersect(names(given), spec$linkStages)
+  if (length(link) > 0) {
+    stop(paste(link, collapse = ", "), " is not a sampling unit in ",
+         "hierarchy ", hierarchy, ": it links SS to the stage above and is ",
+         "not raised (factor 1). Leave it out of the scheme.", call. = FALSE)
+  }
   allowed <- c(stages, names(spec$optional))
   bad <- setdiff(names(given), allowed)
   if (length(bad) > 0) {
@@ -422,6 +430,8 @@ raisingScheme <- function(..., SA = sampleRaising("weight"),
 
   notRaised <- stages[vapply(resolved, function(s) s$method == "none",
                              logical(1))]
+  # A link stage is not a sampling unit: factor 1 is right, not pooling
+  notRaised <- setdiff(notRaised, spec$linkStages)
   if (DE$method == "none" && is.null(totals) && length(notRaised) > 0) {
     stop("With DE = \"none\" and no totals every stage must be raised to its ",
          "population, but these stages are \"none\": ",

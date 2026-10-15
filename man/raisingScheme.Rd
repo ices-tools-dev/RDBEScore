@@ -44,7 +44,7 @@ by the DE ratio.
 Stages not given are \code{"none"} (pooled). The species selection (SS) is
 always 1: a species list with more species gets no extra weight.
 
-All hierarchies except 6 and 11 are implemented. The stages, from the top:
+All hierarchies except 6 are implemented. The stages, from the top:
 \itemize{
 \item hierarchy 1: VS, FT, FO
 \item hierarchy 2: FT, FO (trips sampled directly)
@@ -57,6 +57,8 @@ If the data use FT and the scheme does not name it, FT is \code{"none"}.
 \item hierarchy 8: TE, VS, LE
 \item hierarchy 9: LO (location), TE
 \item hierarchy 10: VS, TE, FT, FO
+\item hierarchy 11: LO, TE, FT. LE lies between FT and SS but is not a
+sampling unit: it is not raised (factor 1) and naming it stops.
 \item hierarchy 12: LO, TE, LE
 \item hierarchy 13: FO (hauls sampled directly)
 }

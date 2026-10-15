@@ -42,7 +42,8 @@
 #' `FOendDate`, else `FOstartDate`, else `FTarvDate` (not in 13). In
 #' hierarchies 4 and 5: `LEdate`, else `FTarvDate` (in 5 when FT is used),
 #' else `OSsamDate`. In hierarchy 7: `LEdate`, else `OSsamDate`. In
-#' hierarchies 8, 9 and 12: `LEdate`. Area, rectangle and métier: the SA
+#' hierarchies 8, 9 and 12: `LEdate`. In hierarchy 11: `LEdate`, else
+#' `FTarvDate`. Area, rectangle and métier: the SA
 #' value when filled, else the FO value (hierarchies 1, 2, 3, 10 and 13) or
 #' the LE value (all others). TE (temporal event) and LO (location) give no
 #' domain.
@@ -72,12 +73,12 @@
 #' estimate. A haul whose samples of the species are all excluded is treated
 #' as not sampled (non-response) by [getStageWeights()].
 #'
-#' All upper hierarchies except 6 and 11 are implemented. The object must
+#' All upper hierarchies except 6 are implemented. The object must
 #' hold one hierarchy. Clustering (`XXclustering` other than `"N"`) is
 #' logged. It does not affect the point estimates.
 #'
-#' @param RDBESDataObj A valid `RDBESDataObject` of any hierarchy except 6
-#'   and 11.
+#' @param RDBESDataObj A valid `RDBESDataObject` of any hierarchy except
+#'   6.
 #' @param species Species to estimate, as AphiaID(s) (WoRMS), matched to
 #'   `SAspeCode`, for example `127143` for plaice. Several values are allowed.
 #'   FAO 3-alpha codes are not accepted: rows added by

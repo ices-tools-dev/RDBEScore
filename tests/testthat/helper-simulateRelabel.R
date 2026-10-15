@@ -113,6 +113,37 @@ simulateH12RatioData <- function(...) {
   sim
 }
 
+# H11: LO from the simulated vessels, TE from their trips, FT from their
+# hauls, and one LE per FT (a link table, not a sampling unit)
+simulateH11RatioData <- function(...) {
+  sim <- simulateH1RatioData(...)
+  h1 <- sim$obj
+  up <- simLOTE(h1)
+  FO <- as.data.frame(h1$FO)
+  FT <- cbind(data.frame(FTid = FO$FOid, TEid = FO$FTid, FTrecType = "FT",
+                         FTencrVessCode = "V1", FTsampType = "PortS",
+                         FTdepDate = FO$FOendDate, FTarvDate = FO$FOendDate),
+              simCopyDesign(FO, "FO", "FT"))
+  LE <- data.frame(LEid = FO$FOid, FTid = FO$FOid, LErecType = "LE",
+                   LEseqNum = 1L, LEstratification = "N",
+                   LEstratumName = "U", LEclustering = "N",
+                   LEclusterName = "U", LEmixedTrip = "N", LEcatReg = "Lan",
+                   LElocode = "ZWHRE", LElocType = "Port", LEctry = "ZW",
+                   LEdate = FO$FOendDate, LEarea = FO$FOarea,
+                   LEmetier6 = FO$FOmetier6, LEsamp = FO$FOsamp,
+                   LEunitName = paste0("landing", FO$FOid))
+  SS <- as.data.frame(h1$SS)
+  SS$LEid <- SS$FOid
+  SS$FOid <- NULL
+  DE <- as.data.frame(h1$DE)
+  DE$DEhierarchy <- 11L
+  sim$obj <- simRelabelObject(list(DE = DE, SD = h1$SD, LO = up$LO,
+                                   TE = up$TE, FT = FT, LE = LE, SS = SS,
+                                   SA = h1$SA, FM = h1$FM, BV = h1$BV,
+                                   CL = h1$CL))
+  sim
+}
+
 simulateH9RatioData <- function(..., leLink = c("SA", "SS")) {
   leLink <- match.arg(leLink)
   sim <- simulateH1RatioData(..., haulsPerTrip = 1)

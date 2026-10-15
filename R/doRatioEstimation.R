@@ -29,10 +29,10 @@
 #' Selection methods are not used to compute weights. Non-probabilistic
 #' designs are logged as assumptions.
 #'
-#' Implemented for all upper hierarchies except 6 and 11. The scheme must be
+#' Implemented for all upper hierarchies except 6. The scheme must be
 #' made for the hierarchy of the data (`raisingScheme(..., hierarchy = 5)`).
 #'
-#' Not in this version: variance, hierarchies 6 and 11, discards.
+#' Not in this version: variance, hierarchy 6, discards.
 #'
 #' @inheritParams getSampleUnits
 #' @inheritParams expandWithinSample
