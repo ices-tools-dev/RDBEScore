@@ -29,8 +29,7 @@ library(data.table)
 ## Load and validate example data
 
 ```{r}
-# read an example dataset and simplify it to 1 trip and 1 haul (the first one in the dataset is selected
-the dat)
+# read an example dataset and simplify it to 1 trip and 1 haul. The 1st haul in the data is selected.
 data(Pckg_survey_apistrat_H1)
 myH1DataObject1 <- Pckg_survey_apistrat_H1
 myH1DataObject1$SL<-myH1DataObject1$SL[grepl(myH1DataObject1$SL$SLspeclistName, pat="Pckg_survey_apistrat_H1"),]
@@ -49,7 +48,7 @@ Examining a print of the Species List (SL) and Individual Species tables (IS) on
 myH1DataObject1[c("SL","IS")]
 ```
 
-Examining a print of the Species Selection table (SS), one can confirm that only one fishing operation is present in the data (FOid 70849) and that landings were indeed sampled from it (for simplicity only a subset of columns is printed). Note that variable \code{SSuseCalcZero} is set to "N" (i.e., No). This will have to be changed later on if we want zeros calculated.
+Examining a print of the Species Selection table (SS), one can confirm that only one fishing operation is present in the data and that landings were indeed sampled from it (for simplicity only a subset of columns is printed). Note that variable \code{SSuseCalcZero} is set to "N" (i.e., No). This will have to be changed later on if we want zeros calculated.
 
 ```{r}
 myH1DataObject1[[c("SS")]][,c(1:15,19)]
@@ -61,7 +60,7 @@ myH1DataObject1[[c("SA")]][,c(1:9,48:49)]
 
 ## Generating Zeros for species looked for but not reported in the SA table
 
-Lets change the example, by adding a couple of new species (*Pandalus borealis* and *Cancer pagurus*) to the Species List table (SS). We also change variable \code{SSuseCalcZero} to "Y" so that zeros can be calculated.     
+Now, lets change the example, by adding a couple of new species to the Individual Species table (IS): *Pandalus borealis* and *Cancer pagurus*. We also change variable \code{SSuseCalcZero} in table SS to "Y" so that zeros can be calculated.     
 ```{r}
 # first we duplicate the IS
 myH1DataObject1$IS<-rbind(myH1DataObject1$IS, myH1DataObject1$IS, myH1DataObject1$IS)
@@ -76,11 +75,11 @@ validateRDBESDataObject(myH1DataObject1)
 myH1DataObject1[c("IS")]
 ```
 
-After the update, the new dataset likens a situation where observers looked for three species (*Nephrops norvegicus*, *Cancer pagurus* and *Pandalus borealis*) with only one of them (*Nephrops norvegicus*) having been found in the sample. Running function \code{generateZerosUsingSL} the zeros for those additional species can be quickly added. 
+After the update, the new dataset likens a situation where observers looked for three species (*Nephrops norvegicus*, *Cancer pagurus* and *Pandalus borealis*) with only one of them (*Nephrops norvegicus*) having been found in the sample. Using function \code{generateZerosUsingSL} the zeros for those additional species can be quickly added. 
 
 ```{r}
 myH1DataObject1updte<-generateZerosUsingSL(myH1DataObject1)
-myH1DataObject1updte$SA[,c(1:9,48:49)]
+myH1DataObject1updte$SA[,c(1:9,37, 38, 52, 54)]
 ```
 Note that the new rows have floating points values for SAid and SAseqNum (we use sprintf to ensure the decimal places are displayed). This facilitates the ordering of the samples and prevents overlaps when different datasets are joined. Also a SAunitName was created for the new rows that is identical to the SAid.
 ```{r}

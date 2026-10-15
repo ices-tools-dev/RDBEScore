@@ -87,7 +87,7 @@ myH1DataObject1updte$SA[,c(1:9,48:49)]
 
 In many practical situations, diligent observers sometimes record more species than those expected. Such "excess" data is frequently useless from an estimation point-of-view (because the sampling is observer-dependent and therefore likely non-representative), but in analyses (e.g., distribution of rare species) or summaries (e.g., totals of biomass sampled) it may be useful to preserve them in the data.
 
-The difference between these two cases can be specified via the argument `overwriteSampled` in the function `generateNAsUsingSL`. By default (estimation case) the argument is set to TRUE which makes `generateNAsUsingSL` set the weights of these extra species to NA. But, by explicitly setting that argument as `overwriteSampled=FALSE` the information collected can also kept.
+The difference between these two cases can be specified via the argument `overwriteSampled` in the function `generateNAsUsingSL`. By default (estimation case) the argument is set to TRUE which makes `generateNAsUsingSL` set the weights of these extra species to NA. But, by explicitly setting that argument as `overwriteSampled=FALSE` the information collected can also be kept.
 
 To demonstrate this we carry out a small alteration of the example data, removing the *Nephrops norvegicus* from the Species List. This creates a somewhat atypical situation: a haul where nothing was supposed to be looked for but still *Nephrops norvegicus* was registered. We use such situation here for sake of a simple example.
 

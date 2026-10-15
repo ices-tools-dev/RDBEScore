@@ -220,6 +220,25 @@
 
   })
 
+  # ------------------
+  # other tests
+  # ------------------
+
+  test_that("Pckg_survey_apistrat_H1: provides the expected for some situations detected by AI - see issue #273", {
+
+    H1DataObj <- data.table::copy(Pckg_survey_apistrat_H1)
+
+    withNAs <- generateNAsUsingSL(
+      H1DataObj,
+      targetAphiaId = "126436",
+      overwriteSampled = FALSE
+    )
+
+    expect_equal(nrow(withNAs$SA), 400)
+    expect_equal(sum(duplicated(withNAs$SA$SAid)),0)
+    expect_no_error(validateRDBESDataObject(withNAs))
+  })
+
 #}) ## end capture.output
 
 
