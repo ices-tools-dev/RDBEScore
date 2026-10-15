@@ -36,10 +36,9 @@ Estimation actually  is done on a *RDBESEstObject* that is generate from *RDBESD
 ```{r}
 H8ExampleEE1
 ```
-The data has not gone through RDBES upload and download procedure and  contains invalid data types but also may have some other validity problems. However the fields for estimation should be present and valid.
-```{r eval=FALSE, echo=TRUE}
-#to check data types
-validateRDBESDataObject(H8ExampleEE1, checkDataTypes = TRUE, strict = FALSE)
+The commercial sampling data, vessel details and species lists passed RDBES upload screening and were downloaded on 2026-10-14. CL and CE were attached locally and have not passed upload checks. The complete packaged object passes structural validation, including data-type checks.
+```{r}
+validateRDBESDataObject(H8ExampleEE1, checkDataTypes = TRUE)
 ```
 
 

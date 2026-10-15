@@ -29,9 +29,11 @@ Richard Meitern @ Estonian Marine Institute, 2025
 H8ExampleEE1
 }
 \description{
-This dataset does not have passed the RDBES upload checks,
-hence the object might be somewhat invalid, however it resembles real data
-from the Estonian Baltic Trawling fleet for 2022 sprat total landings and
-commercial sampling
+This example represents commercial sampling and sprat landings from the
+Estonian Baltic trawling fleet in 2022. CS, vessel details and species lists
+passed RDBES upload screening and were downloaded on 2026-10-14 under test
+country ZW. CL and CE were attached locally and have not passed upload checks.
+The preparation script replaces database IDs with sequential table IDs,
+preserving foreign-key links and ordering sampling records by sequence number.
 }
 \keyword{datasets}
