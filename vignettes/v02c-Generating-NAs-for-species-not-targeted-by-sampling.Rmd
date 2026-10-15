@@ -32,7 +32,13 @@ library(RDBEScore)
 data(Pckg_survey_apistrat_H1)
 myH1DataObject1 <- Pckg_survey_apistrat_H1
 myH1DataObject1$SL<-myH1DataObject1$SL[grepl(myH1DataObject1$SL$SLspeclistName, pat="Pckg_survey_apistrat_H1"),]
-myH1DataObject1<-filterAndTidyRDBESDataObject(myH1DataObject1, fieldsToFilter="FOid",valuesToFilter=myH1DataObject1$FO$FOid[1])
+myH1DataObject1 <- filterRDBESDataObject(myH1DataObject1, fieldsToFilter="FOid",
+                                      valuesToFilter=myH1DataObject1$FO$FOid[1],
+                                      killOrphans = FALSE)
+# Clean vessel and species-list links before removing downstream orphans
+myH1DataObject1 <- removeBrokenVesselLinks(myH1DataObject1)
+myH1DataObject1 <- removeBrokenSpeciesListLinks(myH1DataObject1)
+myH1DataObject1 <- findAndKillOrphans(myH1DataObject1)
 # check it is a valid RDBESobject
 validateRDBESDataObject(myH1DataObject1)
 ```

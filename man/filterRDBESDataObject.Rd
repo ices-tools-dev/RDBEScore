@@ -8,7 +8,7 @@ filterRDBESDataObject(
   RDBESDataObjectToFilter,
   fieldsToFilter,
   valuesToFilter,
-  killOrphans = FALSE,
+  killOrphans = TRUE,
   verbose = FALSE,
   strict = TRUE
 )
@@ -20,7 +20,7 @@ filterRDBESDataObject(
 
 \item{valuesToFilter}{A vector of the field values you wish to filter for}
 
-\item{killOrphans}{Controls if orphan rows are removed. Default is \code{FALSE}.}
+\item{killOrphans}{Controls if orphan rows are removed. Default is \code{TRUE}.}
 
 \item{verbose}{(Optional) Set to TRUE if you want informative text printed
 out, or FALSE if you don't.  The default is FALSE.}
@@ -42,15 +42,19 @@ try to filter on \code{FOid} it does not look  \code{FOid} in other tables like 
 although the field \code{FOid} exists in \code{FT} table.
 }
 \details{
-\code{killOrphans} allows you to remove orphaned rows if set to \code{TRUE}. The
-default is \code{FALSE}.
+Orphaned rows are removed by default. Set \code{killOrphans = FALSE} to retain
+them. Cleanup proceeds downstream and does not remove parent rows when a
+child is filtered out. Broken vessel and species-list links require the
+separate functions \code{\link[=removeBrokenVesselLinks]{removeBrokenVesselLinks()}} and
+\code{\link[=removeBrokenSpeciesListLinks]{removeBrokenSpeciesListLinks()}}.
 }
 \section{Development review}{
 
 \itemize{
 \item AI-assisted: Yes
-\item Review: rix133
-\item Notes/scope: examples only
+\item Review: pending
+\item Previous review: rix133 (examples only)
+\item Notes/scope:
 }
 }
 
@@ -59,7 +63,7 @@ H1DataObj <- H1Example
 # Select one named design together with its linked sampling records
 H1DataObjFiltered <- filterRDBESDataObject(
   H1DataObj, fieldsToFilter = "DEstratumName",
-  valuesToFilter = "Pckg_SDAResources_agstrat_H1", killOrphans = TRUE
+  valuesToFilter = "Pckg_SDAResources_agstrat_H1"
 )
 summary(H1DataObjFiltered)
 

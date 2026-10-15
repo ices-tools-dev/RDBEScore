@@ -38,8 +38,12 @@ First we'll load some example data from the RDBES and check it's valid.  It's a 
 myH1DataObject <- H1Example
      
 # filter data for DEstratumName==DE_stratum1_H1 to make object smaller and easier to handle
-myH1DataObject <- filterAndTidyRDBESDataObject(myH1DataObject,c("DEstratumName"), c("DE_stratum1_H1"),
-                                               killOrphans=TRUE)
+myH1DataObject <- filterRDBESDataObject(myH1DataObject,c("DEstratumName"), c("DE_stratum1_H1"),
+                                     killOrphans = FALSE)
+# Clean vessel and species-list links before removing downstream orphans
+myH1DataObject <- removeBrokenVesselLinks(myH1DataObject)
+myH1DataObject <- removeBrokenSpeciesListLinks(myH1DataObject)
+myH1DataObject <- findAndKillOrphans(myH1DataObject)
 ```
 
 The functions that generate probabilities do not yet deal with lower hierarchies A and B so we rework a bit the data so it looks like lower hierarchy C. 

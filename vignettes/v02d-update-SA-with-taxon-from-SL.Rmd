@@ -35,16 +35,25 @@ Good practice is to check that the RDBESDataObjects are valid.
 dirH1 <- "../tests/testthat/h1_v_20250211/"
 
 myObject <- createRDBESDataObject(input = dirH1)
-myObject <- filterAndTidyRDBESDataObject(myObject,
+myObject <- filterRDBESDataObject(myObject,
                         fieldsToFilter =c("DEsampScheme"),
-                        valuesToFilter = c("National Routine"))
+                        valuesToFilter = c("National Routine"), killOrphans = FALSE)
+myObject <- removeBrokenVesselLinks(myObject)
+myObject <- removeBrokenSpeciesListLinks(myObject)
+myObject <- findAndKillOrphans(myObject)
 
-myObject <- filterAndTidyRDBESDataObject(myObject,
+myObject <- filterRDBESDataObject(myObject,
                         fieldsToFilter =c("DEsampScheme"),
-                        valuesToFilter = c("National Routine"))
+                        valuesToFilter = c("National Routine"), killOrphans = FALSE)
+myObject <- removeBrokenVesselLinks(myObject)
+myObject <- removeBrokenSpeciesListLinks(myObject)
+myObject <- findAndKillOrphans(myObject)
 # restrict to 1 haul
-myObject <- filterAndTidyRDBESDataObject(myObject, fieldsToFilter="FOid",
-                                         valuesToFilter=myObject$FO$FOid[1])
+myObject <- filterRDBESDataObject(myObject, fieldsToFilter="FOid",
+                                valuesToFilter=myObject$FO$FOid[1], killOrphans = FALSE)
+myObject <- removeBrokenVesselLinks(myObject)
+myObject <- removeBrokenSpeciesListLinks(myObject)
+myObject <- findAndKillOrphans(myObject)
 
 numOfRows <- 5
 myObject[["SA"]] <- head(myObject[["SA"]],numOfRows)

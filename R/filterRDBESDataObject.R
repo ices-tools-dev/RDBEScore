@@ -8,13 +8,16 @@
 #' try to filter on `FOid` it does not look  `FOid` in other tables like `FT`,
 #' although the field `FOid` exists in `FT` table.
 #'
-#' `killOrphans` allows you to remove orphaned rows if set to `TRUE`. The
-#' default is `FALSE`.
+#' Orphaned rows are removed by default. Set `killOrphans = FALSE` to retain
+#' them. Cleanup proceeds downstream and does not remove parent rows when a
+#' child is filtered out. Broken vessel and species-list links require the
+#' separate functions [removeBrokenVesselLinks()] and
+#' [removeBrokenSpeciesListLinks()].
 #'
 #' @param RDBESDataObjectToFilter The `RDBESDataObject` to filter
 #' @param fieldsToFilter A vector of the field names you wish to check
 #' @param valuesToFilter A vector of the field values you wish to filter for
-#' @param killOrphans Controls if orphan rows are removed. Default is `FALSE`.
+#' @param killOrphans Controls if orphan rows are removed. Default is `TRUE`.
 #' @param verbose (Optional) Set to TRUE if you want informative text printed
 #' out, or FALSE if you don't.  The default is FALSE.
 #' @param strict (Optional) This function validates its input data - should
@@ -31,18 +34,19 @@
 #' # Select one named design together with its linked sampling records
 #' H1DataObjFiltered <- filterRDBESDataObject(
 #'   H1DataObj, fieldsToFilter = "DEstratumName",
-#'   valuesToFilter = "Pckg_SDAResources_agstrat_H1", killOrphans = TRUE
+#'   valuesToFilter = "Pckg_SDAResources_agstrat_H1"
 #' )
 #' summary(H1DataObjFiltered)
 #'
 #' @section Development review:
 #' - AI-assisted: Yes
-#' - Review: rix133
-#' - Notes/scope: examples only
+#' - Review: pending
+#' - Previous review: rix133 (examples only)
+#' - Notes/scope:
 filterRDBESDataObject <- function(RDBESDataObjectToFilter,
                                  fieldsToFilter,
                                  valuesToFilter,
-                                 killOrphans = FALSE,
+                                 killOrphans = TRUE,
                                  verbose = FALSE,
                                  strict = TRUE) {
 
