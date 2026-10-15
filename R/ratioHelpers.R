@@ -281,10 +281,10 @@ checkAphiaIds <- function(species, sa = NULL) {
        ".", hint, call. = FALSE)
 }
 
-#' Exclusion reason of a recorded zero (an SA with total weight 0)
+#' Exclusion reason of a recorded zero (an SA with a total or sampled weight of 0)
 #' @keywords internal
 #' @noRd
-zeroSampleReason <- function() "recorded zero (total weight 0)"
+zeroSampleReason <- function() "recorded zero (weight 0)"
 
 #' Check that the requested domain variables are supported
 #' @keywords internal

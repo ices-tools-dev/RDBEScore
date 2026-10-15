@@ -345,7 +345,7 @@ test_that("zeros stay in the sampled hauls, unusable hauls are non-response", {
 
   su <- getSampleUnits(obj, species = 127143)
   expect_equal(su[SAid %in% sa3, excludeReason],
-               "recorded zero (total weight 0)")
+               "recorded zero (weight 0)")
   expect_true(any(grepl("Recorded zeros", getRatioLog(su)$message)))
   expect_false(any(grepl("Excluded.*recorded zero",
                          getRatioLog(su)$message)))
@@ -363,6 +363,72 @@ test_that("zeros stay in the sampled hauls, unusable hauls are non-response", {
   expect_true(any(grepl("without a sample of the species", msg)))
   # other trips are unaffected
   expect_true(all(sw[FTid != 1 & include == TRUE, f_FO] == 1))
+})
+
+test_that("zeros in the 0.4.0 format of generateZerosUsingSL() are zeros", {
+  # Since RDBEScore 0.4.0 a zero row has a sampled weight of 0 and no total
+  # weight. A row of generateNAsUsingSL() has no weights at all.
+  sim <- simulate(lowHierarchy = "C", haulsPerTrip = 3,
+                  vesselsInPopulation = 4)
+  obj <- sim$obj
+  saOf <- function(foid) obj$SA[SSid %in% obj$SS[FOid == foid, SSid], SAid]
+  sa2 <- saOf(2)
+  obj$BV <- obj$BV[!SAid %in% sa2]
+  obj$SA[SAid %in% sa2, `:=`(SAtotalWtLive = NA, SAtotalWtMes = NA,
+                             SAsampWtLive = 0, SAsampWtMes = 0L,
+                             SAlowHierarchy = "D", SAsamp = "N",
+                             SAspecState = "Unknown")]
+  sa3 <- saOf(3)
+  obj$BV <- obj$BV[!SAid %in% sa3]
+  obj$SA[SAid %in% sa3, `:=`(SAtotalWtLive = NA, SAtotalWtMes = NA,
+                             SAsampWtLive = NA, SAsampWtMes = NA,
+                             SAlowHierarchy = "D", SAsamp = "N")]
+  su <- getSampleUnits(obj, species = 127143)
+  expect_equal(su[SAid %in% sa2, excludeReason], "recorded zero (weight 0)")
+  expect_false(su[SAid %in% sa3, excludeReason] == "recorded zero (weight 0)")
+  sc <- raisingScheme(FO = stageRaising("count"), DE = deRaising("ratio"))
+  sw <- getStageWeights(obj, su, sc)
+  fo <- attr(sw, "unitWeights")$FO
+  # haul 2 is a zero and stays sampled, haul 3 (an NA row) is non-response
+  expect_true(2 %in% fo$FOid)
+  expect_false(3 %in% fo$FOid)
+  expect_equal(unique(sw[FTid == 1 & include == TRUE, f_FO]), 3 / 2)
+})
+
+test_that("rows made by generateZerosUsingSL() itself are read as zeros", {
+  # Simulated data with a species list, plaice removed from haul 2, and the
+  # zero row added by the package function, whatever its current format.
+  sim <- simulate(lowHierarchy = "C", haulsPerTrip = 3,
+                  vesselsInPopulation = 4)
+  lst <- lapply(sim$obj[!vapply(sim$obj, is.null, logical(1))],
+                as.data.frame)
+  lst$SS$SLid <- 1L
+  lst$SL <- data.frame(SLid = 1L, SLrecType = "SL", SLcou = "ZW",
+                       SLinst = "4484", SLspeclistName = "Sim",
+                       SLyear = 2024L, SLcatchFrac = "Lan")
+  lst$IS <- data.frame(ISid = 1L, SLid = 1L, ISrecType = "IS",
+                       IScommTaxon = 127143L, ISsppCode = 127143L)
+  sa2 <- lst$SA$SAid[lst$SA$SSid %in% lst$SS$SSid[lst$SS$FOid == 2]]
+  lst$SA <- lst$SA[!lst$SA$SAid %in% sa2, ]
+  lst$BV <- lst$BV[!lst$BV$SAid %in% sa2, ]
+  obj <- withCallingHandlers(
+    createRDBESDataObject(lst, castToCorrectDataTypes = TRUE,
+                          addMissingColumns = TRUE, strict = TRUE),
+    warning = function(w) {
+      if (grepl("bypasses", conditionMessage(w))) {
+        invokeRestart("muffleWarning")
+      }
+    })
+  z <- generateZerosUsingSL(obj)
+  newSA <- setdiff(z$SA$SAid, obj$SA$SAid)
+  expect_length(newSA, 1)
+  su <- getSampleUnits(z, species = 127143)
+  expect_equal(su[SAid %in% newSA, excludeReason], "recorded zero (weight 0)")
+  sw <- getStageWeights(z, su, raisingScheme(FO = stageRaising("count"),
+                                             DE = deRaising("ratio")))
+  # haul 2 counts as sampled with zero catch: all 3 hauls of trip 1 sampled
+  expect_true(2 %in% attr(sw, "unitWeights")$FO$FOid)
+  expect_equal(unique(sw[FTid == 1 & include == TRUE, f_FO]), 1)
 })
 
 test_that("a haul without the species is a zero only if SS says it was looked for", {

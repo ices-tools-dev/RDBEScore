@@ -20,7 +20,7 @@
 #' **Zeros and non-response.** A sampled unit of the lowest stage (a haul in
 #' hierarchies 1 and 2, a landing event or trip in hierarchy 5) can be:
 #' * with an included sample of the species: its fish count,
-#' * with a recorded zero (an SA with total weight 0, see
+#' * with a recorded zero (an SA with a total or sampled weight of 0, see
 #'   [getSampleUnits()]): zero catch, logged as information,
 #' * without any sample of the species: zero catch only if the species was
 #'   looked for, that is, one of its SS records for the catch category has

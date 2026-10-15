@@ -91,10 +91,13 @@ métier: the SA value when filled, else the FO value (hierarchy 1) or the
 LE value (hierarchy 5). \code{areaLookup} recodes areas (for example divisions
 to sub-areas).
 
-\strong{Recorded zeros.} An SA with a total weight of 0 (for example made by
-\code{\link[=generateZerosUsingSL]{generateZerosUsingSL()}}) records that the species was looked for and not
-found. It is flagged \code{include = FALSE} with \code{excludeReason = "recorded zero (total weight 0)"} and logged as information: its haul (or landing
-event) counts as sampled with zero catch.
+\strong{Recorded zeros.} An SA with a total or sampled weight of 0 records that
+the species was looked for and not found. \code{\link[=generateZerosUsingSL]{generateZerosUsingSL()}} writes
+such rows: since RDBEScore 0.4.0 with a sampled weight of 0 and no total
+weight, before that with a total weight of 0. Both are read as zeros. The
+rows of \code{\link[=generateNAsUsingSL]{generateNAsUsingSL()}} have no weights and are not zeros. A zero
+is flagged \code{include = FALSE} with \code{excludeReason = "recorded zero (weight 0)"} and logged as information: its haul (or landing event) counts as
+sampled with zero catch.
 
 \strong{Exclusions.} Samples not sampled (\code{SAsamp == "N"}, also inherited from a
 parent SA), lower hierarchy D, samples without the weights needed for

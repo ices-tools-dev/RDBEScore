@@ -45,7 +45,7 @@ Selection methods are not used for the factors. They are logged per stage.
 hierarchies 1 and 2, a landing event or trip in hierarchy 5) can be:
 \itemize{
 \item with an included sample of the species: its fish count,
-\item with a recorded zero (an SA with total weight 0, see
+\item with a recorded zero (an SA with a total or sampled weight of 0, see
 \code{\link[=getSampleUnits]{getSampleUnits()}}): zero catch, logged as information,
 \item without any sample of the species: zero catch only if the species was
 looked for, that is, one of its SS records for the catch category has

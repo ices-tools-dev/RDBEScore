@@ -43,8 +43,8 @@ Raising goes the other way:
     quarter and métier, with strata you choose.
 
 The factors of all stages are multiplied, so each sample gets one weight
-`wStages`. The estimate of numbers at age is the sum of `wStages` times the numbers
-at age in the samples.
+`wStages`. The estimate of numbers at age is the sum of `wStages` times
+the numbers at age in the samples.
 
 The same functions work for hierarchy 2 (trips sampled directly) and
 hierarchy 5 (onshore sampling), see [Hierarchy 2](#hierarchy-2) and
@@ -76,9 +76,9 @@ obj$DE[, .(DEstratumName, DEauxVarTot, DEauxVarName, DEauxVarUnit)]
 ## A raising scheme
 
 A scheme says how each stage is raised. It is built with
-`raisingScheme()`, one `stageRaising()` per stage and one
-`deRaising()`. Stages that are not given are pooled (`"none"`). SS is
-always 1: a species list with more species gets no extra weight.
+`raisingScheme()`, one `stageRaising()` per stage and one `deRaising()`.
+Stages that are not given are pooled (`"none"`). SS is always 1: a
+species list with more species gets no extra weight.
 
 At each stage, the units are grouped by parent and design stratum
 (`XXstratumName`). For a group $h$, $s_h$ is the set of its sampled
@@ -191,7 +191,8 @@ run on its own to inspect what happens.
 
 **1. Sample units.** One row per lowest-level SA (the SA with no
 sub-sample below it), with its path through the hierarchy, its domain,
-the factor within the sample `fSample` and its live weight `xSample` (kg).
+the factor within the sample `fSample` and its live weight `xSample`
+(kg).
 
 ```{r}
 su <- getSampleUnits(obj, species = 127143)
@@ -239,8 +240,9 @@ raised <- raiseToDE(ex, sw, obj)
 attr(raised, "deRatios")   # rDE = total / xWeightedStratum
 ```
 
-When the scheme has totals of your own, `raiseToTotals(raised, ex, sw,
-obj)` follows (see [Raising to your own totals](#own-totals)).
+When the scheme has totals of your own,
+`raiseToTotals(raised, ex, sw, obj)` follows (see [Raising to your own
+totals](#own-totals)).
 
 **6. Summary.** Numbers, mean weight and mean length per domain and age,
 and per domain the estimated live weight and the sum-of-products check.
@@ -349,10 +351,10 @@ the frame does not, such as all landings in CL, or effort in CE. A
 `totalsRaising()` step raises the estimate to them, after the DE step.
 `doRatioEstimation()` then runs `raiseToTotals()` after `raiseToDE()`.
 It applies the totals ratio to every sample before summing per domain,
-because a totals stratum can cut across domains and DE strata.
-You supply the totals as a table, and its key columns are the strata.
-They can be any column the samples carry: the domain variables, an SA
-column such as `SAcommCat`, or a column of a stage table.
+because a totals stratum can cut across domains and DE strata. You
+supply the totals as a table, and its key columns are the strata. They
+can be any column the samples carry: the domain variables, an SA column
+such as `SAcommCat`, or a column of a stage table.
 
 Here the landings in CL are summed per quarter, area and métier:
 
@@ -423,7 +425,8 @@ res2 <- doRatioEstimation(myH2Object, species = 127143, raising = sc2)
 ```
 
 Domains come from FO, as in hierarchy 1. The sample counts in
-`res$domains` are `nTrips` and `nHauls`. Naming VS in an H2 scheme stops.
+`res$domains` are `nTrips` and `nHauls`. Naming VS in an H2 scheme
+stops.
 
 ## Hierarchy 5 {#hierarchy-5}
 
@@ -498,9 +501,9 @@ scheme, for example:
     strata when that is too coarse.
 -   Totals strata without samples are not raised. Borrowing from a
     coarser stratum is not automatic.
--   `liveWeightEst_kg` in `res$domains` is the estimated live weight of the species
-    from the sample weights. SOP therefore compares the raised fish
-    weights with the raised sample weights. A value of 1 does not prove
-    the weights are right.
+-   `liveWeightEst_kg` in `res$domains` is the estimated live weight of
+    the species from the sample weights. SOP therefore compares the
+    raised fish weights with the raised sample weights. A value of 1
+    does not prove the weights are right.
 -   Not covered yet: variance, sub-sampling of BV, hierarchies other
     than 1, 2 and 5, and discards.

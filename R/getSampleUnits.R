@@ -45,11 +45,14 @@
 #' LE value (hierarchy 5). `areaLookup` recodes areas (for example divisions
 #' to sub-areas).
 #'
-#' **Recorded zeros.** An SA with a total weight of 0 (for example made by
-#' [generateZerosUsingSL()]) records that the species was looked for and not
-#' found. It is flagged `include = FALSE` with `excludeReason = "recorded
-#' zero (total weight 0)"` and logged as information: its haul (or landing
-#' event) counts as sampled with zero catch.
+#' **Recorded zeros.** An SA with a total or sampled weight of 0 records that
+#' the species was looked for and not found. [generateZerosUsingSL()] writes
+#' such rows: since RDBEScore 0.4.0 with a sampled weight of 0 and no total
+#' weight, before that with a total weight of 0. Both are read as zeros. The
+#' rows of [generateNAsUsingSL()] have no weights and are not zeros. A zero
+#' is flagged `include = FALSE` with `excludeReason = "recorded zero (weight
+#' 0)"` and logged as information: its haul (or landing event) counts as
+#' sampled with zero catch.
 #'
 #' **Exclusions.** Samples not sampled (`SAsamp == "N"`, also inherited from a
 #' parent SA), lower hierarchy D, samples without the weights needed for
@@ -162,6 +165,17 @@ getSampleUnits <- function(RDBESDataObj,
   sa[, WliveNode := data.table::fifelse(!is.na(SAtotalWtLive),
                                         as.numeric(SAtotalWtLive),
                                         as.numeric(SAtotalWtMes) * convFac)]
+  # A recorded zero: the species was looked for and not found. Rows made by
+  # generateZerosUsingSL() have a total weight of 0 (before RDBEScore 0.4.0)
+  # or a sampled weight of 0 and no total weight (since 0.4.0). Rows made by
+  # generateNAsUsingSL() have no weights at all, so they are not zeros.
+  zeroWt <- function(col) {
+    if (!col %in% names(sa)) return(rep(FALSE, nrow(sa)))
+    v <- suppressWarnings(as.numeric(sa[[col]]))
+    !is.na(v) & v == 0
+  }
+  sa[, zeroNode := zeroWt("SAtotalWtLive") | zeroWt("SAtotalWtMes") |
+       zeroWt("SAsampWtLive") | zeroWt("SAsampWtMes")]
   if (wsMethod == "weight") {
     sa[, fNode := as.numeric(SAtotalWtMes) / as.numeric(SAsampWtMes)]
   } else if (wsMethod == "count") {
@@ -312,11 +326,11 @@ getSampleUnits <- function(RDBESDataObj,
   # Inclusion flags
   # ---------------------------------------------------------------------------
   su[, excludeReason := NA_character_]
-  # A total weight of 0 records that the species was looked for and not
+  # A weight of 0 records that the species was looked for and not
   # found (e.g. rows made by generateZerosUsingSL()). It adds nothing to the
   # estimate, and its haul counts as sampled with zero catch.
-  # Zeros are read from the total weight, whatever the within-sample factor
-  su[!is.na(WliveNode) & WliveNode == 0, excludeReason := zeroSampleReason()]
+  # Zeros are read from the weights, whatever the within-sample factor
+  su[zeroNode == TRUE, excludeReason := zeroSampleReason()]
   su[is.na(excludeReason) & notSampledInTree == TRUE,
      excludeReason := "SAsamp is N (not sampled)"]
   su[is.na(excludeReason) & SAlowHierarchy == "D",
@@ -341,7 +355,7 @@ getSampleUnits <- function(RDBESDataObj,
   nZero <- su[excludeReason == zeroSampleReason(), .N]
   if (nZero > 0) {
     log <- addToRatioLog(log, step, "info",
-      "Recorded zeros (total weight 0): the species was not found, zero catch",
+      "Recorded zeros (weight 0): the species was not found, zero catch",
       nZero, verbose)
   }
   ex <- su[include == FALSE & excludeReason != zeroSampleReason(), .N,

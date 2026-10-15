@@ -51,7 +51,7 @@ column (\code{marketPropCatCol}) and a proportion column
 Proportions are used together with
 \code{totalLandings} to obtain the landed weight per category as
 \eqn{W_c = totalLandings \times prop_c} (exactly \code{Rtot_landing *
-  prop_MC}). When \code{NULL} (default) the function falls back to the
+prop_MC}). When \code{NULL} (default) the function falls back to the
 per-sample SA raise factor controlled by \code{raiseVar}.}
 
 \item{totalLandings}{Optional. A single number: the TOTAL landed weight of
