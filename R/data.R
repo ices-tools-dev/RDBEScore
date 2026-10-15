@@ -119,6 +119,11 @@
 
 #' A dataset containing test RDBES data for H1 in the RDBESDataObject structure
 #'
+#' Downloaded from production RDBES on 2026-10-15 after upload screening.
+#' The original eight designs and sampling identifiers are retained. Dates use
+#' ISO format, the registered test sampling scheme is used, and species-list
+#' links follow the list names in SS, correcting mismatched legacy SL/IS data.
+#'
 #' @format A list containing entries required for H1 RDBES data:
 #' \describe{
 #'   \item{DE}{the Design data table}
@@ -187,6 +192,10 @@
 "H8ExampleEE1"
 
 #' A dataset containing test RDBES data for H5 in the RDBESDataObject structure
+#'
+#' Downloaded from production RDBES on 2026-10-15 after upload screening.
+#' The original observations and table identifiers are retained. Dates use ISO
+#' format and legacy sampling-scheme and CL/CE vocabulary codes are updated.
 #'
 #' @format A list containing entries required for H5 RDBES data:
 #' \describe{

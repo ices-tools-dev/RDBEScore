@@ -1,11 +1,13 @@
+# AI-assisted: Yes
+# Review: pending
 capture.output({  ## suppresses printing of console output when running test()
 
 
 # common parameters
 # H1 directory
-dirH1 <- "./h1_v_20250211/"
+dirH1 <- "./h1_v_20261015/"
 # H5 directory
-dirH5 <- "./h5_v_20250211/"
+dirH5 <- "./h5_v_20261015/"
 
 
 createH1TestData<- function(){
@@ -13,8 +15,8 @@ createH1TestData<- function(){
   #setwd("./tests/testthat/")
   myH1 <- createRDBESDataObject(input = dirH1)
   myH1 <- filterAndTidyRDBESDataObject(myH1,
-                                       fieldsToFilter =c("DEsampScheme"),
-                                       valuesToFilter = c("National Routine"))
+                                       fieldsToFilter = c("DEstratumName"),
+                                       valuesToFilter = c("DE_stratum1_H1", "DE_stratum2_H1", "DE_stratum3_H1"))
 
   # Keep 5 SA rows
   numOfRows <- 5
@@ -34,7 +36,7 @@ createH5TestData <- function(){
   myH5 <- createRDBESDataObject(input = dirH5)
   myH5 <- filterAndTidyRDBESDataObject(myH5,
                                        fieldsToFilter =c("DEsampScheme"),
-                                       valuesToFilter = c("National Routine"))
+                                       valuesToFilter = c("WGRDBES-EST TEST 1"))
 
   numOfRows <- 5
   myH5[["SA"]] <- head(myH5[["SA"]],numOfRows)
