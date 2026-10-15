@@ -1,4 +1,4 @@
-#' Build the table of sample units for ratio estimation (hierarchies 1, 2, 5, 7 and 13)
+#' Build the table of sample units for ratio estimation
 #'
 #' First step of the ratio estimation workflow (see [doRatioEstimation()]).
 #' It returns one row per **lowest-level Sample (SA) record** of the requested
@@ -38,12 +38,13 @@
 #' 1 and logged. A presentation other than `WHL` with a factor of 1 is logged
 #' as suspicious.
 #'
-#' **Domain variables.** Date in hierarchies 1, 2 and 13: `FOendDate`, else
-#' `FOstartDate`, else `FTarvDate` (not in 13). In hierarchy 5: `LEdate`,
-#' else `FTarvDate` (when FT is used), else `OSsamDate`. In hierarchy 7:
-#' `LEdate`, else `OSsamDate`. Area, rectangle and métier: the SA value when
-#' filled, else the FO value (hierarchies 1, 2 and 13) or the LE value
-#' (hierarchies 5 and 7). In hierarchy 7, LE is not a sampling unit: it links
+#' **Domain variables.** Date in hierarchies 1, 2, 3, 10 and 13:
+#' `FOendDate`, else `FOstartDate`, else `FTarvDate` (not in 13). In
+#' hierarchy 5: `LEdate`, else `FTarvDate` (when FT is used), else
+#' `OSsamDate`. In hierarchy 7: `LEdate`, else `OSsamDate`. In hierarchy 8:
+#' `LEdate`. Area, rectangle and métier: the SA value when filled, else the
+#' FO value (hierarchies 1, 2, 3, 10 and 13) or the LE value (hierarchies 5,
+#' 7 and 8). TE (temporal event) gives no domain. In hierarchy 7, LE is not a sampling unit: it links
 #' to SS (`LE$SSid`) and describes the sampled landing. More than one LE per
 #' SS is logged and the first is used. Without LE, area and métier come from
 #' SA only. `areaLookup` recodes areas (for example divisions to sub-areas).
@@ -64,11 +65,12 @@
 #' estimate. A haul whose samples of the species are all excluded is treated
 #' as not sampled (non-response) by [getStageWeights()].
 #'
-#' Upper hierarchies 1, 2, 5, 7 and 13 are implemented. The object must hold one
-#' hierarchy. Clustering (`XXclustering` other than `"N"`) is logged. It does
-#' not affect the point estimates.
+#' Upper hierarchies 1, 2, 3, 5, 7, 8, 10 and 13 are implemented. The object
+#' must hold one hierarchy. Clustering (`XXclustering` other than `"N"`) is
+#' logged. It does not affect the point estimates.
 #'
-#' @param RDBESDataObj A valid `RDBESDataObject` of hierarchy 1, 2, 5, 7 or 13.
+#' @param RDBESDataObj A valid `RDBESDataObject` of hierarchy 1, 2, 3, 5,
+#'   7, 8, 10 or 13.
 #' @param species Species to estimate, as AphiaID(s) (WoRMS), matched to
 #'   `SAspeCode`, for example `127143` for plaice. Several values are allowed.
 #'   FAO 3-alpha codes are not accepted: rows added by

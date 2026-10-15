@@ -15,7 +15,9 @@ raisingScheme(
 \arguments{
 \item{...}{Stage raising methods, named by stage (\code{VS}, \code{FT}, \code{FO} in
 hierarchy 1, \code{FT}, \code{FO} in hierarchy 2, \code{OS}, \code{LE}, \code{FT} in hierarchy 5,
-\code{OS} in hierarchy 7, \code{FO} in hierarchy 13),
+\code{OS} in hierarchy 7, \code{FO} in hierarchy 13, \code{TE}, \code{VS}, \code{FT}, \code{FO} in
+hierarchy 3, \code{VS}, \code{TE}, \code{FT}, \code{FO} in hierarchy 10, \code{TE}, \code{VS}, \code{LE}
+in hierarchy 8),
 each made with
 \code{\link[=stageRaising]{stageRaising()}}.}
 
@@ -46,8 +48,10 @@ by the DE ratio.
 Stages not given are \code{"none"} (pooled). The species selection (SS) is
 always 1: a species list with more species gets no extra weight.
 
-Hierarchies 1, 2, 5, 7 and 13 are implemented. Hierarchy 2 has the stages
-FT and FO (trips are sampled directly). In hierarchy 5 the stages are OS
+Hierarchies 1, 2, 3, 5, 7, 8, 10 and 13 are implemented. Hierarchy 2 has
+the stages FT and FO (trips are sampled directly). Hierarchy 3 has TE
+(temporal event), VS, FT and FO. Hierarchy 10 has VS, TE, FT and FO.
+Hierarchy 8 has TE, VS and LE. In hierarchy 5 the stages are OS
 (onshore event) and LE (landing event). FT is an optional stage under LE:
 name it (\code{FT = stageRaising(...)}) when the SS records of the data link to
 FT. If the data use FT and the scheme does not name it, FT is \code{"none"}.

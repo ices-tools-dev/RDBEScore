@@ -13,7 +13,7 @@
 #' @noRd
 ratioFieldCodeTypes <- function() {
   # Design fields of the upper hierarchy tables of all supported hierarchies
-  upper <- c("VS", "FT", "FO", "OS", "LE", "SS")
+  upper <- c("TE", "LO", "VS", "FT", "FO", "OS", "LE", "SS")
   byPrefix <- function(prefixes, suffix, codeType) {
     data.table::data.table(field = paste0(prefixes, suffix),
                            codeType = codeType)
@@ -47,7 +47,7 @@ ratioFieldCodeTypes <- function() {
 #' Upper hierarchies supported by stage-wise raising
 #' @keywords internal
 #' @noRd
-supportedHierarchies <- function() c(1L, 2L, 5L, 7L, 13L)
+supportedHierarchies <- function() c(1L, 2L, 3L, 5L, 7L, 8L, 10L, 13L)
 
 #' What stage-wise raising needs to know about one upper hierarchy
 #'
@@ -92,6 +92,13 @@ hierarchySpec <- function(hierarchy) {
                areaCol = "FOarea", statRectCol = "FOstatRect",
                metierCol = "FOmetier6",
                unitLabels = c(FT = "nTrips", FO = "nHauls")),
+    # As H1 with temporal events (TE) above the vessels
+    "3" = list(optional = character(0),
+               dateCols = c("FOendDate", "FOstartDate", "FTarvDate"),
+               areaCol = "FOarea", statRectCol = "FOstatRect",
+               metierCol = "FOmetier6",
+               unitLabels = c(TE = "nTemporalEvents", VS = "nVessels",
+                              FT = "nTrips", FO = "nHauls")),
     "5" = list(optional = c(FT = "LE"),
                dateCols = c("LEdate", "FTarvDate", "OSsamDate"),
                areaCol = "LEarea", statRectCol = "LEstatRect",
@@ -105,6 +112,20 @@ hierarchySpec <- function(hierarchy) {
                areaCol = "LEarea", statRectCol = "LEstatRect",
                metierCol = "LEmetier6",
                unitLabels = c(OS = "nOnshoreEvents")),
+    # Temporal events, vessels in them, and their landing events
+    "8" = list(optional = character(0),
+               dateCols = "LEdate",
+               areaCol = "LEarea", statRectCol = "LEstatRect",
+               metierCol = "LEmetier6",
+               unitLabels = c(TE = "nTemporalEvents", VS = "nVessels",
+                              LE = "nLandingEvents")),
+    # As H1 with temporal events (TE) between the vessels and their trips
+    "10" = list(optional = character(0),
+                dateCols = c("FOendDate", "FOstartDate", "FTarvDate"),
+                areaCol = "FOarea", statRectCol = "FOstatRect",
+                metierCol = "FOmetier6",
+                unitLabels = c(VS = "nVessels", TE = "nTemporalEvents",
+                               FT = "nTrips", FO = "nHauls")),
     # Hauls sampled directly in SD, no vessel or trip stage
     "13" = list(optional = character(0),
                 dateCols = c("FOendDate", "FOstartDate"),

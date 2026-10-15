@@ -2,7 +2,7 @@
 % Please edit documentation in R/doRatioEstimation.R
 \name{doRatioEstimation}
 \alias{doRatioEstimation}
-\title{Stage-wise estimation of numbers at age or length (hierarchies 1, 2, 5, 7 and 13, landings)}
+\title{Stage-wise estimation of numbers at age or length (landings)}
 \usage{
 doRatioEstimation(
   RDBESDataObj,
@@ -25,7 +25,8 @@ doRatioEstimation(
 )
 }
 \arguments{
-\item{RDBESDataObj}{A valid \code{RDBESDataObject} of hierarchy 1, 2, 5, 7 or 13.}
+\item{RDBESDataObj}{A valid \code{RDBESDataObject} of hierarchy 1, 2, 3, 5,
+7, 8, 10 or 13.}
 
 \item{species}{Species to estimate, as AphiaID(s) (WoRMS), matched to
 \code{SAspeCode}, for example \code{127143} for plaice. Several values are allowed.
@@ -134,10 +135,11 @@ estimates per domain and class, and per domain (SOP, sample counts).
 Selection methods are not used to compute weights. Non-probabilistic
 designs are logged as assumptions.
 
-Implemented for upper hierarchies 1, 2, 5, 7 and 13. The scheme must be
-made for the hierarchy of the data (\code{raisingScheme(..., hierarchy = 5)}).
+Implemented for upper hierarchies 1, 2, 3, 5, 7, 8, 10 and 13. The scheme
+must be made for the hierarchy of the data
+(\code{raisingScheme(..., hierarchy = 5)}).
 
-Not in this version: variance, hierarchies other than 1, 2, 5, 7 and 13,
+Not in this version: variance, hierarchies 4, 6, 9, 11 and 12,
 discards.
 }
 \section{Development review}{

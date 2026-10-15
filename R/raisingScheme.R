@@ -314,8 +314,10 @@ externalAux <- function(data, by, col) {
 #' Stages not given are `"none"` (pooled). The species selection (SS) is
 #' always 1: a species list with more species gets no extra weight.
 #'
-#' Hierarchies 1, 2, 5, 7 and 13 are implemented. Hierarchy 2 has the stages
-#' FT and FO (trips are sampled directly). In hierarchy 5 the stages are OS
+#' Hierarchies 1, 2, 3, 5, 7, 8, 10 and 13 are implemented. Hierarchy 2 has
+#' the stages FT and FO (trips are sampled directly). Hierarchy 3 has TE
+#' (temporal event), VS, FT and FO. Hierarchy 10 has VS, TE, FT and FO.
+#' Hierarchy 8 has TE, VS and LE. In hierarchy 5 the stages are OS
 #' (onshore event) and LE (landing event). FT is an optional stage under LE:
 #' name it (`FT = stageRaising(...)`) when the SS records of the data link to
 #' FT. If the data use FT and the scheme does not name it, FT is `"none"`.
@@ -324,7 +326,9 @@ externalAux <- function(data, by, col) {
 #'
 #' @param ... Stage raising methods, named by stage (`VS`, `FT`, `FO` in
 #'   hierarchy 1, `FT`, `FO` in hierarchy 2, `OS`, `LE`, `FT` in hierarchy 5,
-#'   `OS` in hierarchy 7, `FO` in hierarchy 13),
+#'   `OS` in hierarchy 7, `FO` in hierarchy 13, `TE`, `VS`, `FT`, `FO` in
+#'   hierarchy 3, `VS`, `TE`, `FT`, `FO` in hierarchy 10, `TE`, `VS`, `LE`
+#'   in hierarchy 8),
 #'   each made with
 #'   [stageRaising()].
 #' @param SA The raising within the sample, made with [sampleRaising()].

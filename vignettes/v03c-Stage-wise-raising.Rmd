@@ -47,11 +47,12 @@ The factors of all stages are multiplied, so each sample gets one weight
 the numbers at age in the samples.
 
 The same functions work for hierarchy 2 (trips sampled directly),
-hierarchy 5 (onshore sampling), hierarchy 7 (onshore events only) and
-hierarchy 13 (hauls sampled directly), see [Hierarchy 2](#hierarchy-2),
-[Hierarchy 5](#hierarchy-5), [Hierarchy 7](#hierarchy-7) and
-[Hierarchy 13](#hierarchy-13) below. Other hierarchies are not
-implemented yet.
+hierarchy 5 (onshore sampling), hierarchy 7 (onshore events only),
+hierarchy 13 (hauls sampled directly) and hierarchies 3, 8 and 10 (with
+temporal events), see [Hierarchy 2](#hierarchy-2),
+[Hierarchy 5](#hierarchy-5), [Hierarchy 7](#hierarchy-7),
+[Hierarchy 13](#hierarchy-13) and [Temporal events](#temporal-events)
+below. Hierarchies 4, 6, 9, 11 and 12 are not implemented yet.
 
 ```{r}
 library(RDBEScore)
@@ -511,6 +512,36 @@ res13 <- doRatioEstimation(myH13Object, species = 127143, raising = sc13)
 Domains come from FO, as in hierarchy 1, but there is no `FTarvDate` to
 fall back on. The sample count in `res$domains` is `nHauls`.
 
+## Temporal events: hierarchies 3, 8 and 10 {#temporal-events}
+
+A temporal event (TE) is a period that is sampled, for example a week.
+It is a stage like any other, with `TEnumTotal`, `TEnumSamp`,
+`TEstratumName` and the auxiliary fields, and it gives no domain.
+
+| Hierarchy | Stages | Domains from |
+|---|---|---|
+| 3 | TE > VS > FT > FO | FO |
+| 10 | VS > TE > FT > FO | FO |
+| 8 | TE > VS > LE | LE |
+
+In hierarchies 3 and 8 the vessels are sampled within a temporal event,
+so `VSnumTotal` is the number of vessels in that period. In hierarchy 10
+the temporal events are sampled within a vessel.
+
+```{r, eval = FALSE}
+# Weeks counted within their TE stratum (for example a month), vessels
+# counted per week, landing events counted per vessel
+sc8 <- raisingScheme(TE = stageRaising("count"),
+                     VS = stageRaising("count"),
+                     LE = stageRaising("count"), hierarchy = 8)
+res8 <- doRatioEstimation(H8ExampleEE1, species = 126425, raising = sc8)
+```
+
+`"count"` divides by the sampled units found in the data, not by the
+recorded `XXnumSamp`. In `H8ExampleEE1` some weeks have two vessel
+records that each say `VSnumSamp = 1`. Their vessel factor is then
+`VSnumTotal / 2`.
+
 ## Checks
 
 The run stops with a message when the information does not fit the
@@ -546,5 +577,5 @@ scheme, for example:
     the species from the sample weights. SOP therefore compares the
     raised fish weights with the raised sample weights. A value of 1
     does not prove the weights are right.
--   Not covered yet: variance, sub-sampling of BV, hierarchies other
-    than 1, 2, 5, 7 and 13, and discards.
+-   Not covered yet: variance, sub-sampling of BV, hierarchies 4, 6, 9,
+    11 and 12, and discards.

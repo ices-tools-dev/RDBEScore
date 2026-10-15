@@ -195,8 +195,12 @@ test_that("doRatioEstimation needs a raising scheme", {
 })
 
 test_that("only implemented hierarchies and landings are accepted", {
-  expect_error(getSampleUnits(H8ExampleEE1, species = 126425, strict = FALSE),
-               "Hierarchy 8 is not implemented yet")
+  # an object labelled with a hierarchy that is not implemented
+  notYet <- setdiff(1:13, RDBEScore:::supportedHierarchies())[1]
+  obj <- H8ExampleEE1
+  obj$DE <- data.table::copy(obj$DE)[, DEhierarchy := notYet]
+  expect_error(getSampleUnits(obj, species = 126425, strict = FALSE),
+               paste0("Hierarchy ", notYet, " is not implemented yet"))
   sim <- simulate()
   expect_error(getSampleUnits(sim$obj, species = 127143, catchCat = "Dis"),
                "Lan")
