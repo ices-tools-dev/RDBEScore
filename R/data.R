@@ -4,6 +4,9 @@
 #'
 #' A data frame containing the tables required for each RDBES hierachy
 #'
+#' Tables without children in the hierarchy (for example LE under SS in H7)
+#' come right after their parent table and are not sampling units.
+#'
 #' @format A data frame containing the tables required for each RDBES hierachy.
 #' \describe{
 #'   \item{hierarchy}{the hierachy this applies to H1 to H13}
@@ -13,7 +16,9 @@
 #'   \item{samplingUnit}{is this table a sampling unit within the hierarchy?}
 #'   \item{sortOrder}{the table sort order within the hiaerarchy}
 #' }
-#' @source \url{https://github.com/davidcurrie2001/MI_RDBES_ExchangeFiles}
+#' @source The ICES RDBES XSD files in data-raw/xsd and the RDBES CS data
+#'   model in data-raw/dataFormat, hard-coded in
+#'   data-raw/getTablesInHierarchies.r
 "tablesInRDBESHierarchies"
 
 

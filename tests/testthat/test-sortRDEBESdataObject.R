@@ -1,6 +1,7 @@
 capture.output({  ## suppresses printing of console output when running test()
 test_that("sorting a raw object works for H8", {
-  correctOrder <- c('DE', 'SD', 'TE', 'VS', 'FT', 'LE', 'SS', 'SA', 'FM', 'BV',
+  # FT after LE: in the H8 XSD (data-raw/xsd/H8.xsd) FT hangs under LE
+  correctOrder <- c('DE', 'SD', 'TE', 'VS', 'LE', 'FT', 'SS', 'SA', 'FM', 'BV',
                     'FO', 'LO', 'OS', 'VD', 'SL','IS', 'CL', 'CE')
   expect_equal(names(sort(H8ExampleEE1)),correctOrder)
 })

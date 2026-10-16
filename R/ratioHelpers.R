@@ -168,6 +168,13 @@ hierarchySpec <- function(hierarchy) {
                 unitLabels = c(FO = "nHauls")))
   if (is.null(spec$info)) spec$info <- list()
   if (is.null(spec$linkStages)) spec$linkStages <- character(0)
+  # Link stages are not sampling units, so put them back in the chain at
+  # their place in the hierarchy
+  if (length(spec$linkStages) > 0) {
+    allTables <- getTablesInRDBESHierarchy(h, includeOptTables = FALSE,
+                                           includeLowHierTables = FALSE)
+    chain <- allTables[allTables %in% c(chain, spec$linkStages)]
+  }
   c(list(hierarchy = h, stages = setdiff(chain, c("DE", "SD", "SS", "SA"))),
     spec)
 }

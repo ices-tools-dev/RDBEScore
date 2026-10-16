@@ -16,12 +16,18 @@ A data frame containing the tables required for each RDBES hierachy.
 }
 }
 \source{
-\url{https://github.com/davidcurrie2001/MI_RDBES_ExchangeFiles}
+The ICES RDBES XSD files in data-raw/xsd and the RDBES CS data
+model in data-raw/dataFormat, hard-coded in
+data-raw/getTablesInHierarchies.r
 }
 \usage{
 tablesInRDBESHierarchies
 }
 \description{
 A data frame containing the tables required for each RDBES hierachy
+}
+\details{
+Tables without children in the hierarchy (for example LE under SS in H7)
+come right after their parent table and are not sampling units.
 }
 \keyword{datasets}
