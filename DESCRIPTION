@@ -119,6 +119,7 @@ Suggests:
 Depends:
     R (>= 4.1)
 Imports:
-    data.table
+    data.table,
+    icesVocab
 VignetteBuilder: knitr
 Config/roxygen2/version: 8.1.1

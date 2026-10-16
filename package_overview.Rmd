@@ -19,7 +19,7 @@ output:
 
 - import functions like `createRDBESDataObject` and `validateRDBESDataObject`
 - manipulate functions such as `filterAndTidyRDBESDataObject`, `combineRDBESDataObjects` and `removeBrokenVesselLinks`
-- analysis functions including `createRDBESEstObject`, `doEstimationForAllStrata`, `doBVestimCANUM` and `exportEstimationResultsToInterCatchFormat` to generate estimates and export them to InterCatch format.
+- analysis functions including `createRDBESEstObject`, `doEstimationForAllStrata`, `doRatioEstimation` and `exportEstimationResultsToInterCatchFormat` to generate estimates and export them to InterCatch format.
 
 These functions support the entire workflow from data import through cleaning to estimation and reporting.  The package is designed to work with data from the RDBES, which is a relational database system used by ICES to store data from regional sampling programmes. The `RDBEScore` package is intended to be used by national data coordinators, data analysts, and scientists working with data from the RDBES.
 
@@ -258,132 +258,36 @@ How to interpret these results in the above example?
  
 
 
-## Basic Ratio Estimation
+## Ratio Estimation
 
-In practice the data submitters have to prepare Intercatch data call tables. In the future the estimation functions should be made so that they estimate the values for these tables. 
-
-The package includes a function **doBVestimCANUM(...)** that can be used for a basic estimation of the total catch at number (CANUM) for a specified biological variable, such as age or length. 
-
+**doRatioEstimation(...)** estimates numbers, mean weight and mean length at age or length for one species. Each stage of the sampling hierarchy is raised with a method you choose (counts, an auxiliary variable, a ratio, your own totals or inclusion probabilities), followed by a ratio to the totals in the DE table.
 
 ### Simple Estimation Example
 
-
-For the simplest case of estimation we need the **RDBESDataObject** with CS tables and a CL table. In the following example we will estimate the total number of sprat caught in the area *27.3.d.28.1* with the gear *OTM_SPF_16-31_0_0* for the first quarter of the year.
-
-```{r}
-#From the commercial landings table we need to get the total weight of the catches
-CLfieldstoSum <- c("CLoffWeight")
-```
-
-## Getting the Right Data
-
-The most important thing in this estimation is to get the same strata for the CS and CL tables. This means we want to take the samples from the same area, with the same gear and the same species. Exactly how this is done depends on the upper and lower hierarchy used and how the sampling is stratified. In the following example we are using the lower hierarchy C meaning that we are extracting the BV data as the biological data. 
+`H1StageRaisingExample` is a small simulated hierarchy 1 object for plaice. Here hauls are raised to the trip by counts, trips and vessels are pooled, and the DE step is a ratio to the landed live weight in DE.
 
 ```{r}
-#get the first quarter data from CS 
-strataListCS <- list(LEarea="27.3.d.28.1",
-                     LEmetier6 = "OTM_SPF_16-31_0_0",
-                     TEstratumName = month.name[1:3],
-                    SAspeCodeFAO = "SPR")
+scheme <- raisingScheme(
+  FO = stageRaising("count"),
+  DE = deRaising("ratio", total = "DEauxVarTot",
+                 value = "speciesLiveWeight", at = "SA"))
 
-#get the first quarter data from CL table
-strataListCL <- list(CLarea="27.3.d.28.1",
-                     CLquar = 1,
-                     CLmetier6 = "OTM_SPF_16-31_0_0",
-                     CLspecFAO = "SPR")
+res <- doRatioEstimation(H1StageRaisingExample, species = 127143,
+                         raising = scheme, target = "Age", plusGroup = 8,
+                         checkCodes = FALSE)
 ```
 
+## Estimation Results
 
-## Adding CL data to the lower hierarchy
-The function **addCLtoLowerCS(...)** can be used to add the commercial landings (CL) data to the lower hierarchy, enabling estimation of biological variables using corresponding landing weights.
-
+The estimates are per domain (year, quarter, area and métier by default) and age.
 
 ```{r}
-#we are using the lower hierarchy C meaning that we are extracting the BV data
-#as the biological data
-biolCLQ1 <- addCLtoLowerCS(H8ExampleEE1, strataListCS, strataListCL,
-                         combineStrata =T, lowerHierarchy = "C",
-                         CLfields = CLfieldstoSum)
+head(res$estimates)
 ```
 
-## Estimation based on CL and BV
-To estimate the total number of sprat caught in the area 27.3.d.28.1 with the gear OTM_SPF_16-31_0_0 for the first quarter of the year we need to use the function **doBVestimCANUM(...)**.  Details on this function and the overall estimation workflow are provided in the vignettes. 
-The output table should be enough to populate a classic InterCatch data call table. 
+The results can be formatted for the InterCatch data call with **exportEstimationResultsToInterCatchFormat()**.
 
-```{r canNum}
-lenCANUMQ1 <- doBVestimCANUM(biolCLQ1, c("sumCLoffWeight"),
-             classUnits = "Lengthmm",
-             classBreaks = seq(70,130,10),
-             verbose = FALSE)
-
-knitr::kable(lenCANUMQ1[order(lenCANUMQ1$LengthmmMean), c("Group", "WeightgMean", "LengthmmMean", "totNum")],
-             digits = 2)
-```
-
-
-## Exporting Results
-
-The results can be formatted for the InterCatch data call using **exportEstimationResultsToInterCatchFormat()**. 
-To do this we need to map the columns in our calculated object to the column names expected by the export function.
-
-```{r}
-# Add extra columns to the final result 
-addCols <- c(names(strataListCS),
-             names(strataListCL),
-             paste0('sum', CLfieldstoSum))
-
-ageCANUM <- doBVestimCANUM(biolCLQ1, addCols,
-             classUnits = "Ageyear",
-             classBreaks = 1:8,
-             verbose = FALSE)
-
-# Map the results to InterCatch format
-dataToExport <- data.frame(
-    # HI columns
-    Country = "EE",
-    Year = "2022",
-    SeasonType = "Quarter",
-    Season = ageCANUM$CLquar,
-    Fleet = ageCANUM$CLmetier6,
-    AreaType = "Div",
-    FishingArea = ageCANUM$CLarea,
-    DepthRange = "NA", 
-    
-    # SI columns
-    Species = ageCANUM$SAspeCodeFAO, 
-    Stock = "Unknown",
-    CatchCategory = "L",
-    ReportingCategory = "R",
-    DataToFrom = "Data",
-    Usage = "Used",
-    SamplesOrigin = "U",
-    QualityFlag = "U",
-    UnitCATON = "kg",
-    CATON = ageCANUM$sumCLoffWeight,
-    OffLandings = ageCANUM$sumCLoffWeight,
-    
-    # SD columns
-    Sex = "N",
-    CANUMtype = "L",
-    AgeLength = as.integer(as.character(ageCANUM$Group)),
-    PlusGroup = ageCANUM$plusGroup,
-    unitMeanWeight = "g", 
-    unitCANUM = "n",
-    UnitAgeOrLength = "Age", 
-    UnitMeanLength = "mm",
-    NumberCaught = ageCANUM$totNum,
-    MeanWeight = ageCANUM$WeightgMean,
-    MeanLength = ageCANUM$LengthmmMean
-)
-
-# Generate the InterCatch string
-ic_output <- exportEstimationResultsToInterCatchFormat(dataToExport)
-
-# Show the first few lines of the output
-head(ic_output)
-``` 
-
-See the vignettes 03b (ratio estimation) or 04b (stratified estimation) for more detailed examples and explanations of the estimation workflow and exporting results to InterCatch format.
+See vignette 03b (ratio estimator) for the raising methods, the steps one by one and all supported hierarchies.
 
 
 

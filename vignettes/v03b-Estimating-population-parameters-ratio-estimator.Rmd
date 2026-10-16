@@ -4,8 +4,11 @@ date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{03b Estimating population parameters: ratio estimator}
-  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 ```{r setup, include = FALSE}
@@ -15,177 +18,636 @@ knitr::opts_chunk$set(
 )
 ```
 
+## Introduction
 
-## Introduction 
+Countries raise their commercial samples in different ways. Some pool
+all sampled hauls and raise them directly to the landings. Others raise
+hauls to the trip by the number of hauls, trips to the vessel by trip
+landings, and so on. This vignette shows how to do any of these with one
+function, `doRatioEstimation()`, by choosing the raising method **per
+stage** of the sampling hierarchy.
 
-The aim of this document is to demonstrate how to estimate population parameters from RDBESDataObjects. 
+Hierarchy 1 is sampled top-down: design stratum (DE), vessel (VS), trip
+(FT), haul (FO), species selection (SS), sample (SA) and fish (BV, FM).
+Raising goes the other way:
+
+1.  **Within the sample**, the measured fish are raised to the catch
+    fraction of the haul, by default by the sampled weight
+    (`SAtotalWtMes / SAsampWtMes`).
+2.  **At every stage**, the sampled units are raised to their parent
+    unit (hauls to their trip, trips to their vessel, vessels to the DE
+    stratum) with a factor. The method of each stage is your choice.
+3.  **At the DE stratum**, the result is optionally calibrated to a
+    total of the DE stratum (`DEauxVarTot`).
+4.  **To your own totals**, optionally, for example landings from CL by
+    quarter and métier, with strata you choose.
+
+The factors of all stages are multiplied, so each sample gets one weight
+`wStages`. The estimate of numbers at age is the sum of `wStages` times
+the numbers at age in the samples.
+
+The same functions work for all hierarchies, see
+[Hierarchy 2](#hierarchy-2), [Hierarchy 5](#hierarchy-5),
+[Hierarchy 7](#hierarchy-7), [Hierarchy 13](#hierarchy-13),
+[Temporal events](#temporal-events), [Hierarchy 4](#hierarchy-4),
+[Hierarchy 6](#hierarchy-6) and [Locations](#locations) below.
 
 ```{r}
 library(RDBEScore)
+library(data.table)
 ```
 
-## Prerequisites
+## The example data
 
-We'll use some example data from the RDBES.  For your own data it's a good idea to check your RDBESDataObjects are valid after any manipulations you perform.
+`H1StageRaisingExample` is a small simulated hierarchy 1 object for
+plaice (PLE). Because it is simulated, the true numbers at age of the
+whole population are known, in `H1StageRaisingTruth`.
 
-
-## Estimation workflow
-
-Estimation actually  is done on a *RDBESEstObject* that is generate from *RDBESDataObject* using **createRDBESEstObject(...)**. The following example uses a dataset that  resembles in many ways real data at ICES area 27.3.d.28.1 from the Estonian Baltic Trawling fleet for 2022 sprat (*Sprattus sprattus*).The dataset has both total landings and commercial sampling data.
-
-```{r}
-H8ExampleEE1
-```
-The commercial sampling data, vessel details and species lists passed RDBES upload screening and were downloaded on 2026-10-14. CL and CE were attached locally and have not passed upload checks. The complete packaged object passes structural validation, including data-type checks.
-```{r}
-validateRDBESDataObject(H8ExampleEE1, checkDataTypes = TRUE)
-```
-
-
-
-
-### Simple Estimation Example
-
-
-For the simplest case of estimation we need the RDBESDataObject with CS tables and a CL table. In the following example we will estimate the total number of sprat caught in the area 27.3.d.28.1 with the gear OTM_SPF_16-31_0_0 for the first and last quarter of the year.
+There are 4 vessels with 2 trips each and 6 hauls per trip. The sampling
+is deliberately uneven: the two vessels that catch young plaice had only
+1 haul sampled per trip, the two vessels that catch old plaice had all 6
+hauls sampled.
 
 ```{r}
-#From the commertial landings table we need to get the total weight of the catches
-CLfieldstoSum <- c("CLoffWeight")
+obj <- H1StageRaisingExample
+obj$FO[, .(hauls = .N, sampled = sum(FOsamp == "Y")), by = .(FTid)]
+obj$DE[, .(DEstratumName, DEauxVarTot, DEauxVarName, DEauxVarUnit)]
 ```
 
-The most important thing in this estimation is to get the same strata for the CS and CL tables. This means we want to take the samples from the same area, with the same gear and the same species. Exactly how this is done depends on the upper and lower hierarchy used and how the sampling is stratified. In the following example we are using the lower hierarchy C meaning that we are extracting the BV data as the biological data. 
+## A raising scheme
+
+A scheme says how each stage is raised. It is built with
+`raisingScheme()`, one `stageRaising()` per stage and one `deRaising()`.
+Stages that are not given are pooled (`"none"`). SS is always 1: a
+species list with more species gets no extra weight.
+
+At each stage, the units are grouped by parent and design stratum
+(`XXstratumName`). For a group $h$, $s_h$ is the set of its sampled
+units and $n_h$ their number. Each sampled unit $i \in s_h$ gets a
+factor $f_i$:
+
+| method | factor $f_i$ | in words | fields used |
+|----|----|----|----|
+| `"none"` | $1$ | units pooled |  |
+| `"count"` | $N_h / n_h$ | units in the group / sampled units | $N_h$ = `XXnumTotal` |
+| `"aux"` | $X_h / \sum_{j \in s_h} x_j$ | aux total / sum of aux of the sampled units | $X_h$ = `XXauxVarTot`, $x_j$ = `XXauxVarValue` |
+| `"ratio"` | $T_h / \sum_{j \in s_h} v_j$ | total / sum of value | any columns you name, or a function for $v$ |
+| `"external"` | $T_h / \sum_{j \in s_h} v_j$ | total / sum of value | your own tables via `externalAux()` |
+| `"prob"` | $1 / \pi_i$ | 1 / inclusion probability | $\pi_i$ = `XXincProb` |
+
+*count* and *aux* are presets of *ratio*: *count* is $T_h = N_h$ with
+$v_j = 1$. The selection method (`XXselectMeth`) is never used to
+compute a factor, it is only logged.
+
+The factors are multiplied along the path, so each lowest-level sample
+$k$ gets one weight, for example in hierarchy 1
+
+$$w_k = f_{VS} \, f_{FT} \, f_{FO}$$
+
+(SS is always 1). With $y_{k,a}$ the numbers at age $a$ in sample $k$,
+raised within the sample, the estimate for domain $d$ in DE stratum $H$
+is
+
+$$\hat N_{d,a} = r_H \sum_{k \in d} w_k \, y_{k,a}$$
+
+with $r_H = 1$ for `deRaising("none")`, and for `deRaising("ratio")`
+
+$$r_H = \frac{T_H}{\sum_{k \in H} w_k \, x_k}$$
+
+where $T_H$ is `DEauxVarTot` and $x_k$ the same quantity measured on the
+samples (by default the live weight of the species in sample $k$).
+
+Within the sample, $y_{k,a} = f_k \, m_{k,a}$ with $m_{k,a}$ the fish
+measured and $f_k$ the within-sample factor of `sampleRaising()`. The
+auxiliary is scaled the same way, $x_k = f_k \, m_k$, so the ratio
+compares like with like.
+
+In the output, $f_k$ is `fSample`, $x_k$ is `xSample` and $w_k$ is
+`wStages` (all in `res$samples`), $r_H$ is `rDE` (in `res$ratios$DE`),
+$r_g$ is `rTotals` (in `res$ratios$totals`) and $y_{k,a}$ is `yN` (in
+`res$fishBySample`).
+
+With your own totals (`totalsRaising()`), a second ratio follows per
+totals stratum $g$:
+
+$$r_g = \frac{T_g}{\sum_{k \in g} w_k \, r_{H(k)} \, x_k}, \qquad
+\hat N_{d,a} = \sum_{k \in d} w_k \, r_{H(k)} \, r_{g(k)} \, y_{k,a}$$
+
+Here, hauls are raised to the trip by counts, trips and vessels are
+pooled, and the DE step is a ratio to the landed live weight in DE:
 
 ```{r}
-#get the first quarter data from CS 
-strataListCS <- list(LEarea="27.3.d.28.1",
-                     LEmetier6 = "OTM_SPF_16-31_0_0",
-                     TEstratumName = month.name[1:3],
-                    SAspeCodeFAO = "SPR")
-
-#get the first quarter data from CL table
-strataListCL <- list(CLarea="27.3.d.28.1",
-                     CLquar = 1,
-                     CLmetier6 = "OTM_SPF_16-31_0_0",
-                     CLspecFAO = "SPR")
-
-#we are using the lower hierarchy C meaning that we are extracting the BV data
-#as the biological data
-biolCLQ1 <- addCLtoLowerCS(H8ExampleEE1, strataListCS, strataListCL,
-                         combineStrata =T, lowerHierarchy = "C",
-                         CLfields = CLfieldstoSum)
+scheme <- raisingScheme(
+  FO  = stageRaising("count"),
+  DE = deRaising("ratio", total = "DEauxVarTot",
+                   value = "speciesLiveWeight", at = "SA"))
+scheme
 ```
 
-To estimate the total number of sprat caught in the area 27.3.d.28.1 with the gear OTM_SPF_16-31_0_0 for the first quarter of the year we need to use the function **doBVestimCANUM(...)**. The function takes the biological data table, the columns to be added to the final result and the class breaks for the estimation. The function returns a table with the estimates for the given class breaks.
-The allowed class units are "Ageyears", "Lenghtmm" and "Weightg". The class breaks are the number of classes to break the data into. The function will return the estimates for each class.
-The addColumns parameter is a vector of column names that will be added to the final result. The columns should be present in the biological data table. A minimum of one column (the sum column that in our case is "sumCLoffWeight") is required. The function will return the estimates for each unique value in the columns.
+## Running the estimation
 
 ```{r}
-lenCANUMQ1 <- doBVestimCANUM(biolCLQ1, c("sumCLoffWeight"),
-             classUnits = "Lengthmm",
-             classBreaks = seq(70,130,10),
-             verbose = FALSE)
-
-lenCANUMQ1
+res <- doRatioEstimation(obj, species = 127143, raising = scheme,
+                         target = "Age", plusGroup = 8, checkCodes = FALSE)
+res
 ```
 
+The species is given as its AphiaID (WoRMS), here `127143` for plaice,
+as in `SAspeCode` and in the species list. FAO codes are not accepted,
+because the zero and NA rows added by `generateZerosUsingSL()` and
+`generateNAsUsingSL()` carry the AphiaID only.
 
-To have the estimates for several Quarters in the result same biolCL table creation is done for the last quarter of the year. 
+`checkCodes = FALSE` skips the check of coded fields against the ICES
+code lists, which needs internet access.
+
+The result is a list of tables, each named by what one row of it is.
+Printing the result lists them. The estimates are per domain (year,
+quarter, area and métier by default) and age:
 
 ```{r}
-strataListCS <- list(LEarea="27.3.d.28.1",
-                     LEmetier6 = "OTM_SPF_16-31_0_0",
-                     TEstratumName = month.name[10:12], #the last 3 months of the year
-                    SAspeCodeFAO = "SPR")
-
-strataListCL <- list(CLarea="27.3.d.28.1",
-                     CLquar = 4,
-                     CLmetier6 = "OTM_SPF_16-31_0_0",
-                     CLspecFAO = "SPR")
-
-biolCLQ4 <- addCLtoLowerCS(H8ExampleEE1, strataListCS, strataListCL,
-                         combineStrata =T, lowerHierarchy = "C",
-                         CLfields = CLfieldstoSum)
+head(res$estimates)
 ```
 
+What belongs to a whole domain, such as the estimated live weight of the
+species, the sum-of-products check and the sample counts, is in
+`res$domains`:
+
 ```{r}
-#lets combine the two quarters into one table
-biolCL <- rbind(biolCLQ1, biolCLQ4)
+res$domains
 ```
 
-More columns from the above table can be added to the final result. The output is broken down by unique values in these columns.
+The DE ratios are in `res$ratios$DE`, the samples with their factors in
+`res$samples`.
+
+Assumptions and exclusions are collected in the log:
 
 ```{r}
-#this alllows to add extra columns into the final result 
-addCols <- c(names(strataListCS),
-             names(strataListCL),
-             paste0('sum', CLfieldstoSum))
-
-ageCANUM <- doBVestimCANUM(biolCL, addCols,
-             classUnits = "Ageyear",
-             classBreaks = 1:8,
-             verbose = FALSE)
-
-ageCANUM
+res$log[, .(step, level, message, n)]
 ```
 
-## Exporting results to InterCatch
+## The steps one by one
 
-The results can be formatted for the InterCatch data call using **exportEstimationResultsToInterCatchFormat()**. 
-To do this we need to map the columns in our calculated `ageCANUM` object to the column names expected by the export function.
+`doRatioEstimation()` runs a chain of exported functions. Each can be
+run on its own to inspect what happens.
+
+**1. Sample units.** One row per lowest-level SA (the SA with no
+sub-sample below it), with its path through the hierarchy, its domain,
+the factor within the sample `fSample` and its live weight `xSample`
+(kg).
 
 ```{r}
-# Map the results to InterCatch format
-dataToExport <- data.frame(
-    # HI columns
-    Country = "EE",
-    Year = "2022",
-    SeasonType = "Quarter",
-    Season = ageCANUM$CLquar,
-    Fleet = ageCANUM$CLmetier6,
-    AreaType = "Div",
-    FishingArea = ageCANUM$CLarea,
-    DepthRange = "NA", 
-    
-    # SI columns
-    Species = ageCANUM$SAspeCodeFAO, 
-    Stock = "Unknown",
-    CatchCategory = "L",
-    ReportingCategory = "R",
-    DataToFrom = "Data",
-    Usage = "Used",
-    SamplesOrigin = "U",
-    QualityFlag = "U",
-    UnitCATON = "kg",
-    CATON = ageCANUM$sumCLoffWeight,
-    OffLandings = ageCANUM$sumCLoffWeight,
-    
-    # SD columns
-    Sex = "N",
-    CANUMtype = "L",
-    AgeLength = as.integer(as.character(ageCANUM$Group)),
-    PlusGroup = ageCANUM$plusGroup,
-    #SampledCatch = ageCANUM$sumCLoffWeight,
-    #NumSamplesLngt = ageCANUM$lenMeas,
-    #NumLngtMeas = ageCANUM$lenMeas,
-    #NumSamplesAge = ageCANUM$lenMeas,
-    #NumAgeMeas = ageCANUM$lenMeas,
-    unitMeanWeight = "g", 
-    unitCANUM = "n",
-    UnitAgeOrLength = "Age", 
-    UnitMeanLength = "mm",
-    NumberCaught = ageCANUM$totNum,
-    MeanWeight = ageCANUM$WeightgMean,
-    MeanLength = ageCANUM$LengthmmMean
-)
+su <- getSampleUnits(obj, species = 127143)
+head(su[, .(SAid, FOid, FTid, VSid, quarter, area, fSample, xSample, include)])
+```
 
-# Generate the InterCatch string
-ic_output <- exportEstimationResultsToInterCatchFormat(dataToExport)
+**2. Expansion within the sample.** Numbers (and weights and lengths) at
+age of each sample, raised to the catch fraction it represents.
 
-# Show the first few lines of the output
-head(ic_output)
-``` 
+```{r}
+ex <- expandWithinSample(obj, su, target = "Age")
+head(ex[, .(SAid, class, yN, yW_g)])
+```
 
+**3. Unit tables and stage factors.** `getUnitTable()` returns all units
+of one stage, including sampled hauls in which no plaice was found.
+`computeStageFactors()` is the engine that computes the factor of every
+sampled unit.
+
+```{r}
+hauls <- getUnitTable(obj, "FO")
+head(hauls[, .(FOid, FTid, FOstratumName, FOnumTotal, FOnumSamp, sampled)])
+f <- computeStageFactors(hauls, id = "FOid", by = c("FTid", "FOstratumName"),
+                         total = "FOnumTotal", sampled = "sampled")
+unique(f[, .(FTid, n, total, fStage)])
+```
+
+Trips of the young vessels have 1 sampled haul out of 6, so each sampled
+haul counts 6 times. Trips of the old vessels have all hauls sampled, so
+the factor is 1.
+
+**4. Stage weights.** The factors of all stages, multiplied into one
+weight `wStages` per sample.
+
+```{r}
+sw <- getStageWeights(obj, su, scheme)
+unique(sw[, .(VSid, FTid, f_VS, f_FT, f_FO, wStages)])
+```
+
+**5. Raising to the DE stratum.** Weighted sums per DE stratum, domain
+and age, with the DE ratio `DEauxVarTot / sum(w x)`.
+
+```{r}
+raised <- raiseToDE(ex, sw, obj)
+attr(raised, "deRatios")   # rDE = total / xWeightedStratum
+```
+
+When the scheme has totals of your own,
+`raiseToTotals(raised, ex, sw, obj)` follows (see [Raising to your own
+totals](#own-totals)).
+
+**6. Summary.** Numbers, mean weight and mean length per domain and age,
+and per domain the estimated live weight and the sum-of-products check.
+
+```{r}
+head(summariseRatioEstimates(raised, plusGroup = 8))
+summariseRatioDomains(raised)
+```
+
+## Why the method per stage matters
+
+The sampled hauls are not spread evenly: old-fish vessels are sampled
+six times more heavily than young-fish vessels. Pooling the hauls lets
+the old fish dominate. Raising hauls by counts, or by an auxiliary
+variable, corrects for that.
+
+```{r}
+schemes <- list(
+  pooled = raisingScheme(DE = deRaising("ratio")),
+  countHauls = scheme,
+  auxChain = raisingScheme(FO = stageRaising("aux"),
+                           FT = stageRaising("aux"),
+                           DE = deRaising("ratio")),
+  countAll = raisingScheme(FO = stageRaising("count"),
+                           FT = stageRaising("count"),
+                           VS = stageRaising("count")))
+
+meanAge <- function(d) d[, sum(age * N) / sum(N)]
+comparison <- rbindlist(lapply(names(schemes), function(nm) {
+  r <- doRatioEstimation(obj, species = 127143, raising = schemes[[nm]],
+                         checkCodes = FALSE)
+  data.table(scheme = nm, meanAge = meanAge(r$estimates),
+             totalN = sum(r$estimates$N))
+}))
+rbind(data.table(scheme = "truth", meanAge = meanAge(H1StageRaisingTruth),
+                 totalN = sum(H1StageRaisingTruth$N)),
+      comparison)
+```
+
+-   **pooled** over-estimates the mean age by more than a year and
+    under-estimates the numbers, because old fish are heavier.
+-   **countHauls** removes most of that error.
+-   **auxChain** uses the landed weight of each haul and trip, which
+    follows the catch even more closely.
+-   **countAll** has no DE ratio, so its level depends only on the
+    sampled hauls. It is the design-based expansion.
+
+This is one simulated data set, so the differences between the corrected
+schemes are partly chance. The pooling error is not: it comes from the
+sampling design.
+
+## Other options
+
+**Any columns, or a function.** With `"ratio"` you name the total and
+the value. The value may be a function of the unit table, for example
+days at sea:
+
+```{r, eval = FALSE}
+daysAtSea <- function(u) {
+  as.numeric(as.Date(u$FTarvDate) - as.Date(u$FTdepDate)) + 1
+}
+stageRaising("ratio", total = "FTauxVarTot", value = daysAtSea)
+```
+
+**External auxiliary information.** Values or totals that are not in the
+upload, such as logbook landings or national statistics, can be given as
+a table with key columns:
+
+```{r}
+logbook <- data.frame(FTid = obj$FT$FTid, landKg = obj$FT$FTauxVarValue)
+external <- raisingScheme(
+  FT = stageRaising("external", total = "FTauxVarTot",
+                    value = externalAux(logbook, by = "FTid",
+                                        col = "landKg")),
+  FO = stageRaising("count"),
+  DE = deRaising("ratio"))
+external
+```
+
+**Reported inclusion probabilities.** `stageRaising("prob")` uses
+`1 / XXincProb` as reported.
+
+**Strata.** By default every stage is raised within its design stratum.
+`strata = NULL` pools the strata of a parent, and another column of the
+stage table can be named instead.
+
+**The DE step.** `deRaising("none")` takes the weighted sum as the
+estimate. Every stage must then be raised to its population, unless the
+scheme has totals. With `at = "FT"` (or `"FO"`, `"VS"`) the DE ratio
+uses a quantity measured on trips (hauls, vessels), and sampled units
+without the species stay in the sum. Every stage below `at` must then be
+raised, otherwise x covers whole trips while the numbers cover only
+their sampled hauls.
+
+**The within-sample factor.** `SA = sampleRaising("weight")` is the
+default (`SAtotalWtMes / SAsampWtMes`). `"count"` uses
+`SAnumTotal / SAnumSamp`, and `"none"` takes the measured fish as they
+are. The x of the DE or totals ratio can be `"speciesLiveWeight"`
+(default), `"fishWeight"` (the summed weight of the fish counted) or
+`"fishCount"`.
+
+## Raising to your own totals {#own-totals}
+
+The DE total covers the sampling frame. Often you also have totals that
+the frame does not, such as all landings in CL, or effort in CE. A
+`totalsRaising()` step raises the estimate to them, after the DE step.
+`doRatioEstimation()` then runs `raiseToTotals()` after `raiseToDE()`.
+It applies the totals ratio to every sample before summing per domain,
+because a totals stratum can cut across domains and DE strata. You
+supply the totals as a table, and its key columns are the strata. They
+can be any column the samples carry: the domain variables, an SA column
+such as `SAcommCat`, or a column of a stage table.
+
+Here the landings in CL are summed per quarter, area and métier:
+
+```{r}
+cl <- obj$CL[, .(kg = sum(CLoffWeight)),
+             by = .(quarter = CLquar, area = CLarea, metier6 = CLmetier6)]
+cl
+withTotals <- raisingScheme(
+  FO = stageRaising("count"),
+  DE = deRaising("ratio"),
+  totals = totalsRaising(externalAux(cl, by = c("quarter", "area",
+                                                "metier6"), col = "kg")))
+withTotals
+resT <- doRatioEstimation(obj, species = 127143, raising = withTotals,
+                          checkCodes = FALSE)
+resT$ratios$totals
+```
+
+In this simulated object the DE total equals the CL landings, so the
+totals ratios are near 1. They adjust each quarter × area cell to its
+own landings, where the DE ratio used one factor for the whole stratum.
+Because every cell lies inside the one DE stratum, the DE ratio cancels:
+the result is the same without it. The DE step matters when a totals
+stratum spans several DE strata, and the totals step matters most when
+the frame covers only part of the landings.
+
+The run stops when a totals stratum has samples but no row in your
+table, which usually means codes that do not match (for example `27.4`
+against `27.4.a`). A total without samples is logged and not raised.
+
+Direct raising by size category, with no stage factors and no scaling
+within the sample, is one combination of these options:
+
+```{r, eval = FALSE}
+bySize <- myCL[, .(kg = sum(CLoffWeight)),
+               by = .(quarter = CLquar, area = CLarea,
+                      metier6 = CLmetier6, SAcommCat = CLsizeCat)]
+raisingScheme(
+  SA = sampleRaising("none"),
+  totals = totalsRaising(
+    externalAux(bySize, by = c("quarter", "area", "metier6", "SAcommCat"),
+                col = "kg"),
+    value = "fishWeight"))
+```
+
+Per stratum and size category $c$ this gives
+$\hat N_a = \sum_c n_{a,c} \, W_c / \sum_{j \in c} \mathrm{wt}_j$: the
+landed weight of the category divided by the weight of the measured
+fish, times the fish of age $a$ among them.
+
+## Hierarchy 2 {#hierarchy-2}
+
+Hierarchy 2 is at-sea sampling without the vessel stage: design stratum
+(DE), trip (FT), fishing operation (FO), species selection (SS) and
+sample (SA). Trips are sampled directly in SD, so FT is raised to the DE
+stratum. `FTnumTotal` is the number of trips in the population of the FT
+stratum. The vessel of a trip is in VD, through the `VDid` of FT.
+
+The scheme names FT and FO and says `hierarchy = 2`:
+
+```{r, eval = FALSE}
+# Trips and hauls counted, then a ratio to the DE total
+sc2 <- raisingScheme(FT = stageRaising("count"),
+                     FO = stageRaising("count"),
+                     DE = deRaising("ratio"),
+                     hierarchy = 2)
+res2 <- doRatioEstimation(myH2Object, species = 127143, raising = sc2)
+```
+
+Domains come from FO, as in hierarchy 1. The sample counts in
+`res$domains` are `nTrips` and `nHauls`. Naming VS in an H2 scheme
+stops.
+
+## Hierarchy 5 {#hierarchy-5}
+
+Hierarchy 5 is onshore sampling: design stratum (DE), onshore event (OS,
+for example an auction day or a port day), landing event (LE), species
+selection (SS) and sample (SA). FT is optional under LE. When the SS
+records link to FT, FT is a third raising stage (OS, LE, FT).
+
+The functions are the same. Only the stage names change, and the scheme
+must say `hierarchy = 5`:
+
+```{r, eval = FALSE}
+# Auction days counted within their OS stratum, landing events counted
+# per auction day, then a ratio to the DE total
+sc5 <- raisingScheme(OS = stageRaising("count"),
+                     LE = stageRaising("count"),
+                     DE = deRaising("ratio"),
+                     hierarchy = 5)
+res5 <- doRatioEstimation(myH5Object, species = 127143, raising = sc5)
+
+# Landing events raised by their landed weight
+raisingScheme(OS = stageRaising("count"), LE = stageRaising("aux"),
+              hierarchy = 5)
+
+# With FT under LE
+raisingScheme(OS = stageRaising("count"), LE = stageRaising("count"),
+              FT = stageRaising("count"), hierarchy = 5)
+```
+
+What differs from hierarchy 1:
+
+-   The domain date is `LEdate`, else `FTarvDate` (when FT is used),
+    else `OSsamDate`. Area, rectangle and métier come from LE when the
+    SA value is blank.
+-   VD fields can be used at LE (through the `VDid` of LE, as at VS in
+    hierarchy 1), for example `value = "VDlen"`.
+-   The sample counts in `res$domains` are `nOnshoreEvents`,
+    `nLandingEvents` and, with FT, `nTrips`.
+-   If the data use FT and the scheme does not name it, FT is pooled
+    (`"none"`) and this is logged. A scheme that names FT on data
+    without FT stops, and so do data where some SS records link to LE
+    and others to FT.
+
+## Hierarchy 7 {#hierarchy-7}
+
+Hierarchy 7 is onshore sampling without trips: design stratum (DE),
+onshore event (OS), species selection (SS) and sample (SA). OS is the
+only raising stage. LE is not a sampling unit here. It hangs under SS
+(`LE$SSid`) and says when, where and with which métier the sampled
+landing was caught.
+
+```{r, eval = FALSE}
+# Onshore events counted within their OS stratum, then a ratio to the DE
+# total
+sc7 <- raisingScheme(OS = stageRaising("count"), DE = deRaising("ratio"),
+                     hierarchy = 7)
+res7 <- doRatioEstimation(myH7Object, species = 127143, raising = sc7)
+```
+
+-   The domain date is `LEdate`, else `OSsamDate`. Area, rectangle and
+    métier come from LE when the SA value is blank. More than one LE per
+    SS is logged, and the first LE is used.
+-   Without LE, area and métier come from SA only, and are NA when SA is
+    blank.
+-   The sample count in `res$domains` is `nOnshoreEvents`.
+
+## Hierarchy 13 {#hierarchy-13}
+
+Hierarchy 13 is at-sea sampling of hauls without vessels or trips:
+design stratum (DE), fishing operation (FO), species selection (SS) and
+sample (SA). FO is the only raising stage, and `FOnumTotal` is the number
+of hauls in the population of the FO stratum.
+
+```{r, eval = FALSE}
+sc13 <- raisingScheme(FO = stageRaising("count"), DE = deRaising("ratio"),
+                      hierarchy = 13)
+res13 <- doRatioEstimation(myH13Object, species = 127143, raising = sc13)
+```
+
+Domains come from FO, as in hierarchy 1, but there is no `FTarvDate` to
+fall back on. The sample count in `res$domains` is `nHauls`.
+
+## Temporal events: hierarchies 3, 8 and 10 {#temporal-events}
+
+A temporal event (TE) is a period that is sampled, for example a week.
+It is a stage like any other, with `TEnumTotal`, `TEnumSamp`,
+`TEstratumName` and the auxiliary fields, and it gives no domain.
+
+| Hierarchy | Stages | Domains from |
+|---|---|---|
+| 3 | TE > VS > FT > FO | FO |
+| 10 | VS > TE > FT > FO | FO |
+| 8 | TE > VS > LE | LE |
+
+In hierarchies 3 and 8 the vessels are sampled within a temporal event,
+so `VSnumTotal` is the number of vessels in that period. In hierarchy 10
+the temporal events are sampled within a vessel.
+
+```{r, eval = FALSE}
+# Weeks counted within their TE stratum (for example a month), vessels
+# counted per week, landing events counted per vessel
+sc8 <- raisingScheme(TE = stageRaising("count"),
+                     VS = stageRaising("count"),
+                     LE = stageRaising("count"), hierarchy = 8)
+res8 <- doRatioEstimation(H8ExampleEE1, species = 126425, raising = sc8)
+```
+
+`"count"` divides by the sampled units found in the data, not by the
+recorded `XXnumSamp`. In `H8ExampleEE1` some weeks have two vessel
+records that each say `VSnumSamp = 1`. Their vessel factor is then
+`VSnumTotal / 2`.
+
+## Hierarchy 4 {#hierarchy-4}
+
+Hierarchy 4 is onshore sampling of trips: onshore event (OS), the trips
+landed there (FT) and their landing events (LE). Domains come from LE:
+the date is `LEdate`, else `FTarvDate`, else `OSsamDate`.
+
+```{r, eval = FALSE}
+sc4 <- raisingScheme(OS = stageRaising("count"),
+                     FT = stageRaising("count"),
+                     LE = stageRaising("count"), hierarchy = 4)
+```
+
+## Hierarchy 6 {#hierarchy-6}
+
+Hierarchy 6 is onshore sampling of trips whose whole catch is landed and
+whose area and gear are known: onshore event (OS), the trips landed there
+(FT) and one fishing operation per trip (FO, with `FOaggLev = "T"`). FO
+gives the area and métier of the sample. LE is optional under FT
+(`LE$FTid`) and is not a sampling unit.
+
+```{r, eval = FALSE}
+sc6 <- raisingScheme(OS = stageRaising("count"),
+                     FT = stageRaising("count"),
+                     FO = stageRaising("count"), hierarchy = 6)
+```
+
+-   With one FO per trip, the FO factor is 1 under `"count"`.
+-   The domain date is `FOendDate`, else `FOstartDate`, `LEdate`,
+    `FTarvDate`, `OSsamDate`. Area, rectangle and métier come from FO,
+    else from LE, when the SA value is blank. More than one LE per trip
+    is logged, and the first LE is used.
+-   The sample counts in `res$domains` are `nOnshoreEvents`, `nTrips` and
+    `nFishingOperations`.
+
+## Locations: hierarchies 9, 11 and 12 {#locations}
+
+A location (LO) is a sampled place, for example a landing site. Below it
+are temporal events (TE). Like TE, LO is raised as any other stage and
+gives no domain.
+
+| Hierarchy | Stages | Domains from |
+|---|---|---|
+| 12 | LO > TE > LE | LE |
+| 11 | LO > TE > FT, LE not raised | LE, else FT for the date |
+| 9 | LO > TE | LE linked to the sample |
+
+In hierarchy 11, LE is a mandatory table between FT and SS, but it is not
+a sampling unit. It is kept on the path with factor 1, so all sampled
+landing events of a trip together stand for the trip, and naming LE in
+the scheme stops.
+
+In hierarchy 9, SS hangs directly under TE. LE is not a sampling unit:
+it links to the sample (`LE$SAid`) and SS, and gives the date, area and
+métier. The LE of the sample is used first, then the LE of its top-level
+SA, then an LE linked by SS only. Without LE there is no date in
+hierarchy 9: quarter and month are NA, the log says so, and the year
+comes from DE.
+
+```{r, eval = FALSE}
+sc9 <- raisingScheme(LO = stageRaising("count"),
+                     TE = stageRaising("count"), hierarchy = 9)
+sc12 <- raisingScheme(LO = stageRaising("count"),
+                      TE = stageRaising("count"),
+                      LE = stageRaising("count"), hierarchy = 12)
+sc11 <- raisingScheme(LO = stageRaising("count"),
+                      TE = stageRaising("count"),
+                      FT = stageRaising("count"), hierarchy = 11)
+```
+
+There is no package data for hierarchies 4, 9, 11 and 12. They are
+tested on simulated data only.
+
+## Checks
+
+The run stops with a message when the information does not fit the
+scheme, for example:
+
+-   a total is missing, or differs within a stratum,
+-   a stratum has a positive total but no sampled units,
+-   a sampled unit has no external value, or external keys are
+    duplicated,
+-   the DE step is `"none"`, there are no totals and a stage is not
+    raised,
+-   x is measured on a stage and a stage below it is not raised,
+-   a totals stratum has samples but no total,
+-   a stage unit has more than one value of a totals stratum (use
+    `at = "SA"` or strata that are fixed per unit).
+
+## Assumptions and limitations
+
+-   A sampled haul (or landing event) without a sample of the species
+    counts as **zero catch** only if the species was looked for: one of
+    its SS records has `SSuseCalcZero = "Y"` and the species is on its
+    species list (SL/IS). Without SL/IS in the object, `"Y"` alone
+    counts and the log says so. Otherwise the species was **not looked
+    for**, and the unit is left out as non-response. Running
+    `generateZerosUsingSL()` first turns the zeros into recorded zeros
+    (SA rows with weight 0).
+-   The DE ratio is formed per DE stratum and shared by all domains
+    (quarter, area, métier) of that stratum. Use totals with your own
+    strata when that is too coarse.
+-   Totals strata without samples are not raised. Borrowing from a
+    coarser stratum is not automatic.
+-   `liveWeightEst_kg` in `res$domains` is the estimated live weight of
+    the species from the sample weights. SOP therefore compares the
+    raised fish weights with the raised sample weights. A value of 1
+    does not prove the weights are right.
+-   Not covered yet: variance, sub-sampling of BV and discards.
 
 See also other package vignettes:
 
@@ -201,7 +663,5 @@ for (i in seq_along(vignettes$Rmd)) {
 }
 }
 ```
-
-*Last review: 15/10/2026*
 
 #END
