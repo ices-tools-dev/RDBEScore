@@ -1,3 +1,6 @@
+# AI-assisted: Yes
+# Review: pending
+# Notes/scope:
 # Simulated hierarchy 5 data with a known truth, used to test stage-wise
 # raising on onshore sampling (DE - SD - OS - LE - (FT) - SS - SA).
 #

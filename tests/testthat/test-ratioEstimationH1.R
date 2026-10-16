@@ -1,3 +1,6 @@
+# AI-assisted: Yes
+# Review: pending
+# Notes/scope:
 capture.output({  ## suppresses printing of console output when running test()
 
 domainKey <- c("year", "quarter", "area", "metier6")

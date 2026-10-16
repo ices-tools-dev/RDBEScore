@@ -1,3 +1,6 @@
+# AI-assisted: Yes
+# Review: pending
+# Notes/scope:
 capture.output({  ## suppresses printing of console output when running test()
 
 # Stage-wise raising on hierarchy 2 (DE - SD - FT - FO - SS - SA), with

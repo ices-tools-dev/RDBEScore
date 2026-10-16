@@ -1,3 +1,6 @@
+# AI-assisted: Yes
+# Review: pending
+# Notes/scope: AI-assisted applies to the H8 expected order (LE before FT) only
 capture.output({  ## suppresses printing of console output when running test()
 test_that("sorting a raw object works for H8", {
   # FT after LE: in the H8 XSD (data-raw/xsd/H8.xsd) FT hangs under LE

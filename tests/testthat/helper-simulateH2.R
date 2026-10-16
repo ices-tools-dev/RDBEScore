@@ -1,3 +1,6 @@
+# AI-assisted: Yes
+# Review: pending
+# Notes/scope:
 # Simulated hierarchy 2 data with a known truth, used to test stage-wise
 # raising on at-sea sampling of trips (DE - SD - FT - FO - SS - SA).
 #

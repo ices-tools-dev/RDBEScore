@@ -1,3 +1,6 @@
+# AI-assisted: Yes
+# Review: pending
+# Notes/scope: AI-assisted applies to the test for hierarchies 6, 8, 11, 12 and 13 only
 capture.output({  ## suppresses printing of console output when running test()
 
 test_that("getTablesInRDBESHierarchy fails for non-int hierarchy parameter H1",  {

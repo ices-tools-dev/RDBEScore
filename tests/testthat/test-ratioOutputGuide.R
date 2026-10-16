@@ -1,3 +1,6 @@
+# AI-assisted: Yes
+# Review: pending
+# Notes/scope:
 capture.output({  ## suppresses printing of console output when running test()
 
 # Every column of every element of a doRatioEstimation() result must be

@@ -61,7 +61,8 @@ ratioUsedVars <- c("table", "field", "value", "valid", "n", "codeType",
                    "reason", ".reason", "SSsamp", "IScommTaxon",
                    "fSample", "xSample", "fStage", "wCumulative", "wStages",
                    "rApplied", "rDE", "rTotals", "W_g", "L_mm", "yW_g",
-                   "yL_mm", "liveWeightSampled_kg", "liveWeightEst_kg", "rTotals")
+                   "yL_mm", "liveWeightSampled_kg", "liveWeightEst_kg", "rTotals",
+                   "zeroNode")
 
 globalVariables(unique(c(usedVars, moreUsedVars, evenMoreUsedVars,
                          ratioUsedVars)))

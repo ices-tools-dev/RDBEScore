@@ -1,3 +1,6 @@
+# AI-assisted: Yes
+# Review: pending
+# Notes/scope:
 capture.output({  ## suppresses printing of console output when running test()
 
 # Within-sample factor (sampleRaising) and the auxiliary x measured on the

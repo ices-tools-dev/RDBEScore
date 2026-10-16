@@ -1,3 +1,6 @@
+# AI-assisted: Yes
+# Review: pending
+# Notes/scope:
 # Simulated hierarchy 1 data with a known truth, used to test the ratio
 # estimation functions (doRatioEstimation and its steps).
 #
