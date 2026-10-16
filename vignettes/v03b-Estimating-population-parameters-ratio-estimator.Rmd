@@ -46,11 +46,11 @@ The factors of all stages are multiplied, so each sample gets one weight
 `wStages`. The estimate of numbers at age is the sum of `wStages` times
 the numbers at age in the samples.
 
-The same functions work for all hierarchies except 6, see
+The same functions work for all hierarchies, see
 [Hierarchy 2](#hierarchy-2), [Hierarchy 5](#hierarchy-5),
 [Hierarchy 7](#hierarchy-7), [Hierarchy 13](#hierarchy-13),
-[Temporal events](#temporal-events), [Hierarchy 4](#hierarchy-4) and
-[Locations](#locations) below.
+[Temporal events](#temporal-events), [Hierarchy 4](#hierarchy-4),
+[Hierarchy 6](#hierarchy-6) and [Locations](#locations) below.
 
 ```{r}
 library(RDBEScore)
@@ -552,6 +552,28 @@ sc4 <- raisingScheme(OS = stageRaising("count"),
                      LE = stageRaising("count"), hierarchy = 4)
 ```
 
+## Hierarchy 6 {#hierarchy-6}
+
+Hierarchy 6 is onshore sampling of trips whose whole catch is landed and
+whose area and gear are known: onshore event (OS), the trips landed there
+(FT) and one fishing operation per trip (FO, with `FOaggLev = "T"`). FO
+gives the area and métier of the sample. LE is optional under FT
+(`LE$FTid`) and is not a sampling unit.
+
+```{r, eval = FALSE}
+sc6 <- raisingScheme(OS = stageRaising("count"),
+                     FT = stageRaising("count"),
+                     FO = stageRaising("count"), hierarchy = 6)
+```
+
+-   With one FO per trip, the FO factor is 1 under `"count"`.
+-   The domain date is `FOendDate`, else `FOstartDate`, `LEdate`,
+    `FTarvDate`, `OSsamDate`. Area, rectangle and métier come from FO,
+    else from LE, when the SA value is blank. More than one LE per trip
+    is logged, and the first LE is used.
+-   The sample counts in `res$domains` are `nOnshoreEvents`, `nTrips` and
+    `nFishingOperations`.
+
 ## Locations: hierarchies 9, 11 and 12 {#locations}
 
 A location (LO) is a sampled place, for example a landing site. Below it
@@ -625,5 +647,4 @@ scheme, for example:
     the species from the sample weights. SOP therefore compares the
     raised fish weights with the raised sample weights. A value of 1
     does not prove the weights are right.
--   Not covered yet: variance, sub-sampling of BV, hierarchy 6,
-    and discards.
+-   Not covered yet: variance, sub-sampling of BV and discards.

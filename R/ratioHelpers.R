@@ -48,7 +48,7 @@ ratioFieldCodeTypes <- function() {
 #' @keywords internal
 #' @noRd
 supportedHierarchies <- function() {
-  c(1L, 2L, 3L, 4L, 5L, 7L, 8L, 9L, 10L, 11L, 12L, 13L)
+  1:13
 }
 
 #' What stage-wise raising needs to know about one upper hierarchy
@@ -78,8 +78,9 @@ hierarchySpec <- function(hierarchy) {
   h <- suppressWarnings(as.integer(hierarchy))
   if (length(h) != 1 || is.na(h) || !h %in% supportedHierarchies()) {
     stop("Hierarchy ", paste(hierarchy, collapse = ", "),
-         " is not implemented yet for stage-wise raising. Implemented: ",
-         paste(supportedHierarchies(), collapse = ", "), ".", call. = FALSE)
+         " is not an RDBES upper hierarchy. Use one of ",
+         min(supportedHierarchies()), " to ", max(supportedHierarchies()),
+         ".", call. = FALSE)
   }
   chain <- getTablesInRDBESHierarchy(h, includeOptTables = FALSE,
                                      includeLowHierTables = FALSE,
@@ -117,6 +118,17 @@ hierarchySpec <- function(hierarchy) {
                metierCol = "LEmetier6",
                unitLabels = c(OS = "nOnshoreEvents", LE = "nLandingEvents",
                               FT = "nTrips")),
+    # Onshore events, the trips landed there and their fishing operation at
+    # trip level (FOaggLev "T"), which gives the area and metier. LE is
+    # optional under FT and not a sampling unit
+    "6" = list(optional = character(0), info = list(LE = "FTid"),
+               dateCols = c("FOendDate", "FOstartDate", "LEdate",
+                            "FTarvDate", "OSsamDate"),
+               areaCol = c("FOarea", "LEarea"),
+               statRectCol = c("FOstatRect", "LEstatRect"),
+               metierCol = c("FOmetier6", "LEmetier6"),
+               unitLabels = c(OS = "nOnshoreEvents", FT = "nTrips",
+                              FO = "nFishingOperations")),
     # Onshore events only. LE is not a sampling unit here: it hangs under SS
     # and says where and when the sampled landing was caught
     "7" = list(optional = character(0), info = list(LE = "SSid"),

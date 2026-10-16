@@ -25,7 +25,7 @@ Default \code{sampleRaising("weight")}.}
 \item{totals}{Optional raising to totals you supply, made with
 \code{\link[=totalsRaising]{totalsRaising()}}. Applied after the DE step. Default \code{NULL} (none).}
 
-\item{hierarchy}{The RDBES upper hierarchy: \code{1} (default), \code{2} or \code{5}. It must
+\item{hierarchy}{The RDBES upper hierarchy, \code{1} (default) to \code{13}. It must
 match \code{DEhierarchy} in the data.}
 }
 \value{
@@ -44,7 +44,7 @@ by the DE ratio.
 Stages not given are \code{"none"} (pooled). The species selection (SS) is
 always 1: a species list with more species gets no extra weight.
 
-All hierarchies except 6 are implemented. The stages, from the top:
+All hierarchies are implemented. The stages, from the top:
 \itemize{
 \item hierarchy 1: VS, FT, FO
 \item hierarchy 2: FT, FO (trips sampled directly)
@@ -53,6 +53,8 @@ All hierarchies except 6 are implemented. The stages, from the top:
 \item hierarchy 5: OS, LE, and FT under LE as an optional stage: name it
 (\code{FT = stageRaising(...)}) when the SS records of the data link to FT.
 If the data use FT and the scheme does not name it, FT is \code{"none"}.
+\item hierarchy 6: OS, FT, FO (one fishing operation per trip, at trip
+level). LE is optional under FT and not a sampling unit.
 \item hierarchy 7: OS
 \item hierarchy 8: TE, VS, LE
 \item hierarchy 9: LO (location), TE

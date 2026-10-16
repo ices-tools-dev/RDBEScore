@@ -73,12 +73,11 @@
 #' estimate. A haul whose samples of the species are all excluded is treated
 #' as not sampled (non-response) by [getStageWeights()].
 #'
-#' All upper hierarchies except 6 are implemented. The object must
+#' All upper hierarchies (1 to 13) are implemented. The object must
 #' hold one hierarchy. Clustering (`XXclustering` other than `"N"`) is
 #' logged. It does not affect the point estimates.
 #'
-#' @param RDBESDataObj A valid `RDBESDataObject` of any hierarchy except
-#'   6.
+#' @param RDBESDataObj A valid `RDBESDataObject` of one upper hierarchy.
 #' @param species Species to estimate, as AphiaID(s) (WoRMS), matched to
 #'   `SAspeCode`, for example `127143` for plaice. Several values are allowed.
 #'   FAO 3-alpha codes are not accepted: rows added by

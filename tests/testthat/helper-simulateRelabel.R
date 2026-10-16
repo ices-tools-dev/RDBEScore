@@ -2,9 +2,10 @@
 # Review: pending
 # Notes/scope:
 
-# Simulated data with a known truth for hierarchies 4, 9 and 12, used to
-# test stage-wise raising:
+# Simulated data with a known truth for hierarchies 4, 6, 9, 11 and 12, used
+# to test stage-wise raising:
 #   H4:  DE - SD - OS - FT - LE - SS - SA
+#   H6:  DE - SD - OS - FT - FO - SS - SA, with LE (optional) under FT
 #   H12: DE - SD - LO - TE - LE - SS - SA
 #   H9:  DE - SD - LO - TE - SS - SA, with LE linked to SA and SS
 #
@@ -79,6 +80,47 @@ simulateH4RatioData <- function(...) {
   sim$obj <- simRelabelObject(list(DE = DE, SD = h1$SD, OS = OS, FT = FT,
                                    LE = LE, SS = SS, SA = h1$SA, FM = h1$FM,
                                    BV = h1$BV, CL = h1$CL))
+  sim
+}
+
+# H6: OS from the simulated vessels, as in H4. The trips and their fishing
+# operations stay, with FOaggLev "T" (one FO per trip by default). With
+# useLE = TRUE each trip gets one LE with the date, area and metier of its
+# first FO.
+simulateH6RatioData <- function(..., haulsPerTrip = 1, useLE = TRUE) {
+  sim <- simulateH1RatioData(..., haulsPerTrip = haulsPerTrip)
+  h1 <- sim$obj
+  VS <- as.data.frame(h1$VS)
+  OS <- cbind(data.frame(OSid = VS$VSid, SDid = VS$SDid, OSrecType = "OS",
+                         OSlocode = "ZWHRE", OSlocName = "Harare",
+                         OSlocType = "Port",
+                         OSsamDate = h1$FT$FTarvDate[match(VS$VSid,
+                                                           h1$FT$VSid)]),
+              simCopyDesign(VS, "VS", "OS"))
+  FT <- as.data.frame(h1$FT)
+  FT$OSid <- FT$VSid
+  FT$VSid <- NULL
+  FT$FTsampType <- "PortS"
+  FO <- as.data.frame(h1$FO)
+  FO$FOaggLev <- "T"
+  LE <- NULL
+  if (useLE) {
+    fo <- FO[match(FT$FTid, FO$FTid), ]
+    LE <- data.frame(LEid = FT$FTid, FTid = FT$FTid, LErecType = "LE",
+                     LEseqNum = 1L, LEstratification = "N",
+                     LEstratumName = "U", LEclustering = "N",
+                     LEclusterName = "U", LEmixedTrip = "N",
+                     LEcatReg = "Lan", LElocode = "ZWHRE",
+                     LElocType = "Port", LEctry = "ZW",
+                     LEdate = fo$FOendDate, LEarea = fo$FOarea,
+                     LEmetier6 = fo$FOmetier6, LEsamp = "Y",
+                     LEunitName = paste0("landing", FT$FTid))
+  }
+  DE <- as.data.frame(h1$DE)
+  DE$DEhierarchy <- 6L
+  sim$obj <- simRelabelObject(list(DE = DE, SD = h1$SD, OS = OS, FT = FT,
+                                   LE = LE, FO = FO, SS = h1$SS, SA = h1$SA,
+                                   FM = h1$FM, BV = h1$BV, CL = h1$CL))
   sim
 }
 

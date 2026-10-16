@@ -25,8 +25,7 @@ doRatioEstimation(
 )
 }
 \arguments{
-\item{RDBESDataObj}{A valid \code{RDBESDataObject} of any hierarchy except
-6.}
+\item{RDBESDataObj}{A valid \code{RDBESDataObject} of one upper hierarchy.}
 
 \item{species}{Species to estimate, as AphiaID(s) (WoRMS), matched to
 \code{SAspeCode}, for example \code{127143} for plaice. Several values are allowed.
@@ -135,10 +134,10 @@ estimates per domain and class, and per domain (SOP, sample counts).
 Selection methods are not used to compute weights. Non-probabilistic
 designs are logged as assumptions.
 
-Implemented for all upper hierarchies except 6. The scheme must be
+Implemented for all upper hierarchies (1 to 13). The scheme must be
 made for the hierarchy of the data (\code{raisingScheme(..., hierarchy = 5)}).
 
-Not in this version: variance, hierarchy 6, discards.
+Not in this version: variance, discards.
 }
 \section{Development review}{
 

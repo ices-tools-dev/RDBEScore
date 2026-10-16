@@ -194,13 +194,12 @@ test_that("doRatioEstimation needs a raising scheme", {
                "raisingScheme")
 })
 
-test_that("only implemented hierarchies and landings are accepted", {
-  # an object labelled with a hierarchy that is not implemented
-  notYet <- setdiff(1:13, RDBEScore:::supportedHierarchies())[1]
+test_that("only RDBES hierarchies and landings are accepted", {
+  # an object labelled with a hierarchy that does not exist
   obj <- H8ExampleEE1
-  obj$DE <- data.table::copy(obj$DE)[, DEhierarchy := notYet]
+  obj$DE <- data.table::copy(obj$DE)[, DEhierarchy := 14L]
   expect_error(getSampleUnits(obj, species = 126425, strict = FALSE),
-               paste0("Hierarchy ", notYet, " is not implemented yet"))
+               "Hierarchy 14 is not an RDBES upper hierarchy")
   sim <- simulate()
   expect_error(getSampleUnits(sim$obj, species = 127143, catchCat = "Dis"),
                "Lan")

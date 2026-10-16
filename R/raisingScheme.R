@@ -314,7 +314,7 @@ externalAux <- function(data, by, col) {
 #' Stages not given are `"none"` (pooled). The species selection (SS) is
 #' always 1: a species list with more species gets no extra weight.
 #'
-#' All hierarchies except 6 are implemented. The stages, from the top:
+#' All hierarchies are implemented. The stages, from the top:
 #' * hierarchy 1: VS, FT, FO
 #' * hierarchy 2: FT, FO (trips sampled directly)
 #' * hierarchy 3: TE (temporal event), VS, FT, FO
@@ -322,6 +322,8 @@ externalAux <- function(data, by, col) {
 #' * hierarchy 5: OS, LE, and FT under LE as an optional stage: name it
 #'   (`FT = stageRaising(...)`) when the SS records of the data link to FT.
 #'   If the data use FT and the scheme does not name it, FT is `"none"`.
+#' * hierarchy 6: OS, FT, FO (one fishing operation per trip, at trip
+#'   level). LE is optional under FT and not a sampling unit.
 #' * hierarchy 7: OS
 #' * hierarchy 8: TE, VS, LE
 #' * hierarchy 9: LO (location), TE
@@ -339,7 +341,7 @@ externalAux <- function(data, by, col) {
 #' @param DE The raising to the DE stratum, made with [deRaising()].
 #' @param totals Optional raising to totals you supply, made with
 #'   [totalsRaising()]. Applied after the DE step. Default `NULL` (none).
-#' @param hierarchy The RDBES upper hierarchy: `1` (default), `2` or `5`. It must
+#' @param hierarchy The RDBES upper hierarchy, `1` (default) to `13`. It must
 #'   match `DEhierarchy` in the data.
 #'
 #' @details
