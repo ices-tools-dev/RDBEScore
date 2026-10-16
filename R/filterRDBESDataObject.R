@@ -13,6 +13,9 @@
 #' child is filtered out. Broken vessel and species-list links require the
 #' separate functions [removeBrokenVesselLinks()] and
 #' [removeBrokenSpeciesListLinks()].
+#' Filtering VD or SL does not automatically remove sampling rows whose
+#' vessel or species-list links no longer match. Filtering sampling tables
+#' does not automatically trim unused VD or SL rows.
 #'
 #' @param RDBESDataObjectToFilter The `RDBESDataObject` to filter
 #' @param fieldsToFilter A vector of the field names you wish to check
@@ -40,8 +43,7 @@
 #'
 #' @section Development review:
 #' - AI-assisted: Yes
-#' - Review: pending
-#' - Previous review: rix133 (examples only)
+#' - Review: rix133
 #' - Notes/scope:
 filterRDBESDataObject <- function(RDBESDataObjectToFilter,
                                  fieldsToFilter,

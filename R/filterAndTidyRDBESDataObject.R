@@ -4,6 +4,16 @@
 #' vessel and species-list links, and optionally removes downstream orphans.
 #' It is retained for compatibility and will be removed in a future release.
 #'
+#' @section Effect on sampling records:
+#' Available VD and SL records determine which sampling rows are retained:
+#' vessel-link cleanup removes sampling rows with unmatched `VDid` values,
+#' and species-list cleanup removes SS rows without a matching SL entry.
+#' These operations delete sampling rows rather than recoding their values.
+#' They still run when `killOrphans = FALSE`, which disables only the final
+#' downstream orphan cleanup. This function does not trim unused VD and SL
+#' rows based on retained sampling records. That reverse operation is proposed
+#' in \url{https://github.com/ices-tools-dev/RDBEScore/issues/287}.
+#'
 #' @section Migration:
 #' Use [filterRDBESDataObject()] for filtering with downstream orphan removal.
 #' To reproduce the full cleanup performed here, filter with
@@ -15,7 +25,8 @@
 #' @param RDBESDataObjectToFilterAndTidy The RDBESDataObject to filter.
 #' @param fieldsToFilter A vector of the field names you wish to check.
 #' @param valuesToFilter A vector of the field values you wish to filter for.
-#' @param killOrphans Controls if orphan rows are removed. Default is TRUE.
+#' @param killOrphans Controls the final downstream orphan cleanup. Default is
+#' TRUE. Broken vessel-link and species-list-link removal always run.
 #' @param verbose (Optional) Set to TRUE if you want informative text printed
 #' out, or FALSE if you don't.  The default is FALSE.
 #' @param strict (Optional) This function validates its input data - should
@@ -40,8 +51,7 @@
 #'
 #' @section Development review:
 #' - AI-assisted: Yes
-#' - Review: pending
-#' - Previous review: rix133 (examples only)
+#' - Review: rix133
 #' - Notes/scope:
 filterAndTidyRDBESDataObject <- function(RDBESDataObjectToFilterAndTidy,
                                  fieldsToFilter,

@@ -28,6 +28,8 @@ library(RDBEScore)
 In the first step you need to load some example data.
 Good practice is to check that the RDBESDataObjects are valid. 
 
+**Sampling-data restriction in this example:** each filtering sequence below explicitly removes sampling rows without matching VD records and SS rows without matching SL records, then removes downstream orphans. This preserves the former `filterAndTidyRDBESDataObject()` behavior. These steps can exclude sampling observations and are additional to ordinary filtering. They do not trim unused VD/SL rows based on CS data, which is separate work planned in [issue #287](https://github.com/ices-tools-dev/RDBEScore/issues/287). See [Manipulating RDBESDataObjects](v01b-manipulating-rdbesdataobjects.html) for details.
+
 ```{r}
 # load an example dataset
 

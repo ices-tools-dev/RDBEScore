@@ -47,13 +47,15 @@ them. Cleanup proceeds downstream and does not remove parent rows when a
 child is filtered out. Broken vessel and species-list links require the
 separate functions \code{\link[=removeBrokenVesselLinks]{removeBrokenVesselLinks()}} and
 \code{\link[=removeBrokenSpeciesListLinks]{removeBrokenSpeciesListLinks()}}.
+Filtering VD or SL does not automatically remove sampling rows whose
+vessel or species-list links no longer match. Filtering sampling tables
+does not automatically trim unused VD or SL rows.
 }
 \section{Development review}{
 
 \itemize{
 \item AI-assisted: Yes
-\item Review: pending
-\item Previous review: rix133 (examples only)
+\item Review: rix133
 \item Notes/scope:
 }
 }

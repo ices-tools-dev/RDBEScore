@@ -32,6 +32,8 @@ library(RDBEScore)
 
 First we'll load some example data from the RDBES and check it's valid.  It's a good tip to check your RDBESDataObjects are valid after any manipulations you perform. See how to import your own data in the vignette [Import RDBES data](raw-data-import.html) In this vignette package example data pre-loaded with `RDBEScore` is used.
 
+**Sampling-data restriction in this example:** the preparation below preserves the cleanup sequence formerly performed by `filterAndTidyRDBESDataObject()`. The explicit `removeBrokenVesselLinks()` and `removeBrokenSpeciesListLinks()` calls delete sampling rows without matching VD and SL records, followed by downstream orphan removal. These are additional restrictions on CS data. Ordinary `filterRDBESDataObject()` does not perform those two broken-link checks. Trimming unused VD/SL rows in the reverse direction is planned separately in [issue #287](https://github.com/ices-tools-dev/RDBEScore/issues/287). See [Manipulating RDBESDataObjects](v01b-manipulating-rdbesdataobjects.html) for the distinction.
+
 ```{r}
 
 # load some H1 test data

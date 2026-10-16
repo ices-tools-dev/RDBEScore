@@ -21,7 +21,7 @@ Create a table of RDBES Ids
 
 \itemize{
 \item AI-assisted: Yes
-\item Review: pending
+\item Review: rix133
 \item Notes/scope:
 }
 }

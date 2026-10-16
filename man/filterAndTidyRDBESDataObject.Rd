@@ -20,7 +20,8 @@ filterAndTidyRDBESDataObject(
 
 \item{valuesToFilter}{A vector of the field values you wish to filter for.}
 
-\item{killOrphans}{Controls if orphan rows are removed. Default is TRUE.}
+\item{killOrphans}{Controls the final downstream orphan cleanup. Default is
+TRUE. Broken vessel-link and species-list-link removal always run.}
 
 \item{verbose}{(Optional) Set to TRUE if you want informative text printed
 out, or FALSE if you don't.  The default is FALSE.}
@@ -36,6 +37,18 @@ This deprecated function filters an RDBESDataObject, removes rows with broken
 vessel and species-list links, and optionally removes downstream orphans.
 It is retained for compatibility and will be removed in a future release.
 }
+\section{Effect on sampling records}{
+
+Available VD and SL records determine which sampling rows are retained:
+vessel-link cleanup removes sampling rows with unmatched \code{VDid} values,
+and species-list cleanup removes SS rows without a matching SL entry.
+These operations delete sampling rows rather than recoding their values.
+They still run when \code{killOrphans = FALSE}, which disables only the final
+downstream orphan cleanup. This function does not trim unused VD and SL
+rows based on retained sampling records. That reverse operation is proposed
+in \url{https://github.com/ices-tools-dev/RDBEScore/issues/287}.
+}
+
 \section{Migration}{
 
 Use \code{\link[=filterRDBESDataObject]{filterRDBESDataObject()}} for filtering with downstream orphan removal.
@@ -50,8 +63,7 @@ between orphan removal and cleanup of vessel and species-list links.
 
 \itemize{
 \item AI-assisted: Yes
-\item Review: pending
-\item Previous review: rix133 (examples only)
+\item Review: rix133
 \item Notes/scope:
 }
 }

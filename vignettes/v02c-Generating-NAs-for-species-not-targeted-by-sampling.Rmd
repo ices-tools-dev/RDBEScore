@@ -27,6 +27,8 @@ library(RDBEScore)
 
 ## Load and validate example data
 
+**Sampling-data restriction in this example:** after selecting SL and the fishing operation, the explicit broken-link cleanup removes sampling rows without matching VD records and SS rows without matching SL records. Downstream orphan cleanup follows. This preserves the former `filterAndTidyRDBESDataObject()` sequence and can exclude sampling observations. Ordinary `filterRDBESDataObject()` does not perform these two broken-link checks. This is distinct from trimming unused VD/SL rows, which is planned in [issue #287](https://github.com/ices-tools-dev/RDBEScore/issues/287). See [Manipulating RDBESDataObjects](v01b-manipulating-rdbesdataobjects.html).
+
 ```{r}
 # read an example dataset and simplify it to 1 trip and 1 haul. The 1st haul in the data is selected.
 data(Pckg_survey_apistrat_H1)

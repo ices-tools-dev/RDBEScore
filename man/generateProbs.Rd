@@ -35,7 +35,7 @@ happens with regards to non-probabilistic methods
 
 \itemize{
 \item AI-assisted: Yes
-\item Review: pending
+\item Review: rix133
 \item Notes/scope:
 }
 }

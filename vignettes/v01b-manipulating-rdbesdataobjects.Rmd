@@ -120,6 +120,23 @@ validateRDBESDataObject(myCombinedRawObject, verbose = FALSE)
 
 RDBESDataObjects can be filtered using the **filterRDBESDataObject()** function - this allows the RDBESDataObject to be filtered by any field.  A typical use of filtering might be to extract all data collected in a particular ICES division.  
 
+### Filtering, removing broken links and trimming lookup tables
+
+These operations remove different records. Their direction matters when deciding which sampling observations to retain.
+
+| Operation | Records removed | Direction |
+|:--|:--|:--|
+| `filterRDBESDataObject()` | Rows failing the requested field/value selection, followed by downstream orphan rows by default. An ID field is filtered only in the table where it is the primary key. | User selection, then downstream cleanup within the sampling hierarchy. |
+| `removeBrokenVesselLinks()` | Sampling rows whose `VDid` has no matching VD row. | Available VD records determine which sampling rows survive. |
+| `removeBrokenSpeciesListLinks()` | SS rows without an SL match for species-list name, catch fraction, design year and sampling country. | Available SL records determine which SS rows survive. |
+| VD/SL trimming proposed in [issue #287](https://github.com/ices-tools-dev/RDBEScore/issues/287) | Unused VD and SL rows, based on the retained sampling records. Associated IS records must also be considered when trimming SL. | Retained sampling records determine which lookup rows survive. This is separate work planned for #287. |
+
+**Ordinary filtering does not automatically restrict sampling records to the vessels and species lists present in VD and SL.** Its default orphan cleanup excludes the `VDid` and `SLid` links. For example, filtering VD by vessel length does not automatically remove sampling rows for the excluded vessels. Filtering SL by list name does not automatically remove SS rows referring to other lists. Ordinary filtering also does not trim unused VD or SL rows after filtering sampling tables.
+
+The deprecated `filterAndTidyRDBESDataObject()` filters with immediate orphan cleanup disabled, runs both broken-link removal functions, then optionally removes downstream orphans. It can therefore **delete CS (sampling) rows based on the contents of VD and SL**. It removes rows rather than recoding their values. Its `killOrphans = FALSE` option disables only the final orphan-removal step. Broken vessel-link and species-list-link removal still run.
+
+Use `filterRDBESDataObject()` for ordinary filtering. Call the broken-link removal functions explicitly when you intend to restrict sampling records to the available VD and SL records, and inspect the records removed before using the result for estimation. Missing lookup records alone do not establish that the associated sampling observations should be excluded. The proposed trimming in #287 addresses the opposite direction and must preserve the retained sampling records.
+
 
 ```{r filter}
 myH1RawObject <- H1Example
@@ -142,12 +159,18 @@ print(myFilteredObject)
 
 validateRDBESDataObject(myFilteredObject, verbose = FALSE)
 ```
-It is important to note that filtering is likely to result in "orphan" rows being produced so it is usual to also apply the **findAndKillOrphans()** function to the filtered data to remove these records.
+Since `filterRDBESDataObject()` defaults to `killOrphans = TRUE`, the result above has already undergone downstream orphan cleanup. This does not remove upstream parent rows simply because their children were filtered out.
+
+To inspect orphan cleanup as a separate step, first retain the orphans explicitly:
 
 ```{r clean1}
 
-myFilteredObjectNoOrphans <- 
-  findAndKillOrphans(objectToCheck = myFilteredObject, verbose = FALSE)
+myFilteredObjectWithOrphans <- filterRDBESDataObject(
+  myH1RawObject, fieldsToFilter = myFields, valuesToFilter = myValues,
+  killOrphans = FALSE
+)
+myFilteredObjectNoOrphans <-
+  findAndKillOrphans(objectToCheck = myFilteredObjectWithOrphans, verbose = FALSE)
 
 validateRDBESDataObject(myFilteredObjectNoOrphans, verbose = FALSE)
 
@@ -189,7 +212,11 @@ print(myInverseFiltered)
 
 
 
-You can also remove any records that are not linking to a row in the VesselDetails (VD) table using the **removeBrokenVesselLinks()** function.
+### Explicitly restricting sampling records using VD and SL
+
+The following two examples deliberately remove sampling rows based on VD and SL. They demonstrate additional restrictions on the sampling data, rather than trimming unused VD or SL records.
+
+`removeBrokenVesselLinks()` removes sampling rows whose `VDid` has no match in VD. Filtering VD first therefore determines which vessels' sampling rows can remain. The helper itself does not remove all downstream orphans. Call `findAndKillOrphans()` afterwards if that cleanup is also intended.
 
 ```{r clean2}
 
@@ -207,7 +234,7 @@ validateRDBESDataObject(myFilteredObjectValidVesselLinks, verbose = FALSE)
 
 ```
 
-Finally you can also remove any records that are not linking to an entry in the SpeciesListDetails (SL) table using the **removeBrokenSpeciesListLinks()** function.
+`removeBrokenSpeciesListLinks()` removes SS rows without a matching SL entry. Filtering SL first therefore restricts the species selections that can remain. The helper leaves downstream orphan cleanup to a separate `findAndKillOrphans()` call. These choices can change the observations available for estimation.
 
 ```{r clean3}
 
