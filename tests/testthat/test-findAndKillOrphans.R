@@ -1,3 +1,6 @@
+# AI-assisted: Yes
+# Review: rix133
+# Notes/scope:
 capture.output({  ## suppresses printing of console output when running test()
 
 test_that("findAndKillOrphans runs without errors on an empty RDBESDataObject",  {
@@ -30,7 +33,8 @@ test_that("findAndKillOrphans removes orphans on an filtered RDBESDataObject",  
   myValues <- c("blah" )
   myFilteredObject <- filterRDBESDataObject(myH1RawObject,
                                            fieldsToFilter = myFields,
-                                           valuesToFilter = myValues )
+                                           valuesToFilter = myValues,
+                                           killOrphans = FALSE)
 
   # Check the expected number of rows are returned
   expect_equal(nrow(myFilteredObject[["VS"]]),0)
@@ -76,7 +80,8 @@ test_that("findAndKillOrphans does not remove upstream rows when lower-level row
   myFilteredObject <- filterRDBESDataObject(
     myH1RawObject,
     fieldsToFilter = "VSunitName",
-    valuesToFilter = "blah"
+    valuesToFilter = "blah",
+    killOrphans = FALSE
   )
 
   expect_equal(nrow(myFilteredObject[["VS"]]), 0)

@@ -5,9 +5,24 @@
 # Notes/scope: Imports saved ZIPs and renumbers IDs while preserving links.
 
 ddir <- file.path('data-raw', 'exampleData')
-zipFiles <- file.path(ddir, c('H8ExampleEE1_CS_2026-10-14.zip',
+dataDate <- '2026_10_14'
+# Change dataDate to today's YYYY_MM_DD to download a fresh combined export.
+zipFiles <- file.path(ddir, paste0('H8_', dataDate, '.zip'))
+if (!file.exists(zipFiles)) {
+  legacyFiles <- file.path(ddir, c('H8ExampleEE1_CS_2026-10-14.zip',
                              'H8ExampleEE1_VD_2026-10-14.zip',
                              'H8ExampleEE1_SL_2026-10-14.zip'))
+  if (dataDate == '2026_10_14' && all(file.exists(legacyFiles))) {
+    zipFiles <- legacyFiles
+  } else {
+    if (dataDate != format(Sys.time(), '%Y_%m_%d', tz = 'Europe/Tallinn')) {
+      stop('Missing historical ZIP. Set dataDate to today to download current data.')
+    }
+    source('data-raw/downloadExampleData.R')
+    zipFiles <- downloadExampleData(8, 2022,
+      samplingScheme = 'EST_OnShoreCommercialPelagic', ddir = ddir)
+  }
+}
 H8ExampleEE1 <- RDBEScore::createRDBESDataObject(
   zipFiles, castToCorrectDataTypes = TRUE, strict = TRUE
 )

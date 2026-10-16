@@ -1,13 +1,32 @@
-#' Filter and remove orphan records in an RDBESDataObject
+#' Filter and tidy an RDBESDataObject (deprecated)
 #'
-#' This function filters an RDBESDataObject based on specified fields and values, and can optionally remove any orphan records.
-#' The returned object will include all rows which either: a) do not include any of the field names in `fieldsToFilter`, or b) do include the field names and have one of the allowed values in `valuesToFilter`.
-#' If `killOrphans` is set to `TRUE`, the function will remove orphaned rows. The default is `TRUE`.
+#' This deprecated function filters an RDBESDataObject, removes rows with broken
+#' vessel and species-list links, and optionally removes downstream orphans.
+#' It is retained for compatibility and will be removed in a future release.
+#'
+#' @section Effect on sampling records:
+#' Available VD and SL records determine which sampling rows are retained:
+#' vessel-link cleanup removes sampling rows with unmatched `VDid` values,
+#' and species-list cleanup removes SS rows without a matching SL entry.
+#' These operations delete sampling rows rather than recoding their values.
+#' They still run when `killOrphans = FALSE`, which disables only the final
+#' downstream orphan cleanup. This function does not trim unused VD and SL
+#' rows based on retained sampling records. That reverse operation is proposed
+#' in \url{https://github.com/ices-tools-dev/RDBEScore/issues/287}.
+#'
+#' @section Migration:
+#' Use [filterRDBESDataObject()] for filtering with downstream orphan removal.
+#' To reproduce the full cleanup performed here, filter with
+#' `killOrphans = FALSE`, call [removeBrokenVesselLinks()], then
+#' [removeBrokenSpeciesListLinks()], and finally [findAndKillOrphans()] if
+#' orphan removal is wanted. This explicit sequence preserves the distinction
+#' between orphan removal and cleanup of vessel and species-list links.
 #'
 #' @param RDBESDataObjectToFilterAndTidy The RDBESDataObject to filter.
 #' @param fieldsToFilter A vector of the field names you wish to check.
 #' @param valuesToFilter A vector of the field values you wish to filter for.
-#' @param killOrphans Controls if orphan rows are removed. Default is TRUE.
+#' @param killOrphans Controls the final downstream orphan cleanup. Default is
+#' TRUE. Broken vessel-link and species-list-link removal always run.
 #' @param verbose (Optional) Set to TRUE if you want informative text printed
 #' out, or FALSE if you don't.  The default is FALSE.
 #' @param strict (Optional) This function validates its input data - should
@@ -19,18 +38,21 @@
 #' @md
 #'
 #' @examples
+#' # Migration: filter, remove broken links, then remove downstream orphans
 #' H1DataObj <- H1Example
-#' # Keep a named design and remove the records no longer linked to it
-#' H1DataObjFiltered <- filterAndTidyRDBESDataObject(
+#' H1DataObjFiltered <- filterRDBESDataObject(
 #'   H1DataObj, fieldsToFilter = "DEstratumName",
-#'   valuesToFilter = "Pckg_SDAResources_agstrat_H1"
+#'   valuesToFilter = "Pckg_SDAResources_agstrat_H1", killOrphans = FALSE
 #' )
+#' H1DataObjFiltered <- removeBrokenVesselLinks(H1DataObjFiltered)
+#' H1DataObjFiltered <- removeBrokenSpeciesListLinks(H1DataObjFiltered)
+#' H1DataObjFiltered <- findAndKillOrphans(H1DataObjFiltered)
 #' summary(H1DataObjFiltered)
 #'
 #' @section Development review:
 #' - AI-assisted: Yes
 #' - Review: rix133
-#' - Notes/scope: examples only
+#' - Notes/scope:
 filterAndTidyRDBESDataObject <- function(RDBESDataObjectToFilterAndTidy,
                                  fieldsToFilter,
                                  valuesToFilter,
@@ -38,6 +60,15 @@ filterAndTidyRDBESDataObject <- function(RDBESDataObjectToFilterAndTidy,
                                  verbose = FALSE,
                                  strict = TRUE)
   {
+
+  .Deprecated(
+    msg = paste0(
+      "filterAndTidyRDBESDataObject() is deprecated and will be removed in a ",
+      "future release. Use filterRDBESDataObject() for filtering and orphan ",
+      "removal. For the full cleanup sequence, see ",
+      "help('filterAndTidyRDBESDataObject')."
+    )
+  )
 
   # Check we have a valid RDBESDataObject before doing anything else
   validateRDBESDataObject(RDBESDataObjectToFilterAndTidy,
@@ -51,6 +82,7 @@ filterAndTidyRDBESDataObject <- function(RDBESDataObjectToFilterAndTidy,
       filterRDBESDataObject(RDBESDataObjectToFilterAndTidy,
                                                       fieldsToFilter,
                                                       valuesToFilter,
+                                                      killOrphans = FALSE,
                                                       verbose = verbose,
                                                       strict = strict)
   # 2 - remove broken vessels links

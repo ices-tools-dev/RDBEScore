@@ -31,7 +31,7 @@
 #'
 #' @section Development review:
 #' - AI-assisted: Yes
-#' - Review: pending
+#' - Review: rix133
 #' - Notes/scope:
 generateProbs <- function(x,
                           probType,

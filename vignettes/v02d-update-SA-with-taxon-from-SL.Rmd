@@ -28,6 +28,8 @@ library(RDBEScore)
 In the first step you need to load some example data.
 Good practice is to check that the RDBESDataObjects are valid. 
 
+**Sampling-data restriction in this example:** each filtering sequence below explicitly removes sampling rows without matching VD records and SS rows without matching SL records, then removes downstream orphans. This preserves the former `filterAndTidyRDBESDataObject()` behavior. These steps can exclude sampling observations and are additional to ordinary filtering. They do not trim unused VD/SL rows based on CS data, which is separate work planned in [issue #287](https://github.com/ices-tools-dev/RDBEScore/issues/287). See [Manipulating RDBESDataObjects](v01b-manipulating-rdbesdataobjects.html) for details.
+
 ```{r}
 # load an example dataset
 
@@ -35,9 +37,25 @@ Good practice is to check that the RDBESDataObjects are valid.
 dirH1 <- "../tests/testthat/h1_v_20250211/"
 
 myObject <- createRDBESDataObject(input = dirH1)
-myObject <- filterAndTidyRDBESDataObject(myObject,
+myObject <- filterRDBESDataObject(myObject,
                         fieldsToFilter =c("DEsampScheme"),
-                        valuesToFilter = c("National Routine"))
+                        valuesToFilter = c("National Routine"), killOrphans = FALSE)
+myObject <- removeBrokenVesselLinks(myObject)
+myObject <- removeBrokenSpeciesListLinks(myObject)
+myObject <- findAndKillOrphans(myObject)
+
+myObject <- filterRDBESDataObject(myObject,
+                        fieldsToFilter =c("DEsampScheme"),
+                        valuesToFilter = c("National Routine"), killOrphans = FALSE)
+myObject <- removeBrokenVesselLinks(myObject)
+myObject <- removeBrokenSpeciesListLinks(myObject)
+myObject <- findAndKillOrphans(myObject)
+# restrict to 1 haul
+myObject <- filterRDBESDataObject(myObject, fieldsToFilter="FOid",
+                                valuesToFilter=myObject$FO$FOid[1], killOrphans = FALSE)
+myObject <- removeBrokenVesselLinks(myObject)
+myObject <- removeBrokenSpeciesListLinks(myObject)
+myObject <- findAndKillOrphans(myObject)
 
 numOfRows <- 5
 myObject[["SA"]] <- head(myObject[["SA"]],numOfRows)
@@ -100,9 +118,9 @@ What was looked for is 125464 - `Clupeidae`.
 In the sample we recorded 126425 - `Clupea harengus` which is part of the `Clupeidae` family. In this point it will be helpful to use `renameSA` function.
 
 ## Rename species code in SA table using SL table.
-We looked for the fish from `Clupeidae` family but we had a more precise reading 
-than we expected because we read fish in the species level which is a more accurate 
-rank than family.
+We looked for fish from the `Clupeidae` family in the sample but in the end had a more precise taxonomy 
+than we expected: we identified the sampled fish to the species level which is a more precise 
+taxonomic rank than family. To solve this inconsistency you can use function `renameSA`.
 
 
 ```{r}
@@ -112,9 +130,9 @@ myObjectnew<-updateSAwithTaxonFromSL(RDBESDataObject=myObject,
                             strict=TRUE)
 ```
 
-Function is checking the rank of aphia id in both of tables SA and SL. If aphia 
-id in SA table is more accurate than in SL table and aphia ids are from the 
-same family then aphia id in SA table is renaming to aphia id from SL table. If aphia Ids are from diffrent families then the function is leaving the primary value. If we have the opposite situation, so when in the SL table there is more accurate rank than in the SA table, the function is leaving the primary value too.
+The function compares the taxonomic rank of the aphia id declared in table SA and SL. If the aphia 
+id in the table SA is more precise than the aphia id table SL *and* the aphia ids are from the 
+same family then the aphia id in the table SA is renamed to the aphia id from SL table. If the aphia Ids are from different families then the function leaves the primary value. If the opposite situation takes place, i.e., the aphia id in table SA is less precise than the one in the SL table, the function leaves the primary value too.
 
 In the SA results we can see that 126425 - `Clupea harengus` has been changed to 125464 - `Clupeidae`.
 ```{r}
@@ -135,5 +153,7 @@ for (i in seq_along(vignettes$Rmd)) {
 }
 }
 ```
+
+*Last review: 15/10/2026*
 
 #END

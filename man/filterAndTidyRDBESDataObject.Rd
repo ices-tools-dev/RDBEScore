@@ -2,7 +2,7 @@
 % Please edit documentation in R/filterAndTidyRDBESDataObject.R
 \name{filterAndTidyRDBESDataObject}
 \alias{filterAndTidyRDBESDataObject}
-\title{Filter and remove orphan records in an RDBESDataObject}
+\title{Filter and tidy an RDBESDataObject (deprecated)}
 \usage{
 filterAndTidyRDBESDataObject(
   RDBESDataObjectToFilterAndTidy,
@@ -20,7 +20,8 @@ filterAndTidyRDBESDataObject(
 
 \item{valuesToFilter}{A vector of the field values you wish to filter for.}
 
-\item{killOrphans}{Controls if orphan rows are removed. Default is TRUE.}
+\item{killOrphans}{Controls the final downstream orphan cleanup. Default is
+TRUE. Broken vessel-link and species-list-link removal always run.}
 
 \item{verbose}{(Optional) Set to TRUE if you want informative text printed
 out, or FALSE if you don't.  The default is FALSE.}
@@ -32,26 +33,51 @@ the validation be strict? The default is TRUE.}
 The filtered input object of the same class as \code{RDBESDataObjectToFilterAndTidy}.
 }
 \description{
-This function filters an RDBESDataObject based on specified fields and values, and can optionally remove any orphan records.
-The returned object will include all rows which either: a) do not include any of the field names in \code{fieldsToFilter}, or b) do include the field names and have one of the allowed values in \code{valuesToFilter}.
-If \code{killOrphans} is set to \code{TRUE}, the function will remove orphaned rows. The default is \code{TRUE}.
+This deprecated function filters an RDBESDataObject, removes rows with broken
+vessel and species-list links, and optionally removes downstream orphans.
+It is retained for compatibility and will be removed in a future release.
 }
+\section{Effect on sampling records}{
+
+Available VD and SL records determine which sampling rows are retained:
+vessel-link cleanup removes sampling rows with unmatched \code{VDid} values,
+and species-list cleanup removes SS rows without a matching SL entry.
+These operations delete sampling rows rather than recoding their values.
+They still run when \code{killOrphans = FALSE}, which disables only the final
+downstream orphan cleanup. This function does not trim unused VD and SL
+rows based on retained sampling records. That reverse operation is proposed
+in \url{https://github.com/ices-tools-dev/RDBEScore/issues/287}.
+}
+
+\section{Migration}{
+
+Use \code{\link[=filterRDBESDataObject]{filterRDBESDataObject()}} for filtering with downstream orphan removal.
+To reproduce the full cleanup performed here, filter with
+\code{killOrphans = FALSE}, call \code{\link[=removeBrokenVesselLinks]{removeBrokenVesselLinks()}}, then
+\code{\link[=removeBrokenSpeciesListLinks]{removeBrokenSpeciesListLinks()}}, and finally \code{\link[=findAndKillOrphans]{findAndKillOrphans()}} if
+orphan removal is wanted. This explicit sequence preserves the distinction
+between orphan removal and cleanup of vessel and species-list links.
+}
+
 \section{Development review}{
 
 \itemize{
 \item AI-assisted: Yes
 \item Review: rix133
-\item Notes/scope: examples only
+\item Notes/scope:
 }
 }
 
 \examples{
+# Migration: filter, remove broken links, then remove downstream orphans
 H1DataObj <- H1Example
-# Keep a named design and remove the records no longer linked to it
-H1DataObjFiltered <- filterAndTidyRDBESDataObject(
+H1DataObjFiltered <- filterRDBESDataObject(
   H1DataObj, fieldsToFilter = "DEstratumName",
-  valuesToFilter = "Pckg_SDAResources_agstrat_H1"
+  valuesToFilter = "Pckg_SDAResources_agstrat_H1", killOrphans = FALSE
 )
+H1DataObjFiltered <- removeBrokenVesselLinks(H1DataObjFiltered)
+H1DataObjFiltered <- removeBrokenSpeciesListLinks(H1DataObjFiltered)
+H1DataObjFiltered <- findAndKillOrphans(H1DataObjFiltered)
 summary(H1DataObjFiltered)
 
 }

@@ -1,20 +1,26 @@
+# AI-assisted: Yes
+# Review: rix133
 capture.output({  ## suppresses printing of console output when running test()
 
 
 # common parameters
 # H1 directory
-dirH1 <- "./h1_v_20250211/"
+dirH1 <- "./h1_v_20261015/"
 # H5 directory
-dirH5 <- "./h5_v_20250211/"
+dirH5 <- "./h5_v_20261015/"
 
 
 createH1TestData<- function(){
 
   #setwd("./tests/testthat/")
   myH1 <- createRDBESDataObject(input = dirH1)
-  myH1 <- filterAndTidyRDBESDataObject(myH1,
-                                       fieldsToFilter =c("DEsampScheme"),
-                                       valuesToFilter = c("National Routine"))
+  myH1 <- filterRDBESDataObject(myH1,
+                                       fieldsToFilter = c("DEstratumName"),
+                                       valuesToFilter = c("DE_stratum1_H1", "DE_stratum2_H1", "DE_stratum3_H1"),
+                                       killOrphans = FALSE)
+  myH1 <- removeBrokenVesselLinks(myH1)
+  myH1 <- removeBrokenSpeciesListLinks(myH1)
+  myH1 <- findAndKillOrphans(myH1)
 
   # Keep 5 SA rows
   numOfRows <- 5
@@ -32,9 +38,13 @@ createH1TestData<- function(){
 createH5TestData <- function(){
 
   myH5 <- createRDBESDataObject(input = dirH5)
-  myH5 <- filterAndTidyRDBESDataObject(myH5,
+  myH5 <- filterRDBESDataObject(myH5,
                                        fieldsToFilter =c("DEsampScheme"),
-                                       valuesToFilter = c("National Routine"))
+                                       valuesToFilter = c("WGRDBES-EST TEST 1"),
+                                       killOrphans = FALSE)
+  myH5 <- removeBrokenVesselLinks(myH5)
+  myH5 <- removeBrokenSpeciesListLinks(myH5)
+  myH5 <- findAndKillOrphans(myH5)
 
   numOfRows <- 5
   myH5[["SA"]] <- head(myH5[["SA"]],numOfRows)

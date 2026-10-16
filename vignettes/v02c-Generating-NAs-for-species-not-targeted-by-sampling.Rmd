@@ -27,13 +27,20 @@ library(RDBEScore)
 
 ## Load and validate example data
 
+**Sampling-data restriction in this example:** after selecting SL and the fishing operation, the explicit broken-link cleanup removes sampling rows without matching VD records and SS rows without matching SL records. Downstream orphan cleanup follows. This preserves the former `filterAndTidyRDBESDataObject()` sequence and can exclude sampling observations. Ordinary `filterRDBESDataObject()` does not perform these two broken-link checks. This is distinct from trimming unused VD/SL rows, which is planned in [issue #287](https://github.com/ices-tools-dev/RDBEScore/issues/287). See [Manipulating RDBESDataObjects](v01b-manipulating-rdbesdataobjects.html).
+
 ```{r}
-# read an example dataset and simplify it to 1 trip and 1 haul [dev bote: this section needs to be reworked when data and filterRDBESDataObject are  updated]
+# read an example dataset and simplify it to 1 trip and 1 haul. The 1st haul in the data is selected.
 data(Pckg_survey_apistrat_H1)
 myH1DataObject1 <- Pckg_survey_apistrat_H1
 myH1DataObject1$SL<-myH1DataObject1$SL[grepl(myH1DataObject1$SL$SLspeclistName, pat="Pckg_survey_apistrat_H1"),]
-#myH1DataObject1<-filterAndTidyRDBESDataObject(myH1DataObject1, fieldsToFilter="FOid",valuesToFilter=70849, killOrphans = TRUE)
-myH1DataObject1<-filterRDBESDataObject(myH1DataObject1, fieldsToFilter="SSid",valuesToFilter=myH1DataObject1$SS$SSid[1], killOrphans = TRUE)
+myH1DataObject1 <- filterRDBESDataObject(myH1DataObject1, fieldsToFilter="FOid",
+                                      valuesToFilter=myH1DataObject1$FO$FOid[1],
+                                      killOrphans = FALSE)
+# Clean vessel and species-list links before removing downstream orphans
+myH1DataObject1 <- removeBrokenVesselLinks(myH1DataObject1)
+myH1DataObject1 <- removeBrokenSpeciesListLinks(myH1DataObject1)
+myH1DataObject1 <- findAndKillOrphans(myH1DataObject1)
 # check it is a valid RDBESobject
 validateRDBESDataObject(myH1DataObject1)
 ```
@@ -48,7 +55,7 @@ Examining a print of the Species List (SL) and Individual Species (IS) tables on
 myH1DataObject1[c("SL","IS")]
 ```
 
-Examining a print of the Species Selection table (SS), one can confirm that only one fishing operation is present in the data (FOid 70849) and that landings were indeed sampled from it (for simplicity only a subset of columns is printed).
+Examining a print of the Species Selection table (SS), one can confirm that only one fishing operation is present in the data and that landings were indeed sampled from it (for simplicity only a subset of columns is printed).
 
 ```{r}
 myH1DataObject1[[c("SS")]][,1:15]
@@ -60,7 +67,7 @@ myH1DataObject1[[c("SA")]][,c(1:9,48:49)]
 
 ## Generating NAs for species not looked for
 
-Suppose we want to consult the data to produce an estimate of, e.g., cod (aphiaId 126436). That species was not targeted by the sampling programme and it is impossible to infer from the data if it was or not present alongside *Nephrops norvegicus* during the sampling. The total weight measured (SAtotalWtMes) of cod should therefore be considered missing (NA). 
+Suppose we want to use these data to produce an estimate of, e.g., cod (aphiaId 126436). That species was not targeted by the sampling programme so it will not be possible to infer from the data if it was or not present alongside *Nephrops norvegicus* during the sampling. The total weight measured (SAtotalWtMes) of cod should therefore be considered missing (NA). 
 
 The function \code{generateNAsUsingSL} does that (again for convenience, only a few columns of the SA table are printed).
 
@@ -129,5 +136,7 @@ for (i in seq_along(vignettes$Rmd)) {
 }
 }
 ```
+
+*Last review: 15/10/2026*
 
 #END

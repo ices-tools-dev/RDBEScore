@@ -1,4 +1,6 @@
 # RDBEScore 0.4.0
+- Breaking: `filterRDBESDataObject()` now removes downstream orphans by default. Use `killOrphans = FALSE` to retain them. `filterAndTidyRDBESDataObject()` is deprecated pending removal. Its help page documents the explicit filtering, broken-link cleanup and orphan-removal sequence needed to reproduce its behavior (#281).
+- Removed the unused internal estimation prototypes `doDBEestimantionObjUpp()`, `doDBestimation()` and `createDBEPrepObj()` (#280).
 - Documentation: revised function examples to run with packaged or small synthetic data, retaining `\dontrun` for examples that demonstrate strict validation errors (#272).
 - Breaking: `getLinkedDataFromLevel()` now returns the requested field and target-table columns in both directions, without adding intermediate hierarchy ids (#268). Non-id requested fields are retained when going down the hierarchy. `getLowerTableSubsets()` avoids duplicated requested-field columns.
 - Package README updated with AI usage guidelines

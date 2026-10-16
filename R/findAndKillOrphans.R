@@ -20,7 +20,8 @@
 #' H1DataObj <- H1Example
 #' # Filtering a design leaves unlinked records downstream
 #' H1DataObjFiltered <- filterRDBESDataObject(
-#'   H1DataObj, "DEstratumName", "Pckg_SDAResources_agstrat_H1"
+#'   H1DataObj, "DEstratumName", "Pckg_SDAResources_agstrat_H1",
+#'   killOrphans = FALSE
 #' )
 #' H1DataObjNoOrphans <- findAndKillOrphans(H1DataObjFiltered)
 #' c(before = nrow(H1DataObjFiltered$SA), after = nrow(H1DataObjNoOrphans$SA))

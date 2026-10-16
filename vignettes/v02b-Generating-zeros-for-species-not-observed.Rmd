@@ -28,12 +28,20 @@ library(data.table)
 
 ## Load and validate example data
 
+**Sampling-data restriction in this example:** after selecting SL and the fishing operation, the explicit broken-link cleanup removes sampling rows without matching VD records and SS rows without matching SL records. Downstream orphan cleanup follows. This preserves the former `filterAndTidyRDBESDataObject()` sequence and can exclude sampling observations. Ordinary `filterRDBESDataObject()` does not perform these two broken-link checks. This is distinct from trimming unused VD/SL rows, which is planned in [issue #287](https://github.com/ices-tools-dev/RDBEScore/issues/287). See [Manipulating RDBESDataObjects](v01b-manipulating-rdbesdataobjects.html).
+
 ```{r}
 # read an example dataset and simplify it to 1 trip and 1 haul. The 1st haul in the data is selected.
 data(Pckg_survey_apistrat_H1)
 myH1DataObject1 <- Pckg_survey_apistrat_H1
 myH1DataObject1$SL<-myH1DataObject1$SL[grepl(myH1DataObject1$SL$SLspeclistName, pat="Pckg_survey_apistrat_H1"),]
-myH1DataObject1<-filterAndTidyRDBESDataObject(myH1DataObject1, fieldsToFilter="FOid",valuesToFilter=myH1DataObject1$FO$FOid[1])
+myH1DataObject1 <- filterRDBESDataObject(myH1DataObject1, fieldsToFilter="FOid",
+                                      valuesToFilter=myH1DataObject1$FO$FOid[1],
+                                      killOrphans = FALSE)
+# Clean vessel and species-list links before removing downstream orphans
+myH1DataObject1 <- removeBrokenVesselLinks(myH1DataObject1)
+myH1DataObject1 <- removeBrokenSpeciesListLinks(myH1DataObject1)
+myH1DataObject1 <- findAndKillOrphans(myH1DataObject1)
 # check it is a valid RDBESobject
 validateRDBESDataObject(myH1DataObject1)
 ```
@@ -104,5 +112,6 @@ for (i in seq_along(vignettes$Rmd)) {
 }
 ```
 
-#END
+*Last review: 14/10/2026*
 
+#END

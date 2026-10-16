@@ -12,7 +12,7 @@
 #'
 #' @section Development review:
 #' - AI-assisted: Yes
-#' - Review: pending
+#' - Review: rix133
 #' - Notes/scope:
 
 createTableOfRDBESIds<-function(x, addSAseqNums=TRUE){
