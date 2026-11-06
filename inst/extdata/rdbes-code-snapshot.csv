@@ -1,0 +1,176 @@
+codeType,Key,Description,Deprecated,Retrieved
+AccuracyCode,100g,100 grams,FALSE,2026-11-06
+AccuracyCode,10g,10 grams,FALSE,2026-11-06
+AccuracyCode,25mm,25 millimetres,FALSE,2026-11-06
+AccuracyCode,500g,500 grams,FALSE,2026-11-06
+AccuracyCode,5cm,5 centimetres,FALSE,2026-11-06
+AccuracyCode,NotApplicable,Not applicable,FALSE,2026-11-06
+AccuracyCode,cm,1 centimetre,FALSE,2026-11-06
+AccuracyCode,g,1 gram,FALSE,2026-11-06
+AccuracyCode,kg,1 kilogram,FALSE,2026-11-06
+AccuracyCode,mm,1 millimetre,FALSE,2026-11-06
+AccuracyCode,scm,0.5 centimetre,FALSE,2026-11-06
+AccuracyCode,smm,0.5 millimetre,FALSE,2026-11-06
+AccuracyCode,year,1 year,FALSE,2026-11-06
+BiologicalMeasurementType,Age,Age,FALSE,2026-11-06
+BiologicalMeasurementType,Berried,"Berried female, for crustaceans",FALSE,2026-11-06
+BiologicalMeasurementType,ForkLength,Fork length in millimeters (mm),FALSE,2026-11-06
+BiologicalMeasurementType,GeneticPopulation,"Population indication of a group of fish of one species, which shares common ecological and genetic features. Use for populations (biological units) for specific species e.g. herring populations defined by WKSIDAC2.",FALSE,2026-11-06
+BiologicalMeasurementType,HatchSeason,Hatching Season,FALSE,2026-11-06
+BiologicalMeasurementType,IlliciumCollected,Indication on illicia collected and potentially archived. To be used for all collected illicia including when an age is provided.,FALSE,2026-11-06
+BiologicalMeasurementType,InfoConversionFactor,Information to derive conversion factors is available,FALSE,2026-11-06
+BiologicalMeasurementType,InfoGenetic,Genetic information for the specimen is available,FALSE,2026-11-06
+BiologicalMeasurementType,InfoGonad,Gonad information for the specimen is available,FALSE,2026-11-06
+BiologicalMeasurementType,InfoLiver,Liver information for the specimen is available,FALSE,2026-11-06
+BiologicalMeasurementType,InfoOtolithMorphometrics,Otolith morphometry Information is available,FALSE,2026-11-06
+BiologicalMeasurementType,InfoParasite,Parasite information for the specimen is available,FALSE,2026-11-06
+BiologicalMeasurementType,InfoStomach,Stomach information for the specimen is available,FALSE,2026-11-06
+BiologicalMeasurementType,InfoTagging,Tagging information is available,FALSE,2026-11-06
+BiologicalMeasurementType,LengthCarapace,Length of carapace or cephalotorax in millimeters (mm),FALSE,2026-11-06
+BiologicalMeasurementType,LengthLowerJawFork,Lower jaw to fork length in millimeters (mm),FALSE,2026-11-06
+BiologicalMeasurementType,LengthMantle,Mantle length in millimeters (mm),FALSE,2026-11-06
+BiologicalMeasurementType,LengthMaximumShell,Maximum shell length in millimeters (mm),FALSE,2026-11-06
+BiologicalMeasurementType,LengthPinchedTail,Pinched tail length in milimeters (mm),FALSE,2026-11-06
+BiologicalMeasurementType,LengthPreAnal,Pre-anal length in millimeters (mm),FALSE,2026-11-06
+BiologicalMeasurementType,LengthPreCaudal,Pre-caudal length in millimeters (mm),FALSE,2026-11-06
+BiologicalMeasurementType,LengthStandard,Standard length in millimeters (mm),FALSE,2026-11-06
+BiologicalMeasurementType,LengthTail,Tail length in millimeters (mm),FALSE,2026-11-06
+BiologicalMeasurementType,LengthTotal,Total length in millimeters (mm),FALSE,2026-11-06
+BiologicalMeasurementType,LengthWingSpan,Wing Span length in millimeters (mm),FALSE,2026-11-06
+BiologicalMeasurementType,Maturity,Maturity,FALSE,2026-11-06
+BiologicalMeasurementType,Number,Number of Individuals,FALSE,2026-11-06
+BiologicalMeasurementType,OtolithCollected,Indication on otolith collected and potentially archived. To be used for all collected otoliths including when an age is provided,FALSE,2026-11-06
+BiologicalMeasurementType,ScaleCollected,Indication on scale collected and potentially archived. To be used for all collected scales including when an age is provided,FALSE,2026-11-06
+BiologicalMeasurementType,Sex,Sex,FALSE,2026-11-06
+BiologicalMeasurementType,ShellHeight,Shell height in millimeters (mm),FALSE,2026-11-06
+BiologicalMeasurementType,SpecimenState,State of the specimen,FALSE,2026-11-06
+BiologicalMeasurementType,Stock,Stock,FALSE,2026-11-06
+BiologicalMeasurementType,VertebraCount,Number of Vertebrae,FALSE,2026-11-06
+BiologicalMeasurementType,WeightGutted,"Measured gutted weight of specimen in grams (g), after removing viscera and gonad.",FALSE,2026-11-06
+BiologicalMeasurementType,WeightLive,Weight of specimen before any processing in grams (g),FALSE,2026-11-06
+BiologicalMeasurementType,WeightMeasured,"Measured weight of specimen in grams (g), according to state and processing",FALSE,2026-11-06
+BiologicalMeasurementType,WidthCarapace,Width of carapace in millimeters (mm),FALSE,2026-11-06
+BiologicalMeasurementType,WidthMaximumShell,Maximum shell width in millimeters (mm),FALSE,2026-11-06
+CatchCategory,BMS,Below Minimum Size landings,FALSE,2026-11-06
+CatchCategory,Catch,Catch (when landing and discard is mixed),FALSE,2026-11-06
+CatchCategory,Dis,Discard (only for commercial sample data),FALSE,2026-11-06
+CatchCategory,DisBMS,"Mixed fraction of discard and BMS, where the categories are estimated together.",FALSE,2026-11-06
+CatchCategory,Lan,Landing,FALSE,2026-11-06
+CatchCategory,RegDis,Logbook Registered Discard,FALSE,2026-11-06
+CatchFraction,Catch,Sample is taken from the catch,FALSE,2026-11-06
+CatchFraction,Dis,Sample is taken from the discards,FALSE,2026-11-06
+CatchFraction,Lan,Sample is taken from the landings,FALSE,2026-11-06
+LowerHierarchy,A,"Length or weight stratified biological samples, which require both Frequency Measure (FM) and Biological Variable (BV) RDBES tables",FALSE,2026-11-06
+LowerHierarchy,B,"Only length or weight frequency data are taken from samples/subsamples, which require only the Frequency Measure (FM) RDBES table",FALSE,2026-11-06
+LowerHierarchy,C,"Only biological data are taken from samples/subsamples, which require only the Biological Variable (BV) RDBES table",FALSE,2026-11-06
+LowerHierarchy,D,"No length measurements or biological analyses of samples, neither Frequency Measure (FM) or Biological Variable (BV) RDBES tables required",FALSE,2026-11-06
+ProductPresentation,CBF,Cod Butterfly Escalado,FALSE,2026-11-06
+ProductPresentation,CLA,Claws only,FALSE,2026-11-06
+ProductPresentation,DWT,ICCAT code,FALSE,2026-11-06
+ProductPresentation,FBS,Filleted with skin and bones on,FALSE,2026-11-06
+ProductPresentation,FIL,Filleted,FALSE,2026-11-06
+ProductPresentation,FIS,Filleted and skinned,FALSE,2026-11-06
+ProductPresentation,FSP,Filleted with skin removed and pinbone on,FALSE,2026-11-06
+ProductPresentation,GHT,"Gutted, headed and tailed",FALSE,2026-11-06
+ProductPresentation,GUG,Gutted and gilled,FALSE,2026-11-06
+ProductPresentation,GUH,Gutted and headed,FALSE,2026-11-06
+ProductPresentation,GUL,"Gutted, liver remaining",FALSE,2026-11-06
+ProductPresentation,GUN,"Gutted, gonads remaining",FALSE,2026-11-06
+ProductPresentation,GUS,"Gutted, headed and skinned",FALSE,2026-11-06
+ProductPresentation,GUT,Gutted,FALSE,2026-11-06
+ProductPresentation,HEA,Headed,FALSE,2026-11-06
+ProductPresentation,JAP,Japanese cut,FALSE,2026-11-06
+ProductPresentation,JAT,Tailed Japanese cut,FALSE,2026-11-06
+ProductPresentation,LAP,Lappen,FALSE,2026-11-06
+ProductPresentation,LVR,Liver only,FALSE,2026-11-06
+ProductPresentation,OTH,Any other presentation,FALSE,2026-11-06
+ProductPresentation,ROE,Roe(s) only,FALSE,2026-11-06
+ProductPresentation,SKI,Skinned,FALSE,2026-11-06
+ProductPresentation,SUR,Surimi,FALSE,2026-11-06
+ProductPresentation,TAL,Tails only,FALSE,2026-11-06
+ProductPresentation,TLD,Tailed,FALSE,2026-11-06
+ProductPresentation,TNG,Tongue only,FALSE,2026-11-06
+ProductPresentation,TUB,Tube only (Squid),FALSE,2026-11-06
+ProductPresentation,Unknown,Unknown presentation,FALSE,2026-11-06
+ProductPresentation,WHL,Whole (No processing),FALSE,2026-11-06
+ProductPresentation,WNG,Wings only,FALSE,2026-11-06
+RDBESUpperHierarchy,1,Commercial fisheries sampling according to hierarchy 1,FALSE,2026-11-06
+RDBESUpperHierarchy,10,Commercial fisheries sampling according to hierarchy 10,FALSE,2026-11-06
+RDBESUpperHierarchy,11,Commercial fisheries sampling according to hierarchy 11,FALSE,2026-11-06
+RDBESUpperHierarchy,12,Commercial fisheries sampling according to hierarchy 12,FALSE,2026-11-06
+RDBESUpperHierarchy,13,Commercial fisheries sampling according to hierarchy 13,FALSE,2026-11-06
+RDBESUpperHierarchy,2,Commercial fisheries sampling according to hierarchy 2,FALSE,2026-11-06
+RDBESUpperHierarchy,3,Commercial fisheries sampling according to hierarchy 3,FALSE,2026-11-06
+RDBESUpperHierarchy,4,Commercial fisheries sampling according to hierarchy 4,FALSE,2026-11-06
+RDBESUpperHierarchy,5,Commercial fisheries sampling according to hierarchy 5,FALSE,2026-11-06
+RDBESUpperHierarchy,6,Commercial fisheries sampling according to hierarchy 6,FALSE,2026-11-06
+RDBESUpperHierarchy,7,Commercial fisheries sampling according to hierarchy 7,FALSE,2026-11-06
+RDBESUpperHierarchy,8,Commercial fisheries sampling according to hierarchy 8,FALSE,2026-11-06
+RDBESUpperHierarchy,9,Commercial fisheries sampling according to hierarchy 9,FALSE,2026-11-06
+ReasonForNotSampling,CameraNotWorking,Camera not working,FALSE,2026-11-06
+ReasonForNotSampling,CameraViewObstructed,Obstruction of camera view,FALSE,2026-11-06
+ReasonForNotSampling,IndustryDeclined,"Industry declines to allow sampling of fish or to allow an observer on board, e.g. for logistical reasons. As described in ICES. 2013. Report of the Study Group on Practical Implementation of Discard Sampling Plans (SGPIDS).",FALSE,2026-11-06
+ReasonForNotSampling,NoAnswer,Contact attempted but no answer received.,FALSE,2026-11-06
+ReasonForNotSampling,NoContactDetails,No Contact Details as described in ICES. 2013. Report of the Study Group on Practical Implementation of Discard Sampling Plans (SGPIDS).,FALSE,2026-11-06
+ReasonForNotSampling,NotAvailable,Not Available as described in ICES. 2013. Report of the Study Group on Practical Implementation of Discard Sampling Plans (SGPIDS).,FALSE,2026-11-06
+ReasonForNotSampling,ObserverDeclined,Observer declines to collect the sample or go onboard the vessel e.g. for logistic reasons. As described in ICES. 2013. Report of the Study Group on Practical Implementation of Discard Sampling Plans (SGPIDS).,FALSE,2026-11-06
+ReasonForNotSampling,Other,Other,FALSE,2026-11-06
+ReasonForNotSampling,OutOfFrame,Not included in sampling frame,FALSE,2026-11-06
+ReasonForNotSampling,PoorImageQuality,Poor Image Quality,FALSE,2026-11-06
+ReasonForNotSampling,PoorSpecimenQuality,Poor specimen quality,FALSE,2026-11-06
+ReasonForNotSampling,QuotaReached,Quota Reached,FALSE,2026-11-06
+ReasonForNotSampling,Unknown,Not recorded in the paper work,FALSE,2026-11-06
+SamplingUnit,Basket,"Basket, when samples are clustered (same time/grouped)",FALSE,2026-11-06
+SamplingUnit,Box,"Box, when samples are clustered (same time/grouped)",FALSE,2026-11-06
+SamplingUnit,Container,"Container, when samples are clustered (same time/grouped)",FALSE,2026-11-06
+SamplingUnit,Haul,"Haul, when samples are clustered (same time/grouped)",FALSE,2026-11-06
+SamplingUnit,Individuals,Individual fish randomly sampled throughout the catch. These fish are un-clustered.,FALSE,2026-11-06
+SamplingUnit,Minutes,"Minutes, when samples are clustered (same time/grouped)",FALSE,2026-11-06
+SamplingUnit,Number,"Number, when samples are clustered (same time/grouped)",FALSE,2026-11-06
+SamplingUnit,Tray,"Tray, when samples are clustered (same time/grouped)",FALSE,2026-11-06
+SamplingUnit,Weight,"Weight, when samples are clustered (same time/grouped)",FALSE,2026-11-06
+SelectionMethod,CENSUS,Census,FALSE,2026-11-06
+SelectionMethod,D,Directed sampling from the remainder of the catch,FALSE,2026-11-06
+SelectionMethod,FIXED,Fixed sample,FALSE,2026-11-06
+SelectionMethod,NPCLQS-O,Non-Probabilistic Cross-Level Quota sampling at other levels than trip,FALSE,2026-11-06
+SelectionMethod,NPCLQS-T,Non-Probabilistic Cross-Level Quota sampling at the trip level,FALSE,2026-11-06
+SelectionMethod,NPCS,Non-Probabilistic Convenience Sampling,FALSE,2026-11-06
+SelectionMethod,NPJS,Non-Probabilistic Judgement Sampling,FALSE,2026-11-06
+SelectionMethod,NPQSRSWOR,Non-Probabilistic Quasi Simple Random Sampling Without Replacement,FALSE,2026-11-06
+SelectionMethod,NPQSRSWR,Non-Probabilistic Quasi Simple Random Sampling With Replacement,FALSE,2026-11-06
+SelectionMethod,NPQSYSS,Non-Probabilistic Quasi Systematic Sampling,FALSE,2026-11-06
+SelectionMethod,NotApplicable,Used in cases where a selection does not take place,FALSE,2026-11-06
+SelectionMethod,R,Random sampling from a subsample of the catch,FALSE,2026-11-06
+SelectionMethod,SRSWOR,Simple Random Sampling Without Replacement,FALSE,2026-11-06
+SelectionMethod,SRSWR,Simple Random Sampling With Replacement,FALSE,2026-11-06
+SelectionMethod,SYSS,Systematic Sampling,FALSE,2026-11-06
+SelectionMethod,UPSWOR,Unequal Probability Sampling Without Replacement,FALSE,2026-11-06
+SelectionMethod,UPSWR,Unequal Probability Sampling With Replacement,FALSE,2026-11-06
+SelectionMethod,Unknown,Selection method is not known,FALSE,2026-11-06
+SpecimensState,AliveHighProbSurvival,Considered to have a high probability of surviving by a pre-determined criteria after the specimen was released alive to the sea.,FALSE,2026-11-06
+SpecimensState,AliveLowProbSurvival,Considered to have a low probability of surviving by a pre-determined criteria after the specimen was released alive to the sea.,FALSE,2026-11-06
+SpecimensState,DeadOrZeroProbSurvival,Considered to have null probability of surviving by a pre-determined criteria,FALSE,2026-11-06
+SpecimensState,Decomposed,Considered dead before caught using a pre-determined criteria,FALSE,2026-11-06
+SpecimensState,Mixed,"Mixture of dead, impaired and/or healthy specimens in unknown proportion",FALSE,2026-11-06
+SpecimensState,NotDetermined,The observer did not try to determine the state of the specimen,FALSE,2026-11-06
+SpecimensState,Predated,Specimen(s) with signs of predation,FALSE,2026-11-06
+SpecimensState,Unknown,The observer was not able to note the state of specimen but was expected to do so,FALSE,2026-11-06
+StateOfProcessing,BAF,Boiled and Frozen,FALSE,2026-11-06
+StateOfProcessing,BOI,Boiled,FALSE,2026-11-06
+StateOfProcessing,DEF,Defrosted,FALSE,2026-11-06
+StateOfProcessing,DRI,Dried,FALSE,2026-11-06
+StateOfProcessing,FRE,Fresh,FALSE,2026-11-06
+StateOfProcessing,FRO,Frozen,FALSE,2026-11-06
+StateOfProcessing,SAD,Salted and Dried,FALSE,2026-11-06
+StateOfProcessing,SAL,Salted,FALSE,2026-11-06
+StateOfProcessing,SMO,Smoked,FALSE,2026-11-06
+StateOfProcessing,UNK,Unknown,FALSE,2026-11-06
+ValueUnitOrScale,Agewr,Age in winter rings,FALSE,2026-11-06
+ValueUnitOrScale,Ageyear,Age in years,FALSE,2026-11-06
+ValueUnitOrScale,Lengthmm,Length in millimeters,FALSE,2026-11-06
+ValueUnitOrScale,NotApplicable,"NotApplicable, no unit or scale exist.",FALSE,2026-11-06
+ValueUnitOrScale,SMSF,WKSMSF 2018 Maturity Scale,FALSE,2026-11-06
+ValueUnitOrScale,Sex,"Sex as male, female, transitioning or undetermined",FALSE,2026-11-06
+ValueUnitOrScale,Weightg,Weight in grams,FALSE,2026-11-06
+YesNoFields,N,No,FALSE,2026-11-06
+YesNoFields,Y,Yes,FALSE,2026-11-06

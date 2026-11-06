@@ -113,13 +113,13 @@ Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 Suggests:
+    icesVocab,
     knitr,
     rmarkdown,
     testthat
 Depends:
     R (>= 4.1)
 Imports:
-    data.table,
-    icesVocab
+    data.table
 VignetteBuilder: knitr
 Config/roxygen2/version: 8.1.1

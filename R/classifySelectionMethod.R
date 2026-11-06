@@ -21,7 +21,7 @@
 #'   `NA` or empty.
 #' @section Development review:
 #' - AI-assisted: Yes
-#' - Review: pending
+#' - Review: rix133
 #' - Notes/scope:
 #' @export
 #'
