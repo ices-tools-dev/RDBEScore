@@ -68,8 +68,10 @@ mean weights are not estimated. Default \code{TRUE}.}
 
 \item{plusGroup}{Optional plus group age.}
 
-\item{checkCodes}{Logical. Run \code{\link[=checkRDBESCodes]{checkRDBESCodes()}} (needs internet access
-to vocab.ices.dk). Default \code{TRUE}.}
+\item{checkCodes}{Logical. Run \code{\link[=checkRDBESCodes]{checkRDBESCodes()}} against the ICES code
+lists packaged with RDBEScore. Values not in the lists give a warning and
+are returned in \code{codeCheck}. They never stop the estimation, because the
+ICES lists can change after the data were uploaded. Default \code{TRUE}.}
 
 \item{strict}{Passed to \code{\link[=filterRDBESDataObject]{filterRDBESDataObject()}}, which validates the
 object. Default \code{TRUE}.}
@@ -116,7 +118,8 @@ This wrapper runs the steps below in order. Every step is exported and
 can be run on its own to inspect the intermediate tables, which are all
 returned in the result:
 \enumerate{
-\item \code{\link[=checkRDBESCodes]{checkRDBESCodes()}}: coded fields against the live ICES code lists.
+\item \code{\link[=checkRDBESCodes]{checkRDBESCodes()}}: coded fields against the ICES code lists packaged
+with RDBEScore (optional).
 \item \code{\link[=getSampleUnits]{getSampleUnits()}}: one row per lowest-level SA with its path, design
 classes, domain, within-sample factor \code{fSample} and live weight \code{xSample}.
 \item \code{\link[=expandWithinSample]{expandWithinSample()}}: FM/BV composition expanded to the sampled catch
@@ -143,7 +146,7 @@ Not in this version: variance, discards.
 
 \itemize{
 \item AI-assisted: Yes
-\item Review: pending
+\item Review: rix133
 \item Notes/scope:
 }
 }

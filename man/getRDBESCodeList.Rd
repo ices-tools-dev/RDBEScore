@@ -9,42 +9,49 @@ getRDBESCodeList(codeType, refresh = FALSE)
 \arguments{
 \item{codeType}{Character, a single ICES code type.}
 
-\item{refresh}{Logical. If \code{TRUE} the list is downloaded again even if it
-is in the session cache. Default \code{FALSE}.}
+\item{refresh}{Logical. If \code{TRUE} the list is downloaded from vocab.ices.dk
+(needs the suggested package icesVocab and internet access), replacing
+the cached list. Default \code{FALSE}.}
 }
 \value{
 A \code{data.table} with columns \code{Key}, \code{Description} and \code{Deprecated}.
+The attribute \code{source} is \code{"package snapshot"} or \code{"ICES vocabulary"},
+and \code{retrieved} is the date the list was downloaded.
 }
 \description{
-Downloads an ICES vocabulary code list (for example \code{"SelectionMethod"},
-\code{"LowerHierarchy"} or \code{"ProductPresentation"}) through
-\code{\link[icesVocab:getCodeList]{icesVocab::getCodeList()}}. Each list is downloaded once per R session and
-then served from a cache.
+Returns an ICES vocabulary code list (for example \code{"SelectionMethod"},
+\code{"LowerHierarchy"} or \code{"ProductPresentation"}). By default the list is read
+from a snapshot of the ICES vocabulary distributed with the package, so no
+internet connection is needed. With \code{refresh = TRUE} the current list is
+downloaded from vocab.ices.dk through \code{\link[icesVocab:getCodeList]{icesVocab::getCodeList()}}. If the
+download fails, the snapshot is used with a warning.
 }
 \details{
-Code types relevant to the RDBES include \code{SelectionMethod},
-\code{LowerHierarchy}, \code{CatchCategory}, \code{CatchFraction}, \code{ProductPresentation},
-\code{StateOfProcessing}, \code{SpecimensState}, \code{SamplingUnit}, \code{AccuracyCode},
-\code{BiologicalMeasurementType}, \code{ValueUnitOrScale}, \code{ReasonForNotSampling},
-\code{RDBESUpperHierarchy} and \code{YesNoFields}. See
-\code{\link[icesVocab:getCodeTypeList]{icesVocab::getCodeTypeList()}} for all code types.
+The snapshot holds every code type checked by \code{\link[=checkRDBESCodes]{checkRDBESCodes()}}:
+\code{AccuracyCode}, \code{BiologicalMeasurementType}, \code{CatchCategory},
+\code{CatchFraction}, \code{LowerHierarchy}, \code{ProductPresentation},
+\code{RDBESUpperHierarchy}, \code{ReasonForNotSampling}, \code{SamplingUnit},
+\code{SelectionMethod}, \code{SpecimensState}, \code{StateOfProcessing},
+\code{ValueUnitOrScale} and \code{YesNoFields}. It is made with
+\code{data-raw/refreshRDBESCodeSnapshot.R}. The ICES lists can change after the
+snapshot was made, and after the data were uploaded.
 
-An internet connection to vocab.ices.dk is needed the first time a list is
-requested in a session.
+Each list is read once per R session and then served from a cache.
 }
 \section{Development review}{
 
 \itemize{
 \item AI-assisted: Yes
-\item Review: pending
+\item Review: rix133
 \item Notes/scope:
 }
 }
 
 \examples{
-\dontrun{
-getRDBESCodeList("SelectionMethod")
-}
+selectionMethods <- getRDBESCodeList("SelectionMethod")
+selectionMethods
+# Date the packaged ICES list was downloaded
+attr(selectionMethods, "retrieved")
 }
 \seealso{
 \code{\link[=checkRDBESCodes]{checkRDBESCodes()}}

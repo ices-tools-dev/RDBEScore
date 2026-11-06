@@ -12,7 +12,8 @@
 #' can be run on its own to inspect the intermediate tables, which are all
 #' returned in the result:
 #'
-#' 1. [checkRDBESCodes()]: coded fields against the live ICES code lists.
+#' 1. [checkRDBESCodes()]: coded fields against the ICES code lists packaged
+#'    with RDBEScore (optional).
 #' 2. [getSampleUnits()]: one row per lowest-level SA with its path, design
 #'    classes, domain, within-sample factor `fSample` and live weight `xSample`.
 #' 3. [expandWithinSample()]: FM/BV composition expanded to the sampled catch
@@ -41,8 +42,10 @@
 #'   `"month"`, `"area"`, `"statRect"` and `"metier6"`. Default
 #'   `c("year", "quarter", "area", "metier6")`.
 #' @param plusGroup Optional plus group age.
-#' @param checkCodes Logical. Run [checkRDBESCodes()] (needs internet access
-#'   to vocab.ices.dk). Default `TRUE`.
+#' @param checkCodes Logical. Run [checkRDBESCodes()] against the ICES code
+#'   lists packaged with RDBEScore. Values not in the lists give a warning and
+#'   are returned in `codeCheck`. They never stop the estimation, because the
+#'   ICES lists can change after the data were uploaded. Default `TRUE`.
 #'
 #' @return An object of class `RDBESRatioEstimate`, a list. Each element is
 #'   named by what one row of it is:
@@ -71,7 +74,7 @@
 #'   [summariseRatioEstimates()]
 #' @section Development review:
 #' - AI-assisted: Yes
-#' - Review: pending
+#' - Review: rix133
 #' - Notes/scope:
 #' @export
 #'
@@ -114,8 +117,15 @@ doRatioEstimation <- function(RDBESDataObj,
 
   codeCheck <- NULL
   if (checkCodes) {
-    codeCheck <- checkRDBESCodes(RDBESDataObj, strict = strict)
-    nBad <- codeCheck[valid == FALSE, sum(n)]
+    # The code check is informative only and must not stop the estimation
+    codeCheck <- tryCatch(
+      checkRDBESCodes(RDBESDataObj, strict = strict),
+      error = function(e) {
+        warning("The check of coded fields was skipped: ",
+                conditionMessage(e), call. = FALSE)
+        NULL
+      })
+    nBad <- if (is.null(codeCheck)) 0 else codeCheck[valid == FALSE, sum(n)]
     if (nBad > 0) {
       bad <- codeCheck[valid == FALSE,
                        paste0(field, "='", value, "'", collapse = ", ")]

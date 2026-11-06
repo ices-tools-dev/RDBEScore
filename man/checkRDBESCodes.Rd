@@ -9,7 +9,8 @@ checkRDBESCodes(
   tables = NULL,
   fields = NULL,
   strict = TRUE,
-  verbose = FALSE
+  verbose = FALSE,
+  refresh = FALSE
 )
 }
 \arguments{
@@ -23,32 +24,45 @@ check to. Default \code{NULL} checks all supported fields.}
 \item{strict}{Passed to \code{\link[=validateRDBESDataObject]{validateRDBESDataObject()}}. Default \code{TRUE}.}
 
 \item{verbose}{Logical. If \code{TRUE} a message lists the invalid values.}
+
+\item{refresh}{Logical. Passed to \code{\link[=getRDBESCodeList]{getRDBESCodeList()}}: if \code{TRUE} the code
+lists are downloaded from vocab.ices.dk instead of using the packaged
+snapshot. Default \code{FALSE}.}
 }
 \value{
 A \code{data.table} with one row per table, field and distinct value:
 \code{table}, \code{field}, \code{codeType}, \code{value}, \code{n} (number of records), \code{valid}
-(value is in the ICES code list) and \code{deprecated}.
+(value is in the ICES code list), \code{deprecated}, and \code{source} and
+\code{retrieved} of the code list used (see \code{\link[=getRDBESCodeList]{getRDBESCodeList()}}).
 }
 \description{
 Compares the values of the coded fields used in estimation (selection
 methods, lower hierarchy, catch category, presentation, state of
 processing, sampling unit, measurement type, accuracy, unit or scale and
-yes/no fields) with the live ICES code lists from \code{\link[=getRDBESCodeList]{getRDBESCodeList()}}.
+yes/no fields) with the ICES code lists from \code{\link[=getRDBESCodeList]{getRDBESCodeList()}}. By
+default these are the lists packaged with RDBEScore, so no internet
+connection is needed.
+}
+\details{
+The ICES code lists can change between data upload and estimation. A value
+that is not in the lists is reported, but the data are not changed and
+\code{\link[=doRatioEstimation]{doRatioEstimation()}} only gives a warning.
 }
 \section{Development review}{
 
 \itemize{
 \item AI-assisted: Yes
-\item Review: pending
+\item Review: rix133
 \item Notes/scope:
 }
 }
 
 \examples{
-\dontrun{
-codeCheck <- checkRDBESCodes(H1Example)
+H1DataObj <- H1Example
+codeCheck <- checkRDBESCodes(H1DataObj)
+head(codeCheck)
+# Values that are not in the packaged ICES code lists (none here)
 codeCheck[valid == FALSE]
-}
 }
 \seealso{
 \code{\link[=getRDBESCodeList]{getRDBESCodeList()}}

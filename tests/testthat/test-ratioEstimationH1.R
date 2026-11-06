@@ -1,5 +1,5 @@
 # AI-assisted: Yes
-# Review: pending
+# Review: rix133
 # Notes/scope:
 capture.output({  ## suppresses printing of console output when running test()
 
@@ -237,28 +237,28 @@ test_that("pooled and counted hauls on a sampled design are close to the truth",
 })
 
 # ---------------------------------------------------------------------------
-# Live ICES code lists (need vocab.ices.dk)
+# ICES code lists (packaged snapshot, the refresh needs vocab.ices.dk)
 # ---------------------------------------------------------------------------
 
-skipIfNoVocab <- function() {
-  skip_on_cran()
-  ok <- tryCatch({
-    getRDBESCodeList("YesNoFields")
-    TRUE
-  }, error = function(e) FALSE)
-  if (!ok) skip("vocab.ices.dk not reachable")
-}
-
 test_that("getRDBESCodeList returns ICES code lists", {
-  skipIfNoVocab()
   sm <- getRDBESCodeList("SelectionMethod")
   expect_true(all(c("SRSWOR", "CENSUS", "NPCS") %in% sm$Key))
   expect_named(sm, c("Key", "Description", "Deprecated"))
   expect_error(getRDBESCodeList("NotACodeType"), "not found")
 })
 
+test_that("getRDBESCodeList downloads the current list with refresh = TRUE", {
+  skip_on_cran()
+  skip_if_not_installed("icesVocab")
+  skip_if_offline("vocab.ices.dk")
+  yn <- getRDBESCodeList("YesNoFields", refresh = TRUE)
+  # Remove the downloaded list from the session cache
+  rm(list = "YesNoFields", envir = .rdbesCodeListCache)
+  expect_equal(attr(yn, "source"), "ICES vocabulary")
+  expect_true(all(c("Y", "N") %in% yn$Key))
+})
+
 test_that("checkRDBESCodes flags values that are not in the ICES lists", {
-  skipIfNoVocab()
   sim <- simulate()
   obj <- sim$obj
   expect_equal(nrow(checkRDBESCodes(obj)[valid == FALSE]), 0)
