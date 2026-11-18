@@ -2,7 +2,7 @@ Package: RDBEScore
 Type: Package
 Title: Functions for the ICES Regional Database and Estimation System (RDBES)
 Version: 0.4.0
-Author: c(
+Authors@R: c(
     person(given = "David",
            family = "Currie",
            role = c("aut"),
