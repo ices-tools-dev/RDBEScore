@@ -9,7 +9,7 @@ Authors@R: c(
            comment = c(ORCID = "0000-0002-3523-6895")),
     person(given = "Richard",
            family = "Meitern",
-           role =  c("aut"),
+           role =  c("aut","cre"),
            email = "richard.meitern@ut.ee",
            comment = c(ORCID = "0000-0002-2600-3002")),
     person(given = "Nuno",
@@ -101,7 +101,7 @@ Authors@R: c(
            family = "Craig",
            role = c("ctb"),
            email = "Jessica.Craig@gov.scot"),
-  person(given = "Colin", family = "Millar", role = "ctb"),
+  person(given = "Colin", family = "Millar", role = c("ctb"),
   person(given = "Ejaz", family = "Muhammad", role = "ctb"))
 Maintainer: Richard Meitern <richard.meitern@ut.ee>
 Description: The RDBEScore package provides functions to import and work with
