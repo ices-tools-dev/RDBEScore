@@ -139,6 +139,8 @@ In the SA results we can see that 126425 - `Clupea harengus` has been changed to
 myObjectnew$SA[,c(1,2,9,14,48,49)]
 ```
 
+A similar behaviour of this function could be expected if the taxon declared in the SL table would be *Teleostei* or *Clupeiformes* instead of *Clupeidae*.
+
 See also other package vignettes:
 
 ```{r,echo=F, results='asis', eval=T}
