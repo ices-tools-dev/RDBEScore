@@ -101,7 +101,7 @@ Authors@R: c(
            family = "Craig",
            role = c("ctb"),
            email = "Jessica.Craig@gov.scot"),
-  person(given = "Colin", family = "Millar", role = c("ctb"),
+  person(given = "Colin", family = "Millar", role = c("ctb")),
   person(given = "Ejaz", family = "Muhammad", role = "ctb"))
 Maintainer: Richard Meitern <richard.meitern@ut.ee>
 Description: The RDBEScore package provides functions to import and work with
