@@ -77,6 +77,8 @@ test_that("generateZerosUsingSL creates rows for SLcou*SLinst*SLspeclistName*SLy
 	  # Check all species in species list are now present in SA (that won't always be the case but should be here)
 	  tempSL <- merge(myTest[["SL"]], myTest[["IS"]],  by = "SLid")
 	  expect_equal(all(tempSL$IScommTaxon %in% myTest[["SA"]]$SAspeCode),TRUE)
+	  # check all SAid are finite
+	  expect_equal(all(is.finite(myTest$SAid)),TRUE)
 
 })
 
@@ -328,6 +330,14 @@ test_that("Produces error when there are multiple values of SAlandCat per SSid*S
   expect_error(generateZerosUsingSL(myH1DataObject1),
                "Cannot generateZerosUsingSL*")
 
+})
+
+test_that("Does not produce error when processing dataset H8ExampleEE1", {
+
+  data(H8ExampleEE1)
+  H8DataObj <- H8ExampleEE1
+  H8DataObj$SA$SAspeCode <- as.character(H8DataObj$SA$SAspeCode)
+  expect_no_error(a<-generateZerosUsingSL(H8DataObj), message = "error when applying function to dataset H8ExampleEE1 see issue #273")
 })
 
 

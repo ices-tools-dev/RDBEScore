@@ -13,7 +13,7 @@ generateTestTbls(tblNames, prevTbls = list(), ...)
 Defaults to empty list}
 
 \item{...}{
-  Arguments passed on to \code{\link[=makeTbl]{makeTbl}}
+  Arguments passed on to \code{\link{makeTbl}}
   \describe{
     \item{\code{tblName}}{Name of the table}
     \item{\code{rows}}{numeric number of rows per parent record. Defaults to 4.}
@@ -36,9 +36,20 @@ Generates a named list of data tables that follow the structure of
 RDBESDataObject. The tables only have columns required for testing
 The generate tables
 }
-\examples{
-\dontrun{
-generateTestTbls(c("A", "B", "C"), selMeth = "SRSWOR")
-generateTestTbls(LETTERS[1:5]) # makes 5 tables with method CENSUS
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: rix133
+\item Notes/scope: examples only
 }
+}
+
+\examples{
+# Small synthetic hierarchy with two rows per parent
+tables <- RDBEScore:::generateTestTbls(c("A", "B", "C"), rows = 2,
+                                      selMeth = "SRSWOR")
+vapply(tables, nrow, integer(1))
+head(tables$C)
+
 }

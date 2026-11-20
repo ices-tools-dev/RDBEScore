@@ -72,3 +72,20 @@ a named list
 \description{
 Constructor for RDBESDataObject class
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: rix133
+\item Notes/scope: examples only
+}
+}
+
+\examples{
+H1DataObj <- H1Example
+# Construct an object from already prepared data.tables
+newDataObj <- newRDBESDataObject(DE = data.table::copy(H1DataObj$DE),
+                                SD = data.table::copy(H1DataObj$SD))
+summary(newDataObj)
+
+}

@@ -36,11 +36,21 @@ an empty RDBESDataObject will be returned.
 Create an R object from a folder containing .csv data files downloaded from
 the RDBES upload/download page.
 }
-\examples{
-\dontrun{
-myEmptyRDBESObject <- importRDBESDataCSV()
-rdbesExtractPath <- "./tests/testthat/h7_v_1_19_18/"
-obj <- importRDBESDataCSV(rdbesExtractPath)
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: rix133
+\item Notes/scope: Added tests dealing with over integer limit
 }
+}
+
+\examples{
+# Import a CSV distributed with the package using its explicit table name
+csvDir <- system.file("extdata", package = "RDBEScore")
+object <- RDBEScore:::importRDBESDataCSV(
+  csvDir, listOfFileNames = list(VS = "VesselSelection.csv")
+)
+head(object$VS[, c("VSid", "VSselectMeth", "VSnumSamp", "VSnumTotal")])
 }
 \keyword{internal}

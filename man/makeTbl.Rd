@@ -41,3 +41,17 @@ a data.table
 \description{
 Generate a Data Table
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: rix133
+\item Notes/scope: examples only
+}
+}
+
+\examples{
+# A small synthetic table for checking a sampling calculation
+RDBEScore:::makeTbl("VS", rows = 2, selMeth = "SRSWOR")
+
+}

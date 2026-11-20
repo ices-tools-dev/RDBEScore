@@ -24,13 +24,18 @@
 #' occuring in SL for level of species rank. If in SA is
 #' Sprat(126425), in SL Clupeidae (125464) function renameSpeciesSA rename Sprat
 #' from SA to Clupeidae. Clupeidae(family rank) is higher rank than Sprat(species rank).
+#'@section Development review:
+#' - AI-assisted: Yes
+#' - Review: rix133
+#' - Notes/scope: examples only
 #'
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' myObject <- createRDBESDataObject(input = "WGRDBES-EST/personal/Kasia/vignettes/vignetteData")
-#' renameSpeciesSA(RDBESDataObject=myObject,validate,verbose,strict)}
+#' H1DataObj <- Pckg_survey_apistrat_H1
+#' H1DataObjUpdated <- updateSAwithTaxonFromSL(H1DataObj)
+#' unique(H1DataObjUpdated$SA$SAspeCode)
+#'
 
 updateSAwithTaxonFromSL <- function(RDBESDataObject,
                             validate = TRUE,
@@ -56,26 +61,26 @@ updateSAwithTaxonFromSL <- function(RDBESDataObject,
 
   # 1st
   # Append ahpia records to SA data
-  H1_SA_new <- dplyr::left_join(H1_SA,
+  H1_SA_new <- joinDT(H1_SA,
     aphiaRecords,
     by = c("SAspeCode" = "AphiaID")
   )
 
   # Append ahpia records to IS data
   #H1_SL$SLsppCode <- as.character(H1_SL$SLsppCode)
-  #H1_SL_new <- dplyr::left_join(H1_SL,
+  #H1_SL_new <- joinDT(H1_SL,
   #  aphiaRecords,
   #  by = c("SLsppCode" = "AphiaID")
   #)
   H1_IS$ISsppCode <- as.character(H1_IS$ISsppCode)
-  H1_IS_new <- dplyr::left_join(H1_IS,
-                                aphiaRecords,
-                                by = c("ISsppCode" = "AphiaID")
+  H1_IS_new <- joinDT(H1_IS,
+                      aphiaRecords,
+                      by = c("ISsppCode" = "AphiaID")
   )
   # Combine SL with IS
-  H1_SL_new <- dplyr::left_join(H1_SL,
-                                H1_IS_new,
-                                by = "SLid")
+  H1_SL_new <- joinDT(H1_SL,
+                      H1_IS_new,
+                      by = "SLid")
 
 
   # SS only information about SLspecieslistName

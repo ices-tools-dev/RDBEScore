@@ -34,10 +34,20 @@ downloadable from the ICES RDBES web page. The function accepts a filepaths
 to zip files, unzips and import tables as an object of class
 \code{RDBESDataObject}.
 }
-\examples{
-\dontrun{
-rdbesExtractPath <- "./2022_FPN_FPE_H7.zip"
-obj <- importRDBESDataZIP(rdbesExtractPath)
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: rix133
+\item Notes/scope: examples only
 }
+}
+
+\examples{
+# Import the example ZIP distributed with the package
+zipPath <- system.file("extdata", "H1_Example.zip", package = "RDBEScore")
+object <- RDBEScore:::importRDBESDataZIP(zipPath)
+summary(object)
+
 }
 \keyword{internal}

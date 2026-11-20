@@ -69,14 +69,14 @@ if(validate){
 		draftNewRows$SAspeCodeFAO <- ""
 		draftNewRows$SAsamp <- 'N'
 		draftNewRows[,c("SAtotalWtLive","SAsampWtLive","SAtotalWtMes","SAsampWtMes")] <- NA
-		draftNewRows$SAid <- max(rdbesSA$SAid) + (1:length(inSA[!inSA]))*0.001 # maintain a count
-		draftNewRows$SAseqNum <- max(rdbesSA$SAseqNum) + (1:length(inSA[!inSA]))*0.001 # maintain a count
-		draftNewRows$SAunitName <- paste0("NAgen_", max(rdbesSA$SAid) + (1:length(inSA[!inSA]))*0.001) # maintain a count
+		draftNewRows$SAid <- max(rdbesSA[SSid == tmpSSwithSLrow$SSid,]$SAid) + (1:length(inSA[!inSA]))*0.001 # maintain a count
+		draftNewRows$SAseqNum <- max(rdbesSA[SSid == tmpSSwithSLrow$SSid,]$SAseqNum) + (1:length(inSA[!inSA]))*0.001 # maintain a count
+		draftNewRows$SAunitName <- paste0("NAgen_", max(rdbesSA[SSid == tmpSSwithSLrow$SSid,]$SAid) + (1:length(inSA[!inSA]))*0.001) # maintain a count
 		# updates the table
-			rdbesSA <- rbind(rdbesSA, draftNewRows)
+			rdbesSA <- rbind(rdbesSA[SSid == tmpSSwithSLrow$SSid,], draftNewRows)
 		# checks if spp were added ok
 		#browser()
-			test_fail <- length(aphiaNeedingGenerateNAs <- targetAphiaId1[!targetAphiaId1 %in% rdbesSA$SAspeCode])>0
+			test_fail <- length(aphiaNeedingGenerateNAs <- targetAphiaId1[!targetAphiaId1 %in% rdbesSA[SSid == tmpSSwithSLrow$SSid,]$SAspeCode])>0
 			if(test_fail) stop()
 		}
 

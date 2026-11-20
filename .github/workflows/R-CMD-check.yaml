@@ -6,6 +6,8 @@ on:
   pull_request:
     branches: [main, master]
 
+
+
 name: R-CMD-check
 
 jobs:
@@ -47,6 +49,13 @@ jobs:
           r-version: ${{ matrix.config.r }}
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
+
+      - name: Install gettext for macOS R-devel
+        if: runner.os == 'macOS' && matrix.config.r == 'devel'
+        run: |
+          curl -fsSL https://mac.r-project.org/bin/darwin23/arm64/gettext-0.22.5-darwin.23-arm64.tar.xz -o /tmp/gettext.tar.xz
+          sudo tar -xJf /tmp/gettext.tar.xz -C /
+          test -f /opt/R/arm64/include/libintl.h
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:

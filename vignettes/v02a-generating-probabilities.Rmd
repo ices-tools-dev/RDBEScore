@@ -32,25 +32,31 @@ library(RDBEScore)
 
 First we'll load some example data from the RDBES and check it's valid.  It's a good tip to check your RDBESDataObjects are valid after any manipulations you perform. See how to import your own data in the vignette [Import RDBES data](raw-data-import.html) In this vignette package example data pre-loaded with `RDBEScore` is used.
 
+**Sampling-data restriction in this example:** the preparation below preserves the cleanup sequence formerly performed by `filterAndTidyRDBESDataObject()`. The explicit `removeBrokenVesselLinks()` and `removeBrokenSpeciesListLinks()` calls delete sampling rows without matching VD and SL records, followed by downstream orphan removal. These are additional restrictions on CS data. Ordinary `filterRDBESDataObject()` does not perform those two broken-link checks. Trimming unused VD/SL rows in the reverse direction is planned separately in [issue #287](https://github.com/ices-tools-dev/RDBEScore/issues/287). See [Manipulating RDBESDataObjects](v01b-manipulating-rdbesdataobjects.html) for the distinction.
+
 ```{r}
 
 # load some H1 test data
 myH1DataObject <- H1Example
      
 # filter data for DEstratumName==DE_stratum1_H1 to make object smaller and easier to handle
-myH1DataObject <- filterAndTidyRDBESDataObject(myH1DataObject,c("DEstratumName"), c("DE_stratum1_H1"),
-                                               killOrphans=TRUE)
+myH1DataObject <- filterRDBESDataObject(myH1DataObject,c("DEstratumName"), c("DE_stratum1_H1"),
+                                     killOrphans = FALSE)
+# Clean vessel and species-list links before removing downstream orphans
+myH1DataObject <- removeBrokenVesselLinks(myH1DataObject)
+myH1DataObject <- removeBrokenSpeciesListLinks(myH1DataObject)
+myH1DataObject <- findAndKillOrphans(myH1DataObject)
 ```
 
 The functions that generate probabilities do not yet deal with lower hierarchies A and B so we rework a bit the data so it looks like lower hierarchy C. 
 
 ```{r}
 # Temp fixes to change data to lower hierarchy C - function won't deal with A, or B yet
-myH1DataObject[["BV"]] <- dplyr::distinct(myH1DataObject[["BV"]], FMid, .keep_all = TRUE)
-temp <- dplyr::left_join(myH1DataObject[["BV"]][,c("BVid","FMid")], 
-                         myH1DataObject[["FM"]][,c("FMid","SAid")], 
-                         by="FMid")
-myH1DataObject[["BV"]]$SAid <- temp$SAid
+# keep the first BV row of each FMid
+myH1DataObject[["BV"]] <- unique(myH1DataObject[["BV"]], by = "FMid")
+# link BV directly to SA using the SAid of its FM row
+myH1DataObject[["BV"]]$SAid <- myH1DataObject[["FM"]]$SAid[
+  match(myH1DataObject[["BV"]]$FMid, myH1DataObject[["FM"]]$FMid)]
 myH1DataObject[["BV"]]$FMid <- NA
 myH1DataObject[["SA"]]$SAlowHierarchy <- "C"
 myH1DataObject[["BV"]]$BVnumTotal <- 10
@@ -204,6 +210,6 @@ for (i in seq_along(vignettes$Rmd)) {
 }
 ```
 
+*Last review: 09/10/2026*
+
 #END
-
-

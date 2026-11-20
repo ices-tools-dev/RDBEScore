@@ -1,3 +1,8 @@
+# AI-assisted: Yes
+# Review: rix133
+# Restored from before #293. The function is deprecated, so its
+# deprecation warning is muffled with withoutDeprecation().
+
 # Step 1: Generate independent random normal variables
 n <- 100  # Number of samples
 Lengthmm <- rnorm(n, mean = 100, sd = 1)  # Lengthmm variable
@@ -12,12 +17,19 @@ biolCLQ1 <- data.table(
   sumCLoffWeight = 396210
 )
 
+test_that("doBVestimCANUM gives a deprecation warning", {
+  expect_warning(doBVestimCANUM(biolCLQ1, "sumCLoffWeight",
+                                classUnits = "Lengthmm",
+                                classBreaks = seq(70, 130, 10)),
+                 class = "deprecatedWarning")
+})
+
 # Test 1: Check the output structure of BVestimCANUM
 test_that("doBVestimCANUM returns correct structure", {
-  lenCANUMQ1 <- doBVestimCANUM(biolCLQ1, c("sumCLoffWeight"),
+  lenCANUMQ1 <- withoutDeprecation(doBVestimCANUM(biolCLQ1, c("sumCLoffWeight"),
                              classUnits = "Lengthmm",
                              classBreaks = seq(70, 130, 10),
-                             verbose = FALSE)
+                             verbose = FALSE))
 
   # Check that the output is a data.table
   expect_true(is.data.table(lenCANUMQ1))
@@ -30,10 +42,10 @@ test_that("doBVestimCANUM returns correct structure", {
 
 # Test 2: Check that Group is correctly classified
 test_that("doBVestimCANUM correctly classifies Lengthmm groups", {
-  lenCANUMQ1 <- doBVestimCANUM(biolCLQ1, c("sumCLoffWeight"),
+  lenCANUMQ1 <- withoutDeprecation(doBVestimCANUM(biolCLQ1, c("sumCLoffWeight"),
                              classUnits = "Lengthmm",
                              classBreaks = seq(70, 130, 10),
-                             verbose = FALSE)
+                             verbose = FALSE))
 
   # Check that the Group column contains the correct labels
   expected_groups <- c("70-80", "80-90", "90-100", "100-110", "110-120", "120-130", "130+")
@@ -43,10 +55,10 @@ test_that("doBVestimCANUM correctly classifies Lengthmm groups", {
 
 # Test 3: Check WeightgMean calculation
 test_that("doBVestimCANUM calculates WeightgMean correctly", {
-  lenCANUMQ1 <- doBVestimCANUM(biolCLQ1, c("sumCLoffWeight"),
+  lenCANUMQ1 <- withoutDeprecation(doBVestimCANUM(biolCLQ1, c("sumCLoffWeight"),
                              classUnits = "Lengthmm",
                              classBreaks = seq(70, 130, 10),
-                             verbose = FALSE)
+                             verbose = FALSE))
 
   # Ensure WeightgMean is numeric and positive
   expect_true(is.numeric(lenCANUMQ1$WeightgMean))
@@ -56,10 +68,10 @@ test_that("doBVestimCANUM calculates WeightgMean correctly", {
 
 # Test 5: Sanity check for total weights
 test_that("doBVestimCANUM performs a sanity check for total weights", {
-  lenCANUMQ1 <- doBVestimCANUM(biolCLQ1, c("sumCLoffWeight"),
+  lenCANUMQ1 <- withoutDeprecation(doBVestimCANUM(biolCLQ1, c("sumCLoffWeight"),
                              classUnits = "Lengthmm",
                              classBreaks = seq(70, 130, 10),
-                             verbose = FALSE)
+                             verbose = FALSE))
 
   # Check that the sum of totWeight equals sumCLoffWeight (within tolerance)
   total_weight <- sum(lenCANUMQ1$totWeight)
@@ -70,10 +82,10 @@ test_that("doBVestimCANUM performs a sanity check for total weights", {
 
 # Test 6: Check TWCoef calculation
 test_that("doBVestimCANUM calculates TWCoef correctly", {
-  lenCANUMQ1 <- doBVestimCANUM(biolCLQ1, c("sumCLoffWeight"),
+  lenCANUMQ1 <- withoutDeprecation(doBVestimCANUM(biolCLQ1, c("sumCLoffWeight"),
                              classUnits = "Lengthmm",
                              classBreaks = seq(70, 130, 10),
-                             verbose = FALSE)
+                             verbose = FALSE))
 
   # Recalculate TWCoef
   lenCANUMQ1[, expected_TWCoef := sumCLoffWeight / WeightIndexSum]
@@ -84,10 +96,10 @@ test_that("doBVestimCANUM calculates TWCoef correctly", {
 
 test_that("doBVestimCANUM works for age without lenght data", {
   biolCLQ1_noLength <- copy(biolCLQ1[BVvalUnitScale != "Lengthmm",])
-  lenCANUMQ1 <- doBVestimCANUM(biolCLQ1_noLength, c("sumCLoffWeight"),
+  lenCANUMQ1 <- withoutDeprecation(doBVestimCANUM(biolCLQ1_noLength, c("sumCLoffWeight"),
                                classUnits = "Ageyear",
                                classBreaks = 1:8,
-                               verbose = FALSE)
+                               verbose = FALSE))
   expect_true(all(c("Group", "WeightgMean", "WeightgLen", "lenMeas", "targetMeas","LengthmmMean",
                     "propSample", "WeightIndex", "totWeight", "totNum") %in% names(lenCANUMQ1)))
 

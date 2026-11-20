@@ -23,20 +23,20 @@ an RDBESDataObject with any records with an invalid VDid removed
 Remove rows which are not pointing to a valid VesselDetails (VD) records i.e.
 those rows which have a value of VDid that does not exist in the VD table.
 }
-\examples{
-\dontrun{
+\section{Development review}{
 
-myH1RawObject <-
-  importRDBESDataCSV(rdbesExtractPath = "tests\\\\testthat\\\\h1_v_1_19")
-myFields <- c("VDlenCat")
-myValues <- c("18-<24")
-myFilteredObject <- filterRDBESDataObject(myH1RawObject,
-  fieldsToFilter = myFields,
-  valuesToFilter = myValues
-)
-myObjectValidVesselLinks <- removeBrokenVesselLinks(
-  objectToCheck = myFilteredObject,
-  verbose = FALSE
-)
+\itemize{
+\item AI-assisted: Yes
+\item Human review: rix133
+\item Notes/scope:
 }
+}
+
+\examples{
+H1DataObj <- Pckg_survey_apistrat_H1
+# Retain a vessel-length category, leaving sampling records for other vessels
+H1DataObjFiltered <- filterRDBESDataObject(H1DataObj, "VDlenCat", "VL1012")
+H1DataObjCleaned <- removeBrokenVesselLinks(H1DataObjFiltered, verbose = FALSE)
+c(before = nrow(H1DataObjFiltered$VS), after = nrow(H1DataObjCleaned$VS))
+
 }

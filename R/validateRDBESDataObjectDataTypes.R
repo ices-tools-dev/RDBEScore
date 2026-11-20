@@ -6,6 +6,9 @@
 #'
 #' @return A data frame containing any data type differences (an empty data
 #' frame if there are no differences)
+#' @section Development review:
+#' - AI-assisted: No
+#' - Human review: rix133
 #'
 validateRDBESDataObjectDataTypes <- function(objectToCheck){
 
@@ -41,8 +44,8 @@ validateRDBESDataObjectDataTypes <- function(objectToCheck){
 
       # Compare the two lists of column data types
       myColCompare <-
-        dplyr::inner_join(myRequiredCols,myActualCols,
-                          by=c("R.Name"="FieldName"))
+        joinDT(myRequiredCols,myActualCols,
+               by=c("R.Name"="FieldName"), type = "inner")
 
       # Get the rows that are different (ignoring the rows where we don't
       # know the data types)

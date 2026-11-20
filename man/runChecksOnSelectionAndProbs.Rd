@@ -27,10 +27,22 @@ and probabilities of the different sampling tables of a hierarchy.
 It should be run ahead of generateProbs to secure its correct execution
 and for that reason it is included in the wrapper applyGenerateProbs.
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: rix133
+\item Notes/scope: examples only
+}
+}
+
+\examples{
+H1DataObj <- Pckg_survey_apistrat_H1
+# Suppress per-record progress messages. Invalid designs still stop.
+invisible(capture.output(runChecksOnSelectionAndProbs(H1DataObj)))
+
+}
 \seealso{
 \code{\link{applyGenerateProbs}}
 \code{\link{generateProbs}}
-
-examples for now see
-https://github.com/ices-eg/WK_RDBES/tree/master/WKRDB-EST2/chairs/Nuno
 }

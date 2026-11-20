@@ -13,15 +13,23 @@ validateRDBESEstObject(objectToCheck, verbose = FALSE)
 out, or FALSE if you don't.  The default is FALSE.}
 }
 \value{
-Whoever revises this function please specify what it returns here
+The validated input object, invisibly. Stops if validation fails.
 }
 \description{
 Check whether an object is a valid RDBESEstObject
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: rix133
+\item Notes/scope: examples running only
+}
+}
+
 \examples{
-\dontrun{
-myH1RawObject <-
-importRDBESDataCSV(rdbesExtractPath = "tests/testthat/h1_v_1_19")
-myEStObj <- createRDBESEstObject(myH1RawObject,1)
-validateRDBESEstObject(myEStObj)}
+H1DataObj <- Pckg_survey_apistrat_H1
+H1EstObj <- createRDBESEstObject(H1DataObj, 1, stopTable = "SA")
+validateRDBESEstObject(H1EstObj)
+
 }

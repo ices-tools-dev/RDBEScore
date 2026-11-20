@@ -22,21 +22,21 @@ A data frame containing estimates for all strata
 Estimate totals and means, and try to generate samples variances for all
 strata in an RDBESEstObject
 }
-\examples{
-\dontrun{
+\section{Development review}{
 
-myH1RawObject <-
-  importRDBESDataCSV(rdbesExtractPath = "tests\\\\testthat\\\\h1_v_1_19")
-
-# Update our test data with some random sample measurements
-myH1RawObject[["SA"]]$SAsampWtLive <-
-  round(runif(n = nrow(myH1RawObject[["SA"]]), min = 1, max = 100))
-
-myH1EstObj <- createRDBESEstObject(myH1RawObject, 1)
-
-myStrataEst <- doEstimationForAllStrata(
-  RDBESDataObjectForEstim = myH1EstObj,
-  targetValue = 'SAsampWtLive'
-)
+\itemize{
+\item AI-assisted: Yes
+\item Review: rix133
+\item Notes/scope: examples only
 }
+}
+
+\examples{
+H1DataObj <- Pckg_survey_apistrat_H1
+H1EstObj <- createRDBESEstObject(H1DataObj, 1, stopTable = "SA")
+estimates <- doEstimationForAllStrata(H1EstObj, targetValue = "SAsampWtMes")
+# Show estimates at the vessel-selection level
+estimates[estimates$recType == "VS",
+          c("recType", "stratumName", "est.total", "var.total")]
+
 }

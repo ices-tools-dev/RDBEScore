@@ -23,13 +23,18 @@
 #' it will contain the data from those files.  If no path is supplied then
 #' an empty RDBESDataObject will be returned.
 #'
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: rix133
+#' - Notes/scope: Added tests dealing with over integer limit
+#'
 #' @examples
-#' \dontrun{
-#' myEmptyRDBESObject <- importRDBESDataCSV()
-#' rdbesExtractPath <- "./tests/testthat/h7_v_1_19_18/"
-#' obj <- importRDBESDataCSV(rdbesExtractPath)
-#' }
-
+#' # Import a CSV distributed with the package using its explicit table name
+#' csvDir <- system.file("extdata", package = "RDBEScore")
+#' object <- RDBEScore:::importRDBESDataCSV(
+#'   csvDir, listOfFileNames = list(VS = "VesselSelection.csv")
+#' )
+#' head(object$VS[, c("VSid", "VSselectMeth", "VSnumSamp", "VSnumTotal")])
 importRDBESDataCSV <- function(rdbesExtractPath = NULL,
                                listOfFileNames = NULL,
                                castToCorrectDataTypes = TRUE,
@@ -82,6 +87,10 @@ importRDBESDataCSV <- function(rdbesExtractPath = NULL,
         fieldsFormat <- RDBEScore::mapColNamesFieldR[
           RDBEScore::mapColNamesFieldR$Table.Prefix == myFile, "RDataType"]
 
+        #to account for the possible long numeric fields in all integer fields
+        #because the id numbers may get wery long at one point
+        fieldsFormat <- ifelse(fieldsFormat == "integer", "numeric", fieldsFormat)
+
         # Read the file with error handling so we can raise a clear message
         filePath <- paste(rdbesExtractPath, "/", fileNames[myFile],  sep = "")
         csvBaseName <- sub("\\.csv$", "", fileNames[myFile])
@@ -93,7 +102,7 @@ importRDBESDataCSV <- function(rdbesExtractPath = NULL,
             quote = "",
             stringsAsFactors = FALSE,
             colClasses = fieldsFormat
-          ),
+            ),
           silent = TRUE
         )
 

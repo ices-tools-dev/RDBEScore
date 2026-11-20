@@ -18,8 +18,16 @@ nothing if the column exists and has unique values, otherwise an error is thrown
 This function checks if a specified column exists in a given data table and has unique values.
 If the column does not exist or has non-unique values, an error is thrown.
 }
-\examples{
-\dontrun{
-  RDBEScore:::check_key_column(H1Example$DE, "DEid")
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: rix133
+\item Notes/scope: examples only
 }
+}
+
+\examples{
+RDBEScore:::check_key_column(H1Example$DE, "DEid")
+
 }

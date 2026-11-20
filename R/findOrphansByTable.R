@@ -10,6 +10,9 @@
 #' @return A data frame with the primary keys of the table checked, the two
 #' letter table identifier, and their orphan status.
 #'
+#' @section Development review:
+#' - AI-assisted: No
+#' - Human review: rix133
 findOrphansByTable <- function(tableToCheck,
                                objectToCheck,
                                foreignKeyIds,
@@ -45,14 +48,16 @@ findOrphansByTable <- function(tableToCheck,
       if (!is.null(objectToCheck[[fkTable]])) {
         if (myFK == "SAparSequNum") {
           # Need to handle SAparSequNum differently
-          joinedTables <- dplyr::inner_join(myTable,
+          joinedTables <- joinDT(myTable,
             objectToCheck[[fkTable]],
-            by = c("SAseqNum" = "SAparSequNum")
+            by = c("SAseqNum" = "SAparSequNum"),
+            type = "inner"
           )
         } else {
-          joinedTables <- dplyr::inner_join(myTable,
+          joinedTables <- joinDT(myTable,
             objectToCheck[[fkTable]],
-            by = myFK
+            by = myFK,
+            type = "inner"
           )
         }
 

@@ -25,6 +25,8 @@ A list containing entries required for H5 RDBES data:
 H5Example
 }
 \description{
-A dataset containing test RDBES data for H5 in the RDBESDataObject structure
+Downloaded from production RDBES on 2026-10-15 after upload screening.
+The original observations and table identifiers are retained. Dates use ISO
+format and legacy sampling-scheme and CL/CE vocabulary codes are updated.
 }
 \keyword{datasets}

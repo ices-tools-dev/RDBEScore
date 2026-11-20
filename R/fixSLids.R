@@ -20,7 +20,14 @@
 #' @export
 #'
 #' @examples
-#' # To add
+#' H1DataObj <- Pckg_survey_apistrat_H1
+#' H1DataObjFixed <- fixSLids(H1DataObj)
+#' H1DataObjFixed$IS[, c("ISid", "SLid", "IStaxaId")]
+#'
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: rix133
+#' - Notes/scope: examples only
 
 
 fixSLids<-function(RDBESDataObject, verbose = FALSE, validate = TRUE, strict = TRUE){

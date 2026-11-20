@@ -80,7 +80,26 @@
 #'
 #' @examples
 #' # Create an empty object
-#' myEmptyRDBESObject <- createRDBESDataObject(input = NULL)
+#' emptyDataObj <- createRDBESDataObject(input = NULL)
+#' summary(emptyDataObj)
+#'
+#' # Import a named list of packaged tables
+#' H1DataObj <- Pckg_survey_apistrat_H1
+#' # NULL entries must be omitted from a list of input tables
+#' H1Tables <- Filter(Negate(is.null), data.table::copy(H1DataObj))
+#' # Local table input warns that it bypasses the RDBES upload checks
+#' H1DataObjFromTables <- createRDBESDataObject(input = H1Tables)
+#' summary(H1DataObjFromTables)
+#'
+#' # Import the example ZIP distributed with the package
+#' zipPath <- system.file("extdata", "H1_Example.zip", package = "RDBEScore")
+#' H1DataObjFromZip <- createRDBESDataObject(input = zipPath)
+#' summary(H1DataObjFromZip)
+#'
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: rix133
+#' - Notes/scope: examples only
 
 createRDBESDataObject <- function(input = NULL,
                                   listOfFileNames = NULL,

@@ -1,7 +1,9 @@
+# AI-assisted: Yes
+# Review: rix133
 #capture.output({  ## suppresses printing of console output when running test()
 
   # H1 directory
-  dirH1 <- "./h1_v_20250211/"
+  dirH1 <- "./h1_v_20261015/"
   myCountry <- "ZW"
   myYear <- 1965
   myCatchFraction <- "Lan"
@@ -37,7 +39,7 @@
 
     #Filter our data for WGRDBES-EST TEST 1, 1965, H1
     myFields <- c("DEyear","SDctry","DEhierarchy","DEsampScheme","DEstratumName","SAspeCode","SScatchFra")
-    myValues <- c(myYear,myCountry,1,"National Routine","DE_stratum1_H1",mySpecies,myCatchFraction)
+    myValues <- c(myYear,myCountry,1,"WGRDBES-EST TEST 1","DE_stratum1_H1",mySpecies,myCatchFraction)
     myH1RawObject <- filterRDBESDataObject(myH1RawObject,
                                            fieldsToFilter = myFields,
                                            valuesToFilter = myValues )

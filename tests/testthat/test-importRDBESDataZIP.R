@@ -5,7 +5,7 @@ capture.output({  ## suppresses printing of console output when running test()
 
   # common parameters
   # H1 directory
-  dirH1 <- "./h1_v_20250211/"
+  dirH1 <- "./h1_v_20261015/"
 
 
   # H1 object for comparison

@@ -48,8 +48,23 @@ runChecksOnSelectionAndProbs which main tests need to be passed before
 probabilities can be calculated. The it calls generateProbs for
 each sample in each sampling level of the hierarchy.
 }
+\section{Development review}{
+
+\itemize{
+\item AI-assisted: Yes
+\item Review: rix133
+\item Notes/scope: examples only
+}
+}
+
 \examples{
-# To be added
+H1DataObj <- Pckg_survey_apistrat_H1
+# Suppress the per-record progress messages
+invisible(capture.output(
+  H1DataObjWithProbs <- applyGenerateProbs(H1DataObj, probType = "inclusion")
+))
+head(H1DataObjWithProbs$VS[, c("VSstratumName", "VSincProb")])
+
 }
 \seealso{
 \code{\link{runChecksOnSelectionAndProbs}}

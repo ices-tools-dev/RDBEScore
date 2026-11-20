@@ -17,7 +17,9 @@ A list containing entries required for H7 RDBES data:
 \item{SL}{the Species List data table}
 \item{IS}{the Individual Species table}
 }
-#' @source Richard Meitern @ Estonian Marine Institute, 2025
+}
+\source{
+Richard Meitern @ Estonian Marine Institute, 2025
 }
 \usage{
 H7Example

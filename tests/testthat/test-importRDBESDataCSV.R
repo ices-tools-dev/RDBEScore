@@ -1,13 +1,12 @@
+# AI-assisted: No
+# Review: rix133
 capture.output({  ## suppresses printing of console output when running test()
-
-
-
 
   # common parameters
   # H1 directory
-  dirH1 <- "./h1_v_20250211/"
+  dirH1 <- "./h1_v_20261015/"
   # H5 directory
-  dirH5 <- "./h5_v_20250211/"
+  dirH5 <- "./h5_v_20261015/"
 
   # H1 object for comparison
   expObjH1 <- H1Example
@@ -81,8 +80,15 @@ capture.output({  ## suppresses printing of console output when running test()
     file.remove(tempBVfNname)
     expect_equal(BV$BVfishId[1],id)
   })
+test_that("Importing a CSV folder with an id above 2,147,483,647 works",{
+  expect_error(importRDBESDataCSV(rdbesExtractPath = "./bigid"), NA)
+})
 
-
+test_that("id columns without large values are still integers and with are doubles",{
+  res <- importRDBESDataCSV(rdbesExtractPath = "./bigid")
+  expect_true(is.double(res$SD$SDid))
+  expect_true(is.integer(res$SD$DEid))
+})
 
 
 }) ## end capture.output

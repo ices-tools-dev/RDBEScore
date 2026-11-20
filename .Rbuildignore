@@ -1,7 +1,10 @@
+^renv$
+^renv\.lock$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^data-raw$
 ^README\.Rmd$
+^AGENTS\.md$
 ^WGRDBES-EST$
 ^.pre-commit-config.yaml$
 ^codecov.yml$
@@ -17,3 +20,6 @@ package_overview.Rmd
 ^.pptx$
 ^_pkgdown\.yml$
 ^pkgdown$
+^\.positai$
+^\.claude$
+^personal$

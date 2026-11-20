@@ -21,16 +21,20 @@
 #' @export
 #'
 #' @examples
+#' H1DataObj <- H1Example
+#' H5DataObj <- H5Example
 #' \dontrun{
-#'
-#' myH1RawObject <-
-#'     importRDBESDataCSV(rdbesExtractPath = "tests\\testthat\\h1_v_1_19")
-#' myH5RawObject <-
-#'     importRDBESDataCSV(rdbesExtractPath = "tests\\testthat\\h5_v_1_19")
-#'
-#' myCombinedRawObject <- combineRDBESDataObjects(RDBESDataObject1=myH1RawObject,
-#'                                              RDBESDataObject2=myH5RawObject)
+#' # Strict validation (the default) rejects combining different hierarchies
+#' combineRDBESDataObjects(H1DataObj, H5DataObj, strict = TRUE)
 #' }
+#' # Explicitly allowing mixed hierarchies produces a warning
+#' combined <- combineRDBESDataObjects(H1DataObj, H5DataObj, strict = FALSE)
+#' summary(combined)
+#'
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: rix133
+#' - Notes/scope: examples only
 combineRDBESDataObjects <- function(RDBESDataObject1,
                                     RDBESDataObject2,
                                     verbose = FALSE,

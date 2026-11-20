@@ -1,4 +1,7 @@
-#' Add CL data to a lower-level CS table in an RDBESDataObject
+#' Add CL data to a lower-level CS table in an RDBESDataObject (deprecated)
+#'
+#' This deprecated function is retained for compatibility and will be removed
+#' in a future release. Use [doRatioEstimation()] instead (see Migration).
 #'
 #' This function adds data from a `CL` table in an `RDBESDataObject` to a
 #' BV or FM table. It combines information from the `CS` and `CL` tables and
@@ -24,30 +27,49 @@
 #'   to the biological data. If `combineStrata` is `TRUE`, strata columns from the `CS` data are collapsed using a vertical bar (`|`). The function
 #'   currently supports only biological data at the "C" hierarchy level.
 #'
-#' @examples
-#' \dontrun{
-#' strataListCS <- list(LEarea="27.3.d.28.1",
-#'                      LEmetier6 = "OTM_SPF_16-31_0_0",
-#'                      TEstratumName = month.name[1:3],
-#'                      SAspeCodeFAO = "SPR")
-#' strataListCL <- list(CLarea="27.3.d.28.1",
-#'                      CLquar = 1,
-#'                      CLmetier6 = "OTM_SPF_16-31_0_0",
-#'                      CLspecFAO = "SPR")
-#' biolCL <- addCLtoLowerCS(rdbesObject, strataListCS, strataListCL,
-#'                          combineStrata = TRUE,
-#'                          lowerHierarchy = "C",
-#'                          CLfields = c("CLoffWeight"))
-#' }
-#'
 #' @seealso \code{\link{getLowerTableSubsets}}, \code{\link{upperTblData}}
+#' @section Migration:
+#' `addCLtoLowerCS()` followed by [doBVestimCANUM()] pools the measured fish
+#' of a stratum and raises them to its CL landings. The same estimate is
+#' obtained with [doRatioEstimation()] and
+#' `raisingScheme(SA = sampleRaising("none"), totals = totalsRaising(...,
+#' value = "fishWeight"))`, with the CL landings per domain given through
+#' [externalAux()]. The H8 section of
+#' `vignette("v03b-Estimating-population-parameters-ratio-estimator")` shows
+#' the migration of the former vignette example.
 #' @export
-addCLtoLowerCS <- function(rdbes, strataListCS, strataListCL, combineStrata =T, lowerHierarchy = "C", CLfields = c("CLoffWeight"), verbose = FALSE){
+#'
+#' @examples
+#' H8DataObj <- H8ExampleEE1
+#' # Add first-quarter sprat landings to biological measurements
+#' strataCS <- list(TEstratumName = month.name[1:3], SAspeCodeFAO = "SPR")
+#' strataCL <- list(CLarea = "27.3.d.28.1", CLquar = 1,
+#'                  CLmetier6 = "OTM_SPF_16-31_0_0", CLspecFAO = "SPR")
+#' # Two warnings: the function is deprecated, and the three months are
+#' # pooled into one stratum
+#' biolCL <- addCLtoLowerCS(H8DataObj, strataCS, strataCL,
+#'                        CLfields = "CLoffWeight")
+#' unique(biolCL[, c("CLquar", "sumCLoffWeight")])
+#'
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: rix133
+#' - Notes/scope:
+addCLtoLowerCS <- function(rdbes, strataListCS, strataListCL, combineStrata =T,
+                           lowerHierarchy = "C", CLfields = c("CLoffWeight"),
+                           verbose = FALSE){
+  .Deprecated(
+    msg = paste0(
+      "addCLtoLowerCS() is deprecated and will be removed in a future ",
+      "release. Use doRatioEstimation(). See help('addCLtoLowerCS') for ",
+      "the migration."
+    )
+  )
 
   # Function to subset data.table based on criteria list
   subset_dt <- function(dt, criteria) {
     for (field in names(criteria)) {
-      dt <- dt[get(field) == criteria[[field]], ]
+      dt <- dt[get(field) %in% criteria[[field]], ]
     }
     return(dt)
   }

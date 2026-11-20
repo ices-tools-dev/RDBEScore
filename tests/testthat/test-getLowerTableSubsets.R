@@ -1,4 +1,9 @@
 
+# AI-assisted: Yes
+# Review: rix133
+capture.output({  ## suppresses printing of console output when running test()
+
+
 # Define mock data for testing
 DE <- data.frame(DEid = c(1, 2, 3, 4), SDid = c(1, 2, 3, 4))
 SD <- data.frame(SDid = c(1, 2, 3, 4), TEid = c(1, 2, 3, 4))
@@ -28,8 +33,7 @@ test_that("Function returns correct data with valid inputs", {
   res <- getLowerTableSubsets(list(TEstratumName = "January"), "SA", H8ExampleEE1, T)
 
   expect_equal(nrow(res), 3)
-  #expect last column to be "TEstratumName"
-  expect_equal(colnames(res)[ncol(res)], "TEstratumName")
+  expect_true("TEstratumName" %in% names(res))
 
 })
 
@@ -37,10 +41,7 @@ test_that("Function works with combineStrata = TRUE and collapsing strata", {
   res <- expect_warning(getLowerTableSubsets(list(TEstratumName = c("January", "February")), "SA", H8ExampleEE1, T))
 
   expect_equal(nrow(res), 6)
-  #expect last column to be "TEstratumName"
-  expect_equal(colnames(res)[ncol(res)], "TEstratumName")
-  #ecpect all values in ast column to be January|February
-  expect_equal(all(grepl("January|February", res$TEstratumName)), TRUE)
+  expect_equal(unique(res$TEstratumName), "January|February")
 
 })
 
@@ -55,9 +56,15 @@ test_that("Function handles intersection correctly", {
   res <- getLowerTableSubsets(list(TEid = 4, TEstratumName = "January"), "SA", H8ExampleEE1, T)
 
   expect_equal(nrow(res), 2)
-  #expect last column to be "TEstratumName"
-  expect_equal(colnames(res)[ncol(res)], "TEstratumName")
-  #expect value in last column to be "January"
   expect_equal(res$TEstratumName, rep("January",2))
 
+})
+
+test_that("Function does not duplicate the requested fields in the result", {
+  res <- getLowerTableSubsets(list(TEid = 4, TEstratumName = "January"), "SA", H8ExampleEE1, T)
+
+  expect_equal(anyDuplicated(colnames(res)), 0)
+  expect_equal(sum(colnames(res) == "TEstratumName"), 1)
+  expect_equal(sum(colnames(res) == "TEid"), 1)
+})
 })

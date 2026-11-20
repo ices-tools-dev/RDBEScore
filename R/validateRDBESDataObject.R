@@ -27,12 +27,19 @@
 #' @md
 #' @export
 #' @aliases checkRDBESDataObject
-#' @examples
-#' \dontrun{
-#' myH1RawObject <-
-#' importRDBESDataCSV(rdbesExtractPath = "tests/testthat/h1_v_1_19")
-#' validateRDBESDataObject(myH1RawObject)}
 #'
+#' @examples
+#' H1DataObj <- Pckg_survey_apistrat_H1
+#' H1DataObjValidated <- validateRDBESDataObject(H1DataObj, checkDataTypes = TRUE)
+#' summary(H1DataObjValidated)
+#'
+#' # The backwards-compatible validation alias
+#' checkRDBESDataObject(H1DataObj)
+#'
+#' @section Development review:
+#' - AI-assisted: Yes
+#' - Review: rix133
+#' - Notes/scope: examples only
 validateRDBESDataObject <- function(objectToCheck,
                                 checkDataTypes = FALSE,
                                 verbose = FALSE,
