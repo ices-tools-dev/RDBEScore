@@ -2,7 +2,7 @@
 % Please edit documentation in R/doBVestimCACNUM.R
 \name{doBVestimCANUM}
 \alias{doBVestimCANUM}
-\title{Estimate Catch at Number (CANUM) for Biological Variables}
+\title{Estimate Catch at Number (CANUM) for Biological Variables (deprecated)}
 \usage{
 doBVestimCANUM(
   bv,
@@ -27,9 +27,13 @@ doBVestimCANUM(
 A \code{data.table} containing the aggregated results, including groupings, calculated means, proportions, indices, and totals for the specified biological variable.
 }
 \description{
-This function estimates catch at number (CANUM) for a specified biological variable, such as age or length. It aggregates data based on specified columns and generates a "plus group" for the highest value in the defined classes. The function supports grouping by various units (e.g., age, length, weight) and calculates required indices, totals, and proportions for the groups.
+This deprecated function is retained for compatibility and will be
+removed in a future release. Use \code{\link[=doRatioEstimation]{doRatioEstimation()}} instead (see
+Migration).
 }
 \details{
+This function estimates catch at number (CANUM) for a specified biological variable, such as age or length. It aggregates data based on specified columns and generates a "plus group" for the highest value in the defined classes. The function supports grouping by various units (e.g., age, length, weight) and calculates required indices, totals, and proportions for the groups.
+
 The function performs the following steps:
 \itemize{
 \item Validates the presence of the \code{classUnits} in the biological variable data.
@@ -76,6 +80,22 @@ The calculations are as follows:
 }
 }
 }
+\section{Migration}{
+
+\code{\link[=addCLtoLowerCS]{addCLtoLowerCS()}} followed by \code{doBVestimCANUM()} pools the measured fish
+of a stratum and raises them to its CL landings. The same estimate is
+obtained with \code{\link[=doRatioEstimation]{doRatioEstimation()}} and
+\code{raisingScheme(SA = sampleRaising("none"), totals = totalsRaising(..., value = "fishWeight"))}, with the CL landings per domain given through
+\code{\link[=externalAux]{externalAux()}}. The H8 section of
+\code{vignette("v03b-Estimating-population-parameters-ratio-estimator")}
+shows the migration of the former vignette example.
+
+Fish below the first class break are left out, and their landed weight
+is given to the other classes. With the default \code{classBreaks = 1:8}
+this leaves out age 0, which \code{\link[=doRatioEstimation]{doRatioEstimation()}} keeps. Use
+\code{classBreaks = 0:8} to compare the two.
+}
+
 \section{Development review}{
 
 \itemize{
@@ -92,9 +112,11 @@ strataCS <- list(LEarea = "27.3.d.28.1", LEmetier6 = "OTM_SPF_16-31_0_0",
                  TEstratumName = month.name[1:3], SAspeCodeFAO = "SPR")
 strataCL <- list(CLarea = "27.3.d.28.1", CLquar = 1,
                  CLmetier6 = "OTM_SPF_16-31_0_0", CLspecFAO = "SPR")
-# A warning reports that the three months are pooled into one stratum
+# Two warnings: the function is deprecated, and the three months are
+# pooled into one stratum
 biolCL <- addCLtoLowerCS(H8DataObj, strataCS, strataCL,
                        CLfields = "CLoffWeight")
+# A deprecation warning
 lengthCANUM <- doBVestimCANUM(biolCL, addColumns = "sumCLoffWeight",
                              classUnits = "Lengthmm",
                              classBreaks = seq(70, 130, 10))

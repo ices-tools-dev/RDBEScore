@@ -2,7 +2,7 @@
 % Please edit documentation in R/addCLtoLowerCS.R
 \name{addCLtoLowerCS}
 \alias{addCLtoLowerCS}
-\title{Add CL data to a lower-level CS table in an RDBESDataObject}
+\title{Add CL data to a lower-level CS table in an RDBESDataObject (deprecated)}
 \usage{
 addCLtoLowerCS(
   rdbes,
@@ -38,22 +38,36 @@ A data.table containing the biological data from the lower hierarchy with added 
 the sum of the specified fields from the \code{CL} data.
 }
 \description{
+This deprecated function is retained for compatibility and will be removed
+in a future release. Use \code{\link[=doRatioEstimation]{doRatioEstimation()}} instead (see Migration).
+}
+\details{
 This function adds data from a \code{CL} table in an \code{RDBESDataObject} to a
 BV or FM table. It combines information from the \code{CS} and \code{CL} tables and
 calculates aggregate statistics such as the sum of the specified fields in the \code{CL} table.
-}
-\details{
+
 The function first subsets the biological data in the \code{RDBESDataObject} based on the criteria in \code{strataListCS}. It then retrieves
 the corresponding \code{CL} data based on the criteria in \code{strataListCL}, sums the fields specified in \code{CLfields}, and adds them as new columns
 to the biological data. If \code{combineStrata} is \code{TRUE}, strata columns from the \code{CS} data are collapsed using a vertical bar (\code{|}). The function
 currently supports only biological data at the "C" hierarchy level.
 }
+\section{Migration}{
+
+\code{addCLtoLowerCS()} followed by \code{\link[=doBVestimCANUM]{doBVestimCANUM()}} pools the measured fish
+of a stratum and raises them to its CL landings. The same estimate is
+obtained with \code{\link[=doRatioEstimation]{doRatioEstimation()}} and
+\code{raisingScheme(SA = sampleRaising("none"), totals = totalsRaising(..., value = "fishWeight"))}, with the CL landings per domain given through
+\code{\link[=externalAux]{externalAux()}}. The H8 section of
+\code{vignette("v03b-Estimating-population-parameters-ratio-estimator")} shows
+the migration of the former vignette example.
+}
+
 \section{Development review}{
 
 \itemize{
 \item AI-assisted: Yes
 \item Review: rix133
-\item Notes/scope: examples only
+\item Notes/scope:
 }
 }
 
@@ -63,7 +77,8 @@ H8DataObj <- H8ExampleEE1
 strataCS <- list(TEstratumName = month.name[1:3], SAspeCodeFAO = "SPR")
 strataCL <- list(CLarea = "27.3.d.28.1", CLquar = 1,
                  CLmetier6 = "OTM_SPF_16-31_0_0", CLspecFAO = "SPR")
-# A warning reports that the three months are pooled into one stratum
+# Two warnings: the function is deprecated, and the three months are
+# pooled into one stratum
 biolCL <- addCLtoLowerCS(H8DataObj, strataCS, strataCL,
                        CLfields = "CLoffWeight")
 unique(biolCL[, c("CLquar", "sumCLoffWeight")])

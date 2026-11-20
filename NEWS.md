@@ -1,4 +1,7 @@
 # RDBEScore 0.4.0
+- Deprecated: `addCLtoLowerCS()` and `doBVestimCANUM()` are deprecated pending removal. Use `doRatioEstimation()`. Their help pages and vignette v03b show the migration of the former H8 example. With the default `classBreaks = 1:8`, `doBVestimCANUM()` leaves out age-0 fish and gives their landed weight to the older ages (#293).
+- Breaking: removed `doEstimationRatio()`, which did not work as intended. Use `doRatioEstimation()` (#293).
+- ICES code lists: `getRDBESCodeList()` and `checkRDBESCodes()` use a snapshot of the ICES vocabulary packaged with RDBEScore (`inst/extdata/rdbes-code-snapshot.csv`, made with `data-raw/refreshRDBESCodeSnapshot.R`), so estimation needs no internet access. `icesVocab` is only suggested, for `refresh = TRUE` (#293).
 - Breaking: `filterRDBESDataObject()` now removes downstream orphans by default. Use `killOrphans = FALSE` to retain them. `filterAndTidyRDBESDataObject()` is deprecated pending removal. Its help page documents the explicit filtering, broken-link cleanup and orphan-removal sequence needed to reproduce its behavior (#281).
 - Removed the unused internal estimation prototypes `doDBEestimantionObjUpp()`, `doDBestimation()` and `createDBEPrepObj()` (#280).
 - Documentation: revised function examples to run with packaged or small synthetic data, retaining `\dontrun` for examples that demonstrate strict validation errors (#272).

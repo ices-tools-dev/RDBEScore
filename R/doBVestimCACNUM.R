@@ -1,4 +1,8 @@
-##' Estimate Catch at Number (CANUM) for Biological Variables
+##' Estimate Catch at Number (CANUM) for Biological Variables (deprecated)
+##'
+##' This deprecated function is retained for compatibility and will be
+##' removed in a future release. Use [doRatioEstimation()] instead (see
+##' Migration).
 ##'
 ##' This function estimates catch at number (CANUM) for a specified biological variable, such as age or length. It aggregates data based on specified columns and generates a "plus group" for the highest value in the defined classes. The function supports grouping by various units (e.g., age, length, weight) and calculates required indices, totals, and proportions for the groups.
 ##'
@@ -55,6 +59,21 @@
 ##'   \deqn{C_{num} = \frac{T_W}{\left( \frac{W_{mean}}{1000} \right)}}
 ##' }
 ##'
+##' @section Migration:
+##' [addCLtoLowerCS()] followed by `doBVestimCANUM()` pools the measured fish
+##' of a stratum and raises them to its CL landings. The same estimate is
+##' obtained with [doRatioEstimation()] and
+##' `raisingScheme(SA = sampleRaising("none"), totals = totalsRaising(...,
+##' value = "fishWeight"))`, with the CL landings per domain given through
+##' [externalAux()]. The H8 section of
+##' `vignette("v03b-Estimating-population-parameters-ratio-estimator")`
+##' shows the migration of the former vignette example.
+##'
+##' Fish below the first class break are left out, and their landed weight
+##' is given to the other classes. With the default `classBreaks = 1:8`
+##' this leaves out age 0, which [doRatioEstimation()] keeps. Use
+##' `classBreaks = 0:8` to compare the two.
+##'
 ##' @export
 ##' @importFrom stats formula
 ##'
@@ -65,9 +84,11 @@
 ##'                  TEstratumName = month.name[1:3], SAspeCodeFAO = "SPR")
 ##' strataCL <- list(CLarea = "27.3.d.28.1", CLquar = 1,
 ##'                  CLmetier6 = "OTM_SPF_16-31_0_0", CLspecFAO = "SPR")
-##' # A warning reports that the three months are pooled into one stratum
+##' # Two warnings: the function is deprecated, and the three months are
+##' # pooled into one stratum
 ##' biolCL <- addCLtoLowerCS(H8DataObj, strataCS, strataCL,
 ##'                        CLfields = "CLoffWeight")
+##' # A deprecation warning
 ##' lengthCANUM <- doBVestimCANUM(biolCL, addColumns = "sumCLoffWeight",
 ##'                              classUnits = "Lengthmm",
 ##'                              classBreaks = seq(70, 130, 10))
@@ -81,6 +102,14 @@ doBVestimCANUM <- function(bv, addColumns,
                            classUnits = "Ageyear",
                            classBreaks = 1:8,
                            verbose = FALSE){
+  .Deprecated(
+    msg = paste0(
+      "doBVestimCANUM() is deprecated and will be removed in a future ",
+      "release. Use doRatioEstimation(). See help('doBVestimCANUM') for ",
+      "the migration."
+    )
+  )
+
   rightF <- "BVvalUnitScale"
 
   # Validate the presence of classUnits in the data
