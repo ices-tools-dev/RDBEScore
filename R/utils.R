@@ -10,7 +10,7 @@ usedVars <- c("mapColNamesFieldR",
               "..varsNeeded", "|>", "parentTableID", "est.total",
               "recType", "parentTableStratum", "stratumName",
               "parentIDandStratum", "studyVariable", "..myColNames",
-              "..methColNames", "tblName", "SLid","SAid",
+              "..methColNames", "tblName", "SLid","SAid",".requestedValue",
               "..myLevel","parentTable",".", "id", "i.id" )
 
 moreUsedVars  <- c("..clustFields", "DEyear", "SAcatchCat",
